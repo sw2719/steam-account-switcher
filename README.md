@@ -25,6 +25,7 @@ Steam Account Switching made easy
 * Auto-updating? (There is not much to update to this program though.)
 * Changing the order of accounts (Looking for ways to implement this.)
 * Cleaner UI
+* Designing an icon and adding it
 # How it works
 When you launch the program for the first time, the program fetches current auto-login user from registry and then adds it to accounts.txt.
 When you add account(s), it saves your username(s) to accounts.txt in plain text.
