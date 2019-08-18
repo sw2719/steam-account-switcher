@@ -1,4 +1,4 @@
-# steam-switcher
+# Steam Account Switcher
 Steam Account Switching made easy
 # How to use
 1. Unpack the archive
