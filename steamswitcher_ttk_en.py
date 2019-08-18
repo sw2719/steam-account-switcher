@@ -103,9 +103,7 @@ def setkey(name, value, value_type):
         winreg.CloseKey(reg_key)
         print("Changed %s's value to %s" % (name, str(value)))
     except OSError:
-        messagebox.showerror('Error', 'Registry operation failed.\n' +
-                             'If this keeps happening, contact developer.\n' +
-                             'Contact information available in About')
+        messagebox.showerror('Error', 'Registry operation failed.')
         sys.exit(0)
 
 
