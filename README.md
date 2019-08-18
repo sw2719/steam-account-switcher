@@ -10,6 +10,7 @@ Steam Account Switching made easy
 (Because this program alters your registry value, Windows SmartScreen or your Anti-virus might detect it as harmful software.)
 4. Add accounts via Menu > Add accounts
    (Warning: Do NOT add accounts by manually editing accounts.txt)
+   (Account limit is 12)
 5. Click one of the buttons to change to desired account.
 
 * If you previously set auto-login for that account, It just works. (It might show login prompt if you didn't login for a while)
