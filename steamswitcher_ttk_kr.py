@@ -262,11 +262,10 @@ def removewindow():
                 continue
 
         print('Removing selected accounts...')
-        txt = open('accounts.txt', 'w')
-        for username in accounts:
-            if username not in to_remove:  # 삭제할 계정이 아닌지 확인
-                txt.write(username + '\n')
-        txt.close()
+        with open('accounts.txt', 'w') as txt:
+            for username in accounts:
+                if username not in to_remove:  # 삭제할 계정이 아닌지 확인
+                    txt.write(username + '\n')
         refresh()
         close()
 
@@ -329,13 +328,13 @@ account_menu.add_separator()
 account_menu.add_command(label="정보", command=about)
 menubar.add_cascade(label="메뉴", menu=account_menu)
 
-topframe = ttk.Frame(main)
+topframe = tk.Frame(main)
 topframe.pack(side='top', fill='x')
 
-bottomframe = ttk.Frame(main)
+bottomframe = tk.Frame(main)
 bottomframe.pack(side='bottom')
 
-nouserlabel = ttk.Label(main, text='추가된 계정 없음')
+nouserlabel = tk.Label(main, text='추가된 계정 없음')
 
 style = ttk.Style(main)
 style.configure('c.TButton', background="#000")
@@ -357,18 +356,18 @@ def draw_button(accounts):
     topframe.destroy()
     nouserlabel.destroy()
 
-    topframe = ttk.Frame(main)
+    topframe = tk.Frame(main)
     topframe.pack(side='top', fill='x')
 
-    nouserlabel = ttk.Label(main, text='추가된 계정 없음')
+    nouserlabel = tk.Label(main, text='추가된 계정 없음')
     usertext_row1 = '현재 자동로그인 계정은'
     usertext_row2 = '%s 입니다.' % getuser()
 
-    userlabel_1 = ttk.Label(topframe, text=usertext_row1)
+    userlabel_1 = tk.Label(topframe, text=usertext_row1)
     userlabel_1.pack(side='top')
-    userlabel_2 = ttk.Label(topframe, text=usertext_row2)
+    userlabel_2 = tk.Label(topframe, text=usertext_row2)
     userlabel_2.pack(side='top', pady=2)
-    autolabel = ttk.Label(topframe, text=autologinstr())
+    autolabel = tk.Label(topframe, text=autologinstr())
     autolabel.pack(side='top')
 
     if not accounts:
