@@ -162,8 +162,10 @@ def addwindow():  # 계정 추가 창
     topframe_add.pack(side='top', anchor='center')
     bottomframe_add = tk.Frame(addwindow)
     bottomframe_add.pack(side='bottom', anchor='e')
-    addlabel_row1 = tk.Label(topframe_add, text='추가할 계정을 입력하세요.')
-    addlabel_row2 = tk.Label(topframe_add, text="다수의 계정을 입력할 경우에는\n"
+    addlabel_row1 = tk.Label(topframe_add,
+                             text='추가할 계정을 입력하세요.')
+    addlabel_row2 = tk.Label(topframe_add,
+                             text="다수의 계정을 입력할 경우에는\n"
                              + "'/'(슬래시)로 구분합니다.")
     account_entry = ttk.Entry(bottomframe_add, width=28)
     account_entry.pack(side='left', padx=5, pady=3)
@@ -174,12 +176,15 @@ def addwindow():  # 계정 추가 창
 
     def adduser(userinput):
         if userinput.strip():
-            with open('accounts.txt', 'r') as txt:
-                lastname = txt.readlines()[-1]
-                if '\n' not in lastname:
-                    prefix = '\n'
-                else:
-                    prefix = ''
+            try:
+                with open('accounts.txt', 'r') as txt:
+                    lastname = txt.readlines()[-1]
+                    if '\n' not in lastname:
+                        prefix = '\n'
+                    else:
+                        raise IndexError
+            except IndexError:
+                prefix = ''
 
             txt = open('accounts.txt', 'a')
             name_buffer = userinput.split("/")

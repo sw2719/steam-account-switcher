@@ -175,16 +175,15 @@ def addwindow():
 
     def adduser(userinput):
         if userinput.strip():
-            with open('accounts.txt', 'r') as txt:
-                lastname_buffer = txt.readlines()
-                try:
-                    lastname = lastname_buffer[-1]
+            try:
+                with open('accounts.txt', 'r') as txt:
+                    lastname = txt.readlines()[-1]
                     if '\n' not in lastname:
                         prefix = '\n'
                     else:
-                        prefix = ''
-                except IndexError:
-                    prefix = ''
+                        raise IndexError
+            except IndexError:
+                prefix = ''
 
             txt = open('accounts.txt', 'a')
             name_buffer = userinput.split("/")
@@ -269,11 +268,10 @@ def removewindow():
                 continue
 
         print('Removing selected accounts...')
-        txt = open('accounts.txt', 'w')
-        for username in accounts:
-            if username not in to_remove:
-                txt.write(username + '\n')
-        txt.close()
+        with open('accounts.txt', 'w') as txt:
+            for username in accounts:
+                if username not in to_remove:  # 삭제할 계정이 아닌지 확인
+                    txt.write(username + '\n')
         refresh()
         close()
 
@@ -336,13 +334,13 @@ account_menu.add_separator()
 account_menu.add_command(label="About", command=about)
 menubar.add_cascade(label="Menu", menu=account_menu)
 
-topframe = ttk.Frame(main)
+topframe = tk.Frame(main)
 topframe.pack(side='top', fill='x')
 
-bottomframe = ttk.Frame(main)
+bottomframe = tk.Frame(main)
 bottomframe.pack(side='bottom')
 
-nouserlabel = ttk.Label(main, text='No accounts added')
+nouserlabel = tk.Label(main, text='No accounts added')
 
 style = ttk.Style(main)
 style.configure('c.TButton', background="#000")
