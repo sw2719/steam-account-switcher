@@ -38,7 +38,7 @@ When you press one of the 'account-changing' buttons, code below runs.
 (slightly modified to incrase readability)
 ```
 reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam", 0, winreg.KEY_ALL_ACCESS)
-winreg.SetValueEx(reg_key, AutoLoginUser, 0, winreg.REG_SZ, your_username)
+winreg.SetValueEx(reg_key, 'AutoLoginUser', 0, winreg.REG_SZ, your_username)
 winreg.CloseKey(reg_key)
 ```
 It changes key 'AutoLoginUser' located at Steam registry path, tricking Steam to autologin with that username.
