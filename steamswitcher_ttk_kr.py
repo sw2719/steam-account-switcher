@@ -352,7 +352,7 @@ button_quit.pack(side='left', padx=4, pady=3)
 button_restart.pack(side='right', padx=4, pady=3)
 
 
-def draw_button(accounts):  # 위와 똑같은 코드지만 버튼 새로고침을 위해 함수로 만듬
+def draw_button(accounts):
     global topframe
     global nouserlabel
     topframe.destroy()
