@@ -175,8 +175,7 @@ def addwindow():  # 계정 추가 창
     def adduser(userinput):
         if userinput.strip():
             with open('accounts.txt', 'r') as txt:
-                lastname_buffer = txt.readlines()
-                lastname = lastname_buffer[-1]
+                lastname = txt.readlines()[-1]
                 if '\n' not in lastname:
                     prefix = '\n'
                 else:
@@ -245,12 +244,12 @@ def removewindow():
     check_dict = {}  # 딕셔너리 선언
 
     for v in accounts:
-        var_buffer = tk.IntVar()  # Tkinter 체크버튼 값 변수
+        tk_var = tk.IntVar()  # Tkinter 체크버튼 값 변수
         checkbutton = ttk.Checkbutton(removewindow,  # 체크버튼 만들기
                                       text=v,
-                                      variable=var_buffer)
+                                      variable=tk_var)
         checkbutton.pack(side='top', padx=2, anchor='w')
-        check_dict[v] = var_buffer  # 딕셔너리에 체크버튼 변수 저장
+        check_dict[v] = tk_var  # 딕셔너리에 체크버튼 변수 저장
 
     def removeuser():
         print('Remove function start')
