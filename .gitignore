@@ -130,3 +130,4 @@ dmypy.json
 setup.py
 
 # End of https://www.gitignore.io/api/python
+*.txt

@@ -1,11 +1,37 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
+from tkinter import Frame
 import winreg
 import sys
 import subprocess
+import urllib3 as url
+import threading
 from time import sleep
 
+VERSION = '1.1'
+BRANCH = 'update'
+URL = 'https://raw.githubusercontent.com/sw2719/steam-switcher/' + BRANCH + '/version.txt'
+update_avail = False
+
+def check_update():
+    global update_avail
+    try:
+        http = url.PoolManager()
+        response = http.request('GET', URL)
+        ver_txt = response.data.decode('utf-8')
+        sv_version = ver_txt.splitlines()[-1]
+        print(sv_version)
+    except Exception:
+        pass
+    finally:
+        if float(sv_version) > float(VERSION):
+            update_avail = True
+        else:
+            update_avail = False
+
+t = threading.Thread(target=check_update)
+t.start()
 
 print('--PHASE 1: Import complete')
 print('--PHASE 2: Getting registry values--')
@@ -303,7 +329,7 @@ def window_height(accounts):  # 버튼의 갯수에 따라 창의 높이를 반�
         to_multiply = len(accounts) - 1
     else:
         to_multiply = 0
-    height_int = 140 + 32 * to_multiply
+    height_int = 170 + 32 * to_multiply
     height = str(height_int)
     return height
 
@@ -325,6 +351,9 @@ main.geometry("300x%s+600+250" %  # 기본 창 높이 140 버튼 1개당 32 증�
               window_height(accounts))  # window_height 함수 참조
 main.resizable(False, False)
 
+style = ttk.Style(main)
+style.configure('c.TButton', background="#000")
+
 menubar = tk.Menu(main)
 account_menu = tk.Menu(menubar, tearoff=0)  # 상단 메뉴
 account_menu.add_command(label="계정 추가", command=addwindow)
@@ -333,26 +362,30 @@ account_menu.add_separator()
 account_menu.add_command(label="정보", command=about)
 menubar.add_cascade(label="메뉴", menu=account_menu)
 
+nouserlabel = tk.Label(main, text='추가된 계정 없음')
 topframe = tk.Frame(main)
 topframe.pack(side='top', fill='x')
 
-bottomframe = tk.Frame(main)
-bottomframe.pack(side='bottom')
 
-nouserlabel = tk.Label(main, text='추가된 계정 없음')
+class bottomframe(Frame):
+    def __init__(self):
+        Frame.__init__(self, main)
+        self.pack(side='bottom')
 
-style = ttk.Style(main)
-style.configure('c.TButton', background="#000")
+        button_toggle = ttk.Button(self, width=14, text='자동로그인 토글',
+                                command=toggleAutologin)
+        button_quit = ttk.Button(self, width=5, text='종료', command=main.quit)
+        button_restart = ttk.Button(self, width=16, text='스팀 재시작후 종료',
+                                    command=restart_then_quit)
+        button_toggle.pack(side='left', padx=4, pady=3)
+        button_quit.pack(side='left', padx=4, pady=3)
+        button_restart.pack(side='right', padx=4, pady=3)
+    def refresh(self):
+        self.destroy()
+        bottomframe()
 
 
-button_toggle = ttk.Button(bottomframe, width=14, text='자동로그인 토글',
-                           command=toggleAutologin)
-button_quit = ttk.Button(bottomframe, width=5, text='종료', command=main.quit)
-button_restart = ttk.Button(bottomframe, width=16, text='스팀 재시작후 종료',
-                            command=restart_then_quit)
-button_toggle.pack(side='left', padx=4, pady=3)
-button_quit.pack(side='left', padx=4, pady=3)
-button_restart.pack(side='right', padx=4, pady=3)
+bottomframe = bottomframe()
 
 
 def draw_button(accounts):
@@ -400,6 +433,13 @@ def refresh():
                   window_height(accounts))
     draw_button(accounts)
     print('Menu refreshed with %s account(s)' % len(accounts))
+
+
+    if update_avail:
+        print('Update Available')
+        update_label = tk.Label(bottomframe, text='Update Available')
+        update_label.pack(side='bottom')
+        bottomframe.refresh()
 
 
 print('Init complete. Main app starting.')
