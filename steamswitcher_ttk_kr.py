@@ -3,8 +3,56 @@ import tkinter.ttk as ttk
 from tkinter import messagebox
 import winreg
 import sys
+import os
 import subprocess
+import requests as req
 from time import sleep
+
+print('Running on ', os.getcwd())
+
+VERSION = '1.2'
+BRANCH = 'master'
+URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'
+       % BRANCH)
+
+update_avail = False
+
+
+def checkupdate():
+    global update_avail
+    try:
+        response = req.get(URL)
+        sv_version = response.text.splitlines()[-1]
+        print(sv_version)
+    except Exception:
+        print('EXCEPTION WHILE CHECKING UPDATE')
+    finally:
+        if float(sv_version) > float(VERSION):
+            update_avail = True
+        else:
+            update_avail = False
+    return update_avail
+
+
+def start_checkupdate():
+    update_frame = tk.Frame(main)
+    update_frame.pack(side='bottom')
+
+    if checkupdate():
+        print('Update Available')
+
+        update_label = tk.Label(update_frame, text='업데이트 사용 가능')
+        update_label.pack(side='left', padx=5)
+
+        def open_github():
+            os.startfile('https://github.com/sw2719/steam-account-switcher/releases')
+
+        update_button = ttk.Button(update_frame,
+                                   text='GitHub 방문',
+                                   width=12,
+                                   command=open_github)
+
+        update_button.pack(side='right', padx=5)
 
 
 print('--PHASE 1: Import complete')
@@ -67,10 +115,13 @@ else:
     print('Could not fetch autologin user information!')
 
 print('--PHASE 3: Fetching accounts--')
+
 try:  # 계정 파일 열기
     with open('accounts.txt', 'r') as txt:
         namebuffer = txt.read().splitlines()
+
     accounts = [item for item in namebuffer if not item.strip() == '']
+
     if not accounts:
         raise FileNotFoundError
 except FileNotFoundError:  # 계정 파일이 없거나 계정 정보가 없을 경우
@@ -99,7 +150,8 @@ def setkey(name, value, value_type):  # 레지스트리 값 변경 (이름, 값,
     try:
         reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam", 0,  # 키 열가
                                  winreg.KEY_ALL_ACCESS)
-        winreg.SetValueEx(reg_key, name, 0, value_type, value)  # 값 지정
+        # 값 지정 (키, 값 이름, 0, 값 종류, 값)
+        winreg.SetValueEx(reg_key, name, 0, value_type, value)
         winreg.CloseKey(reg_key)  # 키 닫기
         print("Changed %s's value to %s" % (name, str(value)))  # 콘솔 출력
     except OSError:
@@ -139,7 +191,10 @@ def about():  # 정보 창
     def close():  # 창 닫기
         aboutwindow.destroy()
 
-    button_exit = ttk.Button(aboutwindow, text='닫기', width=8, command=close)
+    button_exit = ttk.Button(aboutwindow,
+                             text='닫기',
+                             width=8,
+                             command=close)
     about_row.pack(pady=15)
     about_steam.pack()
     about_email.pack()
@@ -158,20 +213,26 @@ def addwindow():  # 계정 추가 창
     addwindow.title("계정 추가")
     addwindow.geometry("300x150+650+300")
     addwindow.resizable(False, False)
+
     topframe_add = tk.Frame(addwindow)
     topframe_add.pack(side='top', anchor='center')
+
     bottomframe_add = tk.Frame(addwindow)
     bottomframe_add.pack(side='bottom', anchor='e')
+
     addlabel_row1 = tk.Label(topframe_add,
                              text='추가할 계정을 입력하세요.')
     addlabel_row2 = tk.Label(topframe_add,
                              text="다수의 계정을 입력할 경우에는\n"
                              + "'/'(슬래시)로 구분합니다.")
+
     account_entry = ttk.Entry(bottomframe_add, width=28)
     account_entry.pack(side='left', padx=5, pady=3)
+
     addwindow.grab_set()
     addwindow.focus()
     account_entry.focus()
+
     print('Opened add window.')
 
     def adduser(userinput):
@@ -188,12 +249,14 @@ def addwindow():  # 계정 추가 창
 
             txt = open('accounts.txt', 'a')
             name_buffer = userinput.split("/")
+
             for name_to_write in name_buffer:
                 if len(accounts) < 12:  # 계정 갯수가 한도내인지 확인
                     if name_to_write.strip():  # 올바른 입력값인지 확인
                         if name_to_write not in accounts:  # 중복된 계정이 아닌지 확인
                             print('Writing ' + name_to_write)
                             txt.write(prefix + name_to_write.strip() + '\n')
+                            accounts.append(name_to_write.strip())
                         else:
                             print('Alert: Account %s already exists!'
                                   % name_to_write)
@@ -217,7 +280,8 @@ def addwindow():  # 계정 추가 창
     addwindow.bind('<Return>', enterkey)
     button_add = ttk.Button(bottomframe_add, width=9, text='추가',
                             command=lambda: adduser(account_entry.get()))
-    button_addcancel = ttk.Button(addwindow, width=9, text='취소', command=close)
+    button_addcancel = ttk.Button(addwindow, width=9,
+                                  text='취소', command=close)
     addlabel_row1.pack(pady=10)
     addlabel_row2.pack()
 
@@ -240,7 +304,9 @@ def removewindow():
     removewindow.grab_set()
     removewindow.focus()
     removelabel = tk.Label(removewindow, text='삭제할 계정을 선택하세요.')
-    removelabel.pack(side='top', padx=5, pady=5)
+    removelabel.pack(side='top',
+                     padx=5,
+                     pady=5)
     print('Opened remove window.')
 
     def close():
@@ -253,6 +319,7 @@ def removewindow():
         checkbutton = ttk.Checkbutton(removewindow,  # 체크버튼 만들기
                                       text=v,
                                       variable=tk_var)
+
         checkbutton.pack(side='top', padx=2, anchor='w')
         check_dict[v] = tk_var  # 딕셔너리에 체크버튼 변수 저장
 
@@ -274,10 +341,15 @@ def removewindow():
         refresh()
         close()
 
-    remove_cancel = ttk.Button(bottomframe_rm, text='취소',
-                               command=close, width=9)
-    remove_ok = ttk.Button(bottomframe_rm, text='삭제',
-                           command=removeuser, width=9)
+    remove_cancel = ttk.Button(bottomframe_rm,
+                               text='취소',
+                               command=close,
+                               width=9)
+    remove_ok = ttk.Button(bottomframe_rm,
+                           text='삭제',
+                           command=removeuser,
+                           width=9)
+
     remove_cancel.pack(side='left', padx=5, pady=3)
     remove_ok.pack(side='left', padx=5, pady=3)
 
@@ -303,7 +375,7 @@ def window_height(accounts):  # 버튼의 갯수에 따라 창의 높이를 반�
         to_multiply = len(accounts) - 1
     else:
         to_multiply = 0
-    height_int = 140 + 32 * to_multiply
+    height_int = 160 + 32 * to_multiply
     height = str(height_int)
     return height
 
@@ -325,6 +397,9 @@ main.geometry("300x%s+600+250" %  # 기본 창 높이 140 버튼 1개당 32 증�
               window_height(accounts))  # window_height 함수 참조
 main.resizable(False, False)
 
+style = ttk.Style(main)
+style.configure('c.TButton', background="#000")
+
 menubar = tk.Menu(main)
 account_menu = tk.Menu(menubar, tearoff=0)  # 상단 메뉴
 account_menu.add_command(label="계정 추가", command=addwindow)
@@ -333,23 +408,28 @@ account_menu.add_separator()
 account_menu.add_command(label="정보", command=about)
 menubar.add_cascade(label="메뉴", menu=account_menu)
 
+nouserlabel = tk.Label(main, text='추가된 계정 없음')
 topframe = tk.Frame(main)
 topframe.pack(side='top', fill='x')
 
 bottomframe = tk.Frame(main)
 bottomframe.pack(side='bottom')
 
-nouserlabel = tk.Label(main, text='추가된 계정 없음')
-
-style = ttk.Style(main)
-style.configure('c.TButton', background="#000")
-
-
-button_toggle = ttk.Button(bottomframe, width=14, text='자동로그인 토글',
+button_toggle = ttk.Button(bottomframe,
+                           width=14,
+                           text='자동로그인 토글',
                            command=toggleAutologin)
-button_quit = ttk.Button(bottomframe, width=5, text='종료', command=main.quit)
-button_restart = ttk.Button(bottomframe, width=16, text='스팀 재시작후 종료',
+
+button_quit = ttk.Button(bottomframe,
+                         width=5,
+                         text='종료',
+                         command=main.quit)
+
+button_restart = ttk.Button(bottomframe,
+                            width=16,
+                            text='스팀 재시작후 종료',
                             command=restart_then_quit)
+
 button_toggle.pack(side='left', padx=4, pady=3)
 button_quit.pack(side='left', padx=4, pady=3)
 button_restart.pack(side='right', padx=4, pady=3)
@@ -405,4 +485,5 @@ def refresh():
 print('Init complete. Main app starting.')
 draw_button(accounts)
 main.config(menu=menubar)
+main.after(100, start_checkupdate)
 main.mainloop()

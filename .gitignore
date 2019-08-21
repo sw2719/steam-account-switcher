@@ -128,12 +128,11 @@ dmypy.json
 .pyre/
 
 setup.py
+setup_en.py
 
 # End of https://www.gitignore.io/api/python
+*.txt
+*.pyw
 Updater.py
 steamswitcher_ttk_kr_autoupdateexperiment.py
-accounts.txt
-setup_en.py
 setup_updater.py
-steamswitcher_ttk_en.pyw
-steamswitcher_ttk_kr.pyw
