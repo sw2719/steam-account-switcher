@@ -12,7 +12,7 @@ print('Running on ', os.getcwd())
 
 VERSION = '1.2'
 BRANCH = 'master'
-URL = ('https://raw.githubusercontent.com/sw2719/steam-switcher/%s/version.txt'
+URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'
        % BRANCH)
 
 update_avail = False
