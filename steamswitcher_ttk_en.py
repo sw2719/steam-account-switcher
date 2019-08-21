@@ -3,8 +3,56 @@ import tkinter.ttk as ttk
 from tkinter import messagebox
 import winreg
 import sys
+import os
 import subprocess
+import requests as req
 from time import sleep
+
+print('Running on ', os.getcwd())
+
+VERSION = '1.2'
+BRANCH = 'master'
+URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'
+       % BRANCH)
+
+update_avail = False
+
+
+def checkupdate():
+    global update_avail
+    try:
+        response = req.get(URL)
+        sv_version = response.text.splitlines()[-1]
+        print(sv_version)
+    except Exception:
+        print('EXCEPTION WHILE CHECKING UPDATE')
+    finally:
+        if float(sv_version) > float(VERSION):
+            update_avail = True
+        else:
+            update_avail = False
+    return update_avail
+
+
+def start_checkupdate():
+    update_frame = tk.Frame(main)
+    update_frame.pack(side='bottom')
+
+    if checkupdate():
+        print('Update Available')
+
+        update_label = tk.Label(update_frame, text='Update Available')
+        update_label.pack(side='left', padx=5)
+
+        def open_github():
+            os.startfile('https://github.com/sw2719/steam-account-switcher/releases')
+
+        update_button = ttk.Button(update_frame,
+                                   text='Visit GitHub',
+                                   width=12,
+                                   command=open_github)
+
+        update_button.pack(side='right', padx=5)
 
 
 print('--PHASE 1: Import complete')
@@ -70,7 +118,9 @@ print('--PHASE 3: Fetching accounts--')
 try:
     with open('accounts.txt', 'r') as txt:
         namebuffer = txt.read().splitlines()
+
     accounts = [item for item in namebuffer if not item.strip() == '']
+
     if not accounts:
         raise FileNotFoundError
 except FileNotFoundError:
@@ -99,6 +149,7 @@ def setkey(name, value, value_type):
     try:
         reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam", 0,
                                  winreg.KEY_ALL_ACCESS)
+
         winreg.SetValueEx(reg_key, name, 0, value_type, value)
         winreg.CloseKey(reg_key)
         print("Changed %s's value to %s" % (name, str(value)))
@@ -130,6 +181,7 @@ def about():
                            text='Steam: https://steamcommunity.com/'
                            + 'id/muangmuang')
     about_email = tk.Label(aboutwindow, text='E-mail: sw2719@naver.com')
+
     about_disclaimer = tk.Label(aboutwindow,
                                 text='Warning: I am not responsible for\n'
                                 + 'any data loss or damage ' +
@@ -138,7 +190,10 @@ def about():
     def close():
         aboutwindow.destroy()
 
-    button_exit = ttk.Button(aboutwindow, text='Close', width=8, command=close)
+    button_exit = ttk.Button(aboutwindow,
+                             text='Close',
+                             width=8,
+                             command=close)
     about_row.pack(pady=15)
     about_steam.pack()
     about_email.pack()
@@ -157,20 +212,26 @@ def addwindow():
     addwindow.title("Add accounts")
     addwindow.geometry("300x150+650+300")
     addwindow.resizable(False, False)
+
     topframe_add = tk.Frame(addwindow)
     topframe_add.pack(side='top', anchor='center')
+
     bottomframe_add = tk.Frame(addwindow)
     bottomframe_add.pack(side='bottom', anchor='e')
+
     addlabel_row1 = tk.Label(topframe_add,
                              text='Enter account(s) to add.')
     addlabel_row2 = tk.Label(topframe_add,
                              text="In case of adding multiple accounts,\n"
                              + "seperate each account with '/' (slash).")
+
     account_entry = ttk.Entry(bottomframe_add, width=28)
     account_entry.pack(side='left', padx=5, pady=3)
+
     addwindow.grab_set()
     addwindow.focus()
     account_entry.focus()
+
     print('Opened add window.')
 
     def adduser(userinput):
@@ -187,12 +248,14 @@ def addwindow():
 
             txt = open('accounts.txt', 'a')
             name_buffer = userinput.split("/")
+
             for name_to_write in name_buffer:
                 if len(accounts) < 12:
                     if name_to_write.strip():
                         if name_to_write not in accounts:
                             print('Writing ' + name_to_write)
                             txt.write(prefix + name_to_write.strip() + '\n')
+                            accounts.append(name_to_write.strip())
                         else:
                             print('Alert: Account %s already exists!'
                                   % name_to_write)
@@ -241,7 +304,9 @@ def removewindow():
     removewindow.grab_set()
     removewindow.focus()
     removelabel = tk.Label(removewindow, text='Select accounts to remove.')
-    removelabel.pack(side='top', padx=5, pady=5)
+    removelabel.pack(side='top',
+                     padx=5,
+                     pady=5)
     print('Opened remove window.')
 
     def close():
@@ -250,12 +315,13 @@ def removewindow():
     check_dict = {}
 
     for v in accounts:
-        var_buffer = tk.IntVar()
+        tk_var = tk.IntVar()
         checkbutton = ttk.Checkbutton(removewindow,
                                       text=v,
-                                      variable=var_buffer)
+                                      variable=tk_var)
+
         checkbutton.pack(side='top', padx=2, anchor='w')
-        check_dict[v] = var_buffer
+        check_dict[v] = tk_var
 
     def removeuser():
         print('Remove function start')
@@ -275,10 +341,15 @@ def removewindow():
         refresh()
         close()
 
-    remove_cancel = ttk.Button(bottomframe_rm, text='Cancel',
-                               command=close, width=9)
-    remove_ok = ttk.Button(bottomframe_rm, text='Remove',
-                           command=removeuser, width=9)
+    remove_cancel = ttk.Button(bottomframe_rm,
+                               text='Cancel',
+                               command=close,
+                               width=9)
+    remove_ok = ttk.Button(bottomframe_rm,
+                           text='Remove',
+                           command=removeuser,
+                           width=9)
+
     remove_cancel.pack(side='left', padx=5, pady=3)
     remove_ok.pack(side='left', padx=5, pady=3)
 
@@ -326,6 +397,9 @@ main.geometry("300x%s+600+250" %
               window_height(accounts))
 main.resizable(False, False)
 
+style = ttk.Style(main)
+style.configure('c.TButton', background="#000")
+
 menubar = tk.Menu(main)
 account_menu = tk.Menu(menubar, tearoff=0)
 account_menu.add_command(label="Add accounts", command=addwindow)
@@ -334,23 +408,28 @@ account_menu.add_separator()
 account_menu.add_command(label="About", command=about)
 menubar.add_cascade(label="Menu", menu=account_menu)
 
+nouserlabel = tk.Label(main, text='No accounts added')
 topframe = tk.Frame(main)
 topframe.pack(side='top', fill='x')
 
 bottomframe = tk.Frame(main)
 bottomframe.pack(side='bottom')
 
-nouserlabel = tk.Label(main, text='No accounts added')
-
-style = ttk.Style(main)
-style.configure('c.TButton', background="#000")
-
-
-button_toggle = ttk.Button(bottomframe, width=14, text='Toggle auto-login',
+button_toggle = ttk.Button(bottomframe,
+                           width=14,
+                           text='Toggle auto-login',
                            command=toggleAutologin)
-button_quit = ttk.Button(bottomframe, width=5, text='Exit', command=main.quit)
-button_restart = ttk.Button(bottomframe, width=18, text='Restart Steam & exit',
+
+button_quit = ttk.Button(bottomframe,
+                         width=5,
+                         text='Exit',
+                         command=main.quit)
+
+button_restart = ttk.Button(bottomframe,
+                            width=18,
+                            text='Restart Steam & exit',
                             command=restart_then_quit)
+
 button_toggle.pack(side='left', padx=4, pady=3)
 button_quit.pack(side='left', padx=4, pady=3)
 button_restart.pack(side='right', padx=4, pady=3)
@@ -406,4 +485,5 @@ def refresh():
 print('Init complete. Main app starting.')
 draw_button(accounts)
 main.config(menu=menubar)
+main.after(100, start_checkupdate)
 main.mainloop()
