@@ -1,8 +1,9 @@
 # Steam Account Switcher
 Steam Account Switching made easy
 
-[See this program in action!](https://youtu.be/WFtv10RZ_UA)
 [Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
+
+[See this program in action](https://youtu.be/WFtv10RZ_UA)
 # Changelogs
 * Automatic update checking (v1.2)
 # Upcoming Features
