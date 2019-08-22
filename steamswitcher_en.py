@@ -386,7 +386,7 @@ def window_height(accounts):
         to_multiply = len(accounts) - 1
     else:
         to_multiply = 0
-    height_int = 150 + 32 * to_multiply
+    height_int = 160 + 32 * to_multiply
     height = str(height_int)
     return height
 
