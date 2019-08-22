@@ -55,7 +55,6 @@ coverage.xml
 .pytest_cache/
 
 # Translations
-*.mo
 *.pot
 
 # Django stuff:
@@ -137,4 +136,3 @@ Updater.py
 steamswitcher_ttk_kr_autoupdateexperiment.py
 setup_updater.py
 *.json
-*.po
