@@ -12,7 +12,7 @@ print('Running on ', os.getcwd())
 
 VERSION = '1.2'
 BRANCH = 'master'
-URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'
+URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
        % BRANCH)
 
 update_avail = False
@@ -24,28 +24,29 @@ def checkupdate():
         response = req.get(URL)
         sv_version = response.text.splitlines()[-1]
         print(sv_version)
-    except Exception:
-        print('EXCEPTION WHILE CHECKING UPDATE')
-    finally:
+
         if float(sv_version) > float(VERSION):
-            update_avail = True
+            update_avail = 1
         else:
-            update_avail = False
+            update_avail = 0
+    except req.exceptions.RequestException:
+        update_avail = 2
     return update_avail
 
 
 def start_checkupdate():
     update_frame = tk.Frame(main)
     update_frame.pack(side='bottom')
+    update_code = checkupdate()
 
-    if checkupdate():
+    if update_code == 1:
         print('Update Available')
 
         update_label = tk.Label(update_frame, text='Update Available')
         update_label.pack(side='left', padx=5)
 
         def open_github():
-            os.startfile('https://github.com/sw2719/steam-account-switcher/releases')
+            os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
 
         update_button = ttk.Button(update_frame,
                                    text='Visit GitHub',
@@ -53,6 +54,16 @@ def start_checkupdate():
                                    command=open_github)
 
         update_button.pack(side='right', padx=5)
+    elif update_code == 0:
+        print('On latest version')
+
+        update_label = tk.Label(update_frame, text='Using latest version')
+        update_label.pack(side='bottom')
+    elif update_code == 2:
+        print('Exception while getting server version')
+
+        update_label = tk.Label(update_frame, text="Update check failed")
+        update_label.pack(side='bottom')
 
 
 print('--PHASE 1: Import complete')
@@ -66,7 +77,7 @@ def error_msg(title, content):
     root.withdraw()
     messagebox.showerror(title, content)
     root.destroy()
-    sys.exit(0)
+    sys.exit(1)
 
 
 def getuser():
@@ -115,6 +126,7 @@ else:
     print('Could not fetch autologin user information!')
 
 print('--PHASE 3: Fetching accounts--')
+
 try:
     with open('accounts.txt', 'r') as txt:
         namebuffer = txt.read().splitlines()
@@ -154,8 +166,7 @@ def setkey(name, value, value_type):
         winreg.CloseKey(reg_key)
         print("Changed %s's value to %s" % (name, str(value)))
     except OSError:
-        messagebox.showerror('Error', 'Registry operation failed.')
-        sys.exit(0)
+        error_msg('Error', 'Registry operation failed.')
 
 
 def setuser(username):

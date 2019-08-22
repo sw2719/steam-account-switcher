@@ -12,7 +12,7 @@ print('Running on ', os.getcwd())
 
 VERSION = '1.2'
 BRANCH = 'master'
-URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'
+URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
        % BRANCH)
 
 update_avail = False
@@ -24,28 +24,29 @@ def checkupdate():
         response = req.get(URL)
         sv_version = response.text.splitlines()[-1]
         print(sv_version)
-    except Exception:
-        print('EXCEPTION WHILE CHECKING UPDATE')
-    finally:
+
         if float(sv_version) > float(VERSION):
-            update_avail = True
+            update_avail = 1
         else:
-            update_avail = False
+            update_avail = 0
+    except req.exceptions.RequestException:
+        update_avail = 2
     return update_avail
 
 
 def start_checkupdate():
     update_frame = tk.Frame(main)
     update_frame.pack(side='bottom')
+    update_code = checkupdate()
 
-    if checkupdate():
+    if update_code == 1:
         print('Update Available')
 
         update_label = tk.Label(update_frame, text='업데이트 사용 가능')
         update_label.pack(side='left', padx=5)
 
         def open_github():
-            os.startfile('https://github.com/sw2719/steam-account-switcher/releases')
+            os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
 
         update_button = ttk.Button(update_frame,
                                    text='GitHub 방문',
@@ -53,6 +54,16 @@ def start_checkupdate():
                                    command=open_github)
 
         update_button.pack(side='right', padx=5)
+    elif update_code == 0:
+        print('On latest version')
+
+        update_label = tk.Label(update_frame, text='최신 버전 사용 중')
+        update_label.pack(side='bottom')
+    elif update_code == 2:
+        print('Exception while getting server version')
+
+        update_label = tk.Label(update_frame, text="업데이트 확인 실패")
+        update_label.pack(side='bottom')
 
 
 print('--PHASE 1: Import complete')
@@ -66,7 +77,7 @@ def error_msg(title, content):  # 오류 메시지 표시후 종료
     root.withdraw()
     messagebox.showerror(title, content)
     root.destroy()
-    sys.exit(0)
+    sys.exit(1)
 
 
 def getuser():  # 레지스트리에서 AutoLoginUser 값 확인
@@ -116,7 +127,7 @@ else:
 
 print('--PHASE 3: Fetching accounts--')
 
-try:  # 계정 파일 열기
+try:
     with open('accounts.txt', 'r') as txt:
         namebuffer = txt.read().splitlines()
 
@@ -155,8 +166,7 @@ def setkey(name, value, value_type):  # 레지스트리 값 변경 (이름, 값,
         winreg.CloseKey(reg_key)  # 키 닫기
         print("Changed %s's value to %s" % (name, str(value)))  # 콘솔 출력
     except OSError:
-        messagebox.showerror('오류', '레지스트리 작업에 실패했습니다.')
-        sys.exit(0)
+        error_msg('오류', '레지스트리 작업에 실패했습니다.')
 
 
 def setuser(username):  # 버튼 지정용 함수
@@ -206,7 +216,8 @@ def about():  # 정보 창
 def addwindow():  # 계정 추가 창
     global accounts
     if len(accounts) == 12:
-        messagebox.showwarning('계정 한도 도달', '계정 갯수가 한도에 도달했습니다. (12개)')
+        messagebox.showwarning('계정 한도 도달',
+                               '계정 갯수가 한도에 도달했습니다. (12개)')
         return
 
     addwindow = tk.Toplevel(main)
@@ -267,6 +278,7 @@ def addwindow():  # 계정 추가 창
                     messagebox.showwarning('계정 한도 도달',
                                            '계정 한도에 도달하여 계정 %s를 추가할 수 없습니다.'
                                            % name_to_write)
+
             txt.close()
             refresh()
         addwindow.destroy()
