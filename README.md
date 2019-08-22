@@ -7,6 +7,7 @@ Steam Account Switching made easy
 # Upcoming Features
 * Automatic update checking (v1.2)
 * Multi language support (v1.3)
+* Gracefully shutting down Steam (v1.3)
 # About the code
 * Keep in mind that I'm _fairly_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
 * There are English and Korean version codes. English one doesn't have comments (I plan to do that).
