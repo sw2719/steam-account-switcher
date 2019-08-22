@@ -136,3 +136,5 @@ setup_en.py
 Updater.py
 steamswitcher_ttk_kr_autoupdateexperiment.py
 setup_updater.py
+*.json
+*.po
