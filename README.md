@@ -8,11 +8,12 @@ Steam Account Switching made easy
 # Changelogs
 * Automatic update checking (v1.2)
 
-# Upcoming Features
+# Upcoming Features / Changes
 * Multi language support (v1.3)
 * Gracefully shutting down Steam (v1.3)
   (Current implementation uses 'TASKKILL /F /IM Steam.exe')
 * Reduce UI flickering (Not planned)
+* Improving code & readability (Continuous)
 
 # About the code
 * Keep in mind that I'm _fairly_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
