@@ -2,6 +2,8 @@
 Steam Account Switching made easy
 
 [See this program in action!](https://youtu.be/WFtv10RZ_UA)
+# Changelogs
+* Space for future releases
 # Upcoming Features
 * Automatic update checking (v1.2)
 * Multi language support (v1.3)
