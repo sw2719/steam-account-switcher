@@ -4,16 +4,20 @@ Steam Account Switching made easy
 [Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
 
 [See this program in action](https://youtu.be/WFtv10RZ_UA)
+
 # Changelogs
 * Automatic update checking (v1.2)
+
 # Upcoming Features
 * Multi language support (v1.3)
 * Gracefully shutting down Steam (v1.3)
   (Current implementation uses 'TASKKILL /F /IM Steam.exe')
 * Reduce UI flickering (Not planned)
+
 # About the code
 * Keep in mind that I'm _fairly_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
 * There are English and Korean version codes. English one doesn't have comments (I plan to do that).
+
 # How to use
 1. Unpack the archive
 2. Save it to some folder 
@@ -29,14 +33,12 @@ Steam Account Switching made easy
 
 # Guide
 ![window_instruction](https://user-images.githubusercontent.com/22590718/63221815-78c8cb80-c1d9-11e9-829d-c4f1ef855285.png)
+
 # Screenshots
 ![window](https://user-images.githubusercontent.com/22590718/63221824-87af7e00-c1d9-11e9-96e2-87508d2128b5.png)
 ![windowremove](https://user-images.githubusercontent.com/22590718/63221825-87af7e00-c1d9-11e9-8887-ed530c305166.png)
 ![windowadd](https://user-images.githubusercontent.com/22590718/63221826-88481480-c1d9-11e9-82eb-2b78dc9d528d.png)
-# Plans
-* Changing the order of accounts (Looking for ways to implement this.)
-* Cleaner UI
-* Designing an icon and adding it
+
 # How it works
 When you launch the program for the first time, the program fetches current auto-login user from registry and then adds it to accounts.txt.
 When you add account(s), it saves your username(s) to accounts.txt in plain text.
