@@ -16,8 +16,6 @@ locale_value = locale_buf[0]
 if locale_value != 'ko_KR':
     locale_value = 'en_US'
 
-locale_value = 'en_US'
-
 t = gettext.translation('sw', localedir='locale',
                         languages=[locale_value], fallback=True)
 _ = t.gettext
@@ -92,23 +90,17 @@ def error_msg(title, content):  # 오류 메시지 표시후 종료
     sys.exit(1)
 
 
-def getuser():  # 레지스트리에서 AutoLoginUser 값 확인
+def fetch_reg(key):  # 레지스트리에서 값 확인
+    if key == 'username':
+        key_name = 'AutoLoginUser'
+    elif key == 'autologin':
+        key_name = 'RememberPassword'
+    elif key == 'installpath':
+        key_name = 'SteamExe'
+
     try:
         reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam")
-        value_buffer = winreg.QueryValueEx(reg_key, "AutoLoginUser")
-        value = value_buffer[0]
-        winreg.CloseKey(reg_key)
-    except OSError:
-        error_msg(_('레지스트리 불러오기 실패'),
-                  _('레지스트리에서 계정 정보를 불러오는데 실패했습니다.') + '\n' +
-                  _('스팀이 설치되어 있는지 확인하십시오.'))
-    return value
-
-
-def autologin():  # 레지스트리에서 RememberPassword 값 확인
-    try:
-        reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam")
-        value_buffer = winreg.QueryValueEx(reg_key, "RememberPassword")
+        value_buffer = winreg.QueryValueEx(reg_key, key_name)
         value = value_buffer[0]
         winreg.CloseKey(reg_key)
     except OSError:
@@ -119,7 +111,7 @@ def autologin():  # 레지스트리에서 RememberPassword 값 확인
 
 
 def autologinstr():  # autologin 함수 값을 불러와 문자열 출력
-    value = autologin()
+    value = fetch_reg('autologin')
     if value == 1:
         retstr = _('자동로그인 활성화')
     elif value == 0:
@@ -128,12 +120,12 @@ def autologinstr():  # autologin 함수 값을 불러와 문자열 출력
 
 
 print('Fetching registry values...')  # 콘솔에 레지스트리 값 출력
-if autologin() != 2:
-    print('Autologin value is ' + str(autologin()))
+if fetch_reg('autologin') != 2:
+    print('Autologin value is ' + str(fetch_reg('autologin')))
 else:
     print('Could not fetch autologin status!')
-if getuser():
-    print('Current autologin user is ' + getuser())
+if fetch_reg('autologin'):
+    print('Current autologin user is ' + str(fetch_reg('autologin')))
 else:
     print('Could not fetch autologin user information!')
 
@@ -149,10 +141,10 @@ try:
         raise FileNotFoundError
 except FileNotFoundError:  # 계정 파일이 없거나 계정 정보가 없을 경우
     with open('accounts.txt', 'w') as txt:
-        if getuser():
+        if fetch_reg('autologin'):
             print('No account found! Adding current user...')
-            txt.write(getuser() + '\n')
-    accounts = [getuser()]
+            txt.write(fetch_reg('autologin') + '\n')
+    accounts = [fetch_reg('autologin')]
 
 print('Detected ' + str(len(accounts)) + ' accounts:')  # 콘솔에 계정 출력
 
@@ -195,9 +187,9 @@ def setuser(username):  # 버튼 지정용 함수
 
 
 def toggleAutologin():  # 자동로그인 레지스트리 값 0 1 토글
-    if autologin() == 1:
+    if fetch_reg('autologin') == 1:
         value = 0
-    elif autologin() == 0:
+    elif fetch_reg('autologin') == 0:
         value = 1
     setkey('RememberPassword', value, winreg.REG_DWORD)
     refresh()
@@ -387,12 +379,27 @@ def removewindow():
 
 
 def restart_then_quit():  # Steam을 재시작
+    r_path = fetch_reg('installpath')
+    r_path_items = r_path.split('/')
+    path_items = []
+    for item in r_path_items:
+        if ' ' in item:
+            path_items.append(f'"{item}"')
+        else:
+            path_items.append(item)
+    steam_exe = "\\".join(path_items)
+    print(steam_exe)
     try:
-        subprocess.run("TASKKILL /F /IM Steam.exe",  # Steam.exe 프로세스 끝내기
+        subprocess.run(f"{steam_exe} -shutdown", shell=True,
                        creationflags=0x08000000, check=True)
         sleep(1)
-    except subprocess.CalledProcessError:
-        pass
+    except FileNotFoundError:
+        try:
+            subprocess.run("TASKKILL /F /IM Steam.exe",
+                           creationflags=0x08000000, check=True)
+            sleep(1)
+        except subprocess.CalledProcessError:
+            pass
     try:
         subprocess.run("start steam://open/main",  # Steam 실행
                        shell=True, check=True)
@@ -461,6 +468,7 @@ button_restart.pack(side='right', padx=4, pady=3)
 def draw_button(accounts):
     global topframe
     global nouserlabel
+
     topframe.destroy()
     nouserlabel.destroy()
 
@@ -468,13 +476,13 @@ def draw_button(accounts):
     topframe.pack(side='top', fill='x')
 
     nouserlabel = tk.Label(main, text=_('추가된 계정 없음'))
-    usertext_row1 = _('현재 자동로그인 계정:')
-    usertext_row2 = getuser()
 
-    userlabel_1 = tk.Label(topframe, text=usertext_row1)
+    userlabel_1 = tk.Label(topframe, text=_('현재 자동로그인 계정:'))
     userlabel_1.pack(side='top')
-    userlabel_2 = tk.Label(topframe, text=usertext_row2)
+
+    userlabel_2 = tk.Label(topframe, text=fetch_reg('username'))
     userlabel_2.pack(side='top', pady=2)
+
     autolabel = tk.Label(topframe, text=autologinstr())
     autolabel.pack(side='top')
 
@@ -482,7 +490,7 @@ def draw_button(accounts):
         nouserlabel.pack(anchor='center', expand=True)
     elif accounts:
         for v in accounts:
-            if v == getuser():
+            if v == fetch_reg('username'):
                 button = ttk.Button(topframe,
                                     style='c.TButton',
                                     text=v,
