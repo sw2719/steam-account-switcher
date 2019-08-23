@@ -31,6 +31,7 @@ URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/versi
 
 
 def checkupdate():
+    update_avail = None
     try:
         response = req.get(URL)
         sv_version = response.text.splitlines()[-1]
@@ -409,15 +410,6 @@ def window_height(accounts):  # 버튼의 갯수에 따라 창의 높이를 반�
     height_int = 160 + 32 * to_multiply
     height = str(height_int)
     return height
-
-
-def toggleAutologin():  # 자동로그인 레지스트리 값 0 1 토글
-    if autologin() == 1:
-        value = 0
-    elif autologin() == 0:
-        value = 1
-    setkey('RememberPassword', value, winreg.REG_DWORD)
-    refresh()
 
 
 print('--PHASE 5: Drawing UI--')
