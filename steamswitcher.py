@@ -18,9 +18,9 @@ if locale_value != 'ko_KR':
 
 locale_value = 'en_US'
 
-
-t = gettext.translation('sw', localedir='locale', languages=[locale_value], fallback=True)
-t.install()
+t = gettext.translation('sw', localedir='locale',
+                        languages=[locale_value], fallback=True)
+_ = t.gettext
 
 print('Running on ', os.getcwd())
 
@@ -29,11 +29,8 @@ BRANCH = 'master'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
        % BRANCH)
 
-update_avail = False
-
 
 def checkupdate():
-    global update_avail
     try:
         response = req.get(URL)
         sv_version = response.text.splitlines()[-1]
@@ -171,6 +168,14 @@ if len(accounts) > 12:  # 계정 갯수가 12개를 초과할 경우
 print('--PHASE 4: Defining functions--')
 
 
+def fetchuser():  # 계정 파일 다시 불러오기
+    global accounts
+    txt = open('accounts.txt', 'r')
+    namebuffer = txt.read().splitlines()
+    txt.close()
+    accounts = [item for item in namebuffer if not item.strip() == '']
+
+
 def setkey(name, value, value_type):  # 레지스트리 값 변경 (이름, 값, 값 유형)
     try:
         reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam", 0,  # 키 열가
@@ -188,12 +193,13 @@ def setuser(username):  # 버튼 지정용 함수
     refresh()
 
 
-def fetchuser():  # 계정 파일 다시 불러오기
-    global accounts
-    txt = open('accounts.txt', 'r')
-    namebuffer = txt.read().splitlines()
-    txt.close()
-    accounts = [item for item in namebuffer if not item.strip() == '']
+def toggleAutologin():  # 자동로그인 레지스트리 값 0 1 토글
+    if autologin() == 1:
+        value = 0
+    elif autologin() == 0:
+        value = 1
+    setkey('RememberPassword', value, winreg.REG_DWORD)
+    refresh()
 
 
 def about():  # 정보 창
@@ -208,8 +214,8 @@ def about():  # 정보 창
     about_email = tk.Label(aboutwindow, text='E-mail: sw2719@naver.com')
     about_discord = tk.Label(aboutwindow, text='Discord: 꺔먕#6678')
     about_disclaimer = tk.Label(aboutwindow,
-                                text=_('경고: 본 프로그램의 사용으로 인한 데이터 손실 및 기타 손해 등') + '\n' +
-                                _('어떠한 사고나 문제에 대해서 제작자는 책임을 지지 않습니다.'))
+                                text=_('경고: 본 프로그램의 사용으로 인한 데이터 손실 및 기타 손해 등')
+                                + '\n' + _('어떠한 사고나 문제에 대해서 제작자는 책임을 지지 않습니다.'))  # NOQA
 
     def close():  # 창 닫기
         aboutwindow.destroy()
