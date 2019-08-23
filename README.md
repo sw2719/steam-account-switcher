@@ -5,17 +5,19 @@ Steam Account Switching made easy
 
 [See this program in action](https://youtu.be/WFtv10RZ_UA)
 
-# Changelogs (for last 3 versions)
+# Changelogs
+* Gracefully shutting down Steam (v1.3)
+  (Previous implementation used only 'TASKKILL /F /IM Steam.exe')
 * Multi language support (v1.3)
 * Automatic update checking (v1.2)
 
-# Upcoming Features
-* Gracefully shutting down Steam (v1.3)
-  (Current implementation uses 'TASKKILL /F /IM Steam.exe')
+# Upcoming Features / Changes
 * Reduce UI flickering (Not planned)
+* Improving code & readability (Continuous)
 
 # About the code
 * Keep in mind that I'm _fairly_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
+* Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advices are appreciated. 
 * There are English and Korean version codes. English one doesn't have comments (I plan to do that).
 
 # How to use
