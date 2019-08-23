@@ -17,7 +17,7 @@ Steam Account Switching made easy
 
 # About the code
 * Keep in mind that I'm _fairly_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
-* Lots of _global_s. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advices are appreciated. 
+* Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advices are appreciated. 
 * There are English and Korean version codes. English one doesn't have comments (I plan to do that).
 
 # How to use
