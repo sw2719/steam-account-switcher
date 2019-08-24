@@ -6,24 +6,27 @@ Steam Account Switching made easy
 [See this program in action](https://youtu.be/WFtv10RZ_UA)
 
 # Changelogs
+* Reduced UI flickering (v1.3)
+* Gracefully shutting down Steam (v1.3)
+
+  (Previous implementation used only 'TASKKILL /F /IM Steam.exe')
+* Multi language support (v1.3)
+
+  Supported languages: Korean(한국어), English
 * Automatic update checking (v1.2)
 
 # Upcoming Features / Changes
-* Multi language support (v1.3)
-* Gracefully shutting down Steam (v1.3)
-  (Current implementation uses 'TASKKILL /F /IM Steam.exe')
-* Reduce UI flickering (Not planned)
 * Improving code & readability (Continuous)
 
 # About the code
-* Keep in mind that I'm _fairly_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
-* Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advices are appreciated. 
+* Keep in mind that I'm _quite_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
+* Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advices are appreciated.
 * There are English and Korean version codes. English one doesn't have comments (I plan to do that).
 
 # How to use
 1. Unpack the archive
-2. Save it to some folder 
-3. Run the exe 
+2. Save it to some folder
+3. Run the exe
 (Because this program alters your registry value, Windows SmartScreen or your Anti-virus might detect it as harmful software.)
 4. Add accounts via Menu > Add accounts
    (Warning: Do NOT add accounts by manually editing accounts.txt)
@@ -55,4 +58,4 @@ winreg.CloseKey(reg_key)
 ```
 It changes key 'AutoLoginUser' located at Steam registry path, tricking Steam to autologin with that username.
 
-Restarting then quit button calls 'TASKKILL /F /IM Steam.exe', and then calls 'start steam://open/main'.
+If you choose to restart Steam, the program tries to gracefully shutdown Steam. If it fails to do that, it forcefully shutdowns Steam.
