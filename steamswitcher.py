@@ -15,9 +15,10 @@ locale_buf = locale.getdefaultlocale()
 locale_value = locale_buf[0]
 if locale_value != 'ko_KR':
     locale_value = 'en_US'
+locale_value = 'en_US'
 
 t = gettext.translation('sw', localedir='locale',
-                        languages=[locale_value], fallback=True)
+                        languages=[locale_value])
 _ = t.gettext
 
 print('Running on ', os.getcwd())
@@ -179,11 +180,6 @@ def setkey(name, value, value_type):  # 레지스트리 값 변경 (이름, 값,
         print("Changed %s's value to %s" % (name, str(value)))  # 콘솔 출력
     except OSError:
         error_msg(_('레지스트리 오류'), _('레지스트리 값을 바꾸는데 실패했습니다.'))
-
-
-def setuser(username):  # 버튼 지정용 함수
-    setkey('AutoLoginUser', username, winreg.REG_SZ)
-    refresh()
 
 
 def toggleAutologin():  # 자동로그인 레지스트리 값 0 1 토글
@@ -378,7 +374,7 @@ def removewindow():
     remove_ok.pack(side='left', padx=5, pady=3)
 
 
-def restart_then_quit():  # Steam을 재시작
+def exit_after_restart():  # Steam을 재시작
     r_path = fetch_reg('installpath')
     r_path_items = r_path.split('/')
     path_items = []
@@ -390,7 +386,7 @@ def restart_then_quit():  # Steam을 재시작
     steam_exe = "\\".join(path_items)
     print(steam_exe)
     try:
-        subprocess.run(f"{steam_exe} -shutdown", shell=True,
+        subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                        creationflags=0x08000000, check=True)
         sleep(1)
     except FileNotFoundError:
@@ -427,8 +423,11 @@ main.geometry("300x%s+600+250" %  # 기본 창 높이 140 버튼 1개당 32 증�
               window_height(accounts))  # window_height 함수 참조
 main.resizable(False, False)
 
-style = ttk.Style(main)
-style.configure('c.TButton', background="#000")
+sel_style = ttk.Style(main)
+sel_style.configure('sel.TButton', background="#000")
+
+def_style = ttk.Style(main)
+def_style.configure(('TButton'))
 
 menubar = tk.Menu(main)
 account_menu = tk.Menu(menubar, tearoff=0)  # 상단 메뉴
@@ -438,9 +437,8 @@ account_menu.add_separator()
 account_menu.add_command(label=_("정보"), command=about)
 menubar.add_cascade(label=_("메뉴"), menu=account_menu)
 
-nouserlabel = tk.Label(main, text=_('추가된 계정 없음'))
-topframe = tk.Frame(main)
-topframe.pack(side='top', fill='x')
+upper_frame = tk.Frame(main)
+upper_frame.pack(side='top', fill='x')
 
 bottomframe = tk.Frame(main)
 bottomframe.pack(side='bottom')
@@ -458,55 +456,75 @@ button_quit = ttk.Button(bottomframe,
 button_restart = ttk.Button(bottomframe,
                             width=18,
                             text=_('스팀 재시작후 종료'),
-                            command=restart_then_quit)
+                            command=exit_after_restart)
 
 button_toggle.pack(side='left', padx=4, pady=3)
 button_quit.pack(side='left', padx=4, pady=3)
 button_restart.pack(side='right', padx=4, pady=3)
 
+nouser_label = tk.Label(main, text=_('추가된 계정 없음'))
+
 
 def draw_button(accounts):
-    global topframe
-    global nouserlabel
+    global upper_frame
+    global nouser_label
 
-    topframe.destroy()
-    nouserlabel.destroy()
+    button_dict = {}
 
-    topframe = tk.Frame(main)
-    topframe.pack(side='top', fill='x')
+    upper_frame.destroy()
+    nouser_label.destroy()
 
-    nouserlabel = tk.Label(main, text=_('추가된 계정 없음'))
+    upper_frame = tk.Frame(main)
+    upper_frame.pack(side='top', fill='x')
 
-    userlabel_1 = tk.Label(topframe, text=_('현재 자동로그인 계정:'))
+    nouser_label = tk.Label(main, text=_('추가된 계정 없음'))
+
+    userlabel_1 = tk.Label(upper_frame, text=_('현재 자동로그인 계정:'))
     userlabel_1.pack(side='top')
 
-    userlabel_2 = tk.Label(topframe, text=fetch_reg('username'))
+    user_var = tk.StringVar()
+    user_var.set(fetch_reg('username'))
+
+    userlabel_2 = tk.Label(upper_frame, textvariable=user_var)
     userlabel_2.pack(side='top', pady=2)
 
-    autolabel = tk.Label(topframe, text=autologinstr())
+    auto_var = tk.StringVar()
+    auto_var.set(autologinstr())
+
+    autolabel = tk.Label(upper_frame, textvariable=auto_var)
     autolabel.pack(side='top')
 
+    def button_func(username):
+        current_user = fetch_reg('username')
+        button_dict[current_user].config(style='TButton', state='normal')
+        setkey('AutoLoginUser', username, winreg.REG_SZ)
+        button_dict[username].config(style='sel.TButton', state='disabled')
+        user_var.set(fetch_reg('username'))
+
     if not accounts:
-        nouserlabel.pack(anchor='center', expand=True)
+        nouser_label.pack(anchor='center', expand=True)
     elif accounts:
-        for v in accounts:
-            if v == fetch_reg('username'):
-                button = ttk.Button(topframe,
-                                    style='c.TButton',
-                                    text=v,
-                                    state='disabled')
+        for username in accounts:
+            if username == fetch_reg('username'):
+                button_dict[username] = ttk.Button(upper_frame,
+                                                   style='sel.TButton',
+                                                   text=username,
+                                                   state='disabled',
+                                                   command=lambda name=username: button_func(name))  # NOQA
             else:
-                button = ttk.Button(topframe,
-                                    text=v,
-                                    command=lambda name=v: setuser(name))
-            button.pack(fill='x', padx=5, pady=3)
+                button_dict[username] = ttk.Button(upper_frame,
+                                                   style='TButton',
+                                                   text=username,
+                                                   state='normal',
+                                                   command=lambda name=username: button_func(name))  # NOQA
+            button_dict[username].pack(fill='x', padx=5, pady=3)
 
 
 def refresh():
-    global topframe
+    global upper_frame
     global accounts
     fetchuser()
-    topframe.destroy()
+    upper_frame.destroy()
     main.geometry("300x%s" %
                   window_height(accounts))
     draw_button(accounts)
