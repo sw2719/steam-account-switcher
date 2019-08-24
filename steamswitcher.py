@@ -387,7 +387,7 @@ def exit_after_restart():  # Steam을 재시작
     try:
         subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                        creationflags=0x08000000, check=True)
-        sleep(1)
+        sleep(2.5)
     except FileNotFoundError:
         try:
             subprocess.run("TASKKILL /F /IM Steam.exe",
