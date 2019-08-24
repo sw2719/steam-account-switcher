@@ -15,7 +15,6 @@ locale_buf = locale.getdefaultlocale()
 locale_value = locale_buf[0]
 if locale_value != 'ko_KR':
     locale_value = 'en_US'
-locale_value = 'en_US'
 
 t = gettext.translation('sw', localedir='locale',
                         languages=[locale_value])
