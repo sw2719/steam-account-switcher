@@ -22,7 +22,7 @@ _ = t.gettext
 
 print('Running on ', os.getcwd())
 
-VERSION = '1.2'
+VERSION = '1.3'
 BRANCH = 'master'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
        % BRANCH)
