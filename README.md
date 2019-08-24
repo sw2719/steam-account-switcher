@@ -5,7 +5,7 @@ Steam Account Switching made easy
 
 [See this program in action](https://youtu.be/WFtv10RZ_UA)
 
-# Changelogs
+# Changelogs (for last 3 versions)
 * Reduced UI flickering (v1.3)
 * Gracefully shutting down Steam (v1.3)
 
@@ -14,6 +14,8 @@ Steam Account Switching made easy
 
   Supported languages: Korean(한국어), English
 * Automatic update checking (v1.2)
+
+* Intial Release (v1.1)
 
 # Upcoming Features / Changes
 * Improving code & readability (Continuous)
