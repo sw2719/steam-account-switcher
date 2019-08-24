@@ -1,0 +1,206 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-08-23 02:12+0900\n"
+"PO-Revision-Date: 2019-08-23 02:44+0900\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.3\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: en_US\n"
+
+#: steamswitcher_ml.py:59
+msgid "업데이트 사용 가능"
+msgstr "Update available"
+
+#: steamswitcher_ml.py:66
+msgid "GitHub 방문"
+msgstr "Visit GitHub"
+
+#: steamswitcher_ml.py:74
+msgid "최신 버전 사용 중"
+msgstr "Using the latest version"
+
+#: steamswitcher_ml.py:79
+msgid "업데이트 확인 실패"
+msgstr "Failed to check for updates"
+
+#: steamswitcher_ml.py:104 steamswitcher_ml.py:117
+msgid "레지스트리 불러오기 실패"
+msgstr "Failed to load registry"
+
+#: steamswitcher_ml.py:105
+msgid "레지스트리에서 계정 정보를 불러오는데 실패했습니다."
+msgstr "Failed to fetch username value from registry."
+
+#: steamswitcher_ml.py:106 steamswitcher_ml.py:119
+msgid "스팀이 설치되어 있는지 확인하십시오."
+msgstr "Please make sure that Steam is installed."
+
+#: steamswitcher_ml.py:118
+msgid "레지스트리에서 설정 값을 불러오는데 실패했습니다."
+msgstr "Failed to fetch config value from registry."
+
+#: steamswitcher_ml.py:126
+msgid "자동로그인 활성화"
+msgstr "Auto-login is Enabled"
+
+#: steamswitcher_ml.py:128
+msgid "자동로그인 비활성화"
+msgstr "Auto-login is Disabled"
+
+#: steamswitcher_ml.py:168
+msgid "계정 한도 초과"
+msgstr "Account limit exceeded"
+
+#: steamswitcher_ml.py:168
+msgid "계정 갯수가 한도를 초과했습니다."
+msgstr "Maximum number of accounts exceeded."
+
+#: steamswitcher_ml.py:169
+#, python-format
+msgid "현재 계정 수는 %s개 이고, 제한은 12개 입니다."
+msgstr "You have %s accounts and limit is 12."
+
+#: steamswitcher_ml.py:183
+msgid "레지스트리 오류"
+msgstr "Registry Error"
+
+#: steamswitcher_ml.py:183
+msgid "레지스트리 값을 바꾸는데 실패했습니다."
+msgstr "Failed to change the registry value."
+
+#: steamswitcher_ml.py:201 steamswitcher_ml.py:433
+msgid "정보"
+msgstr "About"
+
+#: steamswitcher_ml.py:204
+msgid "Made by 꺔먕 (Myeuaa)"
+msgstr "Made by Myeuaa (sw2719)"
+
+#: steamswitcher_ml.py:211
+msgid "경고: 본 프로그램의 사용으로 인한 데이터 손실 및 기타 손해 등"
+msgstr "Warning: The developer of this progrma is not responsible for"
+
+#: steamswitcher_ml.py:212
+msgid "어떠한 사고나 문제에 대해서 제작자는 책임을 지지 않습니다."
+msgstr "data loss or any other damage from the use of this program."
+
+#: steamswitcher_ml.py:218
+msgid "닫기"
+msgstr "Close"
+
+#: steamswitcher_ml.py:232 steamswitcher_ml.py:291
+msgid "계정 한도 도달"
+msgstr "Account limit reached"
+
+#: steamswitcher_ml.py:233
+msgid "계정 갯수가 한도에 도달했습니다. (12개)"
+msgstr "Maximum number of accounts reached (12)."
+
+#: steamswitcher_ml.py:237 steamswitcher_ml.py:430
+msgid "계정 추가"
+msgstr "Add accounts"
+
+#: steamswitcher_ml.py:248
+msgid "추가할 계정을 입력하세요."
+msgstr "Enter account(s) to add."
+
+#: steamswitcher_ml.py:250
+msgid "다수의 계정을 입력할 경우에는"
+msgstr "In case of adding multiple accounts,"
+
+#: steamswitcher_ml.py:251
+msgid "'/'(슬래시)로 구분합니다."
+msgstr "seperate each account with '/' (slash)."
+
+#: steamswitcher_ml.py:287
+msgid "계정 중복됨"
+msgstr "Duplicate Error"
+
+#: steamswitcher_ml.py:288
+#, python-format
+msgid "계정 %s은 이미 추가되어 있습니다."
+msgstr "Account %s already exists."
+
+#: steamswitcher_ml.py:292
+#, python-format
+msgid "계정 한도에 도달하여 계정 %s를 추가할 수 없습니다."
+msgstr "Couldn't add %s because you've reached account limit."
+
+#: steamswitcher_ml.py:306
+msgid "추가"
+msgstr "Add"
+
+#: steamswitcher_ml.py:309 steamswitcher_ml.py:370
+msgid "취소"
+msgstr "Cancel"
+
+#: steamswitcher_ml.py:321
+msgid "계정 없음"
+msgstr "No Accounts"
+
+#: steamswitcher_ml.py:321
+msgid "추가된 계정이 없습니다."
+msgstr "There is no account to remove."
+
+#: steamswitcher_ml.py:324 steamswitcher_ml.py:431
+msgid "계정 삭제"
+msgstr "Remove accounts"
+
+#: steamswitcher_ml.py:331
+msgid "삭제할 계정을 선택하세요."
+msgstr "Select accounts to remove."
+
+#: steamswitcher_ml.py:374
+msgid "삭제"
+msgstr "Remove"
+
+#: steamswitcher_ml.py:393
+msgid "경고"
+msgstr "Warning"
+
+#: steamswitcher_ml.py:393
+msgid "알 수 없는 오류로 인해"
+msgstr "Could not start Steam"
+
+#: steamswitcher_ml.py:394
+msgid "스팀을 시작할 수 없습니다."
+msgstr "for unknown reason."
+
+#: steamswitcher_ml.py:419
+msgid "스팀 계정 전환기"
+msgstr "Account Switcher"
+
+#: steamswitcher_ml.py:434
+msgid "메뉴"
+msgstr "Menu"
+
+#: steamswitcher_ml.py:436 steamswitcher_ml.py:472
+msgid "추가된 계정 없음"
+msgstr "No accounts added"
+
+#: steamswitcher_ml.py:445
+msgid "자동로그인 토글"
+msgstr "Toggle auto-login"
+
+#: steamswitcher_ml.py:450
+msgid "종료"
+msgstr "Exit"
+
+#: steamswitcher_ml.py:455
+msgid "스팀 재시작후 종료"
+msgstr "Restart Steam & exit"
+
+#: steamswitcher_ml.py:473
+msgid "현재 자동로그인 계정:"
+msgstr "Current Auto-login user:"
