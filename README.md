@@ -11,9 +11,6 @@ Works without your passwords!
 
 # Changelogs (for last 3 versions)
 * Reduced UI flickering (v1.3)
-* Gracefully shutting down Steam (v1.3)
-
-  (Previous implementation used only 'TASKKILL /F /IM Steam.exe')
 * Multi language support (v1.3)
 
   Supported languages: Korean(한국어), English
