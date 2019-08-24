@@ -142,10 +142,10 @@ try:
         raise FileNotFoundError
 except FileNotFoundError:  # 계정 파일이 없거나 계정 정보가 없을 경우
     with open('accounts.txt', 'w') as txt:
-        if fetch_reg('autologin'):
+        if fetch_reg('username'):
             print('No account found! Adding current user...')
-            txt.write(fetch_reg('autologin') + '\n')
-    accounts = [fetch_reg('autologin')]
+            txt.write(fetch_reg('username') + '\n')
+    accounts = [fetch_reg('username')]
 
 print('Detected ' + str(len(accounts)) + ' accounts:')  # 콘솔에 계정 출력
 
