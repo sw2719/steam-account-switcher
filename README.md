@@ -1,6 +1,8 @@
 # Steam Account Switcher
 Steam Account Switching made easy
 
+Works without your passwords!
+
 [Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
 
 [See this program in action](https://youtu.be/WFtv10RZ_UA)
