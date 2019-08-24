@@ -40,7 +40,7 @@ Works without your passwords!
 5. Click one of the buttons to change to desired account.
 
 * If you previously set auto-login for that account, It just works. (It might show login prompt if you didn't login for a while)
-* If you did not, Login prompt will appear when Steam launches. Check the 'Remember my Password' checkbox, enter your password,             then login as you normally would. Next time you switch to that account, It will login automatically.
+* If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password,             then login as you normally would. Next time you switch to that account, It will login automatically.
 
 # Guide
 ![window_instruction](https://user-images.githubusercontent.com/22590718/63221815-78c8cb80-c1d9-11e9-829d-c4f1ef855285.png)
