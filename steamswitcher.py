@@ -374,27 +374,12 @@ def removewindow():
 
 
 def exit_after_restart():  # Steam을 재시작
-    r_path = fetch_reg('installpath')
-    r_path_items = r_path.split('/')
-    path_items = []
-    for item in r_path_items:
-        if ' ' in item:
-            path_items.append(f'"{item}"')
-        else:
-            path_items.append(item)
-    steam_exe = "\\".join(path_items)
-    print(steam_exe)
     try:
-        subprocess.run(f"start {steam_exe} -shutdown", shell=True,
+        subprocess.run("TASKKILL /F /IM Steam.exe",
                        creationflags=0x08000000, check=True)
-        sleep(2.5)
-    except FileNotFoundError:
-        try:
-            subprocess.run("TASKKILL /F /IM Steam.exe",
-                           creationflags=0x08000000, check=True)
-            sleep(1)
-        except subprocess.CalledProcessError:
-            pass
+        sleep(1)
+    except subprocess.CalledProcessError:
+        pass
     try:
         subprocess.run("start steam://open/main",  # Steam 실행
                        shell=True, check=True)
