@@ -25,8 +25,8 @@ Works without your passwords!
 
 # About the code
 * Keep in mind that I'm _quite_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
-* Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advices are appreciated.
-* There are English and Korean version codes. English one doesn't have comments (I plan to do that).
+* Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advice is appreciated.
+* Strings in source code is in Korean. It uses gettext to translate Korean strings into English. .po files are avaliable in /locale. I will add English comments soon. I'm considering that I write source code in English.
 
 # How to use
 1. Unpack the archive
