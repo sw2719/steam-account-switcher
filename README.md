@@ -19,8 +19,8 @@ Works without your passwords!
 * Intial Release (v1.1)
 
 # Upcoming Features / Changes
-# Gracefully shutting down Steam (Maybe v1.4)
-# Import account names from Steam (v1.4)
+* Gracefully shutting down Steam (Maybe v1.4)
+* Import account names from Steam (v1.4)
 * Improving code & readability (Continuous)
 
 # About the code
