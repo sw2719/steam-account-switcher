@@ -67,4 +67,5 @@ winreg.CloseKey(reg_key)
 ```
 It changes key 'AutoLoginUser' located at Steam registry path, tricking Steam to autologin with that username.
 
-If you choose to restart Steam, the program tries to gracefully shutdown Steam. If it fails to do that, it forcefully shutdowns Steam.
+~~If you choose to restart Steam, the program tries to gracefully shutdown Steam. If it fails to do that, it forcefully shutdowns Steam.~~
+Removed due to glitches
