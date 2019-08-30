@@ -24,7 +24,7 @@ Works without your passwords!
 * Improving code & readability (Continuous)
 
 # About the code
-* Requests, gettext module are required.
+* Requests and gettext module are required.
 * Keep in mind that I'm _quite_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
 * Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advice is appreciated.
 * Strings in source code are in Korean. I used gettext to translate Korean strings into English. po files are avaliable in /locale. I will add English comments soon. I'm considering that I write source code in English.
