@@ -21,13 +21,15 @@ Works without your passwords!
 
 * Intial Release (v1.1)
 
-# Upcoming Features / Changes
+# Upcoming Features / Improvements
 * Improving code & readability (Continuous)
+* Adding English comments.
+* Adding docstrings.
+* Changing source code strings to English.
 
 # About the code
 * Keep in mind that I'm _quite_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
 * Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advices are appreciated.
-* There are English and Korean version codes. English one doesn't have comments (I plan to do that).
 
 # How to use
 1. Unpack the archive
@@ -39,8 +41,10 @@ Works without your passwords!
    (Account limit is 12)
 5. Click one of the buttons to change to desired account.
 
-* If you previously set auto-login for that account, It just works. (It might show login prompt if you didn't login for a while)
-* If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password,             then login as you normally would. Next time you switch to that account, It will login automatically.
+* If you previously set auto-login for that account, It just works.
+* It might show login prompt if you didn't login for a while. Steam doesn't let you auto-login after certain period of time.
+
+* If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code.
 
 # Guide
 ![window_instruction](https://user-images.githubusercontent.com/22590718/63221815-78c8cb80-c1d9-11e9-829d-c4f1ef855285.png)
