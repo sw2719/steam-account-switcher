@@ -41,9 +41,10 @@ Works without your passwords!
 * Warning: Do NOT add accounts by manually editing accounts.txt
 * Account limit is 12
 5. Click one of the buttons to change to desired account.
+* If you previously set auto-login for that account, It just works.
+* It might show login prompt if you didn't login for a while. Steam doesn't let you auto-login after certain period of time.
 
-* If you previously set auto-login for that account, It just works. (It might show login prompt if you didn't login for a while)
-* If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password,             then login as you normally would. Next time you switch to that account, It will login automatically.
+* If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code.
 
 # Guide
 ![window_instruction](https://user-images.githubusercontent.com/22590718/63221815-78c8cb80-c1d9-11e9-829d-c4f1ef855285.png)
@@ -66,6 +67,3 @@ winreg.SetValueEx(reg_key, 'AutoLoginUser', 0, winreg.REG_SZ, your_username)
 winreg.CloseKey(reg_key)
 ```
 It changes key 'AutoLoginUser' located at Steam registry path, tricking Steam to autologin with that username.
-
-~~If you choose to restart Steam, the program tries to gracefully shutdown Steam. If it fails to do that, it forcefully shutdowns Steam.~~
-Removed due to glitches
