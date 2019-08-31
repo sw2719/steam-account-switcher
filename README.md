@@ -11,9 +11,6 @@ Works without your passwords!
 
 # Changelogs (for last 3 versions)
 * Reduced UI flickering (v1.3)
-* Gracefully shutting down Steam (v1.3)
-
-  (Previous implementation used only 'TASKKILL /F /IM Steam.exe')
 * Multi language support (v1.3)
 
   Supported languages: Korean(한국어), English
@@ -22,14 +19,20 @@ Works without your passwords!
 * Intial Release (v1.1)
 
 # Upcoming Features / Improvements
+* Gracefully shutting down Steam (Maybe v1.4)
+* Import account names from Steam (v1.4)
 * Improving code & readability (Continuous)
 * Adding English comments.
 * Adding docstrings.
 * Changing source code strings to English.
 
 # About the code
+* Written in Python 3.7
+* Requests and gettext module are required.
 * Keep in mind that I'm _quite_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
-* Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advices are appreciated.
+* Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advice is appreciated.
+* Strings in source code are in Korean. I used gettext to translate Korean strings into English. po files are avaliable in /locale. I will add English comments soon. I'm considering that I write source code in English.
+
 
 # How to use
 1. Unpack the archive
@@ -37,10 +40,11 @@ Works without your passwords!
 3. Run the exe
 (Because this program alters your registry value, Windows SmartScreen or your Anti-virus might detect it as harmful software.)
 4. Add accounts via Menu > Add accounts
-   (Warning: Do NOT add accounts by manually editing accounts.txt)
-   (Account limit is 12)
+* Your account names are saved in accounts.txt located in the same folder where exe is.
+* They are saved in Plain text. (Steam also saves your account names in plain text as well.
+* Warning: Do NOT add accounts by manually editing accounts.txt
+* Account limit is 12
 5. Click one of the buttons to change to desired account.
-
 * If you previously set auto-login for that account, It just works.
 * It might show login prompt if you didn't login for a while. Steam doesn't let you auto-login after certain period of time.
 
@@ -67,5 +71,3 @@ winreg.SetValueEx(reg_key, 'AutoLoginUser', 0, winreg.REG_SZ, your_username)
 winreg.CloseKey(reg_key)
 ```
 It changes key 'AutoLoginUser' located at Steam registry path, tricking Steam to autologin with that username.
-
-If you choose to restart Steam, the program tries to gracefully shutdown Steam. If it fails to do that, it forcefully shutdowns Steam.
