@@ -19,7 +19,6 @@ Works without your passwords!
 
 * Automatic update checking (v1.2)
 
-* Intial Release (v1.1)
 
 # Upcoming Features / Improvements
 * Improving code & readability (Continuous)
