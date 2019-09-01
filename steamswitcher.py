@@ -9,45 +9,52 @@ import requests as req
 import gettext
 import locale
 import psutil
+import re
 from time import sleep
 
 
 locale_buf = locale.getdefaultlocale()
 locale_value = locale_buf[0]
-if locale_value != 'ko_KR':
-    locale_value = 'en_US'
 
-t = gettext.translation('sw', localedir='locale',
-                        languages=[locale_value])
+t = gettext.translation('steamswitcher', localedir='locale',
+                        languages=[locale_value],
+                        fallback=True)
 _ = t.gettext
 
 print('Running on ', os.getcwd())
 
-VERSION = '1.3'
+VERSION = '1.4'
 BRANCH = 'master'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
        % BRANCH)
 
 
 def checkupdate():
+    print('Update check start')
     update_avail = None
     try:
         response = req.get(URL)
         sv_version = response.text.splitlines()[-1]
-        print(sv_version)
+        print('Server version is', sv_version)
+        print('Client version is', str(VERSION))
 
         if float(sv_version) > float(VERSION):
             update_avail = 1
-        else:
+        elif float(sv_version) == float(VERSION):
             update_avail = 0
+        elif float(sv_version) < float(VERSION):
+            update_avail = 2
+
     except req.exceptions.RequestException:
-        update_avail = 2
+        update_avail = 3
     return update_avail
 
 
 def start_checkupdate():
     update_frame = tk.Frame(main)
-    update_frame.pack(side='bottom')
+    update_frame.pack(side='bottom', fill='x')
+    sep = ttk.Separator(update_frame, orient="horizontal")
+    sep.pack(side='top', fill='x')
     update_code = checkupdate()
 
     if update_code == 1:
@@ -68,12 +75,20 @@ def start_checkupdate():
     elif update_code == 0:
         print('On latest version')
 
-        update_label = tk.Label(update_frame, text=_('Using the latest version'))
+        update_label = tk.Label(update_frame,
+                                text=_('Using the latest version'))
         update_label.pack(side='bottom')
     elif update_code == 2:
+        print('Dev build')
+
+        update_label = tk.Label(update_frame,
+                                text=_('Development version'))
+        update_label.pack(side='bottom')
+    elif update_code == 3:
         print('Exception while getting server version')
 
-        update_label = tk.Label(update_frame, text=_('Failed to check for updates'))
+        update_label = tk.Label(update_frame,
+                                text=_('Failed to check for updates'))
         update_label.pack(side='bottom')
 
 
@@ -91,7 +106,7 @@ def check_running(process_name):
 HCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 
 
-def error_msg(title, content):  # 오류 메시지 표시후 종료
+def error_msg(title, content):
     root = tk.Tk()
     root.withdraw()
     messagebox.showerror(title, content)
@@ -99,7 +114,7 @@ def error_msg(title, content):  # 오류 메시지 표시후 종료
     sys.exit(1)
 
 
-def fetch_reg(key):  # 레지스트리에서 값 확인
+def fetch_reg(key):
     if key == 'username':
         key_name = 'AutoLoginUser'
     elif key == 'autologin':
@@ -113,13 +128,44 @@ def fetch_reg(key):  # 레지스트리에서 값 확인
         value = value_buffer[0]
         winreg.CloseKey(reg_key)
     except OSError:
-        error_msg(_('Failed to load registry'),
-                  _('Failed to fetch registry value.') + '\n' +
+        error_msg(_('Registry Error'),
+                  _('Failed to read registry value.') + '\n' +
                   _('Make sure that Steam is installed.'))
     return value
 
 
-def autologinstr():  # autologin 함수 값을 불러와 문자열 출력
+def loginusers():
+    steam_path = fetch_reg('installpath').replace('steam.exe', '')
+    vdf_file = os.path.join(steam_path.replace('/', '\\'),
+                            'config', 'loginusers.vdf')
+
+    print('Fetching loginusers.vdf...')
+    try:
+        with open(vdf_file, 'r') as vdf_file:
+            vdf = vdf_file.read().splitlines()
+    except FileNotFoundError:
+        return False
+
+    AccountName = []
+    PersonaName = []
+
+    rep = {"\t": "", '"': ""}
+    rep = dict((re.escape(k), v) for k, v in rep.items())
+    pattern = re.compile("|".join(rep.keys()))
+
+    for i, v in enumerate(vdf):
+        if v == "\t{":
+            print('Found SteamID64 Entry:')
+            print(vdf[i-1].strip() + '\n')
+            account = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+1])  # NOQA
+            persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])  # NOQA
+            AccountName.append(account.replace("AccountName", ""))
+            PersonaName.append(persona.replace("PersonaName", ""))
+
+    return AccountName, PersonaName
+
+
+def autologinstr():
     value = fetch_reg('autologin')
     if value == 1:
         retstr = _('Auto-login Enabled')
@@ -128,7 +174,7 @@ def autologinstr():  # autologin 함수 값을 불러와 문자열 출력
     return retstr
 
 
-print('Fetching registry values...')  # 콘솔에 레지스트리 값 출력
+print('Fetching registry values...')
 if fetch_reg('autologin') != 2:
     print('Autologin value is ' + str(fetch_reg('autologin')))
 else:
@@ -139,19 +185,6 @@ else:
     print('Could not fetch autologin user information!')
 
 
-def setupwindow():
-    removewindow = tk.Toplevel(main)
-    removewindow.title(_("Welcome"))
-    removewindow.geometry("250x320+650+300")
-    removewindow.resizable(False, False)
-    removewindow.grab_set()
-    removewindow.focus()
-    print('Opened remove window.')
-
-    def close():
-        removewindow.destroy()
-
-
 try:
     with open('accounts.txt', 'r') as txt:
         namebuffer = txt.read().splitlines()
@@ -160,14 +193,14 @@ try:
 
     if not accounts:
         raise FileNotFoundError
-except FileNotFoundError:  # 계정 파일이 없거나 계정 정보가 없을 경우
+except FileNotFoundError:
     with open('accounts.txt', 'w') as txt:
         if fetch_reg('username'):
             print('No account found! Adding current user...')
             txt.write(fetch_reg('username') + '\n')
     accounts = [fetch_reg('username')]
 
-print('Detected ' + str(len(accounts)) + ' accounts:')  # 콘솔에 계정 출력
+print('Detected ' + str(len(accounts)) + ' accounts:')
 
 if accounts:
     print('------------------')
@@ -175,12 +208,8 @@ if accounts:
         print(username)
     print('------------------')
 
-if len(accounts) > 12:  # 계정 갯수가 12개를 초과할 경우
-    error_msg(_('Account limit exceeded'), _('You exceeded the maximum number of accounts.') + '\n' +
-              _('You have %s accounts and limit is 12.') % len(accounts))
 
-
-def fetchuser():  # 계정 파일 다시 불러오기
+def fetchuser():
     global accounts
     txt = open('accounts.txt', 'r')
     namebuffer = txt.read().splitlines()
@@ -188,19 +217,19 @@ def fetchuser():  # 계정 파일 다시 불러오기
     accounts = [item for item in namebuffer if not item.strip() == '']
 
 
-def setkey(name, value, value_type):  # 레지스트리 값 변경 (이름, 값, 값 유형)
+def setkey(name, value, value_type):
     try:
-        reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam", 0,  # 키 열가
+        reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam", 0,
                                  winreg.KEY_ALL_ACCESS)
-        # 값 지정 (키, 값 이름, 0, 값 종류, 값)
+
         winreg.SetValueEx(reg_key, name, 0, value_type, value)
-        winreg.CloseKey(reg_key)  # 키 닫기
-        print("Changed %s's value to %s" % (name, str(value)))  # 콘솔 출력
+        winreg.CloseKey(reg_key)
+        print("Changed %s's value to %s" % (name, str(value)))
     except OSError:
         error_msg(_('Registry Error'), _('Failed to change registry value.'))
 
 
-def toggleAutologin():  # 자동로그인 레지스트리 값 0 1 토글
+def toggleAutologin():
     if fetch_reg('autologin') == 1:
         value = 0
     elif fetch_reg('autologin') == 0:
@@ -212,19 +241,23 @@ def toggleAutologin():  # 자동로그인 레지스트리 값 0 1 토글
 def about():  # 정보 창
     aboutwindow = tk.Toplevel(main)
     aboutwindow.title(_('About'))
-    aboutwindow.geometry("400x210+650+300")
+    aboutwindow.geometry("400x280+650+300")
     aboutwindow.resizable(False, False)
     about_row = tk.Label(aboutwindow, text=_('Made by Myeuaa (sw2719)'))
     about_steam = tk.Label(aboutwindow,
                            text='Steam: https://steamcommunity.com/'
                            + 'id/muangmuang')
     about_email = tk.Label(aboutwindow, text='E-mail: sw2719@naver.com')
-    about_discord = tk.Label(aboutwindow, text='Discord: 꺔먕#6678')
+    if locale_value == 'ko_KR':
+        about_discord = tk.Label(aboutwindow, text='Discord: 꺔먕#6678')
     about_disclaimer = tk.Label(aboutwindow,
-                                text=_('Warning: The developer of this program is not responsible for')
+                                text=_('Warning: The developer of this program is not responsible for')  # NOQA
                                 + '\n' + _('data loss or any other damage from the use of this program.'))  # NOQA
+    version = tk.Label(aboutwindow, text='Version ' + str(VERSION))
+    copyright_label = tk.Label(aboutwindow, text='Copyright (c) Myeuaa | All Rights Reserved\n'  # NOQA
+                               + 'Licensed under the MIT License.')
 
-    def close():  # 창 닫기
+    def close():
         aboutwindow.destroy()
 
     button_exit = ttk.Button(aboutwindow,
@@ -237,15 +270,13 @@ def about():  # 정보 창
     if locale_value == 'ko_KR':
         about_discord.pack()
     about_disclaimer.pack(pady=8)
+    copyright_label.pack(pady=5)
+    version.pack()
     button_exit.pack(side='bottom', pady=5)
 
 
 def addwindow():  # 계정 추가 창
     global accounts
-    if len(accounts) == 12:
-        messagebox.showwarning(_('Account limit reached'),
-                               _('Maximum number of accounts reached.'))
-        return
 
     addwindow = tk.Toplevel(main)
     addwindow.title(_("Add"))
@@ -261,8 +292,8 @@ def addwindow():  # 계정 추가 창
     addlabel_row1 = tk.Label(topframe_add,
                              text=_('Enter accounts(s) to add.'))
     addlabel_row2 = tk.Label(topframe_add,
-                             text=_("In case of adding multiple accounts,") + '\n' +
-                             _("seperate each account with '/' (slash)."))
+                             text=_("In case of adding multiple accounts,") +
+                             '\n' + _("seperate each account with '/' (slash)."))  # NOQA
 
     account_entry = ttk.Entry(bottomframe_add, width=28)
     account_entry.pack(side='left', padx=5, pady=3)
@@ -289,22 +320,17 @@ def addwindow():  # 계정 추가 창
             name_buffer = userinput.split("/")
 
             for name_to_write in name_buffer:
-                if len(accounts) < 12:  # 계정 갯수가 한도내인지 확인
-                    if name_to_write.strip():  # 올바른 입력값인지 확인
-                        if name_to_write not in accounts:  # 중복된 계정이 아닌지 확인
-                            print('Writing ' + name_to_write)
-                            txt.write(prefix + name_to_write.strip() + '\n')
-                            accounts.append(name_to_write.strip())
-                        else:
-                            print('Alert: Account %s already exists!'
-                                  % name_to_write)
-                            messagebox.showinfo(_('Duplicate Error'),
-                                                _('Account %s already exists.')
-                                                % name_to_write)
-                elif len(accounts) == 12:
-                    messagebox.showwarning(_('계정 한도 도달'),
-                                           _("Couldn't add %s because you've reached account limit.")
-                                           % name_to_write)
+                if name_to_write.strip():
+                    if name_to_write not in accounts:
+                        print('Writing ' + name_to_write)
+                        txt.write(prefix + name_to_write.strip() + '\n')
+                        accounts.append(name_to_write.strip())
+                    else:
+                        print('Alert: Account %s already exists!'
+                              % name_to_write)
+                        messagebox.showinfo(_('Duplicate Alert'),
+                                            _('Account %s already exists.')
+                                            % name_to_write)
 
             txt.close()
             refresh()
@@ -329,10 +355,86 @@ def addwindow():  # 계정 추가 창
     button_addcancel.pack(side='bottom', anchor='e', padx=5, pady=3)
 
 
+def importwindow():
+    global accounts
+    importwindow = tk.Toplevel(main)
+    importwindow.title(_("Import"))
+
+    AccountName, PersonaName = loginusers()
+
+    importwindow.geometry("280x300+650+300")
+    importwindow.resizable(False, False)
+    bottomframe_imp = tk.Frame(importwindow)
+    bottomframe_imp.pack(side='bottom')
+    importwindow.grab_set()
+    importwindow.focus()
+    importlabel = tk.Label(importwindow, text=_('Select accounts to import.')
+                           + '\n' + _("Added accounts don't show up."))
+    importlabel.pack(side='top',
+                     padx=5,
+                     pady=5)
+    print('Opened import window.')
+
+    def close():
+        importwindow.destroy()
+
+    def onFrameConfigure(canvas):
+        '''Reset the scroll region to encompass the inner frame'''
+        canvas.configure(scrollregion=canvas.bbox("all"))
+
+    canvas = tk.Canvas(importwindow, borderwidth=0, highlightthickness=0)
+    check_frame = tk.Frame(canvas)
+    scroll_bar = tk.Scrollbar(importwindow,
+                              orient="vertical",
+                              command=canvas.yview)
+
+    canvas.configure(yscrollcommand=scroll_bar.set)
+
+    scroll_bar.pack(side="right", fill="y")
+    canvas.pack(side="left", fill="both", expand=True)
+    canvas.create_window((4, 4), window=check_frame, anchor="nw")
+
+    check_frame.bind("<Configure>", lambda event,
+                     canvas=canvas: onFrameConfigure(canvas))
+
+    check_dict = {}
+
+    for i, v in enumerate(AccountName):
+        if v not in accounts:
+            tk_var = tk.IntVar()
+            checkbutton = ttk.Checkbutton(check_frame,
+                                          text=v + f' ({PersonaName[i]})',
+                                          variable=tk_var)
+
+            checkbutton.pack(side='top', padx=2, anchor='w')
+            check_dict[v] = tk_var
+
+    def import_user():
+        with open('accounts.txt', 'a') as txt:
+            for key, value in check_dict.items():
+                if value.get() == 1:
+                    txt.write(key + '\n')
+        refresh()
+        close()
+
+    import_cancel = ttk.Button(bottomframe_imp,
+                               text=_('Cancel'),
+                               command=close,
+                               width=9)
+    import_ok = ttk.Button(bottomframe_imp,
+                           text=_('Import'),
+                           command=import_user,
+                           width=9)
+
+    import_cancel.pack(side='left', padx=5, pady=3)
+    import_ok.pack(side='left', padx=5, pady=3)
+
+
 def removewindow():
     global accounts
     if not accounts:
-        messagebox.showinfo(_('No Accounts'), _("There's no account to remove."))
+        messagebox.showinfo(_('No Accounts'),
+                            _("There's no account to remove."))
         return
     removewindow = tk.Toplevel(main)
     removewindow.title(_("Remove"))
@@ -351,23 +453,23 @@ def removewindow():
     def close():
         removewindow.destroy()
 
-    check_dict = {}  # 딕셔너리 선언
+    check_dict = {}
 
     for v in accounts:
-        tk_var = tk.IntVar()  # Tkinter 체크버튼 값 변수
-        checkbutton = ttk.Checkbutton(removewindow,  # 체크버튼 만들기
+        tk_var = tk.IntVar()
+        checkbutton = ttk.Checkbutton(removewindow,
                                       text=v,
                                       variable=tk_var)
 
         checkbutton.pack(side='top', padx=2, anchor='w')
-        check_dict[v] = tk_var  # 딕셔너리에 체크버튼 변수 저장
+        check_dict[v] = tk_var
 
     def removeuser():
         print('Remove function start')
         to_remove = []
         for v in accounts:
-            if check_dict.get(v).get() == 1:  # 계정이 딕셔너리에 있는지 확인
-                to_remove.append(v)  # 삭제할 계정 리스트에 추가
+            if check_dict.get(v).get() == 1:
+                to_remove.append(v)
                 print('%s is to be removed.' % v)
             else:
                 continue
@@ -375,7 +477,7 @@ def removewindow():
         print('Removing selected accounts...')
         with open('accounts.txt', 'w') as txt:
             for username in accounts:
-                if username not in to_remove:  # 삭제할 계정이 아닌지 확인
+                if username not in to_remove:
                     txt.write(username + '\n')
         refresh()
         close()
@@ -393,7 +495,7 @@ def removewindow():
     remove_ok.pack(side='left', padx=5, pady=3)
 
 
-def exit_after_restart(graceful):  # Steam을 재시작
+def exit_after_restart(graceful):
     try:
         if graceful is False:
             raise FileNotFoundError
@@ -426,25 +528,25 @@ def exit_after_restart(graceful):  # Steam을 재시작
             pass
     try:
         print('Launching Steam...')
-        subprocess.run("start steam://open/main",  # Steam 실행
+        subprocess.run("start steam://open/main",
                        shell=True, check=True)
     except subprocess.CalledProcessError:
-        messagebox.showerror(_('Error'), _('Could not start Steam automatically') + '\n' +
-                             _('for unknown reason.'))
+        messagebox.showerror(_('Error'),
+                             _('Could not start Steam automatically')
+                             + '\n' + _('for unknown reason.'))
     main.quit()
 
 
-def window_height(accounts):  # 버튼의 갯수에 따라 창의 높이를 반환
+def window_height(accounts):
     if accounts:
         to_multiply = len(accounts) - 1
     else:
         to_multiply = 0
-    height_int = 160 + 32 * to_multiply
+    height_int = 160 + 31 * to_multiply
     height = str(height_int)
     return height
 
 
-print('--PHASE 5: Drawing UI--')
 main = tk.Tk()
 main.title(_("Account Switcher"))
 
@@ -459,7 +561,9 @@ def_style = ttk.Style(main)
 def_style.configure(('TButton'))
 
 menubar = tk.Menu(main)
-account_menu = tk.Menu(menubar, tearoff=0)  # 상단 메뉴
+account_menu = tk.Menu(menubar, tearoff=0)
+account_menu.add_command(label=_('Import accounts from Steam'),
+                         command=importwindow)
 account_menu.add_command(label=_("Add accounts"), command=addwindow)
 account_menu.add_command(label=_("Remove accounts"), command=removewindow)
 account_menu.add_separator()
@@ -468,6 +572,9 @@ menubar.add_cascade(label=_("Menu"), menu=account_menu)
 
 upper_frame = tk.Frame(main)
 upper_frame.pack(side='top', fill='x')
+
+button_frame = tk.Frame(main)
+button_frame.pack(side='top', fill='x')
 
 bottomframe = tk.Frame(main)
 bottomframe.pack(side='bottom')
@@ -496,15 +603,20 @@ nouser_label = tk.Label(main, text=_('No accounts added'))
 
 def draw_button(accounts):
     global upper_frame
+    global button_frame
     global nouser_label
 
     button_dict = {}
 
     upper_frame.destroy()
     nouser_label.destroy()
+    button_frame.destroy()
 
     upper_frame = tk.Frame(main)
     upper_frame.pack(side='top', fill='x')
+
+    button_frame = tk.Frame(main)
+    button_frame.pack(side='top', fill='x')
 
     nouser_label = tk.Label(main, text=_('No accounts added'))
 
@@ -535,13 +647,13 @@ def draw_button(accounts):
     elif accounts:
         for username in accounts:
             if username == fetch_reg('username'):
-                button_dict[username] = ttk.Button(upper_frame,
+                button_dict[username] = ttk.Button(button_frame,
                                                    style='sel.TButton',
                                                    text=username,
                                                    state='disabled',
                                                    command=lambda name=username: button_func(name))  # NOQA
             else:
-                button_dict[username] = ttk.Button(upper_frame,
+                button_dict[username] = ttk.Button(button_frame,
                                                    style='TButton',
                                                    text=username,
                                                    state='normal',
@@ -551,9 +663,11 @@ def draw_button(accounts):
 
 def refresh():
     global upper_frame
+    global button_frame
     global accounts
     fetchuser()
     upper_frame.destroy()
+    button_frame.destroy()
     main.geometry("300x%s" %
                   window_height(accounts))
     draw_button(accounts)
