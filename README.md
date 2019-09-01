@@ -18,7 +18,7 @@ Works without your passwords!
 
 * Intial Release (v1.1)
 
-# Upcoming Features / Changes
+# Upcoming Features / Improvements
 * Gracefully shutting down Steam (Maybe v1.4)
 * Import account names from Steam (v1.4)
 * Improving code & readability (Continuous)
@@ -28,7 +28,6 @@ Works without your passwords!
 * Requests and gettext module are required.
 * Keep in mind that I'm _quite_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
 * Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advice is appreciated.
-* Strings in source code are in Korean. I used gettext to translate Korean strings into English. po files are avaliable in /locale. I will add English comments soon. I'm considering that I write source code in English.
 
 # How to use
 1. Unpack the archive
@@ -60,10 +59,10 @@ When you add account(s), it saves your username(s) to accounts.txt in plain text
 (Steam saves your usernames in plain text as well)
 When you press one of the 'account-changing' buttons, code below runs.
 
-(slightly modified to incrase readability)
+(slightly modified to increase readability)
 ```
 reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam", 0, winreg.KEY_ALL_ACCESS)
 winreg.SetValueEx(reg_key, 'AutoLoginUser', 0, winreg.REG_SZ, your_username)
 winreg.CloseKey(reg_key)
 ```
-It changes key 'AutoLoginUser' located at Steam registry path, tricking Steam to autologin with that username.
+It changes the value of key 'AutoLoginUser' located at Steam registry path, tricking Steam to autologin with that username.
