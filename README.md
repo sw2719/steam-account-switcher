@@ -12,10 +12,11 @@ Works without your passwords!
 # Changelogs (for last 3 versions)
 * Soft shutdown Steam (v1.4)
 * Import accounts from Steam (v1.4)
+
 * Reduced UI flickering (v1.3)
 * Multi language support (v1.3)
-
   Supported languages: Korean(한국어), English
+
 * Automatic update checking (v1.2)
 
 * Intial Release (v1.1)
@@ -35,9 +36,9 @@ Works without your passwords!
 2. Save it to some folder
 3. Run the exe
 (Because this program alters your registry value, Windows SmartScreen or your Anti-virus might detect it as harmful software.)
-4. Add accounts via Menu > Add accounts
+4. Add accounts automatically via Menu > Import accounts from Steam or add them manually via Menu > Add accounts
 * Your account names are saved in accounts.txt located in the same folder where exe is.
-* They are saved in Plain text. (Steam also saves your account names in plain text as well.)
+* They are saved in Plain text. (Steam saves your account names in plain text as well.)
 * Warning: Do NOT add accounts by manually editing accounts.txt
 * There's no account limit, but window size increases as you add more account.
 5. Click one of the buttons to change to desired account.
@@ -45,9 +46,6 @@ Works without your passwords!
 * It might show login prompt if you didn't login for a while. Steam doesn't let you auto-login after certain period of time.
 
 * If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code.
-
-# Guide
-![window_instruction](https://user-images.githubusercontent.com/22590718/63221815-78c8cb80-c1d9-11e9-829d-c4f1ef855285.png)
 
 # Screenshots
 ![window](https://user-images.githubusercontent.com/22590718/63221824-87af7e00-c1d9-11e9-96e2-87508d2128b5.png)
