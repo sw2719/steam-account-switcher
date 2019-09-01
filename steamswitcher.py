@@ -381,9 +381,9 @@ def importwindow():
 
     canvas = tk.Canvas(importwindow, borderwidth=0, highlightthickness=0)
     check_frame = tk.Frame(canvas)
-    scroll_bar = tk.Scrollbar(importwindow,
-                              orient="vertical",
-                              command=canvas.yview)
+    scroll_bar = ttk.Scrollbar(importwindow,
+                               orient="vertical",
+                               command=canvas.yview)
 
     canvas.configure(yscrollcommand=scroll_bar.set)
 
