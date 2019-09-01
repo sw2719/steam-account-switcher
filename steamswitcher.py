@@ -12,16 +12,15 @@ import psutil
 import re
 from time import sleep
 
-
 locale_buf = locale.getdefaultlocale()
-locale_value = locale_buf[0]
+LOCALE = locale_buf[0]
 
 t = gettext.translation('steamswitcher', localedir='locale',
-                        languages=[locale_value],
+                        languages=[LOCALE],
                         fallback=True)
 _ = t.gettext
 
-print('Running on ', os.getcwd())
+print('Running on', os.getcwd())
 
 VERSION = '1.4'
 BRANCH = 'master'
@@ -52,9 +51,7 @@ def checkupdate():
 
 def start_checkupdate():
     update_frame = tk.Frame(main)
-    update_frame.pack(side='bottom', fill='x')
-    sep = ttk.Separator(update_frame, orient="horizontal")
-    sep.pack(side='top', fill='x')
+    update_frame.pack(side='bottom')
     update_code = checkupdate()
 
     if update_code == 1:
@@ -248,7 +245,7 @@ def about():  # 정보 창
                            text='Steam: https://steamcommunity.com/'
                            + 'id/muangmuang')
     about_email = tk.Label(aboutwindow, text='E-mail: sw2719@naver.com')
-    if locale_value == 'ko_KR':
+    if LOCALE == 'ko_KR':
         about_discord = tk.Label(aboutwindow, text='Discord: 꺔먕#6678')
     about_disclaimer = tk.Label(aboutwindow,
                                 text=_('Warning: The developer of this program is not responsible for')  # NOQA
@@ -267,7 +264,7 @@ def about():  # 정보 창
     about_row.pack(pady=15)
     about_steam.pack()
     about_email.pack()
-    if locale_value == 'ko_KR':
+    if LOCALE == 'ko_KR':
         about_discord.pack()
     about_disclaimer.pack(pady=8)
     copyright_label.pack(pady=5)
