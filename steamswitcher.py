@@ -20,7 +20,8 @@ locale_buf = locale.getdefaultlocale()
 LOCALE = locale_buf[0]
 print('System locale is', LOCALE)
 
-t = gettext.translation('steamswitcher', localedir='locale',
+t = gettext.translation('steamswitcher',
+                        localedir='locale',
                         languages=[LOCALE],
                         fallback=True)
 _ = t.gettext
@@ -67,7 +68,9 @@ def start_checkupdate():
     if update_code == 1:
         print('Update Available')
 
-        update_label = tk.Label(update_frame, text=_('New version %s is available.') % sv_version)
+        update_label = tk.Label(update_frame,
+                                text=_('New version %s is available.')
+                                % sv_version)
         update_label.pack(side='left', padx=5)
 
         def open_github():
@@ -140,7 +143,7 @@ def fetch_reg(key):
     return value
 
 
-def loginusers(steam_path = fetch_reg('steampath')):
+def loginusers(steam_path=fetch_reg('steampath')):
     if os.path.isfile('steam_path.txt'):
         with open('steam_path.txt', 'r') as path:
             steam_path = path.read()
@@ -249,7 +252,7 @@ def toggleAutologin():
 def about():  # 정보 창
     aboutwindow = tk.Toplevel(main)
     aboutwindow.title(_('About'))
-    aboutwindow.geometry("400x280+650+300")
+    aboutwindow.geometry("360x270+650+300")
     aboutwindow.resizable(False, False)
     about_row = tk.Label(aboutwindow, text=_('Made by Myeuaa (sw2719)'))
     about_steam = tk.Label(aboutwindow,
@@ -261,9 +264,11 @@ def about():  # 정보 창
     about_disclaimer = tk.Label(aboutwindow,
                                 text=_('Warning: The developer of this program is not responsible for')  # NOQA
                                 + '\n' + _('data loss or any other damage from the use of this program.'))  # NOQA
-    version = tk.Label(aboutwindow, text='Version ' + __VERSION__)
+    about_steam_trademark = tk.Label(aboutwindow, text=_('STEAM is a registered trademark of Valve Corporation.'))  # NOQA
     copyright_label = tk.Label(aboutwindow, text='Copyright (c) Myeuaa | All Rights Reserved\n'  # NOQA
                                + 'Licensed under the MIT License.')
+    version = tk.Label(aboutwindow,
+                       text='Steam Account Changer | Version ' + __VERSION__)
 
     def close():
         aboutwindow.destroy()
@@ -272,12 +277,13 @@ def about():  # 정보 창
                              text=_('Close'),
                              width=8,
                              command=close)
-    about_row.pack(pady=15)
+    about_row.pack(pady=8)
     about_steam.pack()
     about_email.pack()
     if LOCALE == 'ko_KR':
         about_discord.pack()
-    about_disclaimer.pack(pady=8)
+    about_disclaimer.pack(pady=5)
+    about_steam_trademark.pack()
     copyright_label.pack(pady=5)
     version.pack()
     button_exit.pack(side='bottom', pady=5)
@@ -368,10 +374,10 @@ def importwindow():
     if loginusers():
         AccountName, PersonaName = loginusers()
     else:
-        try_manually = messagebox.askyesno(_('Warning'), _('Could not fetch file loginusers.vdf')
-                               + '\n' + _('This may be because Steam directory defined')
-                               + '\n' + _('in registry is invalid.')
-                               + '\n\n' + _('Do you want to select Steam directory manually?'))
+        try_manually = messagebox.askyesno(_('Warning'), _('Could not load loginusers.vdf.')  # NOQA
+                               + '\n' + _('This may be because Steam directory defined')  # NOQA
+                               + '\n' + _('in registry is invalid.')  # NOQA
+                               + '\n\n' + _('Do you want to select Steam directory manually?'))  # NOQA
         if try_manually:
             while True:
                 input_dir = filedialog.askdirectory()
@@ -381,15 +387,15 @@ def importwindow():
                         path.write(input_dir)
                     break
                 else:
-                    try_again = messagebox.askyesno(_('Warning'), _('Steam directory is invalid.')
-                                        + '\n' + _('Try again?'))
+                    try_again = messagebox.askyesno(_('Warning'),
+                                                    _('Steam directory is invalid.')  # NOQA
+                                                    + '\n' + _('Try again?'))
                     if try_again:
                         continue
                     else:
                         return
         else:
             return
-
 
     importwindow = tk.Toplevel(main)
     importwindow.title(_("Import"))
