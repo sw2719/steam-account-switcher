@@ -207,6 +207,7 @@ try:
 except FileNotFoundError:
     txt = open('accounts.txt', 'w')
     txt.close()
+    accounts = []
 
 print('Detected ' + str(len(accounts)) + ' accounts:')
 
