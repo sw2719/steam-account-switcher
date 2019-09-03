@@ -153,7 +153,6 @@ def loginusers(steam_path=fetch_reg('steampath')):
 
     vdf_file = os.path.join(steam_path, 'config', 'loginusers.vdf')
 
-    print('Fetching loginusers.vdf...')
     try:
         with open(vdf_file, 'r') as vdf_file:
             vdf = vdf_file.read().splitlines()
@@ -169,8 +168,6 @@ def loginusers(steam_path=fetch_reg('steampath')):
 
     for i, v in enumerate(vdf):
         if v == "\t{":
-            print('Found SteamID64 Entry:')
-            print(vdf[i-1].strip() + '\n')
             account = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+1])  # NOQA
             persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])  # NOQA
             AccountName.append(account.replace("AccountName", ""))
@@ -309,8 +306,7 @@ def addwindow():  # 계정 추가 창
                              text=_("In case of adding multiple accounts,") +
                              '\n' + _("seperate each account with '/' (slash)."))  # NOQA
 
-    account_entry = ttk.Entry(bottomframe_add, width=28)
-    account_entry.pack(side='left', padx=5, pady=3)
+    account_entry = ttk.Entry(bottomframe_add, width=29)
 
     addwindow.grab_set()
     addwindow.focus()
@@ -364,9 +360,9 @@ def addwindow():  # 계정 추가 창
     addlabel_row1.pack(pady=10)
     addlabel_row2.pack()
 
-    account_entry.pack(side='left', padx=5, pady=3)
-    button_add.pack(side='left', anchor='e', padx=5, pady=3)
-    button_addcancel.pack(side='bottom', anchor='e', padx=5, pady=3)
+    account_entry.pack(side='left', padx=3, pady=3)
+    button_add.pack(side='left', anchor='e', padx=3, pady=3)
+    button_addcancel.pack(side='bottom', anchor='e', padx=3, pady=3)
 
 
 def importwindow():
@@ -478,7 +474,7 @@ def removewindow():
         return
     removewindow = tk.Toplevel(main)
     removewindow.title(_("Remove"))
-    removewindow.geometry("250x320+650+300")
+    removewindow.geometry("230x320+650+300")
     removewindow.resizable(False, False)
     bottomframe_rm = tk.Frame(removewindow)
     bottomframe_rm.pack(side='bottom')
