@@ -350,7 +350,7 @@ def addwindow():  # 계정 추가 창
     def close():
         addwindow.destroy()
 
-    def enterkey(event):  # Enter 키 입력을 감지
+    def enterkey(event):
         adduser(account_entry.get())
 
     addwindow.bind('<Return>', enterkey)
@@ -363,7 +363,7 @@ def addwindow():  # 계정 추가 창
 
     account_entry.pack(side='left', padx=3, pady=3)
     button_add.pack(side='left', anchor='e', padx=3, pady=3)
-    button_addcancel.pack(side='bottom', anchor='e', padx=3, pady=3)
+    button_addcancel.pack(side='bottom', anchor='e', padx=3)
 
 
 def importwindow():
