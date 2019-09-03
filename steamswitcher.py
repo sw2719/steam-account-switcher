@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
+from tkinter import filedialog
 import winreg
 import sys
 import os
@@ -122,8 +123,10 @@ def fetch_reg(key):
         key_name = 'AutoLoginUser'
     elif key == 'autologin':
         key_name = 'RememberPassword'
-    elif key == 'installpath':
+    elif key == 'steamexe':
         key_name = 'SteamExe'
+    elif key == 'steampath':
+        key_name = 'SteamPath'
 
     try:
         reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam")
@@ -137,10 +140,15 @@ def fetch_reg(key):
     return value
 
 
-def loginusers():
-    steam_path = fetch_reg('installpath').replace('steam.exe', '')
-    vdf_file = os.path.join(steam_path.replace('/', '\\'),
-                            'config', 'loginusers.vdf')
+def loginusers(steam_path = fetch_reg('steampath')):
+    if os.path.isfile('steam_path.txt'):
+        with open('steam_path.txt', 'r') as path:
+            steam_path = path.read()
+
+    if '/' in steam_path:
+        steam_path = steam_path.replace('/', '\\')
+
+    vdf_file = os.path.join(steam_path, 'config', 'loginusers.vdf')
 
     print('Fetching loginusers.vdf...')
     try:
@@ -253,7 +261,7 @@ def about():  # 정보 창
     about_disclaimer = tk.Label(aboutwindow,
                                 text=_('Warning: The developer of this program is not responsible for')  # NOQA
                                 + '\n' + _('data loss or any other damage from the use of this program.'))  # NOQA
-    version = tk.Label(aboutwindow, text='Version ' + str(__VERSION__))
+    version = tk.Label(aboutwindow, text='Version ' + __VERSION__)
     copyright_label = tk.Label(aboutwindow, text='Copyright (c) Myeuaa | All Rights Reserved\n'  # NOQA
                                + 'Licensed under the MIT License.')
 
@@ -360,8 +368,28 @@ def importwindow():
     if loginusers():
         AccountName, PersonaName = loginusers()
     else:
-        messagebox.showwarning(_('Warning'), _('Could not fetch file loginusers.vdf')
-                               + '\n' + _('Please add accounts manually.'))
+        try_manually = messagebox.askyesno(_('Warning'), _('Could not fetch file loginusers.vdf')
+                               + '\n' + _('This may be because Steam directory defined')
+                               + '\n' + _('in registry is invalid.')
+                               + '\n\n' + _('Do you want to select Steam directory manually?'))
+        if try_manually:
+            while True:
+                input_dir = filedialog.askdirectory()
+                if loginusers(steam_path=input_dir):
+                    AccountName, PersonaName = loginusers(steam_path=input_dir)
+                    with open('steam_path.txt', 'w') as path:
+                        path.write(input_dir)
+                    break
+                else:
+                    try_again = messagebox.askyesno(_('Warning'), _('Steam directory is invalid.')
+                                        + '\n' + _('Try again?'))
+                    if try_again:
+                        continue
+                    else:
+                        return
+        else:
+            return
+
 
     importwindow = tk.Toplevel(main)
     importwindow.title(_("Import"))
@@ -507,7 +535,7 @@ def exit_after_restart(graceful):
             raise FileNotFoundError
         if check_running('Steam.exe'):
             print('Soft shutdown mode')
-            r_path = fetch_reg('installpath')
+            r_path = fetch_reg('steamexe')
             r_path_items = r_path.split('/')
             path_items = []
             for item in r_path_items:
