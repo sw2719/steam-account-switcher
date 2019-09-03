@@ -10,6 +10,7 @@ import gettext
 import locale
 import psutil
 import re
+from packaging import version
 from time import sleep
 
 __VERSION__ = '1.5'
@@ -37,19 +38,24 @@ def checkupdate():
     update_code = None
     try:
         response = req.get(URL)
-        sv_version = response.text.splitlines()[-1]
-        print('Server version is', sv_version)
-        print('Client version is', str(__VERSION__))
+        sv_version_str = response.text.splitlines()[-1]
+        print('Server version is', sv_version_str)
+        print('Client version is', __VERSION__)
 
-        if sv_version != __VERSION__:
+        sv_version = version.parse(sv_version_str)
+        cl_version = version.parse(__VERSION__)
+
+        if sv_version > cl_version:
             update_code = 1
-        elif sv_version == __VERSION__:
+        elif sv_version == cl_version:
             update_code = 0
+        elif sv_version < cl_version:
+            update_code = 2
 
     except req.exceptions.RequestException:
-        update_code = 2
-        sv_version = '0'
-    return update_code, sv_version
+        update_code = 3
+        sv_version_str = '0'
+    return update_code, sv_version_str
 
 
 def start_checkupdate():
@@ -79,6 +85,12 @@ def start_checkupdate():
                                 text=_('Using the latest version'))
         update_label.pack(side='bottom')
     elif update_code == 2:
+        print('Development version')
+
+        update_label = tk.Label(update_frame,
+                                text=_('Development version'))
+        update_label.pack(side='bottom')
+    elif update_code == 3:
         print('Exception while getting server version')
 
         update_label = tk.Label(update_frame,
@@ -185,11 +197,8 @@ try:
     if not accounts:
         raise FileNotFoundError
 except FileNotFoundError:
-    with open('accounts.txt', 'w') as txt:
-        if fetch_reg('username'):
-            print('No account found! Adding current user...')
-            txt.write(fetch_reg('username') + '\n')
-    accounts = [fetch_reg('username')]
+    txt = open('accounts.txt', 'w')
+    txt.close()
 
 print('Detected ' + str(len(accounts)) + ' accounts:')
 
@@ -675,4 +684,6 @@ print('Init complete. Main app starting.')
 draw_button(accounts)
 main.config(menu=menubar)
 main.after(100, start_checkupdate)
+if not accounts:
+    main.after(150, importwindow)
 main.mainloop()
