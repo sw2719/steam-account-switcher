@@ -348,17 +348,23 @@ def addwindow():  # 계정 추가 창
 
 def importwindow():
     global accounts
+    if loginusers():
+        AccountName, PersonaName = loginusers()
+    else:
+        messagebox.showwarning(_('Warning'), _('Could not fetch file loginusers.vdf')
+                               + '\n' + _('Please add accounts manually.'))
+
     importwindow = tk.Toplevel(main)
     importwindow.title(_("Import"))
-
-    AccountName, PersonaName = loginusers()
-
     importwindow.geometry("280x300+650+300")
     importwindow.resizable(False, False)
-    bottomframe_imp = tk.Frame(importwindow)
-    bottomframe_imp.pack(side='bottom')
+
     importwindow.grab_set()
     importwindow.focus()
+
+    bottomframe_imp = tk.Frame(importwindow)
+    bottomframe_imp.pack(side='bottom')
+
     importlabel = tk.Label(importwindow, text=_('Select accounts to import.')
                            + '\n' + _("Added accounts don't show up."))
     importlabel.pack(side='top',
