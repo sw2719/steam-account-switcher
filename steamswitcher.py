@@ -12,8 +12,11 @@ import psutil
 import re
 from time import sleep
 
+__VERSION__ = '1.5'
+
 locale_buf = locale.getdefaultlocale()
 LOCALE = locale_buf[0]
+print('System locale is', LOCALE)
 
 t = gettext.translation('steamswitcher', localedir='locale',
                         languages=[LOCALE],
@@ -22,42 +25,42 @@ _ = t.gettext
 
 print('Running on', os.getcwd())
 
-VERSION = '1.4'
 BRANCH = 'master'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
        % BRANCH)
 
+HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
+
 
 def checkupdate():
     print('Update check start')
-    update_avail = None
+    update_code = None
     try:
         response = req.get(URL)
         sv_version = response.text.splitlines()[-1]
         print('Server version is', sv_version)
-        print('Client version is', str(VERSION))
+        print('Client version is', str(__VERSION__))
 
-        if float(sv_version) > float(VERSION):
-            update_avail = 1
-        elif float(sv_version) == float(VERSION):
-            update_avail = 0
-        elif float(sv_version) < float(VERSION):
-            update_avail = 2
+        if sv_version != __VERSION__:
+            update_code = 1
+        elif sv_version == __VERSION__:
+            update_code = 0
 
     except req.exceptions.RequestException:
-        update_avail = 3
-    return update_avail
+        update_code = 2
+        sv_version = '0'
+    return update_code, sv_version
 
 
 def start_checkupdate():
     update_frame = tk.Frame(main)
     update_frame.pack(side='bottom')
-    update_code = checkupdate()
+    update_code, sv_version = checkupdate()
 
     if update_code == 1:
         print('Update Available')
 
-        update_label = tk.Label(update_frame, text=_('Update available'))
+        update_label = tk.Label(update_frame, text=_('New version %s is available.') % sv_version)
         update_label.pack(side='left', padx=5)
 
         def open_github():
@@ -76,12 +79,6 @@ def start_checkupdate():
                                 text=_('Using the latest version'))
         update_label.pack(side='bottom')
     elif update_code == 2:
-        print('Dev build')
-
-        update_label = tk.Label(update_frame,
-                                text=_('Development version'))
-        update_label.pack(side='bottom')
-    elif update_code == 3:
         print('Exception while getting server version')
 
         update_label = tk.Label(update_frame,
@@ -98,9 +95,6 @@ def check_running(process_name):
                 psutil.ZombieProcess):
             pass
     return False
-
-
-HCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 
 
 def error_msg(title, content):
@@ -120,7 +114,7 @@ def fetch_reg(key):
         key_name = 'SteamExe'
 
     try:
-        reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam")
+        reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam")
         value_buffer = winreg.QueryValueEx(reg_key, key_name)
         value = value_buffer[0]
         winreg.CloseKey(reg_key)
@@ -177,7 +171,7 @@ if fetch_reg('autologin') != 2:
 else:
     print('Could not fetch autologin status!')
 if fetch_reg('autologin'):
-    print('Current autologin user is ' + str(fetch_reg('autologin')))
+    print('Current autologin user is ' + str(fetch_reg('username')))
 else:
     print('Could not fetch autologin user information!')
 
@@ -216,7 +210,7 @@ def fetchuser():
 
 def setkey(name, value, value_type):
     try:
-        reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam", 0,
+        reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam", 0,
                                  winreg.KEY_ALL_ACCESS)
 
         winreg.SetValueEx(reg_key, name, 0, value_type, value)
@@ -250,7 +244,7 @@ def about():  # 정보 창
     about_disclaimer = tk.Label(aboutwindow,
                                 text=_('Warning: The developer of this program is not responsible for')  # NOQA
                                 + '\n' + _('data loss or any other damage from the use of this program.'))  # NOQA
-    version = tk.Label(aboutwindow, text='Version ' + str(VERSION))
+    version = tk.Label(aboutwindow, text='Version ' + str(__VERSION__))
     copyright_label = tk.Label(aboutwindow, text='Copyright (c) Myeuaa | All Rights Reserved\n'  # NOQA
                                + 'Licensed under the MIT License.')
 
