@@ -25,7 +25,7 @@ Works without your passwords!
 
 # About the code
 * Written in Python 3.7
-* Requests, gettext, and packaging module are required.
+* Requests, gettext, psutil and packaging module are required.
 * Source code is written in English. Translation to other languages is done with gettext.
 * Keep in mind that I'm _quite_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
 * Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advice is appreciated.
