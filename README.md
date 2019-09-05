@@ -26,7 +26,6 @@ Steam Account Switching made easy (on Windows)
 
 * Reduced UI flickering (v1.3)
 * Multi language support (v1.3)
-  Supported languages: Korean(한국어), English
 
 * Automatic update checking (v1.2)
 
