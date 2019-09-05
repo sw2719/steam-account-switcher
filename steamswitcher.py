@@ -252,7 +252,7 @@ def about():  # 정보 창
     aboutwindow.title(_('About'))
     aboutwindow.geometry("360x270+650+300")
     aboutwindow.resizable(False, False)
-    about_row = tk.Label(aboutwindow, text=_('Made by Myeuaa (sw2719)'))
+    about_row = tk.Label(aboutwindow, text=_('Made by sw2719 (Myeuaa)'))
     about_steam = tk.Label(aboutwindow,
                            text='Steam: https://steamcommunity.com/'
                            + 'id/muangmuang')
@@ -263,10 +263,10 @@ def about():  # 정보 창
                                 text=_('Warning: The developer of this program is not responsible for')  # NOQA
                                 + '\n' + _('data loss or any other damage from the use of this program.'))  # NOQA
     about_steam_trademark = tk.Label(aboutwindow, text=_('STEAM is a registered trademark of Valve Corporation.'))  # NOQA
-    copyright_label = tk.Label(aboutwindow, text='Copyright (c) Myeuaa | All Rights Reserved\n'  # NOQA
+    copyright_label = tk.Label(aboutwindow, text='Copyright (c) sw2719 | All Rights Reserved\n'  # NOQA
                                + 'Licensed under the MIT License.')
     version = tk.Label(aboutwindow,
-                       text='Steam Account Changer | Version ' + __VERSION__)
+                       text='Steam Account Switcher | Version ' + __VERSION__)
 
     def close():
         aboutwindow.destroy()
