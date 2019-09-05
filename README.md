@@ -19,8 +19,6 @@ Steam Account Switching made easy (on Windows)
 * But no annoying update pop-up. You can just carry on and update later.
 
 # Changelogs (for last 3 versions)
-* Changed first launch behaviour (v1.5)
-* Bug fixes (v1.5)
 * Added soft shutdown of Steam (v1.4)
 * Added ability to import accounts from Steam (v1.4)
 
@@ -32,6 +30,8 @@ Steam Account Switching made easy (on Windows)
 
 # Upcoming Features / Improvements
 * Improving code & readability (Continuous)
+* Auto-updating (If possible, v1.5)
+* New first launch behaviour (v1.5)
 
 # Source code information
 * Written in Python 3.7
