@@ -1,7 +1,33 @@
+# Steam Account Switcher
+Steam Account Switching made easy (on Windows)
+
+[Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
+
+[See this program in action](https://youtu.be/WFtv10RZ_UA)
+
+# Features
+* Switch between your accounts with just few clicks.
+
+* No more entering ID, password and Steam Guard code every login.
+
+* Unlike some other programs, your passwords are **NOT** required. Only uses your usernames.
+
+* Auto-importing your Steam accounts. Do more clicking, less typing.
+
+* Update checking is built-in, so if I make my program better, you will be notified.
+
+* But no annoying update pop-up. You can just carry on and update later.
+
+# Changelogs (for last 3 versions)
+* Changed first launch behaviour (v1.5)
+* Bug fixes (v1.5)
+
+* Added soft shutdown of Steam (v1.4)
+* Added ability to import accounts from Steam (v1.4)
+
+* Reduced UI flickering (v1.3)
+* Multi language support (v1.3)
   Supported languages: Korean(한국어), English
-
-* Automatic update checking (v1.2)
-
 
 # Upcoming Features / Improvements
 * Improving code & readability (Continuous)
