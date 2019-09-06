@@ -11,8 +11,22 @@ import gettext
 import locale
 import psutil
 import re
+import zipfile as zf
+import shutil
+import threading
+import queue as q
+from io import BytesIO
 from packaging import version
 from time import sleep
+
+print('Program Start')
+
+if getattr(sys, 'frozen', False):
+    print('Running in a bundle')
+    BUNDLE = True
+else:
+    print('Running in a Python interpreter')
+    BUNDLE = False
 
 __VERSION__ = '1.5'
 
@@ -28,42 +42,86 @@ _ = t.gettext
 
 print('Running on', os.getcwd())
 
-BRANCH = 'master'
+BRANCH = 'update_1.5'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
        % BRANCH)
+
 
 HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 
 
-def checkupdate():
-    print('Update check start')
-    update_code = None
-    try:
-        response = req.get(URL)
-        sv_version_str = response.text.splitlines()[-1]
-        print('Server version is', sv_version_str)
-        print('Client version is', __VERSION__)
+def update(sv_version):
+    whitelist = ('accounts.txt', 'Steam Account Switcher.exe', 'steamswitcher.py')
+    for item in os.listdir(os.getcwd()):
+        if item not in whitelist:
+            item = os.path.join(os.getcwd(), item)
+            if os.path.isdir(item):
+                shutil.rmtree(item)
+            elif os.path.isfile(item):
+                os.remove(item)
 
-        sv_version = version.parse(sv_version_str)
-        cl_version = version.parse(__VERSION__)
-
-        if sv_version > cl_version:
-            update_code = 1
-        elif sv_version == cl_version:
-            update_code = 0
-        elif sv_version < cl_version:
-            update_code = 2
-
-    except req.exceptions.RequestException:
-        update_code = 3
-        sv_version_str = '0'
-    return update_code, sv_version_str
+    dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
+    response = req.get(dl_url)
+    archive = zf.ZipFile(BytesIO(response.content))
+    archive.extractall()
+    archive.close()
+    os.execv('Steam Account Switcher.exe', sys.argv)
 
 
 def start_checkupdate():
     update_frame = tk.Frame(main)
     update_frame.pack(side='bottom')
-    update_code, sv_version = checkupdate()
+    queue = q.Queue()
+
+    def checkupdate(queue):
+        print('Update check start')
+        update_code = None
+        try:
+            response = req.get(URL)
+            sv_version_str = response.text.splitlines()[-1]
+            print('Server version is', sv_version_str)
+            print('Client version is', __VERSION__)
+
+            sv_version = version.parse(sv_version_str)
+            cl_version = version.parse(__VERSION__)
+
+            if sv_version > cl_version:
+                update_code = 1
+            elif sv_version == cl_version:
+                update_code = 0
+            elif sv_version < cl_version:
+                update_code = 2
+
+        except req.exceptions.RequestException:
+            update_code = 3
+            sv_version_str = '0'
+        queue.put((update_code, sv_version_str))
+
+    def get_queue():
+        try:
+            tup = queue.get(0)
+            return tup
+        except q.Empty:
+            main.after(100, get_queue)
+
+
+    t = threading.Thread(target=checkupdate, args=queue)
+    t.start()
+    tup = get_queue()
+
+    if BUNDLE:
+        update_code, sv_version = checkupdate()
+    else:
+        update_code = None
+        update_code_temp, sv_version = checkupdate()
+        update_label = tk.Label(update_frame,
+                                text='Using source file / Update check disabled')
+        update_label.pack(side='left', padx=5)
+        update_button = ttk.Button(update_frame,
+                                   text='Update',
+                                   width=12,
+                                   command=lambda: update(sv_version=sv_version))
+        update_button.pack(side='right', padx=5)
 
     if update_code == 1:
         print('Update Available')
@@ -179,10 +237,10 @@ def loginusers(steam_path=fetch_reg('steampath')):
 def autologinstr():
     value = fetch_reg('autologin')
     if value == 1:
-        retstr = _('Auto-login Enabled')
+        return_str = _('Auto-login Enabled')
     elif value == 0:
-        retstr = _('Auto-login Disabled')
-    return retstr
+        return_str = _('Auto-login Disabled')
+    return return_str
 
 
 print('Fetching registry values...')
