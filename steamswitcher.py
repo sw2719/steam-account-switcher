@@ -11,8 +11,22 @@ import gettext
 import locale
 import psutil
 import re
+import zipfile as zf
+import shutil
+import threading
+import queue as q
+from io import BytesIO
 from packaging import version
 from time import sleep
+
+print('Program Start')
+
+if getattr(sys, 'frozen', False):
+    print('Running in a bundle')
+    BUNDLE = True
+else:
+    print('Running in a Python interpreter')
+    BUNDLE = False
 
 __VERSION__ = '1.5'
 
@@ -28,78 +42,139 @@ _ = t.gettext
 
 print('Running on', os.getcwd())
 
-BRANCH = 'master'
+BRANCH = 'update_1.5'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
        % BRANCH)
 
+
 HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
-
-
-def checkupdate():
-    print('Update check start')
-    update_code = None
-    try:
-        response = req.get(URL)
-        sv_version_str = response.text.splitlines()[-1]
-        print('Server version is', sv_version_str)
-        print('Client version is', __VERSION__)
-
-        sv_version = version.parse(sv_version_str)
-        cl_version = version.parse(__VERSION__)
-
-        if sv_version > cl_version:
-            update_code = 1
-        elif sv_version == cl_version:
-            update_code = 0
-        elif sv_version < cl_version:
-            update_code = 2
-
-    except req.exceptions.RequestException:
-        update_code = 3
-        sv_version_str = '0'
-    return update_code, sv_version_str
 
 
 def start_checkupdate():
     update_frame = tk.Frame(main)
     update_frame.pack(side='bottom')
-    update_code, sv_version = checkupdate()
 
-    if update_code == 1:
-        print('Update Available')
+    def update(sv_version):
+        nonlocal update_frame
+        update_frame.destroy()
+        update_frame = tk.Frame(main)
+        update_frame.pack(side='bottom')
 
-        update_label = tk.Label(update_frame,
-                                text=_('New version %s is available.')
-                                % sv_version)
-        update_label.pack(side='left', padx=5)
+        whitelist = ('accounts.txt', 'Steam Account Switcher.exe',
+                    'steamswitcher.py')
 
-        def open_github():
-            os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
+        dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
+        try:
+            update_text = tk.StringVar()
+            update_text.set('Downloading update')
+            update_label = tk.Label(update_frame, textvariable=update_text)
+            update_label.pack(side='bottom')
+            response = req.get(dl_url)
+        except req.exceptions.RequestException:
+            return
 
-        update_button = ttk.Button(update_frame,
-                                   text=_('Visit GitHub'),
-                                   width=12,
-                                   command=open_github)
+        update_text.set('Installing update')
+        for item in os.listdir(os.getcwd()):
+            if item not in whitelist:
+                item = os.path.join(os.getcwd(), item)
+                if os.path.isdir(item):
+                    shutil.rmtree(item)
+                elif os.path.isfile(item):
+                    os.remove(item)
 
-        update_button.pack(side='right', padx=5)
-    elif update_code == 0:
-        print('On latest version')
+        archive = zf.ZipFile(BytesIO(response.content))
+        archive.extractall()
+        archive.close()
+        os.execv('Steam Account Switcher.exe', sys.argv)
 
-        update_label = tk.Label(update_frame,
-                                text=_('Using the latest version'))
-        update_label.pack(side='bottom')
-    elif update_code == 2:
-        print('Development version')
+    queue = q.Queue()
 
-        update_label = tk.Label(update_frame,
-                                text=_('Development version'))
-        update_label.pack(side='bottom')
-    elif update_code == 3:
-        print('Exception while getting server version')
+    def checkupdate():
+        print('Update check start')
+        update_code = None
+        try:
+            response = req.get(URL)
+            sv_version_str = response.text.splitlines()[-1]
+            print('Server version is', sv_version_str)
+            print('Client version is', __VERSION__)
 
-        update_label = tk.Label(update_frame,
-                                text=_('Failed to check for updates'))
-        update_label.pack(side='bottom')
+            sv_version = version.parse(sv_version_str)
+            cl_version = version.parse(__VERSION__)
+
+            if sv_version > cl_version:
+                update_code = 1
+            elif sv_version == cl_version:
+                update_code = 0
+            elif sv_version < cl_version:
+                update_code = 2
+
+        except req.exceptions.RequestException:
+            update_code = 3
+            sv_version_str = '0'
+        queue.put((update_code, sv_version_str))
+
+    update_code = None
+    sv_version = None
+
+    def get_output():
+        nonlocal update_code
+        nonlocal sv_version
+        try:
+            v = queue.get_nowait()
+            update_code = v[0]
+            sv_version = v[1]
+
+            if not BUNDLE:
+                update_label = tk.Label(update_frame,
+                                        text=f'Using source file: sv {sv_version} / cl {__VERSION__}')  # NOQA
+                update_label.pack(side='left', padx=5)
+                update_button = ttk.Button(update_frame,
+                                           text='Update',
+                                           width=12,
+                                           command=lambda: update(sv_version=sv_version))
+                update_button.pack(side='right', padx=5)
+            else:
+                if update_code == 1:
+                    print('Update Available')
+
+                    update_label = tk.Label(update_frame,
+                                            text=_('New version %s is available.')  # NOQA
+                                            % sv_version)
+                    update_label.pack(side='left', padx=5)
+
+                    def open_github():
+                        os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
+
+                    update_button = ttk.Button(update_frame,
+                                               text=_('Visit GitHub'),
+                                               width=12,
+                                               command=open_github)
+
+                    update_button.pack(side='right', padx=5)
+                elif update_code == 0:
+                    print('On latest version')
+
+                    update_label = tk.Label(update_frame,
+                                            text=_('Using the latest version'))
+                    update_label.pack(side='bottom')
+                elif update_code == 2:
+                    print('Development version')
+
+                    update_label = tk.Label(update_frame,
+                                            text=_('Development version'))
+                    update_label.pack(side='bottom')
+                elif update_code == 3:
+                    print('Exception while getting server version')
+
+                    update_label = tk.Label(update_frame,
+                                            text=_('Failed to check for updates'))  # NOQA
+                    update_label.pack(side='bottom')
+        except q.Empty:
+            main.after(300, get_output)
+
+    t = threading.Thread(target=checkupdate)
+    t.start()
+    main.after(300, get_output)
 
 
 def check_running(process_name):
@@ -179,10 +254,10 @@ def loginusers(steam_path=fetch_reg('steampath')):
 def autologinstr():
     value = fetch_reg('autologin')
     if value == 1:
-        retstr = _('Auto-login Enabled')
+        return_str = _('Auto-login Enabled')
     elif value == 0:
-        retstr = _('Auto-login Disabled')
-    return retstr
+        return_str = _('Auto-login Disabled')
+    return return_str
 
 
 print('Fetching registry values...')
