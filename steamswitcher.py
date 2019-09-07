@@ -18,14 +18,16 @@ from time import sleep
 
 print('Program Start')
 
+BRANCH = 'master'
+
+__VERSION__ = '1.5'
+
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
     BUNDLE = True
 else:
     print('Running in a Python interpreter')
     BUNDLE = False
-
-__VERSION__ = '1.3'
 
 locale_buf = locale.getdefaultlocale()
 LOCALE = locale_buf[0]
@@ -39,7 +41,6 @@ _ = t.gettext
 
 print('Running on', os.getcwd())
 
-BRANCH = 'update_1.5'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
        % BRANCH)
 
@@ -50,7 +51,13 @@ HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 def start_checkupdate():
     update_frame = tk.Frame(main)
     update_frame.pack(side='bottom')
-    checking_label = tk.Label(update_frame, text='Checking for updates...')
+
+    if not BUNDLE:
+        update_label = tk.Label(update_frame, text=_('Using source file'))
+        update_label.pack()
+        return
+
+    checking_label = tk.Label(update_frame, text=_('Checking for updates...'))
     checking_label.pack()
     main.update()
 
@@ -63,7 +70,7 @@ def start_checkupdate():
         dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
         try:
             update_text = tk.StringVar()
-            update_text.set(_('Downloading update file...'))
+            update_text.set(_('Downloading update...'))
             update_label = tk.Label(update_frame, textvariable=update_text)
             update_label.pack()
             main.update()
@@ -83,9 +90,12 @@ def start_checkupdate():
         try:
             response = req.get(URL)
             text = response.text.splitlines()
-            auto_updatable = text[-2]
             sv_version_str = text[-1]
+            auto_updatable = text[-2]
+            if auto_updatable not in ['true', 'false']:
+                auto_updatable = 'false'
             print('Server version is', sv_version_str)
+            print(f'Auto updatable: {auto_updatable}')
             print('Client version is', __VERSION__)
 
             sv_version = version.parse(sv_version_str)
@@ -118,71 +128,68 @@ def start_checkupdate():
             sv_version = v[1]
             checking_label.destroy()
 
-            if not BUNDLE:
+            if update_code == 1:
+                print('Auto update Available')
+
                 update_label = tk.Label(update_frame,
-                                        text=f'Using source file: sv {sv_version} / cl {__VERSION__}')  # NOQA
+                                        text=_('Auto update %s is available.')  # NOQA
+                                        % sv_version)
                 update_label.pack(side='left', padx=5)
+
                 update_button = ttk.Button(update_frame,
-                                           text='Update',
-                                           width=8,
-                                           command=lambda: update(sv_version=sv_version))  # NOQA
+                                            text=_('Update'),
+                                            width=8,
+                                            command=lambda: update(sv_version=sv_version))  # NOQA
+
                 update_button.pack(side='right', padx=5)
-            else:
-                if update_code == 1:
-                    print('Update Available')
+            if update_code == 2:
+                print('Manual update Available')
 
-                    update_label = tk.Label(update_frame,
-                                            text=_('New version %s is available.')  # NOQA
-                                            % sv_version)
-                    update_label.pack(side='left', padx=5)
+                update_label = tk.Label(update_frame,
+                                        text=_('Manual update %s is available.')  # NOQA
+                                        % sv_version)
+                update_label.pack(side='left', padx=5)
 
-                    update_button = ttk.Button(update_frame,
-                                               text=_('Update'),
-                                               width=8,
-                                               command=lambda: update(sv_version=sv_version))  # NOQA
+                def open_github():
+                    os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
 
-                    update_button.pack(side='right', padx=5)
-                if update_code == 2:
-                    print('Update Available')
+                update_button = ttk.Button(update_frame,
+                                            text=_('Open GitHub'),
+                                            width=12,
+                                            command=open_github)
 
-                    update_label = tk.Label(update_frame,
-                                            text=_('Manual update %s is available.')  # NOQA
-                                            % sv_version)
-                    update_label.pack(side='left', padx=5)
+                update_button.pack(side='right', padx=5)
+            elif update_code == 0:
+                print('On latest version')
 
-                    def open_github():
-                        os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
+                update_label = tk.Label(update_frame,
+                                        text=_('Using the latest version'))
+                update_label.pack(side='bottom')
+            elif update_code == 3:
+                print('Development version')
 
-                    update_button = ttk.Button(update_frame,
-                                               text=_('Open GitHub'),
-                                               width=12,
-                                               command=open_github)
+                update_label = tk.Label(update_frame,
+                                        text=_('Development version'))
+                update_label.pack(side='bottom')
+            elif update_code == 4:
+                print('Exception while getting server version')
 
-                    update_button.pack(side='right', padx=5)
-                elif update_code == 0:
-                    print('On latest version')
-
-                    update_label = tk.Label(update_frame,
-                                            text=_('Using the latest version'))
-                    update_label.pack(side='bottom')
-                elif update_code == 3:
-                    print('Development version')
-
-                    update_label = tk.Label(update_frame,
-                                            text=_('Development version'))
-                    update_label.pack(side='bottom')
-                elif update_code == 4:
-                    print('Exception while getting server version')
-
-                    update_label = tk.Label(update_frame,
-                                            text=_('Failed to check for updates'))  # NOQA
-                    update_label.pack(side='bottom')
+                update_label = tk.Label(update_frame,
+                                        text=_('Failed to check for updates'))  # NOQA
+                update_label.pack(side='bottom')
         except q.Empty:
             main.after(300, get_output)
 
     t = threading.Thread(target=checkupdate)
     t.start()
     main.after(300, get_output)
+
+
+if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
+    try:
+        os.remove('update.zip')
+    except Exception:
+        pass
 
 
 def check_running(process_name):
@@ -277,7 +284,6 @@ if fetch_reg('autologin'):
     print('Current autologin user is ' + str(fetch_reg('username')))
 else:
     print('Could not fetch autologin user information!')
-
 
 try:
     with open('accounts.txt', 'r') as txt:
@@ -762,10 +768,28 @@ def draw_button(accounts):
         button_dict[username].config(style='sel.TButton', state='disabled')
         user_var.set(fetch_reg('username'))
 
+
+    if loginusers():
+        AccountName, PersonaName = loginusers()
+    else:
+        AccountName = []
+        PersonaName = []
+
     if not accounts:
         nouser_label.pack(anchor='center', expand=True)
     elif accounts:
         for username in accounts:
+            if username in AccountName:
+                try:
+                    profile_name = PersonaName.index(username)
+                    n = 35 - len(username + profile_name)
+                except ValueError:
+                    profile_name = ''
+            else:
+                profile_name = ''
+
+            profile_name = profile_name[:n]
+
             if username == fetch_reg('username'):
                 button_dict[username] = ttk.Button(button_frame,
                                                    style='sel.TButton',

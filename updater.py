@@ -16,7 +16,7 @@ if not getattr(sys, 'frozen', False):
     print()
     pprint("Running on Python interpreter not supported")
     print()
-    input('    Press Enter to exit')
+    input('    Press Enter to exit...')
     sys.exit(0)
 
 
@@ -55,7 +55,7 @@ else:
 if 'Steam Account Switcher.exe' not in f.namelist():
     invalidzip()
 
-whitelist = ('accounts.txt', 'updater')
+whitelist = ('accounts.txt', 'updater', 'update.zip')
 
 parent_dir = os.path.dirname(os.getcwd())
 
@@ -65,16 +65,18 @@ if LOCALE == 'ko_KR':
 else:
     pprint('Deleting current version...')
 
-for item in os.listdir(cwd):
-    if item not in whitelist:
+for item_name in os.listdir(cwd):
+    if item_name not in whitelist:
         try:
-            item = os.path.join(cwd, item)
+            item = os.path.join(cwd, item_name)
             if os.path.isdir(item):
                 shutil.rmtree(item)
             elif os.path.isfile(item):
                 os.remove(item)
         except Exception:
-            pprint(f'Could not delete item {item}')
+            print()
+            pprint(f'Could not delete item {item_name}')
+            pass
 
 print()
 if LOCALE == 'ko_KR':
@@ -84,18 +86,6 @@ else:
 
 f.extractall()
 
-print()
-if LOCALE == 'ko_KR':
-    pprint('업데이트 완료. 업데이터를 종료하고 프로그램을 다시 실행하세요.')
-    print()
-    pprint('----------------------------------------------------------')
-    print()
-    input('    Enter 키를 눌러서 나가기...')
-else:
-    pprint('Update complete. Please launch the application now.')
-    print()
-    pprint('----------------------------------------------------------')
-    print()
-    input('    Press Enter to exit...')
+f.close()
 
-sys.exit(0)
+os.execv('Steam Account Switcher.exe', sys.argv)
