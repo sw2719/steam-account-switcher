@@ -11,11 +11,8 @@ import gettext
 import locale
 import psutil
 import re
-import zipfile as zf
-import shutil
 import threading
 import queue as q
-from io import BytesIO
 from packaging import version
 from time import sleep
 
@@ -28,7 +25,7 @@ else:
     print('Running in a Python interpreter')
     BUNDLE = False
 
-__VERSION__ = '1.5'
+__VERSION__ = '1.3'
 
 locale_buf = locale.getdefaultlocale()
 LOCALE = locale_buf[0]
@@ -53,6 +50,9 @@ HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 def start_checkupdate():
     update_frame = tk.Frame(main)
     update_frame.pack(side='bottom')
+    checking_label = tk.Label(update_frame, text='Checking for updates...')
+    checking_label.pack()
+    main.update()
 
     def update(sv_version):
         nonlocal update_frame
@@ -60,32 +60,20 @@ def start_checkupdate():
         update_frame = tk.Frame(main)
         update_frame.pack(side='bottom')
 
-        whitelist = ('accounts.txt', 'Steam Account Switcher.exe',
-                    'steamswitcher.py')
-
         dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
         try:
             update_text = tk.StringVar()
-            update_text.set('Downloading update')
+            update_text.set(_('Downloading update file...'))
             update_label = tk.Label(update_frame, textvariable=update_text)
-            update_label.pack(side='bottom')
+            update_label.pack()
+            main.update()
             response = req.get(dl_url)
         except req.exceptions.RequestException:
             return
-
-        update_text.set('Installing update')
-        for item in os.listdir(os.getcwd()):
-            if item not in whitelist:
-                item = os.path.join(os.getcwd(), item)
-                if os.path.isdir(item):
-                    shutil.rmtree(item)
-                elif os.path.isfile(item):
-                    os.remove(item)
-
-        archive = zf.ZipFile(BytesIO(response.content))
-        archive.extractall()
-        archive.close()
-        os.execv('Steam Account Switcher.exe', sys.argv)
+        with open('update.zip', 'wb') as f:
+            f.write(response.content)
+        subprocess.run('start updater/updater.exe', shell=True)
+        sys.exit(0)
 
     queue = q.Queue()
 
@@ -94,22 +82,26 @@ def start_checkupdate():
         update_code = None
         try:
             response = req.get(URL)
-            sv_version_str = response.text.splitlines()[-1]
+            text = response.text.splitlines()
+            auto_updatable = text[-2]
+            sv_version_str = text[-1]
             print('Server version is', sv_version_str)
             print('Client version is', __VERSION__)
 
             sv_version = version.parse(sv_version_str)
             cl_version = version.parse(__VERSION__)
-
-            if sv_version > cl_version:
-                update_code = 1
-            elif sv_version == cl_version:
-                update_code = 0
-            elif sv_version < cl_version:
+            if auto_updatable == 'false':
                 update_code = 2
+            else:
+                if sv_version > cl_version:
+                    update_code = 1
+                elif sv_version == cl_version:
+                    update_code = 0
+                elif sv_version < cl_version:
+                    update_code = 3
 
         except req.exceptions.RequestException:
-            update_code = 3
+            update_code = 4
             sv_version_str = '0'
         queue.put((update_code, sv_version_str))
 
@@ -119,10 +111,12 @@ def start_checkupdate():
     def get_output():
         nonlocal update_code
         nonlocal sv_version
+        nonlocal checking_label
         try:
             v = queue.get_nowait()
             update_code = v[0]
             sv_version = v[1]
+            checking_label.destroy()
 
             if not BUNDLE:
                 update_label = tk.Label(update_frame,
@@ -130,8 +124,8 @@ def start_checkupdate():
                 update_label.pack(side='left', padx=5)
                 update_button = ttk.Button(update_frame,
                                            text='Update',
-                                           width=12,
-                                           command=lambda: update(sv_version=sv_version))
+                                           width=8,
+                                           command=lambda: update(sv_version=sv_version))  # NOQA
                 update_button.pack(side='right', padx=5)
             else:
                 if update_code == 1:
@@ -142,11 +136,25 @@ def start_checkupdate():
                                             % sv_version)
                     update_label.pack(side='left', padx=5)
 
+                    update_button = ttk.Button(update_frame,
+                                               text=_('Update'),
+                                               width=8,
+                                               command=lambda: update(sv_version=sv_version))  # NOQA
+
+                    update_button.pack(side='right', padx=5)
+                if update_code == 2:
+                    print('Update Available')
+
+                    update_label = tk.Label(update_frame,
+                                            text=_('Manual update %s is available.')  # NOQA
+                                            % sv_version)
+                    update_label.pack(side='left', padx=5)
+
                     def open_github():
                         os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
 
                     update_button = ttk.Button(update_frame,
-                                               text=_('Visit GitHub'),
+                                               text=_('Open GitHub'),
                                                width=12,
                                                command=open_github)
 
@@ -157,13 +165,13 @@ def start_checkupdate():
                     update_label = tk.Label(update_frame,
                                             text=_('Using the latest version'))
                     update_label.pack(side='bottom')
-                elif update_code == 2:
+                elif update_code == 3:
                     print('Development version')
 
                     update_label = tk.Label(update_frame,
                                             text=_('Development version'))
                     update_label.pack(side='bottom')
-                elif update_code == 3:
+                elif update_code == 4:
                     print('Exception while getting server version')
 
                     update_label = tk.Label(update_frame,
