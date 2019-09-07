@@ -73,7 +73,7 @@ def start_checkupdate():
     update_frame.pack(side='bottom')
     queue = q.Queue()
 
-    def checkupdate(queue):
+    def checkupdate():
         print('Update check start')
         update_code = None
         try:
@@ -97,67 +97,70 @@ def start_checkupdate():
             sv_version_str = '0'
         queue.put((update_code, sv_version_str))
 
+    update_code = None
+    sv_version = None
+
     def get_queue():
+        nonlocal update_code
+        nonlocal sv_version
         try:
-            tup = queue.get(0)
-            return tup
+            v = queue.get_nowait()
+            update_code = v[0]
+            sv_version = v[1]
         except q.Empty:
             main.after(100, get_queue)
 
-
-    t = threading.Thread(target=checkupdate, args=queue)
+    t = threading.Thread(target=checkupdate)
     t.start()
-    tup = get_queue()
+    get_queue()
 
-    if BUNDLE:
-        update_code, sv_version = checkupdate()
+    if not BUNDLE:
+        #update_code = None
+        update_label = tk.Label(update_frame,
+                                text=f'Using source file: sv {sv_version} / cl {__VERSION__}')
+        update_label.pack(side='left', padx=5)
+        #update_button = ttk.Button(update_frame,
+        #                           text='Update',
+        #                           width=12,
+        #                           command=lambda: update(sv_version=sv_version))
+        #update_button.pack(side='right', padx=5)
+        return
     else:
-        update_code = None
-        update_code_temp, sv_version = checkupdate()
-        update_label = tk.Label(update_frame,
-                                text='Using source file / Update check disabled')
-        update_label.pack(side='left', padx=5)
-        update_button = ttk.Button(update_frame,
-                                   text='Update',
-                                   width=12,
-                                   command=lambda: update(sv_version=sv_version))
-        update_button.pack(side='right', padx=5)
+        if update_code == 1:
+            print('Update Available')
 
-    if update_code == 1:
-        print('Update Available')
+            update_label = tk.Label(update_frame,
+                                    text=_('New version %s is available.')
+                                    % sv_version)
+            update_label.pack(side='left', padx=5)
 
-        update_label = tk.Label(update_frame,
-                                text=_('New version %s is available.')
-                                % sv_version)
-        update_label.pack(side='left', padx=5)
+            def open_github():
+                os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
 
-        def open_github():
-            os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
+            update_button = ttk.Button(update_frame,
+                                    text=_('Visit GitHub'),
+                                    width=12,
+                                    command=open_github)
 
-        update_button = ttk.Button(update_frame,
-                                   text=_('Visit GitHub'),
-                                   width=12,
-                                   command=open_github)
+            update_button.pack(side='right', padx=5)
+        elif update_code == 0:
+            print('On latest version')
 
-        update_button.pack(side='right', padx=5)
-    elif update_code == 0:
-        print('On latest version')
+            update_label = tk.Label(update_frame,
+                                    text=_('Using the latest version'))
+            update_label.pack(side='bottom')
+        elif update_code == 2:
+            print('Development version')
 
-        update_label = tk.Label(update_frame,
-                                text=_('Using the latest version'))
-        update_label.pack(side='bottom')
-    elif update_code == 2:
-        print('Development version')
+            update_label = tk.Label(update_frame,
+                                    text=_('Development version'))
+            update_label.pack(side='bottom')
+        elif update_code == 3:
+            print('Exception while getting server version')
 
-        update_label = tk.Label(update_frame,
-                                text=_('Development version'))
-        update_label.pack(side='bottom')
-    elif update_code == 3:
-        print('Exception while getting server version')
-
-        update_label = tk.Label(update_frame,
-                                text=_('Failed to check for updates'))
-        update_label.pack(side='bottom')
+            update_label = tk.Label(update_frame,
+                                    text=_('Failed to check for updates'))
+            update_label.pack(side='bottom')
 
 
 def check_running(process_name):
