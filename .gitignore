@@ -132,7 +132,6 @@ setup_en.py
 # End of https://www.gitignore.io/api/python
 *.txt
 *.pyw
-Updater.py
 steamswitcher_ttk_kr_autoupdateexperiment.py
 setup_updater.py
 *.json
