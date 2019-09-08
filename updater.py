@@ -4,6 +4,8 @@ import zipfile as zf
 import shutil
 import locale
 
+whitelist = ('accounts.txt', 'updater', 'update.zip', 'config.txt')
+
 locale_buf = locale.getdefaultlocale()
 LOCALE = locale_buf[0]
 
@@ -54,8 +56,6 @@ else:
 
 if 'Steam Account Switcher.exe' not in f.namelist():
     invalidzip()
-
-whitelist = ('accounts.txt', 'updater', 'update.zip')
 
 parent_dir = os.path.dirname(os.getcwd())
 
