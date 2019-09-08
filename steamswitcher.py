@@ -160,7 +160,7 @@ def start_checkupdate():
 
             sv_version = version.parse(sv_version_str)
             cl_version = version.parse(__VERSION__)
-            if auto_updatable == 'false':
+            if auto_updatable == 'false' and sv_version > cl_version:
                 update_code = 2
             else:
                 if sv_version > cl_version:
@@ -841,8 +841,11 @@ def draw_button(accounts):
                 else:
                     profilename = ''
 
-                if profilename and n > 0:
-                    profilename = ' (' + profilename[:n] + ')'
+                if profilename and n > 4:
+                    if profilename == profilename[:n]:
+                        profilename = ' (' + profilename[:n] + ')'
+                    else:
+                        profilename = ' (' + profilename[:n] + '..)'
             else:
                 profilename = ''
 

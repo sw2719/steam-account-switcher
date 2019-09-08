@@ -3,6 +3,7 @@ import os
 import zipfile as zf
 import shutil
 import locale
+import subprocess
 
 whitelist = ('accounts.txt', 'updater', 'update.zip', 'config.txt')
 
@@ -20,7 +21,6 @@ if not getattr(sys, 'frozen', False):
     print()
     input('    Press Enter to exit...')
     sys.exit(0)
-
 
 def invalidzip():
     print()
@@ -88,4 +88,18 @@ f.extractall()
 
 f.close()
 
-os.execv('Steam Account Switcher.exe', sys.argv)
+os.system('cls')
+print()
+if LOCALE == 'ko_KR':
+    pprint('업데이트 완료. 이제 프로그램을 실행하세요.')
+    print()
+    pprint('----------------------------------------------------------')
+    print()
+    input('    Enter 키를 눌러 나가기...')
+else:
+    pprint('Update complete. Start the application now.')
+    print()
+    pprint('----------------------------------------------------------')
+    print()
+    input('    Press Enter to exit...')
+sys.exit(0)
