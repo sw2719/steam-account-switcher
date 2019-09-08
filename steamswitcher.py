@@ -16,6 +16,8 @@ import queue as q
 from packaging import version
 from time import sleep
 
+system_locale = locale.getdefaultlocale()[0]
+
 print('Program Start')
 
 BRANCH = 'master'
@@ -31,27 +33,59 @@ else:
 
 config_dict = {}
 
-if not os.path.isfile('config.txt'):
+
+def error_msg(title, content):
+    root = tk.Tk()
+    root.withdraw()
+    messagebox.showerror(title, content)
+    root.destroy()
+    sys.exit(1)
+
+
+def reset_config():
     with open('config.txt', 'w') as cfg:
-        default = ['locale=system', 'show_profilename=true']
+        default = ['# Set language to use in the program (en_us, ko_KR)',
+                   '# Available values: system, ko_KR, en_US (Case sensitive)',
+                   '# If set to system, uses your Windows system locale.',
+                   '# en_US is used if your locale is not supported.',
+                   '',
+                   'locale=system',
+                   '',
+                   '# Determines whether to display your profile names along with your usernames or not',  # NOQA
+                   '# Available values: true, false (Case sensitive)',
+                   '',
+                   'show_profilename=true']
         for line in default:
             cfg.write(line + '\n')
+
+
+if not os.path.isfile('config.txt'):
+    reset_config()
 
 try:
     with open('config.txt', 'r') as cfg:
         data = cfg.read().splitlines()
         for line in data:
-            if '#' in line:
+            if '#' in line or not line:
                 continue
             buf = line.split('=')
             config_dict[buf[0]] = buf[1]
+    if set(['locale', 'show_profilename']) != set(config_dict):
+        reset_config()
+        if system_locale == 'ko_KR':
+            error_msg('설정 오류',
+                      '설정 파일이 유효하지 않아 재설정되었습니다.\n'
+                    + '프로그램을 재실행하십시오.')  # NOQA
+        else:
+            error_msg('Config Error',
+                      'Config file is reset because it was invalid\n'
+                    + 'Please restart the application.')  # NOQA
 except FileNotFoundError:
     config_dict['locale'] == 'system'
     config_dict['show_profilename'] == 'true'
 
 if config_dict['locale'] == 'system':
-    locale_buf = locale.getdefaultlocale()
-    LOCALE = locale_buf[0]
+    LOCALE = system_locale
 elif config_dict['locale'] in ['ko_KR', 'en_US']:
     LOCALE = config_dict['locale']
 else:
@@ -227,14 +261,6 @@ def check_running(process_name):
                 psutil.ZombieProcess):
             pass
     return False
-
-
-def error_msg(title, content):
-    root = tk.Tk()
-    root.withdraw()
-    messagebox.showerror(title, content)
-    root.destroy()
-    sys.exit(1)
 
 
 def fetch_reg(key):
