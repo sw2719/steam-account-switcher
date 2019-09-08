@@ -3,7 +3,6 @@ import os
 import zipfile as zf
 import shutil
 import locale
-import subprocess
 
 whitelist = ('accounts.txt', 'updater', 'update.zip', 'config.txt')
 
@@ -78,28 +77,26 @@ for item_name in os.listdir(cwd):
             pprint(f'Could not delete item {item_name}')
             pass
 
+os.system('cls')
 print()
 if LOCALE == 'ko_KR':
-    pprint('새 버전 압축 해제 중...')
+    pprint('이제 업데이트를 시작합니다.')
+    pprint('창이 사라지면 다시 프로그램을 실행해주세요.')
+    print()
+    pprint('----------------------------------------------------------')
+    print()
+    input('    Enter 키로 업데이트 시작...')
+
 else:
-    pprint('Extracting new version...')
+    pprint('Now starting update process.')
+    pprint('Open the application again after this window disappears.')
+    print()
+    pprint('----------------------------------------------------------')
+    print()
+    input('    Press Enter to start update...')
 
 f.extractall()
 
 f.close()
 
-os.system('cls')
-print()
-if LOCALE == 'ko_KR':
-    pprint('업데이트 완료. 이제 프로그램을 실행하세요.')
-    print()
-    pprint('----------------------------------------------------------')
-    print()
-    input('    Enter 키를 눌러 나가기...')
-else:
-    pprint('Update complete. Start the application now.')
-    print()
-    pprint('----------------------------------------------------------')
-    print()
-    input('    Press Enter to exit...')
 sys.exit(0)
