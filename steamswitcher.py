@@ -29,8 +29,34 @@ else:
     print('Running in a Python interpreter')
     BUNDLE = False
 
-locale_buf = locale.getdefaultlocale()
-LOCALE = locale_buf[0]
+config_dict = {}
+
+if not os.path.isfile('config.txt'):
+    with open('config.txt', 'w') as cfg:
+        default = ['locale=system', 'show_profilename=true']
+        for line in default:
+            cfg.write(line + '\n')
+
+try:
+    with open('config.txt', 'r') as cfg:
+        data = cfg.read().splitlines()
+        for line in data:
+            if '#' in line:
+                continue
+            buf = line.split('=')
+            config_dict[buf[0]] = buf[1]
+except FileNotFoundError:
+    config_dict['locale'] == 'system'
+    config_dict['show_profilename'] == 'true'
+
+if config_dict['locale'] == 'system':
+    locale_buf = locale.getdefaultlocale()
+    LOCALE = locale_buf[0]
+elif config_dict['locale'] in ['ko_KR', 'en_US']:
+    LOCALE = config_dict['locale']
+else:
+    LOCALE = 'en_US'
+
 print('System locale is', LOCALE)
 
 t = gettext.translation('steamswitcher',
@@ -154,9 +180,9 @@ def start_checkupdate():
                     os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
 
                 update_button = ttk.Button(update_frame,
-                                            text=_('Open GitHub'),
-                                            width=12,
-                                            command=open_github)
+                                           text=_('Open GitHub'),
+                                           width=12,
+                                           command=open_github)
 
                 update_button.pack(side='right', padx=5)
             elif update_code == 0:
@@ -768,7 +794,6 @@ def draw_button(accounts):
         button_dict[username].config(style='sel.TButton', state='disabled')
         user_var.set(fetch_reg('username'))
 
-
     if loginusers():
         AccountName, PersonaName = loginusers()
     else:
@@ -779,27 +804,32 @@ def draw_button(accounts):
         nouser_label.pack(anchor='center', expand=True)
     elif accounts:
         for username in accounts:
-            if username in AccountName:
-                try:
-                    profile_name = PersonaName.index(username)
-                    n = 35 - len(username + profile_name)
-                except ValueError:
-                    profile_name = ''
-            else:
-                profile_name = ''
+            if config_dict['show_profilename'] == 'true':
+                if username in AccountName:
+                    try:
+                        i = AccountName.index(username)
+                        profilename = PersonaName[i]
+                        n = 37 - len(username)
+                    except ValueError:
+                        profilename = ''
+                else:
+                    profilename = ''
 
-            profile_name = profile_name[:n]
+                if profilename:
+                    profilename = ' (' + profilename[:n] + ')'
+            else:
+                profilename = ''
 
             if username == fetch_reg('username'):
                 button_dict[username] = ttk.Button(button_frame,
                                                    style='sel.TButton',
-                                                   text=username,
+                                                   text=username + profilename,
                                                    state='disabled',
                                                    command=lambda name=username: button_func(name))  # NOQA
             else:
                 button_dict[username] = ttk.Button(button_frame,
                                                    style='TButton',
-                                                   text=username,
+                                                   text=username + profilename,
                                                    state='normal',
                                                    command=lambda name=username: button_func(name))  # NOQA
             button_dict[username].pack(fill='x', padx=5, pady=3)
