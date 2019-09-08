@@ -14,13 +14,16 @@ Steam Account Switching made easy (on Windows)
 
 * Auto-importing your Steam accounts. Do more clicking, less typing.
 
-* Update checking is built-in, so if I make my program better, you will be notified.
+* Auto-updating is built-in. (Might be unavailable in certain updates.)
 
 * But no annoying update pop-up. You can just carry on and update later.
 
 # Changelogs (for last 3 versions)
 * Changed first launch behaviour (v1.5)
 * Bug fixes (v1.5)
+* Added auto-updating
+* Now your profile names are displayed
+* Added settings functionality
 
 * Added soft shutdown of Steam (v1.4)
 * Added ability to import accounts from Steam (v1.4)
