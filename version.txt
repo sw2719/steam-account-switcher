@@ -1,4 +1,4 @@
 # used for checking for update
 # ignore this file
 true
-1.5_rev2
+1.4
