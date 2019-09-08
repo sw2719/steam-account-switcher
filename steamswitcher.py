@@ -22,7 +22,7 @@ print('Program Start')
 
 BRANCH = 'master'
 
-__VERSION__ = '1.5'
+__VERSION__ = '1.5_rev2'
 
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
