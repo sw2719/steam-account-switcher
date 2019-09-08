@@ -8,43 +8,21 @@ Steam Account Switching made easy (on Windows)
 # Features
 * Switch between your accounts with just few clicks.
 
-* No more entering ID, password and Steam Guard code every login.
+* No more entering ID, password and Steam Guard code every time you login to another account.
 
 * Unlike some other programs, your passwords are **NOT** required. Only uses your usernames.
 
 * Auto-importing your Steam accounts. Do more clicking, less typing.
 
-* Update checking is built-in, so if I make my program better, you will be notified.
+* Auto-updating is built-in. (Might be unavailable in certain updates.)
 
-* But no annoying update pop-up. You can just carry on and update later.
-
-# Changelogs (for last 3 versions)
-* Added soft shutdown of Steam (v1.4)
-* Added ability to import accounts from Steam (v1.4)
-
-* Reduced UI flickering (v1.3)
-* Multi language support (v1.3)
-
-* Automatic update checking (v1.2)
-
-
-# Upcoming Features / Improvements
-* Improving code & readability (Continuous)
-* Auto-updating (If possible, v1.5)
-* New first launch behaviour (v1.5)
-
-# Source code information
-* Written in Python 3.7
-* Requests, packaging, psutil, and gettext module are required.
-* Source code is written in English. Translation to other languages is done with gettext.
-* Keep in mind that I'm _quite_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
-* Lots of global keywords. Yeah I know. They are bad. I just don't know how to do it without them. I could use parameters but to call a function with parameters in tkinter widgets, I need to use lambda or whatever. And I thought using globals would be better than lambdas. Any advice is appreciated.
+* No annoying update pop-up. You can just carry on and update later.
 
 # How to use
 1. Unpack the archive
 2. Save it to some folder
 3. Run the exe
-**(Because this program alters your registry values, Windows SmartScreen or your Anti-virus might detect it as harmful software. You can just ignore it.)**
+**(Because this program alters your registry values AND is not code-signed, Windows SmartScreen or your Anti-virus might detect it as harmful software. You can just ignore it.)**
 
 4. Import accounts from Steam or add them manually via Menu > Add accounts
 * Your account names are saved in accounts.txt located in the same folder where exe file is.
@@ -56,8 +34,32 @@ Steam Account Switching made easy (on Windows)
 * If you previously set auto-login for that account, It just works.
 * It might show login prompt if you didn't login for a while. Steam doesn't let you auto-login after certain period of time. If this is the case, refer to below.
 
-
 * If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code.
+
+# Changelogs (for last 3 versions)
+* Changed first launch behaviour (v1.5)
+* Bug fixes (v1.5)
+* Added auto-updating (v1.5)
+* Now your profile names are displayed (v1.5)
+* Added settings functionality (v1.5)
+
+* Added soft shutdown of Steam (v1.4)
+* Added ability to import accounts from Steam (v1.4)
+
+* Reduced UI flickering (v1.3)
+* Multi language support (v1.3)
+
+# Upcoming Features / Improvements
+* UI for settings (v1.5.1)
+* Improving code & readability (Continuous)
+
+# Source code information
+* Written in Python 3.7
+* Do not run updater.py in python interpreter. It's designed to run only in frozen environment.
+* Requests, packaging, psutil, and gettext module are required.
+* threading module needs to be installed if you are using Python version under 3.7.
+* Source code is written in English. Translation to other languages is done with gettext.
+* Keep in mind that I'm _quite_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
 
 # Screenshots
 ![window](https://user-images.githubusercontent.com/22590718/63221824-87af7e00-c1d9-11e9-96e2-87508d2128b5.png)

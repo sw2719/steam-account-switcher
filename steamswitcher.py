@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
+from tkinter import filedialog
 import winreg
 import sys
 import os
@@ -10,83 +11,245 @@ import gettext
 import locale
 import psutil
 import re
+import threading
+import queue as q
+from packaging import version
 from time import sleep
 
-locale_buf = locale.getdefaultlocale()
-LOCALE = locale_buf[0]
+system_locale = locale.getdefaultlocale()[0]
 
-t = gettext.translation('steamswitcher', localedir='locale',
+print('Program Start')
+
+BRANCH = 'master'
+
+__VERSION__ = '1.5'
+
+if getattr(sys, 'frozen', False):
+    print('Running in a bundle')
+    BUNDLE = True
+else:
+    print('Running in a Python interpreter')
+    BUNDLE = False
+
+config_dict = {}
+
+
+def error_msg(title, content):
+    root = tk.Tk()
+    root.withdraw()
+    messagebox.showerror(title, content)
+    root.destroy()
+    sys.exit(1)
+
+
+def reset_config():
+    with open('config.txt', 'w') as cfg:
+        default = ['# Set language to use in the program (en_us, ko_KR)',
+                   '# Available values: system, ko_KR, en_US (Case sensitive)',
+                   '# If set to system, uses your Windows system locale.',
+                   '# en_US is used if your locale is not supported.',
+                   '',
+                   'locale=system',
+                   '',
+                   '# Determines whether to display your profile names along with your usernames or not',  # NOQA
+                   '# Available values: true, false (Case sensitive)',
+                   '',
+                   'show_profilename=true']
+        for line in default:
+            cfg.write(line + '\n')
+
+
+if not os.path.isfile('config.txt'):
+    reset_config()
+
+try:
+    with open('config.txt', 'r') as cfg:
+        data = cfg.read().splitlines()
+        for line in data:
+            if '#' in line or not line:
+                continue
+            buf = line.split('=')
+            config_dict[buf[0]] = buf[1]
+    if set(['locale', 'show_profilename']) != set(config_dict):
+        reset_config()
+        if system_locale == 'ko_KR':
+            error_msg('설정 오류',
+                      '설정 파일이 유효하지 않아 재설정되었습니다.\n'
+                    + '프로그램을 재실행하십시오.')  # NOQA
+        else:
+            error_msg('Config Error',
+                      'Config file is reset because it was invalid\n'
+                    + 'Please restart the application.')  # NOQA
+except FileNotFoundError:
+    config_dict['locale'] == 'system'
+    config_dict['show_profilename'] == 'true'
+
+if config_dict['locale'] == 'system':
+    LOCALE = system_locale
+elif config_dict['locale'] in ['ko_KR', 'en_US']:
+    LOCALE = config_dict['locale']
+else:
+    LOCALE = 'en_US'
+
+print('System locale is', LOCALE)
+
+t = gettext.translation('steamswitcher',
+                        localedir='locale',
                         languages=[LOCALE],
                         fallback=True)
 _ = t.gettext
 
 print('Running on', os.getcwd())
 
-VERSION = '1.4'
-BRANCH = 'master'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
        % BRANCH)
 
 
-def checkupdate():
-    print('Update check start')
-    update_avail = None
-    try:
-        response = req.get(URL)
-        sv_version = response.text.splitlines()[-1]
-        print('Server version is', sv_version)
-        print('Client version is', str(VERSION))
-
-        if float(sv_version) > float(VERSION):
-            update_avail = 1
-        elif float(sv_version) == float(VERSION):
-            update_avail = 0
-        elif float(sv_version) < float(VERSION):
-            update_avail = 2
-
-    except req.exceptions.RequestException:
-        update_avail = 3
-    return update_avail
+HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 
 
 def start_checkupdate():
     update_frame = tk.Frame(main)
     update_frame.pack(side='bottom')
-    update_code = checkupdate()
 
-    if update_code == 1:
-        print('Update Available')
+    if not BUNDLE:
+        update_label = tk.Label(update_frame, text=_('Using source file'))
+        update_label.pack()
+        return
 
-        update_label = tk.Label(update_frame, text=_('Update available'))
-        update_label.pack(side='left', padx=5)
+    checking_label = tk.Label(update_frame, text=_('Checking for updates...'))
+    checking_label.pack()
+    main.update()
 
-        def open_github():
-            os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
+    def update(sv_version):
+        nonlocal update_frame
+        update_frame.destroy()
+        update_frame = tk.Frame(main)
+        update_frame.pack(side='bottom')
 
-        update_button = ttk.Button(update_frame,
-                                   text=_('Visit GitHub'),
-                                   width=12,
-                                   command=open_github)
+        dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
+        try:
+            update_text = tk.StringVar()
+            update_text.set(_('Downloading update...'))
+            update_label = tk.Label(update_frame, textvariable=update_text)
+            update_label.pack()
+            main.update()
+            response = req.get(dl_url)
+        except req.exceptions.RequestException:
+            return
+        with open('update.zip', 'wb') as f:
+            f.write(response.content)
+        subprocess.run('start updater/updater.exe', shell=True)
+        sys.exit(0)
 
-        update_button.pack(side='right', padx=5)
-    elif update_code == 0:
-        print('On latest version')
+    queue = q.Queue()
 
-        update_label = tk.Label(update_frame,
-                                text=_('Using the latest version'))
-        update_label.pack(side='bottom')
-    elif update_code == 2:
-        print('Dev build')
+    def checkupdate():
+        print('Update check start')
+        update_code = None
+        try:
+            response = req.get(URL)
+            text = response.text.splitlines()
+            sv_version_str = text[-1]
+            auto_updatable = text[-2]
+            if auto_updatable not in ['true', 'false']:
+                auto_updatable = 'false'
+            print('Server version is', sv_version_str)
+            print(f'Auto updatable: {auto_updatable}')
+            print('Client version is', __VERSION__)
 
-        update_label = tk.Label(update_frame,
-                                text=_('Development version'))
-        update_label.pack(side='bottom')
-    elif update_code == 3:
-        print('Exception while getting server version')
+            sv_version = version.parse(sv_version_str)
+            cl_version = version.parse(__VERSION__)
+            if auto_updatable == 'false':
+                update_code = 2
+            else:
+                if sv_version > cl_version:
+                    update_code = 1
+                elif sv_version == cl_version:
+                    update_code = 0
+                elif sv_version < cl_version:
+                    update_code = 3
 
-        update_label = tk.Label(update_frame,
-                                text=_('Failed to check for updates'))
-        update_label.pack(side='bottom')
+        except req.exceptions.RequestException:
+            update_code = 4
+            sv_version_str = '0'
+        queue.put((update_code, sv_version_str))
+
+    update_code = None
+    sv_version = None
+
+    def get_output():
+        nonlocal update_code
+        nonlocal sv_version
+        nonlocal checking_label
+        try:
+            v = queue.get_nowait()
+            update_code = v[0]
+            sv_version = v[1]
+            checking_label.destroy()
+
+            if update_code == 1:
+                print('Auto update Available')
+
+                update_label = tk.Label(update_frame,
+                                        text=_('Auto update %s is available.')  # NOQA
+                                        % sv_version)
+                update_label.pack(side='left', padx=5)
+
+                update_button = ttk.Button(update_frame,
+                                            text=_('Update'),
+                                            width=8,
+                                            command=lambda: update(sv_version=sv_version))  # NOQA
+
+                update_button.pack(side='right', padx=5)
+            if update_code == 2:
+                print('Manual update Available')
+
+                update_label = tk.Label(update_frame,
+                                        text=_('Manual update %s is available.')  # NOQA
+                                        % sv_version)
+                update_label.pack(side='left', padx=5)
+
+                def open_github():
+                    os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
+
+                update_button = ttk.Button(update_frame,
+                                           text=_('Open GitHub'),
+                                           width=12,
+                                           command=open_github)
+
+                update_button.pack(side='right', padx=5)
+            elif update_code == 0:
+                print('On latest version')
+
+                update_label = tk.Label(update_frame,
+                                        text=_('Using the latest version'))
+                update_label.pack(side='bottom')
+            elif update_code == 3:
+                print('Development version')
+
+                update_label = tk.Label(update_frame,
+                                        text=_('Development version'))
+                update_label.pack(side='bottom')
+            elif update_code == 4:
+                print('Exception while getting server version')
+
+                update_label = tk.Label(update_frame,
+                                        text=_('Failed to check for updates'))  # NOQA
+                update_label.pack(side='bottom')
+        except q.Empty:
+            main.after(300, get_output)
+
+    t = threading.Thread(target=checkupdate)
+    t.start()
+    main.after(300, get_output)
+
+
+if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
+    try:
+        os.remove('update.zip')
+    except Exception:
+        pass
 
 
 def check_running(process_name):
@@ -100,27 +263,18 @@ def check_running(process_name):
     return False
 
 
-HCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
-
-
-def error_msg(title, content):
-    root = tk.Tk()
-    root.withdraw()
-    messagebox.showerror(title, content)
-    root.destroy()
-    sys.exit(1)
-
-
 def fetch_reg(key):
     if key == 'username':
         key_name = 'AutoLoginUser'
     elif key == 'autologin':
         key_name = 'RememberPassword'
-    elif key == 'installpath':
+    elif key == 'steamexe':
         key_name = 'SteamExe'
+    elif key == 'steampath':
+        key_name = 'SteamPath'
 
     try:
-        reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam")
+        reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam")
         value_buffer = winreg.QueryValueEx(reg_key, key_name)
         value = value_buffer[0]
         winreg.CloseKey(reg_key)
@@ -131,12 +285,16 @@ def fetch_reg(key):
     return value
 
 
-def loginusers():
-    steam_path = fetch_reg('installpath').replace('steam.exe', '')
-    vdf_file = os.path.join(steam_path.replace('/', '\\'),
-                            'config', 'loginusers.vdf')
+def loginusers(steam_path=fetch_reg('steampath')):
+    if os.path.isfile('steam_path.txt'):
+        with open('steam_path.txt', 'r') as path:
+            steam_path = path.read()
 
-    print('Fetching loginusers.vdf...')
+    if '/' in steam_path:
+        steam_path = steam_path.replace('/', '\\')
+
+    vdf_file = os.path.join(steam_path, 'config', 'loginusers.vdf')
+
     try:
         with open(vdf_file, 'r') as vdf_file:
             vdf = vdf_file.read().splitlines()
@@ -152,8 +310,6 @@ def loginusers():
 
     for i, v in enumerate(vdf):
         if v == "\t{":
-            print('Found SteamID64 Entry:')
-            print(vdf[i-1].strip() + '\n')
             account = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+1])  # NOQA
             persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])  # NOQA
             AccountName.append(account.replace("AccountName", ""))
@@ -165,10 +321,10 @@ def loginusers():
 def autologinstr():
     value = fetch_reg('autologin')
     if value == 1:
-        retstr = _('Auto-login Enabled')
+        return_str = _('Auto-login Enabled')
     elif value == 0:
-        retstr = _('Auto-login Disabled')
-    return retstr
+        return_str = _('Auto-login Disabled')
+    return return_str
 
 
 print('Fetching registry values...')
@@ -177,10 +333,9 @@ if fetch_reg('autologin') != 2:
 else:
     print('Could not fetch autologin status!')
 if fetch_reg('autologin'):
-    print('Current autologin user is ' + str(fetch_reg('autologin')))
+    print('Current autologin user is ' + str(fetch_reg('username')))
 else:
     print('Could not fetch autologin user information!')
-
 
 try:
     with open('accounts.txt', 'r') as txt:
@@ -191,11 +346,9 @@ try:
     if not accounts:
         raise FileNotFoundError
 except FileNotFoundError:
-    with open('accounts.txt', 'w') as txt:
-        if fetch_reg('username'):
-            print('No account found! Adding current user...')
-            txt.write(fetch_reg('username') + '\n')
-    accounts = [fetch_reg('username')]
+    txt = open('accounts.txt', 'w')
+    txt.close()
+    accounts = []
 
 print('Detected ' + str(len(accounts)) + ' accounts:')
 
@@ -216,7 +369,7 @@ def fetchuser():
 
 def setkey(name, value, value_type):
     try:
-        reg_key = winreg.OpenKey(HCU, r"Software\Valve\Steam", 0,
+        reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam", 0,
                                  winreg.KEY_ALL_ACCESS)
 
         winreg.SetValueEx(reg_key, name, 0, value_type, value)
@@ -238,9 +391,9 @@ def toggleAutologin():
 def about():  # 정보 창
     aboutwindow = tk.Toplevel(main)
     aboutwindow.title(_('About'))
-    aboutwindow.geometry("400x280+650+300")
+    aboutwindow.geometry("360x270+650+300")
     aboutwindow.resizable(False, False)
-    about_row = tk.Label(aboutwindow, text=_('Made by Myeuaa (sw2719)'))
+    about_row = tk.Label(aboutwindow, text=_('Made by sw2719 (Myeuaa)'))
     about_steam = tk.Label(aboutwindow,
                            text='Steam: https://steamcommunity.com/'
                            + 'id/muangmuang')
@@ -250,9 +403,11 @@ def about():  # 정보 창
     about_disclaimer = tk.Label(aboutwindow,
                                 text=_('Warning: The developer of this program is not responsible for')  # NOQA
                                 + '\n' + _('data loss or any other damage from the use of this program.'))  # NOQA
-    version = tk.Label(aboutwindow, text='Version ' + str(VERSION))
-    copyright_label = tk.Label(aboutwindow, text='Copyright (c) Myeuaa | All Rights Reserved\n'  # NOQA
+    about_steam_trademark = tk.Label(aboutwindow, text=_('STEAM is a registered trademark of Valve Corporation.'))  # NOQA
+    copyright_label = tk.Label(aboutwindow, text='Copyright (c) sw2719 | All Rights Reserved\n'  # NOQA
                                + 'Licensed under the MIT License.')
+    version = tk.Label(aboutwindow,
+                       text='Steam Account Switcher | Version ' + __VERSION__)
 
     def close():
         aboutwindow.destroy()
@@ -261,12 +416,13 @@ def about():  # 정보 창
                              text=_('Close'),
                              width=8,
                              command=close)
-    about_row.pack(pady=15)
+    about_row.pack(pady=8)
     about_steam.pack()
     about_email.pack()
     if LOCALE == 'ko_KR':
         about_discord.pack()
-    about_disclaimer.pack(pady=8)
+    about_disclaimer.pack(pady=5)
+    about_steam_trademark.pack()
     copyright_label.pack(pady=5)
     version.pack()
     button_exit.pack(side='bottom', pady=5)
@@ -292,8 +448,7 @@ def addwindow():  # 계정 추가 창
                              text=_("In case of adding multiple accounts,") +
                              '\n' + _("seperate each account with '/' (slash)."))  # NOQA
 
-    account_entry = ttk.Entry(bottomframe_add, width=28)
-    account_entry.pack(side='left', padx=5, pady=3)
+    account_entry = ttk.Entry(bottomframe_add, width=29)
 
     addwindow.grab_set()
     addwindow.focus()
@@ -336,7 +491,7 @@ def addwindow():  # 계정 추가 창
     def close():
         addwindow.destroy()
 
-    def enterkey(event):  # Enter 키 입력을 감지
+    def enterkey(event):
         adduser(account_entry.get())
 
     addwindow.bind('<Return>', enterkey)
@@ -347,24 +502,50 @@ def addwindow():  # 계정 추가 창
     addlabel_row1.pack(pady=10)
     addlabel_row2.pack()
 
-    account_entry.pack(side='left', padx=5, pady=3)
-    button_add.pack(side='left', anchor='e', padx=5, pady=3)
-    button_addcancel.pack(side='bottom', anchor='e', padx=5, pady=3)
+    account_entry.pack(side='left', padx=3, pady=3)
+    button_add.pack(side='left', anchor='e', padx=3, pady=3)
+    button_addcancel.pack(side='bottom', anchor='e', padx=3)
 
 
 def importwindow():
     global accounts
+    if loginusers():
+        AccountName, PersonaName = loginusers()
+    else:
+        try_manually = messagebox.askyesno(_('Warning'), _('Could not load loginusers.vdf.')  # NOQA
+                               + '\n' + _('This may be because Steam directory defined')  # NOQA
+                               + '\n' + _('in registry is invalid.')  # NOQA
+                               + '\n\n' + _('Do you want to select Steam directory manually?'))  # NOQA
+        if try_manually:
+            while True:
+                input_dir = filedialog.askdirectory()
+                if loginusers(steam_path=input_dir):
+                    AccountName, PersonaName = loginusers(steam_path=input_dir)
+                    with open('steam_path.txt', 'w') as path:
+                        path.write(input_dir)
+                    break
+                else:
+                    try_again = messagebox.askyesno(_('Warning'),
+                                                    _('Steam directory is invalid.')  # NOQA
+                                                    + '\n' + _('Try again?'))
+                    if try_again:
+                        continue
+                    else:
+                        return
+        else:
+            return
+
     importwindow = tk.Toplevel(main)
     importwindow.title(_("Import"))
-
-    AccountName, PersonaName = loginusers()
-
     importwindow.geometry("280x300+650+300")
     importwindow.resizable(False, False)
-    bottomframe_imp = tk.Frame(importwindow)
-    bottomframe_imp.pack(side='bottom')
+
     importwindow.grab_set()
     importwindow.focus()
+
+    bottomframe_imp = tk.Frame(importwindow)
+    bottomframe_imp.pack(side='bottom')
+
     importlabel = tk.Label(importwindow, text=_('Select accounts to import.')
                            + '\n' + _("Added accounts don't show up."))
     importlabel.pack(side='top',
@@ -435,7 +616,7 @@ def removewindow():
         return
     removewindow = tk.Toplevel(main)
     removewindow.title(_("Remove"))
-    removewindow.geometry("250x320+650+300")
+    removewindow.geometry("230x320+650+300")
     removewindow.resizable(False, False)
     bottomframe_rm = tk.Frame(removewindow)
     bottomframe_rm.pack(side='bottom')
@@ -498,7 +679,7 @@ def exit_after_restart(graceful):
             raise FileNotFoundError
         if check_running('Steam.exe'):
             print('Soft shutdown mode')
-            r_path = fetch_reg('installpath')
+            r_path = fetch_reg('steamexe')
             r_path_items = r_path.split('/')
             path_items = []
             for item in r_path_items:
@@ -639,20 +820,42 @@ def draw_button(accounts):
         button_dict[username].config(style='sel.TButton', state='disabled')
         user_var.set(fetch_reg('username'))
 
+    if loginusers():
+        AccountName, PersonaName = loginusers()
+    else:
+        AccountName = []
+        PersonaName = []
+
     if not accounts:
         nouser_label.pack(anchor='center', expand=True)
     elif accounts:
         for username in accounts:
+            if config_dict['show_profilename'] == 'true':
+                if username in AccountName:
+                    try:
+                        i = AccountName.index(username)
+                        profilename = PersonaName[i]
+                        n = 37 - len(username)
+                    except ValueError:
+                        profilename = ''
+                else:
+                    profilename = ''
+
+                if profilename:
+                    profilename = ' (' + profilename[:n] + ')'
+            else:
+                profilename = ''
+
             if username == fetch_reg('username'):
                 button_dict[username] = ttk.Button(button_frame,
                                                    style='sel.TButton',
-                                                   text=username,
+                                                   text=username + profilename,
                                                    state='disabled',
                                                    command=lambda name=username: button_func(name))  # NOQA
             else:
                 button_dict[username] = ttk.Button(button_frame,
                                                    style='TButton',
-                                                   text=username,
+                                                   text=username + profilename,
                                                    state='normal',
                                                    command=lambda name=username: button_func(name))  # NOQA
             button_dict[username].pack(fill='x', padx=5, pady=3)
@@ -675,4 +878,6 @@ print('Init complete. Main app starting.')
 draw_button(accounts)
 main.config(menu=menubar)
 main.after(100, start_checkupdate)
+if not accounts:
+    main.after(150, importwindow)
 main.mainloop()

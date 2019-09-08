@@ -7,195 +7,243 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-01 20:58+0900\n"
-"PO-Revision-Date: 2019-09-01 21:03+0900\n"
+"POT-Creation-Date: 2019-09-08 19:45+0900\n"
+"PO-Revision-Date: 2019-09-08 19:47+0900\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"Last-Translator: \n"
-"Language-Team: \n"
 "X-Generator: Poedit 2.2.3\n"
 "X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Basepath: ../../..\n"
+"X-Poedit-SearchPath-0: steamswitcher.py\n"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:60
-msgid "Update available"
-msgstr "업데이트 사용 가능"
+#: steamswitcher.py:82
+msgid "Using source file"
+msgstr "소스 파일 사용 중"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:67
-msgid "Visit GitHub"
-msgstr "GitHub 방문"
+#: steamswitcher.py:86
+msgid "Checking for updates..."
+msgstr "업데이트 확인 중..."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:76
+#: steamswitcher.py:99
+msgid "Downloading update..."
+msgstr "업데이트 다운로드 중..."
+
+#: steamswitcher.py:161
+#, python-format
+msgid "Auto update %s is available."
+msgstr "자동 업데이트 %s 사용 가능"
+
+#: steamswitcher.py:166
+msgid "Update"
+msgstr "업데이트"
+
+#: steamswitcher.py:175
+#, python-format
+msgid "Manual update %s is available."
+msgstr "수동 업데이트 %s 사용 가능"
+
+#: steamswitcher.py:183
+msgid "Open GitHub"
+msgstr "GitHub 열기"
+
+#: steamswitcher.py:192
 msgid "Using the latest version"
 msgstr "최신 버전 사용 중"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:82
+#: steamswitcher.py:198
 msgid "Development version"
 msgstr "개발 버전"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:88
+#: steamswitcher.py:204
 msgid "Failed to check for updates"
 msgstr "업데이트 확인 실패"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:128
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:226
+#: steamswitcher.py:256 steamswitcher.py:353
 msgid "Registry Error"
 msgstr "레지스트리 오류"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:129
+#: steamswitcher.py:257
 msgid "Failed to read registry value."
 msgstr "레지스트리 값을 읽을 수 없습니다."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:130
+#: steamswitcher.py:258
 msgid "Make sure that Steam is installed."
 msgstr "Steam이 설치되어 있는지 확인하세요."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:168
+#: steamswitcher.py:298
 msgid "Auto-login Enabled"
 msgstr "자동로그인 켜짐"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:170
+#: steamswitcher.py:300
 msgid "Auto-login Disabled"
 msgstr "자동로그인 꺼짐"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:226
+#: steamswitcher.py:353
 msgid "Failed to change registry value."
 msgstr "레지스트리 값을 바꿀 수 없습니다."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:240
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:567
+#: steamswitcher.py:367 steamswitcher.py:722
 msgid "About"
 msgstr "정보"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:243
-msgid "Made by Myeuaa (sw2719)"
+#: steamswitcher.py:370
+msgid "Made by sw2719 (Myeuaa)"
 msgstr "Made by 꺔먕 (Myeuaa / sw2719)"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:251
+#: steamswitcher.py:378
 msgid "Warning: The developer of this program is not responsible for"
 msgstr "경고: 본 프로그램의 사용으로 인한 데이터 손실 및 기타 손해 등"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:252
+#: steamswitcher.py:379
 msgid "data loss or any other damage from the use of this program."
 msgstr "어떠한 사고나 문제에 대해서 제작자는 책임을 지지 않습니다."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:261
+#: steamswitcher.py:380
+msgid "STEAM is a registered trademark of Valve Corporation."
+msgstr "STEAM은 Valve Corporation의 등록 상표입니다."
+
+#: steamswitcher.py:390
 msgid "Close"
 msgstr "닫기"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:279
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:343
+#: steamswitcher.py:409 steamswitcher.py:472
 msgid "Add"
 msgstr "추가"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:290
+#: steamswitcher.py:420
 msgid "Enter accounts(s) to add."
 msgstr "추가할 계정을 입력하세요."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:292
+#: steamswitcher.py:422
 msgid "In case of adding multiple accounts,"
-msgstr "다수의 계정을 입력할 경우에는"
+msgstr "다수의 계정을 입력할 경우에는,"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:293
+#: steamswitcher.py:423
 msgid "seperate each account with '/' (slash)."
 msgstr "'/'(슬래시)로 구분합니다."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:328
+#: steamswitcher.py:457
 msgid "Duplicate Alert"
 msgstr "중복 경고"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:329
+#: steamswitcher.py:458
 #, python-format
 msgid "Account %s already exists."
 msgstr "계정 %s은 이미 추가되어 있습니다."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:346
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:418
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:483
+#: steamswitcher.py:475 steamswitcher.py:573 steamswitcher.py:638
 msgid "Cancel"
 msgstr "취소"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:358
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:422
+#: steamswitcher.py:489 steamswitcher.py:502
+msgid "Warning"
+msgstr "경고"
+
+#: steamswitcher.py:489
+msgid "Could not load loginusers.vdf."
+msgstr "파일 loginusers.vdf를 불러오지 못했습니다."
+
+#: steamswitcher.py:490
+msgid "This may be because Steam directory defined"
+msgstr "레지스트리에 설정된 스팀 경로가 올바르지"
+
+#: steamswitcher.py:491
+msgid "in registry is invalid."
+msgstr "않을 수 있습니다."
+
+#: steamswitcher.py:492
+msgid "Do you want to select Steam directory manually?"
+msgstr "수동으로 스팀 경로를 설정하시겠습니까?"
+
+#: steamswitcher.py:503
+msgid "Steam directory is invalid."
+msgstr "스팀 경로가 올바르지 않습니다."
+
+#: steamswitcher.py:504
+msgid "Try again?"
+msgstr "다시 시도할까요?"
+
+#: steamswitcher.py:513 steamswitcher.py:577
 msgid "Import"
 msgstr "가져오기"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:368
+#: steamswitcher.py:523
 msgid "Select accounts to import."
 msgstr "가져올 계정들을 선택하세요."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:369
+#: steamswitcher.py:524
 msgid "Added accounts don't show up."
 msgstr "이미 추가된 계정은 나타나지 않습니다."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:433
+#: steamswitcher.py:588
 msgid "No Accounts"
 msgstr "계정 없음"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:434
+#: steamswitcher.py:589
 msgid "There's no account to remove."
 msgstr "삭제할 계정이 없습니다."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:437
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:487
+#: steamswitcher.py:592 steamswitcher.py:642
 msgid "Remove"
 msgstr "삭제"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:444
+#: steamswitcher.py:599
 msgid "Select accounts to remove."
 msgstr "삭제할 계정을 선택하세요."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:531
+#: steamswitcher.py:686
 msgid "Error"
 msgstr "오류"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:532
+#: steamswitcher.py:687
 msgid "Could not start Steam automatically"
-msgstr "알 수 없는 이유로 Steam을 "
+msgstr "알 수 없는 이유로 Steam을"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:533
+#: steamswitcher.py:688
 msgid "for unknown reason."
 msgstr "자동으로 실행 할 수 없습니다."
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:548
+#: steamswitcher.py:703
 msgid "Account Switcher"
 msgstr "Steam 계정 전환기"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:562
-msgid "Add accounts"
-msgstr "계정 추가"
-
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:563
+#: steamswitcher.py:717
 msgid "Import accounts from Steam"
 msgstr "Steam에서 계정 가져오기"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:565
+#: steamswitcher.py:719
+msgid "Add accounts"
+msgstr "계정 추가"
+
+#: steamswitcher.py:720
 msgid "Remove accounts"
 msgstr "계정 삭제"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:568
+#: steamswitcher.py:723
 msgid "Menu"
 msgstr "메뉴"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:581
+#: steamswitcher.py:736
 msgid "Toggle auto-login"
 msgstr "자동로그인 토글"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:586
+#: steamswitcher.py:741
 msgid "Exit"
 msgstr "종료"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:591
+#: steamswitcher.py:746
 msgid "Restart Steam & exit"
 msgstr "스팀 재시작후 종료"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:598
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:618
+#: steamswitcher.py:753 steamswitcher.py:773
 msgid "No accounts added"
 msgstr "추가된 계정 없음"
 
-#: C:\Users\Admin\Desktop\steamswitcher\steamswitcher.py:620
+#: steamswitcher.py:775
 msgid "Current Auto-login user:"
 msgstr "현재 자동로그인 계정:"
