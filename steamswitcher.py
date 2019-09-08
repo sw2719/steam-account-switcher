@@ -841,7 +841,7 @@ def draw_button(accounts):
                 else:
                     profilename = ''
 
-                if profilename:
+                if profilename and n > 0:
                     profilename = ' (' + profilename[:n] + ')'
             else:
                 profilename = ''
