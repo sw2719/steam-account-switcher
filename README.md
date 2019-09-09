@@ -52,7 +52,7 @@ Written entirely in Python.
 * Multi language support (v1.3)
 
 # Upcoming Features / Improvements
-* UI for settings (v1.5.1)
+* UI for settings (v1.6)
 * Improving code & readability (Continuous)
 
 # Source code information
