@@ -823,8 +823,9 @@ def exit_after_restart():
                         if msg:
                             raise FileNotFoundError
                         else:
-                            error_msg(_('Error'), _('Could not soft shutdown Steam.\n'
-                                                    + _('Program will exit.')))
+                            error_msg(_('Error'),
+                                      _('Could not soft shutdown Steam.')
+                                      + '\n' + _('Program will exit.'))
                 else:
                     break
         else:
