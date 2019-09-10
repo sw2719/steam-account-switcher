@@ -18,7 +18,7 @@ from time import sleep
 
 system_locale = locale.getdefaultlocale()[0]
 
-print('Program Start')
+print('App Start')
 
 BRANCH = 'master'
 
@@ -395,8 +395,8 @@ def about():  # 정보 창
                            + 'id/muangmuang')
     about_email = tk.Label(aboutwindow, text='E-mail: sw2719@naver.com')
     about_disclaimer = tk.Label(aboutwindow,
-                                text=_('Warning: The developer of this program is not responsible for')  # NOQA
-                                + '\n' + _('data loss or any other damage from the use of this program.'))  # NOQA
+                                text=_('Warning: The developer of this application is not responsible for')  # NOQA
+                                + '\n' + _('data loss or any other damage from the use of this app.'))  # NOQA
     about_steam_trademark = tk.Label(aboutwindow, text=_('STEAM is a registered trademark of Valve Corporation.'))  # NOQA
     copyright_label = tk.Label(aboutwindow, text='Copyright (c) sw2719 | All Rights Reserved\n'  # NOQA
                                + 'Licensed under the MIT License.')
@@ -825,7 +825,7 @@ def exit_after_restart():
                         else:
                             error_msg(_('Error'),
                                       _('Could not soft shutdown Steam.')
-                                      + '\n' + _('Program will exit.'))
+                                      + '\n' + _('App will now exit.'))
                 else:
                     break
         else:

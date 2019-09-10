@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-10 23:53+0900\n"
-"PO-Revision-Date: 2019-09-10 23:53+0900\n"
+"POT-Creation-Date: 2019-09-11 01:21+0900\n"
+"PO-Revision-Date: 2019-09-11 01:21+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -96,11 +96,11 @@ msgid "Made by sw2719 (Myeuaa)"
 msgstr "Made by 꺔먕 (Myeuaa / sw2719)"
 
 #: steamswitcher.py:398
-msgid "Warning: The developer of this program is not responsible for"
-msgstr "경고: 본 프로그램의 사용으로 인한 데이터 손실 및 기타 손해 등"
+msgid "Warning: The developer of this application is not responsible for"
+msgstr "경고: 본 앱의 사용으로 인한 데이터 손실 및 기타 손해 등"
 
 #: steamswitcher.py:399
-msgid "data loss or any other damage from the use of this program."
+msgid "data loss or any other damage from the use of this app."
 msgstr "어떠한 사고나 문제에 대해서 제작자는 책임을 지지 않습니다."
 
 #: steamswitcher.py:400
@@ -254,8 +254,8 @@ msgid "Could not soft shutdown Steam."
 msgstr "Steam을 안전 종료할 수 없었습니다."
 
 #: steamswitcher.py:828
-msgid "Program will exit."
-msgstr "프로그램이 종료됩니다."
+msgid "App will now exit."
+msgstr "앱이 종료됩니다."
 
 #: steamswitcher.py:848
 msgid "Could not start Steam automatically"
