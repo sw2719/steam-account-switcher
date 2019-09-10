@@ -1,6 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from tkinter import msgbox
+from tkinter import messagebox as msgbox
 from tkinter import filedialog
 import winreg
 import sys
