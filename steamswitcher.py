@@ -22,7 +22,7 @@ print('Program Start')
 
 BRANCH = 'master'
 
-__VERSION__ = '1.5_rev2'
+__VERSION__ = '1.6'
 
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
@@ -44,16 +44,13 @@ def error_msg(title, content):
 
 def reset_config():
     with open('config.txt', 'w') as cfg:
-        default = ['# Set language to use in the program (en_us, ko_KR)',
-                   '# Available values: system, ko_KR, en_US (Case sensitive)',
-                   '# If set to system, uses your Windows system locale.',
-                   '# en_US is used if your locale is not supported.',
-                   '',
-                   'locale=system',
-                   '',
-                   '# Determines whether to display your profile names along with your usernames or not',  # NOQA
-                   '# Available values: true, false (Case sensitive)',
-                   '',
+        if system_locale == 'ko_KR':
+            locale_write = 'locale=ko_KR'
+        else:
+            locale_write = 'locale=en_US'
+
+        default = [locale_write,
+                   'try_soft_shutdown=true',
                    'show_profilename=true']
         for line in default:
             cfg.write(line + '\n')
@@ -66,11 +63,12 @@ try:
     with open('config.txt', 'r') as cfg:
         data = cfg.read().splitlines()
         for line in data:
+            line = line.strip()
             if '#' in line or not line:
                 continue
             buf = line.split('=')
             config_dict[buf[0]] = buf[1]
-    if set(['locale', 'show_profilename']) != set(config_dict):
+    if set(['locale', 'try_soft_shutdown', 'show_profilename']) != set(config_dict):  # NOQA
         reset_config()
         if system_locale == 'ko_KR':
             error_msg('설정 오류',
@@ -84,14 +82,12 @@ except FileNotFoundError:
     config_dict['locale'] == 'system'
     config_dict['show_profilename'] == 'true'
 
-if config_dict['locale'] == 'system':
-    LOCALE = system_locale
-elif config_dict['locale'] in ['ko_KR', 'en_US']:
+if config_dict['locale'] in ['ko_KR', 'en_US']:
     LOCALE = config_dict['locale']
 else:
     LOCALE = 'en_US'
 
-print('System locale is', LOCALE)
+print('Using locale', LOCALE)
 
 t = gettext.translation('steamswitcher',
                         localedir='locale',
@@ -391,15 +387,13 @@ def toggleAutologin():
 def about():  # 정보 창
     aboutwindow = tk.Toplevel(main)
     aboutwindow.title(_('About'))
-    aboutwindow.geometry("360x270+650+300")
+    aboutwindow.geometry("360x250+650+300")
     aboutwindow.resizable(False, False)
     about_row = tk.Label(aboutwindow, text=_('Made by sw2719 (Myeuaa)'))
     about_steam = tk.Label(aboutwindow,
                            text='Steam: https://steamcommunity.com/'
                            + 'id/muangmuang')
     about_email = tk.Label(aboutwindow, text='E-mail: sw2719@naver.com')
-    if LOCALE == 'ko_KR':
-        about_discord = tk.Label(aboutwindow, text='Discord: 꺔먕#6678')
     about_disclaimer = tk.Label(aboutwindow,
                                 text=_('Warning: The developer of this program is not responsible for')  # NOQA
                                 + '\n' + _('data loss or any other damage from the use of this program.'))  # NOQA
@@ -419,8 +413,6 @@ def about():  # 정보 창
     about_row.pack(pady=8)
     about_steam.pack()
     about_email.pack()
-    if LOCALE == 'ko_KR':
-        about_discord.pack()
     about_disclaimer.pack(pady=5)
     about_steam_trademark.pack()
     copyright_label.pack(pady=5)
@@ -673,9 +665,134 @@ def removewindow():
     remove_ok.pack(side='left', padx=5, pady=3)
 
 
-def exit_after_restart(graceful):
+def settingswindow():
+    global config_dict
+    settingswindow = tk.Toplevel(main)
+    settingswindow.title(_("Settings"))
+    settingswindow.geometry("260x210+650+300")
+    settingswindow.resizable(False, False)
+    bottomframe_set = tk.Frame(settingswindow)
+    bottomframe_set.pack(fill='x', side='bottom')
+    settingswindow.grab_set()
+    settingswindow.focus()
+    print('Opened settings window.')
+
+    localeframe = tk.Frame(settingswindow)
+    localeframe.pack(side='top', padx=10, pady=14)
+    locale_label = tk.Label(localeframe, text=_('Language'))
+    locale_label.pack(side='left', padx=3)
+    locale_cb = ttk.Combobox(localeframe,
+                             state="readonly",
+                             values=['English',  # 0
+                                     '한국어 (Korean)'])  # 1
+    if config_dict['locale'] == 'en_US':
+        locale_cb.current(0)
+    elif config_dict['locale'] == 'ko_KR':
+        locale_cb.current(1)
+
+    locale_cb.pack(side='left', padx=3)
+
+    restart_frame = tk.Frame(settingswindow)
+    restart_frame.pack(side='top')
+
+    restart_label = tk.Label(restart_frame,
+                             text=_('Restart app to apply language settings.'))
+    restart_label.pack()
+
+    softshutdwn_frame = tk.Frame(settingswindow)
+    softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=18)
+
+    soft_chkb = ttk.Checkbutton(softshutdwn_frame,
+                                text=_('Try to soft shutdown Steam client'))
+
+    soft_chkb.state(['!alternate'])
+    if config_dict['try_soft_shutdown'] == 'true':
+        soft_chkb.state(['selected'])
+    else:
+        soft_chkb.state(['!selected'])
+
+    soft_chkb.pack(side='left')
+
+    showpnames_frame = tk.Frame(settingswindow)
+    showpnames_frame.pack(fill='x', side='top', padx=12, pady=1)
+
+    showpnames_chkb = ttk.Checkbutton(showpnames_frame,
+                                      text=_('Show profile names'))
+
+    showpnames_chkb.state(['!alternate'])
+    if config_dict['show_profilename'] == 'true':
+        showpnames_chkb.state(['selected'])
+    else:
+        showpnames_chkb.state(['!selected'])
+
+    showpnames_chkb.pack(side='left')
+
+    def save_dict():
+        global config_dict
+        try:
+            with open('config.txt', 'r') as cfg:
+                data = cfg.read().splitlines()
+                for line in data:
+                    line = line.strip()
+                    if '#' in line or not line:
+                        continue
+                    buf = line.split('=')
+                    config_dict[buf[0]] = buf[1]
+        except FileNotFoundError:
+            reset_config()
+
+    def close():
+        settingswindow.destroy()
+
+    def apply():
+        with open('config.txt', 'w') as cfg:
+            locale = ('en_US', 'ko_KR')
+            cfg.write(f'locale={locale[locale_cb.current()]}\n')
+
+            if 'selected' in soft_chkb.state():
+                soft_shutdown = 'true'
+            else:
+                soft_shutdown = 'false'
+            cfg.write(f'try_soft_shutdown={soft_shutdown}\n')
+
+            if 'selected' in showpnames_chkb.state():
+                show_profilename = 'true'
+            else:
+                show_profilename = 'false'
+            cfg.write(f'show_profilename={show_profilename}')
+        apply_label = tk.Label(settingswindow, text=_('Changes applied'))
+        apply_label.pack(side='bottom')
+        settingswindow.after(1000, apply_label.destroy)
+        save_dict()
+        refresh()
+
+    def ok():
+        apply()
+        close()
+
+    settings_ok = ttk.Button(bottomframe_set,
+                             text=_('OK'),
+                             command=ok,
+                             width=10)
+
+    settings_cancel = ttk.Button(bottomframe_set,
+                                 text=_('Cancel'),
+                                 command=close,
+                                 width=10)
+
+    settings_apply = ttk.Button(bottomframe_set,
+                                text=_('Apply'),
+                                command=apply,
+                                width=10)
+
+    settings_ok.pack(side='left', padx=3, pady=3)
+    settings_cancel.pack(side='left', padx=3, pady=3)
+    settings_apply.pack(side='left', padx=3, pady=3)
+
+
+def exit_after_restart():
     try:
-        if graceful is False:
+        if config_dict['try_soft_shutdown'] == 'false':
             raise FileNotFoundError
         if check_running('Steam.exe'):
             print('Soft shutdown mode')
@@ -745,6 +862,7 @@ account_menu.add_command(label=_('Import accounts from Steam'),
 account_menu.add_command(label=_("Add accounts"), command=addwindow)
 account_menu.add_command(label=_("Remove accounts"), command=removewindow)
 account_menu.add_separator()
+account_menu.add_command(label=_("Settings"), command=settingswindow)
 account_menu.add_command(label=_("About"), command=about)
 menubar.add_cascade(label=_("Menu"), menu=account_menu)
 
@@ -758,7 +876,7 @@ bottomframe = tk.Frame(main)
 bottomframe.pack(side='bottom')
 
 button_toggle = ttk.Button(bottomframe,
-                           width=14,
+                           width=15,
                            text=_('Toggle auto-login'),
                            command=toggleAutologin)
 
@@ -768,13 +886,13 @@ button_quit = ttk.Button(bottomframe,
                          command=main.quit)
 
 button_restart = ttk.Button(bottomframe,
-                            width=18,
+                            width=20,
                             text=_('Restart Steam & exit'),
-                            command=lambda: exit_after_restart(True))
+                            command=exit_after_restart)
 
-button_toggle.pack(side='left', padx=4, pady=3)
-button_quit.pack(side='left', padx=4, pady=3)
-button_restart.pack(side='right', padx=4, pady=3)
+button_toggle.pack(side='left', padx=3, pady=3)
+button_quit.pack(side='left', pady=3)
+button_restart.pack(side='right', padx=3, pady=3)
 
 nouser_label = tk.Label(main, text=_('No accounts added'))
 
@@ -815,7 +933,10 @@ def draw_button(accounts):
 
     def button_func(username):
         current_user = fetch_reg('username')
-        button_dict[current_user].config(style='TButton', state='normal')
+        try:
+            button_dict[current_user].config(style='TButton', state='normal')
+        except KeyError:
+            pass
         setkey('AutoLoginUser', username, winreg.REG_SZ)
         button_dict[username].config(style='sel.TButton', state='disabled')
         user_var.set(fetch_reg('username'))
