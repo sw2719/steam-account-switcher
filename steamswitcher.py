@@ -810,16 +810,23 @@ def exit_after_restart():
                            creationflags=0x08000000, check=True)
             print('Shutdown command sent. Waiting for Steam...')
             sleep(2.5)
-            if check_running('Steam.exe'):
-                msg = msgbox.askyesno(_('Alert'),
-                                      _('After soft shutdown attempt,') + '\n' +  # NOQA
-                                      _('Steam appears to be still running.') + '\n\n' +   # NOQA
-                                      _('Do you want to force shutdown Steam?'))  # NOQA
-                if msg:
-                    raise FileNotFoundError
+            for x in range(5):
+                if check_running('Steam.exe'):
+                    if x < 5:
+                        sleep(2.5)
+                        continue
+                    else:
+                        msg = msgbox.askyesno(_('Alert'),
+                                            _('After soft shutdown attempt,') + '\n' +  # NOQA
+                                            _('Steam appears to be still running.') + '\n\n' +   # NOQA
+                                            _('Do you want to force shutdown Steam?'))  # NOQA
+                        if msg:
+                            raise FileNotFoundError
+                        else:
+                            error_msg(_('Error'), _('Could not soft shutdown Steam.\n'
+                                                    + _('Program will exit.')))
                 else:
-                    error_msg(_('Error'), _('Could not soft shutdown Steam.\n'
-                                            + _('Program will exit.')))
+                    break
         else:
             print('Steam is not running.')
     except (FileNotFoundError, subprocess.CalledProcessError):
