@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-10 23:40+0900\n"
-"PO-Revision-Date: 2019-09-10 23:40+0900\n"
+"POT-Creation-Date: 2019-09-10 23:53+0900\n"
+"PO-Revision-Date: 2019-09-10 23:53+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -87,7 +87,7 @@ msgstr "자동로그인 꺼짐"
 msgid "Failed to change registry value."
 msgstr "레지스트리 값을 바꿀 수 없습니다."
 
-#: steamswitcher.py:389 steamswitcher.py:876
+#: steamswitcher.py:389 steamswitcher.py:884
 msgid "About"
 msgstr "정보"
 
@@ -141,7 +141,7 @@ msgstr "계정 %s은 이미 추가되어 있습니다."
 msgid "Cancel"
 msgstr "취소"
 
-#: steamswitcher.py:507 steamswitcher.py:814
+#: steamswitcher.py:507 steamswitcher.py:819
 msgid "Alert"
 msgstr "경고"
 
@@ -201,7 +201,7 @@ msgstr "삭제"
 msgid "Select accounts to remove."
 msgstr "삭제할 계정을 선택하세요."
 
-#: steamswitcher.py:671 steamswitcher.py:875
+#: steamswitcher.py:671 steamswitcher.py:883
 msgid "Settings"
 msgstr "설정"
 
@@ -233,75 +233,75 @@ msgstr "확인"
 msgid "Apply"
 msgstr "적용"
 
-#: steamswitcher.py:815
+#: steamswitcher.py:820
 msgid "After soft shutdown attempt,"
 msgstr "스팀 안전 종료를 시도했으나,"
 
-#: steamswitcher.py:816
+#: steamswitcher.py:821
 msgid "Steam appears to be still running."
 msgstr "Steam이 아직 실행 중인 것 같습니다."
 
-#: steamswitcher.py:817
+#: steamswitcher.py:822
 msgid "Do you want to force shutdown Steam?"
 msgstr "Steam을 강제 종료 하시겠습니까?"
 
-#: steamswitcher.py:821 steamswitcher.py:839
+#: steamswitcher.py:826 steamswitcher.py:847
 msgid "Error"
 msgstr "오류"
 
-#: steamswitcher.py:822
+#: steamswitcher.py:827
+msgid "Could not soft shutdown Steam."
+msgstr "Steam을 안전 종료할 수 없었습니다."
+
+#: steamswitcher.py:828
 msgid "Program will exit."
 msgstr "프로그램이 종료됩니다."
 
-#: steamswitcher.py:821
-msgid "Could not soft shutdown Steam.\n"
-msgstr "Steam을 안전 종료할 수 없었습니다.\n"
-
-#: steamswitcher.py:840
+#: steamswitcher.py:848
 msgid "Could not start Steam automatically"
 msgstr "알 수 없는 이유로 Steam을"
 
-#: steamswitcher.py:841
+#: steamswitcher.py:849
 msgid "for unknown reason."
 msgstr "자동으로 실행 할 수 없습니다."
 
-#: steamswitcher.py:856
+#: steamswitcher.py:864
 msgid "Account Switcher"
 msgstr "Steam 계정 전환기"
 
-#: steamswitcher.py:870
+#: steamswitcher.py:878
 msgid "Import accounts from Steam"
 msgstr "Steam에서 계정 가져오기"
 
-#: steamswitcher.py:872
+#: steamswitcher.py:880
 msgid "Add accounts"
 msgstr "계정 추가"
 
-#: steamswitcher.py:873
+#: steamswitcher.py:881
 msgid "Remove accounts"
 msgstr "계정 삭제"
 
-#: steamswitcher.py:877
+#: steamswitcher.py:885
 msgid "Menu"
 msgstr "메뉴"
 
-#: steamswitcher.py:890
+#: steamswitcher.py:898
 msgid "Toggle auto-login"
 msgstr "자동로그인 토글"
 
-#: steamswitcher.py:895
+#: steamswitcher.py:903
 msgid "Exit"
 msgstr "종료"
 
-#: steamswitcher.py:900
+#: steamswitcher.py:908
 msgid "Restart Steam & exit"
 msgstr "스팀 재시작후 종료"
 
-#: steamswitcher.py:907 steamswitcher.py:927
+#: steamswitcher.py:915 steamswitcher.py:935
 msgid "No accounts added"
 msgstr "추가된 계정 없음"
 
-#: steamswitcher.py:929
+#: steamswitcher.py:937
 msgid "Current Auto-login user:"
 msgstr "현재 자동로그인 계정:"
 
