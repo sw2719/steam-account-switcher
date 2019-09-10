@@ -29,7 +29,6 @@ Written entirely in Python.
 4. Import accounts from Steam or add them manually via Menu > Add accounts
 * Your account names are saved in accounts.txt located in the same folder where exe file is.
 * They are saved in Plain text. (Steam saves your account names in plain text as well.)
-* Warning: Do NOT add accounts by manually editing accounts.txt
 * There's no account limit, but window size increases as you add more account.
 
 5. Click one of the buttons to change to desired account.
