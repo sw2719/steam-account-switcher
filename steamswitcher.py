@@ -44,10 +44,10 @@ def error_msg(title, content):
 
 def reset_config():
     with open('config.txt', 'w') as cfg:
+        locale_write = 'locale=en_US'
+
         if system_locale == 'ko_KR':
             locale_write = 'locale=ko_KR'
-        else:
-            locale_write = 'locale=en_US'
 
         default = [locale_write,
                    'try_soft_shutdown=true',
@@ -567,6 +567,11 @@ def importwindow():
     check_frame.bind("<Configure>", lambda event,
                      canvas=canvas: onFrameConfigure(canvas))
 
+    def _on_mousewheel(event):
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    canvas.bind("<MouseWheel>", _on_mousewheel)
+
     check_dict = {}
 
     for i, v in enumerate(AccountName):
@@ -623,11 +628,33 @@ def removewindow():
     def close():
         removewindow.destroy()
 
+    def onFrameConfigure(canvas):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+
+    canvas = tk.Canvas(removewindow, borderwidth=0, highlightthickness=0)
+    check_frame = tk.Frame(canvas)
+    scroll_bar = ttk.Scrollbar(removewindow,
+                               orient="vertical",
+                               command=canvas.yview)
+
+    canvas.configure(yscrollcommand=scroll_bar.set)
+
+    scroll_bar.pack(side="right", fill="y")
+    canvas.pack(side="left", fill="both", expand=True)
+    canvas.create_window((4, 4), window=check_frame, anchor="nw")
+
+    def _on_mousewheel(event):
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    check_frame.bind("<Configure>", lambda event,
+                     canvas=canvas: onFrameConfigure(canvas))
+    canvas.bind("<MouseWheel>", _on_mousewheel)
+
     check_dict = {}
 
     for v in accounts:
         tk_var = tk.IntVar()
-        checkbutton = ttk.Checkbutton(removewindow,
+        checkbutton = ttk.Checkbutton(check_frame,
                                       text=v,
                                       variable=tk_var)
 
