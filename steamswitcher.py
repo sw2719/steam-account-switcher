@@ -1,6 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from tkinter import messagebox
+from tkinter import msgbox
 from tkinter import filedialog
 import winreg
 import sys
@@ -37,7 +37,7 @@ config_dict = {}
 def error_msg(title, content):
     root = tk.Tk()
     root.withdraw()
-    messagebox.showerror(title, content)
+    msgbox.showerror(title, content)
     root.destroy()
     sys.exit(1)
 
@@ -472,9 +472,9 @@ def addwindow():  # 계정 추가 창
                     else:
                         print('Alert: Account %s already exists!'
                               % name_to_write)
-                        messagebox.showinfo(_('Duplicate Alert'),
-                                            _('Account %s already exists.')
-                                            % name_to_write)
+                        msgbox.showinfo(_('Duplicate Alert'),
+                                        _('Account %s already exists.')
+                                        % name_to_write)
 
             txt.close()
             refresh()
@@ -504,7 +504,7 @@ def importwindow():
     if loginusers():
         AccountName, PersonaName = loginusers()
     else:
-        try_manually = messagebox.askyesno(_('Warning'), _('Could not load loginusers.vdf.')  # NOQA
+        try_manually = msgbox.askyesno(_('Alert'), _('Could not load loginusers.vdf.')  # NOQA
                                + '\n' + _('This may be because Steam directory defined')  # NOQA
                                + '\n' + _('in registry is invalid.')  # NOQA
                                + '\n\n' + _('Do you want to select Steam directory manually?'))  # NOQA
@@ -517,7 +517,7 @@ def importwindow():
                         path.write(input_dir)
                     break
                 else:
-                    try_again = messagebox.askyesno(_('Warning'),
+                    try_again = msgbox.askyesno(_('Warning'),
                                                     _('Steam directory is invalid.')  # NOQA
                                                     + '\n' + _('Try again?'))
                     if try_again:
@@ -603,8 +603,8 @@ def importwindow():
 def removewindow():
     global accounts
     if not accounts:
-        messagebox.showinfo(_('No Accounts'),
-                            _("There's no account to remove."))
+        msgbox.showinfo(_('No Accounts'),
+                        _("There's no account to remove."))
         return
     removewindow = tk.Toplevel(main)
     removewindow.title(_("Remove"))
@@ -810,6 +810,16 @@ def exit_after_restart():
                            creationflags=0x08000000, check=True)
             print('Shutdown command sent. Waiting for Steam...')
             sleep(2.5)
+            if check_running('Steam.exe'):
+                msg = msgbox.askyesno(_('Alert'),
+                                      _('After soft shutdown attempt,') + '\n' +  # NOQA
+                                      _('Steam appears to be still running.') + '\n\n' +   # NOQA
+                                      _('Do you want to force shutdown Steam?'))  # NOQA
+                if msg:
+                    raise FileNotFoundError
+                else:
+                    error_msg(_('Error'), _('Could not soft shutdown Steam.\n'
+                                            + _('Program will exit.')))
         else:
             print('Steam is not running.')
     except (FileNotFoundError, subprocess.CalledProcessError):
@@ -826,9 +836,9 @@ def exit_after_restart():
         subprocess.run("start steam://open/main",
                        shell=True, check=True)
     except subprocess.CalledProcessError:
-        messagebox.showerror(_('Error'),
-                             _('Could not start Steam automatically')
-                             + '\n' + _('for unknown reason.'))
+        msgbox.showerror(_('Error'),
+                         _('Could not start Steam automatically')
+                         + '\n' + _('for unknown reason.'))
     main.quit()
 
 
@@ -845,8 +855,8 @@ def window_height(accounts):
 main = tk.Tk()
 main.title(_("Account Switcher"))
 
-main.geometry("300x%s+600+250" %  # 기본 창 높이 140 버튼 1개당 32 증가
-              window_height(accounts))  # window_height 함수 참조
+main.geometry("300x%s+600+250" %
+              window_height(accounts))
 main.resizable(False, False)
 
 sel_style = ttk.Style(main)
