@@ -20,6 +20,7 @@ if not getattr(sys, 'frozen', False):
     input('    Press Enter to exit...')
     sys.exit(0)
 
+
 def invalidzip():
     print()
     if LOCALE == 'ko_KR':
@@ -64,7 +65,7 @@ else:
     pprint('Installing update...')
 
 try:
-    f.extractall(members=(member for member in f.namelist() if 'updater' not in member))
+    f.extractall(members=(member for member in f.namelist() if 'updater' not in member))  # NOQA
 except Exception:
     print()
     if LOCALE == 'ko_KR':
