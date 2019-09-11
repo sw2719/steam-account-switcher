@@ -1,7 +1,6 @@
 import sys
 import os
 import zipfile as zf
-import shutil
 import locale
 
 whitelist = ('accounts.txt', 'updater', 'update.zip', 'config.txt')
@@ -23,7 +22,7 @@ if not getattr(sys, 'frozen', False):
 
 def invalidzip():
     print()
-    if locale == 'ko_KR':
+    if LOCALE == 'ko_KR':
         pprint('업데이트 압축 파일이 유효하지 않습니다.')
         pprint('프로그램을 재시작 하여 업데이트를 다시 시도하십시오.')
         print()
@@ -60,43 +59,30 @@ parent_dir = os.path.dirname(os.getcwd())
 
 print()
 if LOCALE == 'ko_KR':
-    pprint('현재 버전 삭제 중...')
+    pprint('업데이트 설치 중...')
 else:
-    pprint('Deleting current version...')
+    pprint('Installing update...')
 
-for item_name in os.listdir(cwd):
-    if item_name not in whitelist:
-        try:
-            item = os.path.join(cwd, item_name)
-            if os.path.isdir(item):
-                shutil.rmtree(item)
-            elif os.path.isfile(item):
-                os.remove(item)
-        except Exception:
-            print()
-            pprint(f'Could not delete item {item_name}')
-            pass
-
-os.system('cls')
-print()
-if LOCALE == 'ko_KR':
-    pprint('이제 업데이트를 시작합니다.')
-    pprint('창이 사라지면 다시 프로그램을 실행해주세요.')
+try:
+    f.extractall(members=(member for member in f.namelist() if 'updater' not in member))
+except Exception:
     print()
-    pprint('----------------------------------------------------------')
-    print()
-    input('    Enter 키로 업데이트 시작...')
-
-else:
-    pprint('Now starting update process.')
-    pprint('Open the application again after this window disappears.')
-    print()
-    pprint('----------------------------------------------------------')
-    print()
-    input('    Press Enter to start update...')
-
-f.extractall()
+    if LOCALE == 'ko_KR':
+        pprint('업데이트 도중 오류가 발생하였습니다.')
+        pprint('수동으로 update.zip을 연다음 압축해제 하십시오.')
+        print()
+        pprint('----------------------------------------------------------')
+        print()
+        input('    Enter 키를 눌러서 나가기...')
+    else:
+        pprint('Error occured during update process.')
+        pprint('Manually update by extracting update.zip.')
+        print()
+        pprint('----------------------------------------------------------')
+        print()
+        input('    Press Enter to exit...')
+    sys.exit(1)
 
 f.close()
 
-sys.exit(0)
+os.execv('Steam Account Switcher.exe', sys.argv)
