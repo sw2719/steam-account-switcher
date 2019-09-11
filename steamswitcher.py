@@ -246,6 +246,13 @@ if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
         os.remove('update.zip')
     except Exception:
         pass
+    finally:
+        if msgbox.askyesno(_('Update installed'),
+                           _('Version %s installed.') % __VERSION__
+                           + '\n' +
+                           _('See changes on GitHub releases?')):
+            os.startfile(
+                'https://github.com/sw2719/steam-account-switcher/releases')
 
 
 def check_running(process_name):
