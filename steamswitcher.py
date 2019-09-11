@@ -35,6 +35,7 @@ config_dict = {}
 
 
 def error_msg(title, content):
+    '''Show error message and exit'''
     root = tk.Tk()
     root.withdraw()
     msgbox.showerror(title, content)
@@ -43,6 +44,7 @@ def error_msg(title, content):
 
 
 def reset_config():
+    '''Initialize config.txt with default values'''
     with open('config.txt', 'w') as cfg:
         locale_write = 'locale=en_US'
 
@@ -59,7 +61,7 @@ def reset_config():
 if not os.path.isfile('config.txt'):
     reset_config()
 
-try:
+try:  # Open config.txt and save values to config_dict
     with open('config.txt', 'r') as cfg:
         data = cfg.read().splitlines()
         for line in data:
@@ -68,6 +70,8 @@ try:
                 continue
             buf = line.split('=')
             config_dict[buf[0]] = buf[1]
+
+    # If config file is invalid
     if set(['locale', 'try_soft_shutdown', 'show_profilename']) != set(config_dict):  # NOQA
         reset_config()
         if system_locale == 'ko_KR':
@@ -76,11 +80,10 @@ try:
                     + '프로그램을 재실행하십시오.')  # NOQA
         else:
             error_msg('Config Error',
-                      'Config file is reset because it was invalid\n'
+                      'Config file is reset because it was invalid.\n'
                     + 'Please restart the application.')  # NOQA
 except FileNotFoundError:
-    config_dict['locale'] == 'system'
-    config_dict['show_profilename'] == 'true'
+    reset_config()
 
 if config_dict['locale'] in ['ko_KR', 'en_US']:
     LOCALE = config_dict['locale']
@@ -105,6 +108,7 @@ HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 
 
 def start_checkupdate():
+    '''Check if application has update'''
     update_frame = tk.Frame(main)
     update_frame.pack(side='bottom')
 
@@ -141,6 +145,8 @@ def start_checkupdate():
     queue = q.Queue()
 
     def checkupdate():
+        '''Fetch version information from GitHub and
+        return different update codes'''
         print('Update check start')
         update_code = None
         try:
@@ -175,6 +181,7 @@ def start_checkupdate():
     sv_version = None
 
     def get_output():
+        '''Get version info from checkupdate() and draw UI accordingly.'''
         nonlocal update_code
         nonlocal sv_version
         nonlocal checking_label
@@ -256,6 +263,9 @@ if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
 
 
 def check_running(process_name):
+    '''Check if given process is running and return boolean value.
+    :param process_name: Name of process to check
+    '''
     for process in psutil.process_iter():
         try:
             if process_name.lower() in process.name().lower():
@@ -267,6 +277,9 @@ def check_running(process_name):
 
 
 def fetch_reg(key):
+    '''Return given key's value from steam registry path.
+    :param key: 'username', 'autologin', 'steamexe', 'steampath'
+    '''
     if key == 'username':
         key_name = 'AutoLoginUser'
     elif key == 'autologin':
@@ -289,6 +302,11 @@ def fetch_reg(key):
 
 
 def loginusers(steam_path=fetch_reg('steampath')):
+    '''
+    Fetch loginusers.vdf and return AccountName and
+    PersonaName values as lists.
+    :param steam_path: Steam installation path override
+    '''
     if os.path.isfile('steam_path.txt'):
         with open('steam_path.txt', 'r') as path:
             steam_path = path.read()
@@ -322,6 +340,7 @@ def loginusers(steam_path=fetch_reg('steampath')):
 
 
 def autologinstr():
+    '''Return autologin status messages according to current config.'''
     value = fetch_reg('autologin')
     if value == 1:
         return_str = _('Auto-login Enabled')
@@ -363,6 +382,7 @@ if accounts:
 
 
 def fetchuser():
+    '''Fetch accounts.txt file and save it to global list accounts'''
     global accounts
     txt = open('accounts.txt', 'r')
     namebuffer = txt.read().splitlines()
@@ -370,19 +390,25 @@ def fetchuser():
     accounts = [item for item in namebuffer if not item.strip() == '']
 
 
-def setkey(name, value, value_type):
+def setkey(key_name, value, value_type):
+    '''Change given key's value to given value.
+    :param key_name: Name of key to change value of
+    :param value: Value to change to
+    :param value_type: Registry value type
+    '''
     try:
         reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam", 0,
                                  winreg.KEY_ALL_ACCESS)
 
-        winreg.SetValueEx(reg_key, name, 0, value_type, value)
+        winreg.SetValueEx(reg_key, key_name, 0, value_type, value)
         winreg.CloseKey(reg_key)
-        print("Changed %s's value to %s" % (name, str(value)))
+        print("Changed %s's value to %s" % (key_name, str(value)))
     except OSError:
         error_msg(_('Registry Error'), _('Failed to change registry value.'))
 
 
 def toggleAutologin():
+    '''Toggle autologin registry value between 0 and 1'''
     if fetch_reg('autologin') == 1:
         value = 0
     elif fetch_reg('autologin') == 0:
@@ -391,7 +417,8 @@ def toggleAutologin():
     refresh()
 
 
-def about():  # 정보 창
+def about():
+    '''Open about window'''
     aboutwindow = tk.Toplevel(main)
     aboutwindow.title(_('About'))
     aboutwindow.geometry("360x250+650+300")
@@ -427,7 +454,8 @@ def about():  # 정보 창
     button_exit.pack(side='bottom', pady=5)
 
 
-def addwindow():  # 계정 추가 창
+def addwindow():
+    '''Open add accounts window'''
     global accounts
 
     addwindow = tk.Toplevel(main)
@@ -456,6 +484,9 @@ def addwindow():  # 계정 추가 창
     print('Opened add window.')
 
     def adduser(userinput):
+        '''Write accounts from user's input to accounts.txt
+        :param userinput: Account names to add
+        '''
         if userinput.strip():
             try:
                 with open('accounts.txt', 'r') as txt:
@@ -507,6 +538,7 @@ def addwindow():  # 계정 추가 창
 
 
 def importwindow():
+    '''Open import accounts window'''
     global accounts
     if loginusers():
         AccountName, PersonaName = loginusers()
@@ -575,6 +607,7 @@ def importwindow():
                      canvas=canvas: onFrameConfigure(canvas))
 
     def _on_mousewheel(event):
+        '''Scroll window on mousewheel input'''
         canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
     canvas.bind("<MouseWheel>", _on_mousewheel)
@@ -613,6 +646,7 @@ def importwindow():
 
 
 def removewindow():
+    '''Open remove accounts window'''
     global accounts
     if not accounts:
         msgbox.showinfo(_('No Accounts'),
@@ -636,6 +670,7 @@ def removewindow():
         removewindow.destroy()
 
     def onFrameConfigure(canvas):
+        '''Reset the scroll region to encompass the inner frame'''
         canvas.configure(scrollregion=canvas.bbox("all"))
 
     canvas = tk.Canvas(removewindow, borderwidth=0, highlightthickness=0)
@@ -651,6 +686,7 @@ def removewindow():
     canvas.create_window((4, 4), window=check_frame, anchor="nw")
 
     def _on_mousewheel(event):
+        '''Scroll window on mousewheel input'''
         canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
     check_frame.bind("<Configure>", lambda event,
@@ -669,6 +705,8 @@ def removewindow():
         check_dict[v] = tk_var
 
     def removeuser():
+        '''Write accounts to accounts.txt except the
+        ones user wants to delete'''
         print('Remove function start')
         to_remove = []
         for v in accounts:
@@ -700,6 +738,7 @@ def removewindow():
 
 
 def settingswindow():
+    '''Open settings window'''
     global config_dict
     settingswindow = tk.Toplevel(main)
     settingswindow.title(_("Settings"))
@@ -762,6 +801,7 @@ def settingswindow():
     showpnames_chkb.pack(side='left')
 
     def save_dict():
+        '''Update config_dict with new settings'''
         global config_dict
         try:
             with open('config.txt', 'r') as cfg:
@@ -779,6 +819,7 @@ def settingswindow():
         settingswindow.destroy()
 
     def apply():
+        '''Write new config values to config.txt'''
         with open('config.txt', 'w') as cfg:
             locale = ('en_US', 'ko_KR')
             cfg.write(f'locale={locale[locale_cb.current()]}\n')
@@ -825,6 +866,7 @@ def settingswindow():
 
 
 def exit_after_restart():
+    '''Restart Steam client and exit application'''
     try:
         if config_dict['try_soft_shutdown'] == 'false':
             raise FileNotFoundError
@@ -884,7 +926,9 @@ def exit_after_restart():
     main.quit()
 
 
-def window_height(accounts):
+def window_height():
+    global accounts
+    '''Return window height according to number of accounts'''
     if accounts:
         to_multiply = len(accounts) - 1
     else:
@@ -898,7 +942,7 @@ main = tk.Tk()
 main.title(_("Account Switcher"))
 
 main.geometry("300x%s+600+250" %
-              window_height(accounts))
+              window_height())
 main.resizable(False, False)
 
 sel_style = ttk.Style(main)
@@ -919,10 +963,7 @@ account_menu.add_command(label=_("About"), command=about)
 menubar.add_cascade(label=_("Menu"), menu=account_menu)
 
 upper_frame = tk.Frame(main)
-upper_frame.pack(side='top', fill='x')
-
 button_frame = tk.Frame(main)
-button_frame.pack(side='top', fill='x')
 
 bottomframe = tk.Frame(main)
 bottomframe.pack(side='bottom')
@@ -949,7 +990,9 @@ button_restart.pack(side='right', padx=3, pady=3)
 nouser_label = tk.Label(main, text=_('No accounts added'))
 
 
-def draw_button(accounts):
+def draw_button():
+    '''Draw account switch buttons on main window.'''
+    global accounts
     global upper_frame
     global button_frame
     global nouser_label
@@ -1038,6 +1081,7 @@ def draw_button(accounts):
 
 
 def refresh():
+    '''Refresh main window widgets'''
     global upper_frame
     global button_frame
     global accounts
@@ -1045,13 +1089,13 @@ def refresh():
     upper_frame.destroy()
     button_frame.destroy()
     main.geometry("300x%s" %
-                  window_height(accounts))
-    draw_button(accounts)
+                  window_height())
+    draw_button()
     print('Menu refreshed with %s account(s)' % len(accounts))
 
 
 print('Init complete. Main app starting.')
-draw_button(accounts)
+draw_button()
 main.config(menu=menubar)
 main.after(100, start_checkupdate)
 if not accounts:
