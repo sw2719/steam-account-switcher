@@ -15,6 +15,7 @@ import threading
 import queue as q
 from packaging import version
 from time import sleep
+from ruamel.yaml import YAML
 
 system_locale = locale.getdefaultlocale()[0]
 
@@ -43,33 +44,27 @@ def error_msg(title, content):
     sys.exit(1)
 
 
+yaml = YAML(typ='safe')
+
+
 def reset_config():
     '''Initialize config.txt with default values'''
-    with open('config.txt', 'w') as cfg:
-        locale_write = 'locale=en_US'
+    with open('config.yml', 'w') as cfg:
+        locale_write = 'en_US'
 
         if system_locale == 'ko_KR':
-            locale_write = 'locale=ko_KR'
+            locale_write = 'ko_KR'
 
-        default = [locale_write,
-                   'try_soft_shutdown=true',
-                   'show_profilename=true']
-        for line in default:
-            cfg.write(line + '\n')
+        default = {'locale': locale_write, 'try_soft_shutdown': 'true', 'show_profilename': 'true'}
+        yaml.dump(default, cfg)
 
 
-if not os.path.isfile('config.txt'):
+if not os.path.isfile('config.yml'):
     reset_config()
 
 try:  # Open config.txt and save values to config_dict
-    with open('config.txt', 'r') as cfg:
-        data = cfg.read().splitlines()
-        for line in data:
-            line = line.strip()
-            if '#' in line or not line:
-                continue
-            buf = line.split('=')
-            config_dict[buf[0]] = buf[1]
+    with open('config.yml', 'r') as cfg:
+        config_dict = yaml.load(cfg)
 
     # If config file is invalid
     if set(['locale', 'try_soft_shutdown', 'show_profilename']) != set(config_dict):  # NOQA
@@ -360,17 +355,25 @@ else:
     print('Could not fetch autologin user information!')
 
 try:
-    with open('accounts.txt', 'r') as txt:
-        namebuffer = txt.read().splitlines()
-
-    accounts = [item for item in namebuffer if not item.strip() == '']
-
+    with open('accounts.yml', 'r') as acc:
+        acc_dict = yaml.load(acc)
+        accounts = []
+        if acc_dict:
+            for x in range(len(acc_dict)):
+                try:
+                    cur_dict = acc_dict[x]
+                    accounts.append(cur_dict['accountname'])
+                except KeyError:
+                    break
+        else:
+            raise FileNotFoundError
     if not accounts:
         raise FileNotFoundError
-except FileNotFoundError:
-    txt = open('accounts.txt', 'w')
-    txt.close()
+except (FileNotFoundError, TypeError):
+    acc = open('accounts.yml', 'w')
+    acc.close()
     accounts = []
+    acc_dict = {}
 
 print('Detected ' + str(len(accounts)) + ' accounts:')
 
@@ -382,12 +385,20 @@ if accounts:
 
 
 def fetchuser():
-    '''Fetch accounts.txt file and save it to global list accounts'''
+    global acc_dict
     global accounts
-    txt = open('accounts.txt', 'r')
-    namebuffer = txt.read().splitlines()
-    txt.close()
-    accounts = [item for item in namebuffer if not item.strip() == '']
+    '''Fetch accounts.yml file, add accountnames to list accounts
+    and save it to global list accounts'''
+    with open('accounts.yml', 'r') as acc:
+        acc_dict = yaml.load(acc)
+        accounts = []
+
+        for x in range(len(acc_dict)):
+            try:
+                cur_dict = acc_dict[x]
+                accounts.append(cur_dict['accountname'])
+            except KeyError:
+                break
 
 
 def setkey(key_name, value, value_type):
@@ -457,6 +468,7 @@ def about():
 def addwindow():
     '''Open add accounts window'''
     global accounts
+    global acc_dict
 
     addwindow = tk.Toplevel(main)
     addwindow.title(_("Add"))
@@ -484,37 +496,29 @@ def addwindow():
     print('Opened add window.')
 
     def adduser(userinput):
+        global acc_dict
         '''Write accounts from user's input to accounts.txt
         :param userinput: Account names to add
         '''
         if userinput.strip():
-            try:
-                with open('accounts.txt', 'r') as txt:
-                    lastname = txt.readlines()[-1]
-                    if '\n' not in lastname:
-                        prefix = '\n'
-                    else:
-                        raise IndexError
-            except IndexError:
-                prefix = ''
-
-            txt = open('accounts.txt', 'a')
+            cfg = open('accounts.yml', 'w')
             name_buffer = userinput.split("/")
 
             for name_to_write in name_buffer:
                 if name_to_write.strip():
                     if name_to_write not in accounts:
-                        print('Writing ' + name_to_write)
-                        txt.write(prefix + name_to_write.strip() + '\n')
-                        accounts.append(name_to_write.strip())
+                        acc_dict[len(acc_dict)] = {'accountname': name_to_write}
                     else:
                         print('Alert: Account %s already exists!'
                               % name_to_write)
                         msgbox.showinfo(_('Duplicate Alert'),
                                         _('Account %s already exists.')
                                         % name_to_write)
+            with open('accounts.yml', 'w') as acc:
+                yaml = YAML(typ='safe')
+                yaml.dump(acc_dict, acc)
 
-            txt.close()
+            cfg.close()
             refresh()
         addwindow.destroy()
 
@@ -540,6 +544,7 @@ def addwindow():
 def importwindow():
     '''Open import accounts window'''
     global accounts
+    global acc_dict
     if loginusers():
         AccountName, PersonaName = loginusers()
     else:
@@ -625,10 +630,13 @@ def importwindow():
             check_dict[v] = tk_var
 
     def import_user():
-        with open('accounts.txt', 'a') as txt:
-            for key, value in check_dict.items():
-                if value.get() == 1:
-                    txt.write(key + '\n')
+        global acc_dict
+        for key, value in check_dict.items():
+            if value.get() == 1:
+                acc_dict[len(acc_dict)] = {'accountname': key}
+        with open('accounts.yml', 'w') as acc:
+            yaml = YAML(typ='safe')
+            yaml.dump(acc_dict, acc)
         refresh()
         close()
 
@@ -716,11 +724,15 @@ def removewindow():
             else:
                 continue
 
+        dump_dict = {}
+
         print('Removing selected accounts...')
-        with open('accounts.txt', 'w') as txt:
+        with open('accounts.yml', 'w') as acc:
             for username in accounts:
                 if username not in to_remove:
-                    txt.write(username + '\n')
+                    dump_dict[len(dump_dict)] = {'accountname': username}
+            yaml = YAML(typ='safe')
+            yaml.dump(dump_dict, acc)
         refresh()
         close()
 
@@ -800,45 +812,35 @@ def settingswindow():
 
     showpnames_chkb.pack(side='left')
 
-    def save_dict():
-        '''Update config_dict with new settings'''
-        global config_dict
-        try:
-            with open('config.txt', 'r') as cfg:
-                data = cfg.read().splitlines()
-                for line in data:
-                    line = line.strip()
-                    if '#' in line or not line:
-                        continue
-                    buf = line.split('=')
-                    config_dict[buf[0]] = buf[1]
-        except FileNotFoundError:
-            reset_config()
-
     def close():
         settingswindow.destroy()
 
     def apply():
+        global config_dict
         '''Write new config values to config.txt'''
-        with open('config.txt', 'w') as cfg:
+        with open('config.yml', 'w') as cfg:
             locale = ('en_US', 'ko_KR')
-            cfg.write(f'locale={locale[locale_cb.current()]}\n')
 
             if 'selected' in soft_chkb.state():
                 soft_shutdown = 'true'
             else:
                 soft_shutdown = 'false'
-            cfg.write(f'try_soft_shutdown={soft_shutdown}\n')
 
             if 'selected' in showpnames_chkb.state():
                 show_profilename = 'true'
             else:
                 show_profilename = 'false'
-            cfg.write(f'show_profilename={show_profilename}')
+
+            config_dict = {'locale': locale[locale_cb.current()],
+                           'try_soft_shutdown': soft_shutdown,
+                           'show_profilename': show_profilename}
+
+            yaml = YAML(typ='safe')
+            yaml.dump(config_dict, cfg)
+
         apply_label = tk.Label(settingswindow, text=_('Changes applied'))
         apply_label.pack(side='bottom')
         settingswindow.after(1000, apply_label.destroy)
-        save_dict()
         refresh()
 
     def ok():
@@ -885,11 +887,11 @@ def exit_after_restart():
             subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                            creationflags=0x08000000, check=True)
             print('Shutdown command sent. Waiting for Steam...')
-            sleep(2.5)
-            for x in range(5):
+            sleep(2)
+            for x in range(7):
                 if check_running('Steam.exe'):
-                    if x < 5:
-                        sleep(2.5)
+                    if x < 7:
+                        sleep(1.5)
                         continue
                     else:
                         msg = msgbox.askyesno(_('Alert'),
