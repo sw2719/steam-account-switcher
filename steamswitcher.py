@@ -55,7 +55,9 @@ def reset_config():
         if system_locale == 'ko_KR':
             locale_write = 'ko_KR'
 
-        default = {'locale': locale_write, 'try_soft_shutdown': 'true', 'show_profilename': 'true'}
+        default = {'locale': locale_write,
+                   'try_soft_shutdown': 'true',
+                   'show_profilename': 'true'}
         yaml.dump(default, cfg)
 
 
@@ -507,7 +509,9 @@ def addwindow():
             for name_to_write in name_buffer:
                 if name_to_write.strip():
                     if name_to_write not in accounts:
-                        acc_dict[len(acc_dict)] = {'accountname': name_to_write}
+                        acc_dict[len(acc_dict)] = {
+                            'accountname': name_to_write
+                            }
                     else:
                         print('Alert: Account %s already exists!'
                               % name_to_write)
