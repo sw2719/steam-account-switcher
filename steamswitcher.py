@@ -1082,6 +1082,13 @@ def draw_button():
             button_dict[username].pack(fill='x', padx=5, pady=3)
 
 
+def txt_deprecated():
+    msgbox.showinfo(_('Information'),
+                    _('With version 1.6, data format has been changed.') + '\n'
+                    + _('Please import/add your accounts again.') + '\n\n'
+                    + _('(You can delete accounts.txt if you want to.)'))
+
+
 def refresh():
     '''Refresh main window widgets'''
     global upper_frame
