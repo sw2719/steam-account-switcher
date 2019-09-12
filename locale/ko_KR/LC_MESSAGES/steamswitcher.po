@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-13 02:48+0900\n"
-"PO-Revision-Date: 2019-09-13 02:49+0900\n"
+"POT-Creation-Date: 2019-09-13 03:00+0900\n"
+"PO-Revision-Date: 2019-09-13 03:01+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -317,6 +317,22 @@ msgstr "추가된 계정 없음"
 #: steamswitcher.py:1016
 msgid "Current Auto-login user:"
 msgstr "현재 자동로그인 계정:"
+
+#: steamswitcher.py:1086
+msgid "Information"
+msgstr "정보"
+
+#: steamswitcher.py:1087
+msgid "With version 1.6, data format has been changed."
+msgstr "버전 1.6 에서, 데이터 포맷이 변경되었습니다."
+
+#: steamswitcher.py:1088
+msgid "Please import/add your accounts again."
+msgstr "계정을 다시 추가해주세요."
+
+#: steamswitcher.py:1089
+msgid "(You can delete accounts.txt if you want to.)"
+msgstr "(원하신다면 accounts.txt를 삭제하셔도 됩니다.)"
 
 #~ msgid "Use system language"
 #~ msgstr "시스템 언어 사용"
