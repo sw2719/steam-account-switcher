@@ -3,8 +3,6 @@ import os
 import zipfile as zf
 import locale
 
-whitelist = ('accounts.txt', 'updater', 'update.zip', 'config.txt')
-
 locale_buf = locale.getdefaultlocale()
 LOCALE = locale_buf[0]
 
