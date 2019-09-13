@@ -55,9 +55,9 @@ Written entirely in Python.
 * Added soft shutdown of Steam (v1.4)
 * Added ability to import accounts from Steam (v1.4)
 
-
 # Upcoming Features / Improvements
-* UI for settings (v1.6)
+* Auto launching app upon Steam restart (v1.7)
+* Setting custom name for accounts (Not planned but coming)
 * Improving code & readability (Continuous)
 
 # Source code information
