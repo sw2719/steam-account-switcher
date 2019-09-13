@@ -356,12 +356,41 @@ if fetch_reg('autologin'):
 else:
     print('Could not fetch autologin user information!')
 
+
+def convert_to_yaml():
+    try:
+        with open('accounts.txt', 'r') as txt:
+            namebuffer = txt.read().splitlines()
+
+        dump_dict = {}
+        accounts = [item for item in namebuffer if item.strip()]
+
+        for i, v in enumerate(accounts):
+            dump_dict[i] = {'accountname': v}
+
+        with open('accounts.yml', 'w') as acc:
+            yaml = YAML(typ='safe')
+            yaml.dump(dump_dict, acc)
+
+        os.remove('accounts.txt')
+    except Exception:
+        msgbox.showinfo(_('Information'),
+                        _('With version 1.6, data format has been changed.') + '\n'  # NOQA
+                      + _('Attempt to convert your account data has failed.') + '\n'  # NOQA
+                      + _('Please add them manually or try again by restarting app.'))  # NOQA
+        pass
+
+
+if os.path.isfile('accounts.txt'):
+    if not os.path.isfile('accounts.yml'):
+        convert_to_yaml()
+
 try:
     with open('accounts.yml', 'r') as acc:
         acc_dict = yaml.load(acc)
         accounts = []
         if acc_dict:
-            for x in range(len(acc_dict)):
+            for x in range(len(acc_dict)):  # to preserve the order
                 try:
                     cur_dict = acc_dict[x]
                     accounts.append(cur_dict['accountname'])
@@ -395,7 +424,7 @@ def fetchuser():
         acc_dict = yaml.load(acc)
         accounts = []
         if acc_dict:
-            for x in range(len(acc_dict)):
+            for x in range(len(acc_dict)):  # to preserve the order
                 try:
                     cur_dict = acc_dict[x]
                     accounts.append(cur_dict['accountname'])
@@ -1086,13 +1115,6 @@ def draw_button():
                                                    state='normal',
                                                    command=lambda name=username: button_func(name))  # NOQA
             button_dict[username].pack(fill='x', padx=5, pady=3)
-
-
-def txt_deprecated():
-    msgbox.showinfo(_('Information'),
-                    _('With version 1.6, data format has been changed.') + '\n'
-                    + _('Please import/add your accounts again.') + '\n\n'
-                    + _('(You can delete accounts.txt if you want to.)'))
 
 
 def refresh():
