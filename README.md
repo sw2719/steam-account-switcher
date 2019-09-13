@@ -7,6 +7,9 @@ Written entirely in Python.
 
 [See this program in action](https://youtu.be/WFtv10RZ_UA)
 
+STEAM is a trademark of Valve.
+This app has no affiliation with Steam or Valve.
+
 # Features
 * Switch between your accounts with just few clicks.
 
