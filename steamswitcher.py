@@ -831,7 +831,7 @@ def orderwindow():
                 self.insert(i-1, x)
                 self.curIndex = i
 
-    scrollbar = tk.Scrollbar(lbframe)
+    scrollbar = ttk.Scrollbar(lbframe)
     scrollbar.pack(side='right', fill='y')
 
     lb = DragDropListbox(lbframe, height=12, width=26,
@@ -854,7 +854,7 @@ def orderwindow():
     lbframe.pack(side='top', pady=5)
 
     lb_label1 = tk.Label(labelframe, text=_('Drag or use buttons below'))
-    lb_label2 = tk.Label(labelframe, text=_('to change order'))
+    lb_label2 = tk.Label(labelframe, text=_('to change order.'))
 
     lb_label1.pack()
     lb_label2.pack()
