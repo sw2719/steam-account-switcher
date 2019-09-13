@@ -44,7 +44,7 @@ def error_msg(title, content):
     sys.exit(1)
 
 
-yaml = YAML(typ='safe')
+yaml = YAML()
 
 
 def reset_config():
@@ -369,7 +369,7 @@ def convert_to_yaml():
             dump_dict[i] = {'accountname': v}
 
         with open('accounts.yml', 'w') as acc:
-            yaml = YAML(typ='safe')
+            yaml = YAML()
             yaml.dump(dump_dict, acc)
 
         os.remove('accounts.txt')
@@ -550,7 +550,7 @@ def addwindow():
                                         _('Account %s already exists.')
                                         % name_to_write)
             with open('accounts.yml', 'w') as acc:
-                yaml = YAML(typ='safe')
+                yaml = YAML()
                 yaml.dump(acc_dict, acc)
 
             cfg.close()
@@ -670,7 +670,7 @@ def importwindow():
             if value.get() == 1:
                 acc_dict[len(acc_dict)] = {'accountname': key}
         with open('accounts.yml', 'w') as acc:
-            yaml = YAML(typ='safe')
+            yaml = YAML()
             yaml.dump(acc_dict, acc)
         refresh()
         close()
@@ -766,7 +766,7 @@ def removewindow():
             for username in accounts:
                 if username not in to_remove:
                     dump_dict[len(dump_dict)] = {'accountname': username}
-            yaml = YAML(typ='safe')
+            yaml = YAML()
             yaml.dump(dump_dict, acc)
         refresh()
         close()
@@ -893,7 +893,7 @@ def orderwindow():
             dump_dict[x] = buffer_dict[x]
 
         with open('accounts.yml', 'w') as acc:
-            yaml = YAML(typ='safe')
+            yaml = YAML()
             yaml.dump(dump_dict, acc)
         refresh()
 
@@ -1023,7 +1023,7 @@ def settingswindow():
                            'try_soft_shutdown': soft_shutdown,
                            'show_profilename': show_profilename}
 
-            yaml = YAML(typ='safe')
+            yaml = YAML()
             yaml.dump(config_dict, cfg)
 
         refresh()
