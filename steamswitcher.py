@@ -1083,9 +1083,9 @@ def exit_after_restart():
                            creationflags=0x08000000, check=True)
             print('Shutdown command sent. Waiting for Steam...')
             sleep(2)
-            for x in range(7):
+            for x in range(8):
                 if check_running('Steam.exe'):
-                    if x < 7:
+                    if x < 8:
                         sleep(1.5)
                         continue
                     else:
