@@ -127,7 +127,7 @@ def start_checkupdate():
         dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
         try:
             update_text = tk.StringVar()
-            update_text.set(_('Downloading update...'))
+            update_text.set(_('Downloading update. Do not exit.'))
             update_label = tk.Label(update_frame, textvariable=update_text)
             update_label.pack()
             main.update()
@@ -394,13 +394,15 @@ def fetchuser():
     with open('accounts.yml', 'r') as acc:
         acc_dict = yaml.load(acc)
         accounts = []
-
-        for x in range(len(acc_dict)):
-            try:
-                cur_dict = acc_dict[x]
-                accounts.append(cur_dict['accountname'])
-            except KeyError:
-                break
+        if acc_dict:
+            for x in range(len(acc_dict)):
+                try:
+                    cur_dict = acc_dict[x]
+                    accounts.append(cur_dict['accountname'])
+                except KeyError:
+                    break
+        else:
+            acc_dict = {}
 
 
 def setkey(key_name, value, value_type):
@@ -849,7 +851,7 @@ def settingswindow():
 
     def ok():
         apply()
-        close()
+        settingswindow.destroy()
 
     settings_ok = ttk.Button(bottomframe_set,
                              text=_('OK'),
