@@ -660,7 +660,7 @@ def importwindow():
             checkbutton = ttk.Checkbutton(check_frame,
                                           text=v + f' ({PersonaName[i]})',
                                           variable=tk_var)
-
+            checkbutton.bind("<MouseWheel>", _on_mousewheel)
             checkbutton.pack(side='top', padx=2, anchor='w')
             check_dict[v] = tk_var
 
@@ -743,7 +743,7 @@ def removewindow():
         checkbutton = ttk.Checkbutton(check_frame,
                                       text=v,
                                       variable=tk_var)
-
+        checkbutton.bind("<MouseWheel>", _on_mousewheel)
         checkbutton.pack(side='top', padx=2, anchor='w')
         check_dict[v] = tk_var
 
@@ -784,6 +784,159 @@ def removewindow():
     remove_ok.pack(side='left', padx=5, pady=3)
 
 
+def orderwindow():
+    global accounts
+
+    orderwindow = tk.Toplevel(main)
+    orderwindow.title("")
+    orderwindow.geometry("210x300+650+300")
+    orderwindow.resizable(False, False)
+
+    bottomframe_windowctrl = tk.Frame(orderwindow)
+    bottomframe_windowctrl.pack(side='bottom', padx=3, pady=3)
+
+    bottomframe_orderctrl = tk.Frame(orderwindow)
+    bottomframe_orderctrl.pack(side='bottom', padx=3, pady=3)
+
+    labelframe = tk.Frame(orderwindow)
+    labelframe.pack(side='bottom', padx=3)
+
+    orderwindow.grab_set()
+    orderwindow.focus()
+
+    lbframe = tk.Frame(orderwindow)
+
+    class DragDropListbox(tk.Listbox):
+        '''Listbox with drag reordering of entries'''
+        def __init__(self, master, **kw):
+            kw['selectmode'] = tk.SINGLE
+            tk.Listbox.__init__(self, master, kw)
+            self.bind('<Button-1>', self.setCurrent)
+            self.bind('<B1-Motion>', self.shiftSelection)
+            self.curIndex = None
+
+        def setCurrent(self, event):
+            self.curIndex = self.nearest(event.y)
+
+        def shiftSelection(self, event):
+            i = self.nearest(event.y)
+            if i < self.curIndex:
+                x = self.get(i)
+                self.delete(i)
+                self.insert(i+1, x)
+                self.curIndex = i
+            elif i > self.curIndex:
+                x = self.get(i)
+                self.delete(i)
+                self.insert(i-1, x)
+                self.curIndex = i
+
+    scrollbar = tk.Scrollbar(lbframe)
+    scrollbar.pack(side='right', fill='y')
+
+    lb = DragDropListbox(lbframe, height=12, width=26,
+                         highlightthickness=0,
+                         yscrollcommand=scrollbar.set)
+
+    scrollbar["command"] = lb.yview
+
+    def _on_mousewheel(event):
+        '''Scroll window on mousewheel input'''
+        lb.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    lb.bind("<MouseWheel>", _on_mousewheel)
+    lb.pack(side='left')
+
+    for i, v in enumerate(accounts):
+        lb.insert(i, v)
+
+    lb.select_set(0)
+    lbframe.pack(side='top', pady=5)
+
+    lb_label1 = tk.Label(labelframe, text=_('Drag or use buttons below'))
+    lb_label2 = tk.Label(labelframe, text=_('to change order'))
+
+    lb_label1.pack()
+    lb_label2.pack()
+
+    def down():
+        i = lb.curselection()[0]
+        if i == lb.size() - 1:
+            return
+        x = lb.get(i)
+        lb.delete(i)
+        lb.insert(i+1, x)
+        lb.select_set(i+1)
+
+    def up():
+        i = lb.curselection()[0]
+        if i == 0:
+            return
+        x = lb.get(i)
+        lb.delete(i)
+        lb.insert(i-1, x)
+        lb.select_set(i-1)
+
+    def apply():
+        order = lb.get(0, tk.END)
+        print('New order is', order)
+
+        buffer_dict = {}
+
+        for item in acc_dict.items():
+            i = order.index(item[1]['accountname'])
+            buffer_dict[i] = item[1]
+
+        dump_dict = {}
+
+        for x in range(len(buffer_dict)):
+            dump_dict[x] = buffer_dict[x]
+
+        with open('accounts.yml', 'w') as acc:
+            yaml = YAML(typ='safe')
+            yaml.dump(dump_dict, acc)
+        refresh()
+
+    def close():
+        orderwindow.destroy()
+
+    def ok():
+        apply()
+        close()
+
+    button_up = ttk.Button(bottomframe_orderctrl,
+                           text=_('Up'), command=up)
+    button_up.pack(side='left', padx=2)
+
+    button_down = ttk.Button(bottomframe_orderctrl,
+                             text=_('Down'), command=down)
+    button_down.pack(side='right', padx=2)
+
+    button_ok = ttk.Button(bottomframe_windowctrl,
+                           width=8, text=_('OK'), command=ok)
+    button_ok.pack(side='left')
+    button_cancel = ttk.Button(bottomframe_windowctrl,
+                               width=8, text=_('Cancel'), command=close)
+    button_cancel.pack(side='left', padx=3)
+
+    button_apply = ttk.Button(bottomframe_windowctrl,
+                              width=8, text=_('Apply'))
+
+    def applybutton():
+        nonlocal button_apply
+
+        def enable():
+            button_apply['state'] = 'normal'
+
+        apply()
+        button_apply['state'] = 'disabled'
+        orderwindow.after(500, enable)
+
+    button_apply['command'] = applybutton
+
+    button_apply.pack(side='left')
+
+
 def settingswindow():
     '''Open settings window'''
     global config_dict
@@ -792,7 +945,7 @@ def settingswindow():
     settingswindow.geometry("260x210+650+300")
     settingswindow.resizable(False, False)
     bottomframe_set = tk.Frame(settingswindow)
-    bottomframe_set.pack(fill='x', side='bottom')
+    bottomframe_set.pack(side='bottom')
     settingswindow.grab_set()
     settingswindow.focus()
     print('Opened settings window.')
@@ -873,14 +1026,11 @@ def settingswindow():
             yaml = YAML(typ='safe')
             yaml.dump(config_dict, cfg)
 
-        apply_label = tk.Label(settingswindow, text=_('Changes applied'))
-        apply_label.pack(side='bottom')
-        settingswindow.after(1000, apply_label.destroy)
         refresh()
 
     def ok():
         apply()
-        settingswindow.destroy()
+        close()
 
     settings_ok = ttk.Button(bottomframe_set,
                              text=_('OK'),
@@ -894,8 +1044,18 @@ def settingswindow():
 
     settings_apply = ttk.Button(bottomframe_set,
                                 text=_('Apply'),
-                                command=apply,
                                 width=10)
+
+    def applybutton():
+        nonlocal settings_apply
+
+        def enable():
+            settings_apply['state'] = 'normal'
+        apply()
+        settings_apply['state'] = 'disabled'
+        settingswindow.after(500, enable)
+
+    settings_apply['command'] = applybutton
 
     settings_ok.pack(side='left', padx=3, pady=3)
     settings_cancel.pack(side='left', padx=3, pady=3)
@@ -989,15 +1149,22 @@ def_style = ttk.Style(main)
 def_style.configure(('TButton'))
 
 menubar = tk.Menu(main)
-account_menu = tk.Menu(menubar, tearoff=0)
-account_menu.add_command(label=_('Import accounts from Steam'),
-                         command=importwindow)
-account_menu.add_command(label=_("Add accounts"), command=addwindow)
-account_menu.add_command(label=_("Remove accounts"), command=removewindow)
-account_menu.add_separator()
-account_menu.add_command(label=_("Settings"), command=settingswindow)
-account_menu.add_command(label=_("About"), command=about)
-menubar.add_cascade(label=_("Menu"), menu=account_menu)
+menu = tk.Menu(menubar, tearoff=0)
+menu.add_command(label=_('Import accounts from Steam'),
+                 command=importwindow)
+menu.add_command(label=_("Add accounts"),
+                 command=addwindow)
+menu.add_command(label=_("Remove accounts"),
+                 command=removewindow)
+menu.add_command(label=_("Change account order"),
+                 command=orderwindow)
+menu.add_separator()
+menu.add_command(label=_("Settings"),
+                 command=settingswindow)
+menu.add_command(label=_("About"),
+                 command=about)
+
+menubar.add_cascade(label=_("Menu"), menu=menu)
 
 upper_frame = tk.Frame(main)
 button_frame = tk.Frame(main)
