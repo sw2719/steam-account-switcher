@@ -245,7 +245,7 @@ def start_checkupdate():
     main.after(300, get_output)
 
 
-if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
+def afterupdate():
     try:
         os.remove('update.zip')
     except Exception:
@@ -1303,6 +1303,10 @@ print('Init complete. Main app starting.')
 draw_button()
 main.config(menu=menubar)
 main.after(100, start_checkupdate)
+
+if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
+    main.after(150, afterupdate)
 if not accounts:
-    main.after(150, importwindow)
+    main.after(200, importwindow)
+
 main.mainloop()
