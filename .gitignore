@@ -137,3 +137,5 @@ setup_updater.py
 *.json
 *.bat
 messages.po
+*.yml
+*.py

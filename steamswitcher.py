@@ -1,6 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from tkinter import messagebox
+from tkinter import messagebox as msgbox
 from tkinter import filedialog
 import winreg
 import sys
@@ -15,14 +15,15 @@ import threading
 import queue as q
 from packaging import version
 from time import sleep
+from ruamel.yaml import YAML
 
 system_locale = locale.getdefaultlocale()[0]
 
-print('Program Start')
+print('App Start')
 
 BRANCH = 'master'
 
-__VERSION__ = '1.5_rev2'
+__VERSION__ = '1.6'
 
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
@@ -35,42 +36,40 @@ config_dict = {}
 
 
 def error_msg(title, content):
+    '''Show error message and exit'''
     root = tk.Tk()
     root.withdraw()
-    messagebox.showerror(title, content)
+    msgbox.showerror(title, content)
     root.destroy()
     sys.exit(1)
 
 
+yaml = YAML()
+
+
 def reset_config():
-    with open('config.txt', 'w') as cfg:
-        default = ['# Set language to use in the program (en_us, ko_KR)',
-                   '# Available values: system, ko_KR, en_US (Case sensitive)',
-                   '# If set to system, uses your Windows system locale.',
-                   '# en_US is used if your locale is not supported.',
-                   '',
-                   'locale=system',
-                   '',
-                   '# Determines whether to display your profile names along with your usernames or not',  # NOQA
-                   '# Available values: true, false (Case sensitive)',
-                   '',
-                   'show_profilename=true']
-        for line in default:
-            cfg.write(line + '\n')
+    '''Initialize config.txt with default values'''
+    with open('config.yml', 'w') as cfg:
+        locale_write = 'en_US'
+
+        if system_locale == 'ko_KR':
+            locale_write = 'ko_KR'
+
+        default = {'locale': locale_write,
+                   'try_soft_shutdown': 'true',
+                   'show_profilename': 'true'}
+        yaml.dump(default, cfg)
 
 
-if not os.path.isfile('config.txt'):
+if not os.path.isfile('config.yml'):
     reset_config()
 
-try:
-    with open('config.txt', 'r') as cfg:
-        data = cfg.read().splitlines()
-        for line in data:
-            if '#' in line or not line:
-                continue
-            buf = line.split('=')
-            config_dict[buf[0]] = buf[1]
-    if set(['locale', 'show_profilename']) != set(config_dict):
+try:  # Open config.txt and save values to config_dict
+    with open('config.yml', 'r') as cfg:
+        config_dict = yaml.load(cfg)
+
+    # If config file is invalid
+    if set(['locale', 'try_soft_shutdown', 'show_profilename']) != set(config_dict):  # NOQA
         reset_config()
         if system_locale == 'ko_KR':
             error_msg('설정 오류',
@@ -78,20 +77,17 @@ try:
                     + '프로그램을 재실행하십시오.')  # NOQA
         else:
             error_msg('Config Error',
-                      'Config file is reset because it was invalid\n'
+                      'Config file is reset because it was invalid.\n'
                     + 'Please restart the application.')  # NOQA
 except FileNotFoundError:
-    config_dict['locale'] == 'system'
-    config_dict['show_profilename'] == 'true'
+    reset_config()
 
-if config_dict['locale'] == 'system':
-    LOCALE = system_locale
-elif config_dict['locale'] in ['ko_KR', 'en_US']:
+if config_dict['locale'] in ['ko_KR', 'en_US']:
     LOCALE = config_dict['locale']
 else:
     LOCALE = 'en_US'
 
-print('System locale is', LOCALE)
+print('Using locale', LOCALE)
 
 t = gettext.translation('steamswitcher',
                         localedir='locale',
@@ -109,6 +105,7 @@ HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 
 
 def start_checkupdate():
+    '''Check if application has update'''
     update_frame = tk.Frame(main)
     update_frame.pack(side='bottom')
 
@@ -130,7 +127,7 @@ def start_checkupdate():
         dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
         try:
             update_text = tk.StringVar()
-            update_text.set(_('Downloading update...'))
+            update_text.set(_('Downloading update. Do not exit.'))
             update_label = tk.Label(update_frame, textvariable=update_text)
             update_label.pack()
             main.update()
@@ -145,6 +142,8 @@ def start_checkupdate():
     queue = q.Queue()
 
     def checkupdate():
+        '''Fetch version information from GitHub and
+        return different update codes'''
         print('Update check start')
         update_code = None
         try:
@@ -179,6 +178,7 @@ def start_checkupdate():
     sv_version = None
 
     def get_output():
+        '''Get version info from checkupdate() and draw UI accordingly.'''
         nonlocal update_code
         nonlocal sv_version
         nonlocal checking_label
@@ -245,14 +245,24 @@ def start_checkupdate():
     main.after(300, get_output)
 
 
-if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
+def afterupdate():
     try:
         os.remove('update.zip')
     except Exception:
         pass
+    finally:
+        if msgbox.askyesno(_('Update installed'),
+                           _('Version %s installed.') % __VERSION__
+                           + '\n' +
+                           _('See changes on GitHub releases?')):
+            os.startfile(
+                'https://github.com/sw2719/steam-account-switcher/releases')
 
 
 def check_running(process_name):
+    '''Check if given process is running and return boolean value.
+    :param process_name: Name of process to check
+    '''
     for process in psutil.process_iter():
         try:
             if process_name.lower() in process.name().lower():
@@ -264,6 +274,9 @@ def check_running(process_name):
 
 
 def fetch_reg(key):
+    '''Return given key's value from steam registry path.
+    :param key: 'username', 'autologin', 'steamexe', 'steampath'
+    '''
     if key == 'username':
         key_name = 'AutoLoginUser'
     elif key == 'autologin':
@@ -286,6 +299,11 @@ def fetch_reg(key):
 
 
 def loginusers(steam_path=fetch_reg('steampath')):
+    '''
+    Fetch loginusers.vdf and return AccountName and
+    PersonaName values as lists.
+    :param steam_path: Steam installation path override
+    '''
     if os.path.isfile('steam_path.txt'):
         with open('steam_path.txt', 'r') as path:
             steam_path = path.read()
@@ -319,6 +337,7 @@ def loginusers(steam_path=fetch_reg('steampath')):
 
 
 def autologinstr():
+    '''Return autologin status messages according to current config.'''
     value = fetch_reg('autologin')
     if value == 1:
         return_str = _('Auto-login Enabled')
@@ -337,18 +356,55 @@ if fetch_reg('autologin'):
 else:
     print('Could not fetch autologin user information!')
 
+
+def convert_to_yaml():
+    try:
+        with open('accounts.txt', 'r') as txt:
+            namebuffer = txt.read().splitlines()
+
+        dump_dict = {}
+        accounts = [item for item in namebuffer if item.strip()]
+
+        for i, v in enumerate(accounts):
+            dump_dict[i] = {'accountname': v}
+
+        with open('accounts.yml', 'w') as acc:
+            yaml = YAML()
+            yaml.dump(dump_dict, acc)
+
+        os.remove('accounts.txt')
+    except Exception:
+        msgbox.showinfo(_('Information'),
+                        _('With version 1.6, data format has been changed.') + '\n'  # NOQA
+                      + _('Attempt to convert your account data has failed.') + '\n'  # NOQA
+                      + _('Please add them manually or try again by restarting app.'))  # NOQA
+        pass
+
+
+if os.path.isfile('accounts.txt'):
+    if not os.path.isfile('accounts.yml'):
+        convert_to_yaml()
+
 try:
-    with open('accounts.txt', 'r') as txt:
-        namebuffer = txt.read().splitlines()
-
-    accounts = [item for item in namebuffer if not item.strip() == '']
-
+    with open('accounts.yml', 'r') as acc:
+        acc_dict = yaml.load(acc)
+        accounts = []
+        if acc_dict:
+            for x in range(len(acc_dict)):  # to preserve the order
+                try:
+                    cur_dict = acc_dict[x]
+                    accounts.append(cur_dict['accountname'])
+                except KeyError:
+                    break
+        else:
+            raise FileNotFoundError
     if not accounts:
         raise FileNotFoundError
-except FileNotFoundError:
-    txt = open('accounts.txt', 'w')
-    txt.close()
+except (FileNotFoundError, TypeError):
+    acc = open('accounts.yml', 'w')
+    acc.close()
     accounts = []
+    acc_dict = {}
 
 print('Detected ' + str(len(accounts)) + ' accounts:')
 
@@ -360,26 +416,43 @@ if accounts:
 
 
 def fetchuser():
+    '''Fetch accounts.yml file, add accountnames to list accounts
+    and save it to global list accounts'''
+    global acc_dict
     global accounts
-    txt = open('accounts.txt', 'r')
-    namebuffer = txt.read().splitlines()
-    txt.close()
-    accounts = [item for item in namebuffer if not item.strip() == '']
+    with open('accounts.yml', 'r') as acc:
+        acc_dict = yaml.load(acc)
+        accounts = []
+        if acc_dict:
+            for x in range(len(acc_dict)):  # to preserve the order
+                try:
+                    cur_dict = acc_dict[x]
+                    accounts.append(cur_dict['accountname'])
+                except KeyError:
+                    break
+        else:
+            acc_dict = {}
 
 
-def setkey(name, value, value_type):
+def setkey(key_name, value, value_type):
+    '''Change given key's value to given value.
+    :param key_name: Name of key to change value of
+    :param value: Value to change to
+    :param value_type: Registry value type
+    '''
     try:
         reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam", 0,
                                  winreg.KEY_ALL_ACCESS)
 
-        winreg.SetValueEx(reg_key, name, 0, value_type, value)
+        winreg.SetValueEx(reg_key, key_name, 0, value_type, value)
         winreg.CloseKey(reg_key)
-        print("Changed %s's value to %s" % (name, str(value)))
+        print("Changed %s's value to %s" % (key_name, str(value)))
     except OSError:
         error_msg(_('Registry Error'), _('Failed to change registry value.'))
 
 
 def toggleAutologin():
+    '''Toggle autologin registry value between 0 and 1'''
     if fetch_reg('autologin') == 1:
         value = 0
     elif fetch_reg('autologin') == 0:
@@ -388,21 +461,20 @@ def toggleAutologin():
     refresh()
 
 
-def about():  # 정보 창
+def about():
+    '''Open about window'''
     aboutwindow = tk.Toplevel(main)
     aboutwindow.title(_('About'))
-    aboutwindow.geometry("360x270+650+300")
+    aboutwindow.geometry("360x250+650+300")
     aboutwindow.resizable(False, False)
     about_row = tk.Label(aboutwindow, text=_('Made by sw2719 (Myeuaa)'))
     about_steam = tk.Label(aboutwindow,
                            text='Steam: https://steamcommunity.com/'
                            + 'id/muangmuang')
     about_email = tk.Label(aboutwindow, text='E-mail: sw2719@naver.com')
-    if LOCALE == 'ko_KR':
-        about_discord = tk.Label(aboutwindow, text='Discord: 꺔먕#6678')
     about_disclaimer = tk.Label(aboutwindow,
-                                text=_('Warning: The developer of this program is not responsible for')  # NOQA
-                                + '\n' + _('data loss or any other damage from the use of this program.'))  # NOQA
+                                text=_('Warning: The developer of this application is not responsible for')  # NOQA
+                                + '\n' + _('data loss or any other damage from the use of this app.'))  # NOQA
     about_steam_trademark = tk.Label(aboutwindow, text=_('STEAM is a registered trademark of Valve Corporation.'))  # NOQA
     copyright_label = tk.Label(aboutwindow, text='Copyright (c) sw2719 | All Rights Reserved\n'  # NOQA
                                + 'Licensed under the MIT License.')
@@ -419,8 +491,6 @@ def about():  # 정보 창
     about_row.pack(pady=8)
     about_steam.pack()
     about_email.pack()
-    if LOCALE == 'ko_KR':
-        about_discord.pack()
     about_disclaimer.pack(pady=5)
     about_steam_trademark.pack()
     copyright_label.pack(pady=5)
@@ -428,8 +498,10 @@ def about():  # 정보 창
     button_exit.pack(side='bottom', pady=5)
 
 
-def addwindow():  # 계정 추가 창
+def addwindow():
+    '''Open add accounts window'''
     global accounts
+    global acc_dict
 
     addwindow = tk.Toplevel(main)
     addwindow.title(_("Add"))
@@ -457,34 +529,31 @@ def addwindow():  # 계정 추가 창
     print('Opened add window.')
 
     def adduser(userinput):
+        global acc_dict
+        '''Write accounts from user's input to accounts.txt
+        :param userinput: Account names to add
+        '''
         if userinput.strip():
-            try:
-                with open('accounts.txt', 'r') as txt:
-                    lastname = txt.readlines()[-1]
-                    if '\n' not in lastname:
-                        prefix = '\n'
-                    else:
-                        raise IndexError
-            except IndexError:
-                prefix = ''
-
-            txt = open('accounts.txt', 'a')
+            cfg = open('accounts.yml', 'w')
             name_buffer = userinput.split("/")
 
             for name_to_write in name_buffer:
                 if name_to_write.strip():
                     if name_to_write not in accounts:
-                        print('Writing ' + name_to_write)
-                        txt.write(prefix + name_to_write.strip() + '\n')
-                        accounts.append(name_to_write.strip())
+                        acc_dict[len(acc_dict)] = {
+                            'accountname': name_to_write
+                            }
                     else:
                         print('Alert: Account %s already exists!'
                               % name_to_write)
-                        messagebox.showinfo(_('Duplicate Alert'),
-                                            _('Account %s already exists.')
-                                            % name_to_write)
+                        msgbox.showinfo(_('Duplicate Alert'),
+                                        _('Account %s already exists.')
+                                        % name_to_write)
+            with open('accounts.yml', 'w') as acc:
+                yaml = YAML()
+                yaml.dump(acc_dict, acc)
 
-            txt.close()
+            cfg.close()
             refresh()
         addwindow.destroy()
 
@@ -508,11 +577,13 @@ def addwindow():  # 계정 추가 창
 
 
 def importwindow():
+    '''Open import accounts window'''
     global accounts
+    global acc_dict
     if loginusers():
         AccountName, PersonaName = loginusers()
     else:
-        try_manually = messagebox.askyesno(_('Warning'), _('Could not load loginusers.vdf.')  # NOQA
+        try_manually = msgbox.askyesno(_('Alert'), _('Could not load loginusers.vdf.')  # NOQA
                                + '\n' + _('This may be because Steam directory defined')  # NOQA
                                + '\n' + _('in registry is invalid.')  # NOQA
                                + '\n\n' + _('Do you want to select Steam directory manually?'))  # NOQA
@@ -525,7 +596,7 @@ def importwindow():
                         path.write(input_dir)
                     break
                 else:
-                    try_again = messagebox.askyesno(_('Warning'),
+                    try_again = msgbox.askyesno(_('Warning'),
                                                     _('Steam directory is invalid.')  # NOQA
                                                     + '\n' + _('Try again?'))
                     if try_again:
@@ -575,6 +646,12 @@ def importwindow():
     check_frame.bind("<Configure>", lambda event,
                      canvas=canvas: onFrameConfigure(canvas))
 
+    def _on_mousewheel(event):
+        '''Scroll window on mousewheel input'''
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    canvas.bind("<MouseWheel>", _on_mousewheel)
+
     check_dict = {}
 
     for i, v in enumerate(AccountName):
@@ -583,15 +660,18 @@ def importwindow():
             checkbutton = ttk.Checkbutton(check_frame,
                                           text=v + f' ({PersonaName[i]})',
                                           variable=tk_var)
-
+            checkbutton.bind("<MouseWheel>", _on_mousewheel)
             checkbutton.pack(side='top', padx=2, anchor='w')
             check_dict[v] = tk_var
 
     def import_user():
-        with open('accounts.txt', 'a') as txt:
-            for key, value in check_dict.items():
-                if value.get() == 1:
-                    txt.write(key + '\n')
+        global acc_dict
+        for key, value in check_dict.items():
+            if value.get() == 1:
+                acc_dict[len(acc_dict)] = {'accountname': key}
+        with open('accounts.yml', 'w') as acc:
+            yaml = YAML()
+            yaml.dump(acc_dict, acc)
         refresh()
         close()
 
@@ -609,10 +689,11 @@ def importwindow():
 
 
 def removewindow():
+    '''Open remove accounts window'''
     global accounts
     if not accounts:
-        messagebox.showinfo(_('No Accounts'),
-                            _("There's no account to remove."))
+        msgbox.showinfo(_('No Accounts'),
+                        _("There's no account to remove."))
         return
     removewindow = tk.Toplevel(main)
     removewindow.title(_("Remove"))
@@ -631,18 +712,44 @@ def removewindow():
     def close():
         removewindow.destroy()
 
+    def onFrameConfigure(canvas):
+        '''Reset the scroll region to encompass the inner frame'''
+        canvas.configure(scrollregion=canvas.bbox("all"))
+
+    canvas = tk.Canvas(removewindow, borderwidth=0, highlightthickness=0)
+    check_frame = tk.Frame(canvas)
+    scroll_bar = ttk.Scrollbar(removewindow,
+                               orient="vertical",
+                               command=canvas.yview)
+
+    canvas.configure(yscrollcommand=scroll_bar.set)
+
+    scroll_bar.pack(side="right", fill="y")
+    canvas.pack(side="left", fill="both", expand=True)
+    canvas.create_window((4, 4), window=check_frame, anchor="nw")
+
+    def _on_mousewheel(event):
+        '''Scroll window on mousewheel input'''
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    check_frame.bind("<Configure>", lambda event,
+                     canvas=canvas: onFrameConfigure(canvas))
+    canvas.bind("<MouseWheel>", _on_mousewheel)
+
     check_dict = {}
 
     for v in accounts:
         tk_var = tk.IntVar()
-        checkbutton = ttk.Checkbutton(removewindow,
+        checkbutton = ttk.Checkbutton(check_frame,
                                       text=v,
                                       variable=tk_var)
-
+        checkbutton.bind("<MouseWheel>", _on_mousewheel)
         checkbutton.pack(side='top', padx=2, anchor='w')
         check_dict[v] = tk_var
 
     def removeuser():
+        '''Write accounts to accounts.txt except the
+        ones user wants to delete'''
         print('Remove function start')
         to_remove = []
         for v in accounts:
@@ -652,11 +759,15 @@ def removewindow():
             else:
                 continue
 
+        dump_dict = {}
+
         print('Removing selected accounts...')
-        with open('accounts.txt', 'w') as txt:
+        with open('accounts.yml', 'w') as acc:
             for username in accounts:
                 if username not in to_remove:
-                    txt.write(username + '\n')
+                    dump_dict[len(dump_dict)] = {'accountname': username}
+            yaml = YAML()
+            yaml.dump(dump_dict, acc)
         refresh()
         close()
 
@@ -673,9 +784,289 @@ def removewindow():
     remove_ok.pack(side='left', padx=5, pady=3)
 
 
-def exit_after_restart(graceful):
+def orderwindow():
+    '''Open order change window'''
+    global accounts
+
+    orderwindow = tk.Toplevel(main)
+    orderwindow.title("")
+    orderwindow.geometry("210x300+650+300")
+    orderwindow.resizable(False, False)
+
+    bottomframe_windowctrl = tk.Frame(orderwindow)
+    bottomframe_windowctrl.pack(side='bottom', padx=3, pady=3)
+
+    bottomframe_orderctrl = tk.Frame(orderwindow)
+    bottomframe_orderctrl.pack(side='bottom', padx=3, pady=3)
+
+    labelframe = tk.Frame(orderwindow)
+    labelframe.pack(side='bottom', padx=3)
+
+    orderwindow.grab_set()
+    orderwindow.focus()
+
+    lbframe = tk.Frame(orderwindow)
+
+    class DragDropListbox(tk.Listbox):
+        '''Listbox with drag reordering of entries'''
+        def __init__(self, master, **kw):
+            kw['selectmode'] = tk.SINGLE
+            tk.Listbox.__init__(self, master, kw)
+            self.bind('<Button-1>', self.setCurrent)
+            self.bind('<B1-Motion>', self.shiftSelection)
+            self.curIndex = None
+
+        def setCurrent(self, event):
+            self.curIndex = self.nearest(event.y)
+
+        def shiftSelection(self, event):
+            i = self.nearest(event.y)
+            if i < self.curIndex:
+                x = self.get(i)
+                self.delete(i)
+                self.insert(i+1, x)
+                self.curIndex = i
+            elif i > self.curIndex:
+                x = self.get(i)
+                self.delete(i)
+                self.insert(i-1, x)
+                self.curIndex = i
+
+    scrollbar = ttk.Scrollbar(lbframe)
+    scrollbar.pack(side='right', fill='y')
+
+    lb = DragDropListbox(lbframe, height=12, width=26,
+                         highlightthickness=0,
+                         yscrollcommand=scrollbar.set)
+
+    scrollbar["command"] = lb.yview
+
+    def _on_mousewheel(event):
+        '''Scroll window on mousewheel input'''
+        lb.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    lb.bind("<MouseWheel>", _on_mousewheel)
+    lb.pack(side='left')
+
+    for i, v in enumerate(accounts):
+        lb.insert(i, v)
+
+    lb.select_set(0)
+    lbframe.pack(side='top', pady=5)
+
+    lb_label1 = tk.Label(labelframe, text=_('Drag or use buttons below'))
+    lb_label2 = tk.Label(labelframe, text=_('to change order.'))
+
+    lb_label1.pack()
+    lb_label2.pack()
+
+    def down():
+        i = lb.curselection()[0]
+        if i == lb.size() - 1:
+            return
+        x = lb.get(i)
+        lb.delete(i)
+        lb.insert(i+1, x)
+        lb.select_set(i+1)
+
+    def up():
+        i = lb.curselection()[0]
+        if i == 0:
+            return
+        x = lb.get(i)
+        lb.delete(i)
+        lb.insert(i-1, x)
+        lb.select_set(i-1)
+
+    def apply():
+        order = lb.get(0, tk.END)
+        print('New order is', order)
+
+        buffer_dict = {}
+
+        for item in acc_dict.items():
+            i = order.index(item[1]['accountname'])
+            buffer_dict[i] = item[1]
+
+        dump_dict = {}
+
+        for x in range(len(buffer_dict)):
+            dump_dict[x] = buffer_dict[x]
+
+        with open('accounts.yml', 'w') as acc:
+            yaml = YAML()
+            yaml.dump(dump_dict, acc)
+        refresh()
+
+    def close():
+        orderwindow.destroy()
+
+    def ok():
+        apply()
+        close()
+
+    button_up = ttk.Button(bottomframe_orderctrl,
+                           text=_('Up'), command=up)
+    button_up.pack(side='left', padx=2)
+
+    button_down = ttk.Button(bottomframe_orderctrl,
+                             text=_('Down'), command=down)
+    button_down.pack(side='right', padx=2)
+
+    button_ok = ttk.Button(bottomframe_windowctrl,
+                           width=8, text=_('OK'), command=ok)
+    button_ok.pack(side='left')
+    button_cancel = ttk.Button(bottomframe_windowctrl,
+                               width=8, text=_('Cancel'), command=close)
+    button_cancel.pack(side='left', padx=3)
+
+    button_apply = ttk.Button(bottomframe_windowctrl,
+                              width=8, text=_('Apply'))
+
+    def applybutton():
+        nonlocal button_apply
+
+        def enable():
+            button_apply['state'] = 'normal'
+
+        apply()
+        button_apply['state'] = 'disabled'
+        orderwindow.after(500, enable)
+
+    button_apply['command'] = applybutton
+
+    button_apply.pack(side='left')
+
+
+def settingswindow():
+    '''Open settings window'''
+    global config_dict
+    settingswindow = tk.Toplevel(main)
+    settingswindow.title(_("Settings"))
+    settingswindow.geometry("260x210+650+300")
+    settingswindow.resizable(False, False)
+    bottomframe_set = tk.Frame(settingswindow)
+    bottomframe_set.pack(side='bottom')
+    settingswindow.grab_set()
+    settingswindow.focus()
+    print('Opened settings window.')
+
+    localeframe = tk.Frame(settingswindow)
+    localeframe.pack(side='top', padx=10, pady=14)
+    locale_label = tk.Label(localeframe, text=_('Language'))
+    locale_label.pack(side='left', padx=3)
+    locale_cb = ttk.Combobox(localeframe,
+                             state="readonly",
+                             values=['English',  # 0
+                                     '한국어 (Korean)'])  # 1
+    if config_dict['locale'] == 'en_US':
+        locale_cb.current(0)
+    elif config_dict['locale'] == 'ko_KR':
+        locale_cb.current(1)
+
+    locale_cb.pack(side='left', padx=3)
+
+    restart_frame = tk.Frame(settingswindow)
+    restart_frame.pack(side='top')
+
+    restart_label = tk.Label(restart_frame,
+                             text=_('Restart app to apply language settings.'))
+    restart_label.pack()
+
+    softshutdwn_frame = tk.Frame(settingswindow)
+    softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=18)
+
+    soft_chkb = ttk.Checkbutton(softshutdwn_frame,
+                                text=_('Try to soft shutdown Steam client'))
+
+    soft_chkb.state(['!alternate'])
+    if config_dict['try_soft_shutdown'] == 'true':
+        soft_chkb.state(['selected'])
+    else:
+        soft_chkb.state(['!selected'])
+
+    soft_chkb.pack(side='left')
+
+    showpnames_frame = tk.Frame(settingswindow)
+    showpnames_frame.pack(fill='x', side='top', padx=12, pady=1)
+
+    showpnames_chkb = ttk.Checkbutton(showpnames_frame,
+                                      text=_('Show profile names'))
+
+    showpnames_chkb.state(['!alternate'])
+    if config_dict['show_profilename'] == 'true':
+        showpnames_chkb.state(['selected'])
+    else:
+        showpnames_chkb.state(['!selected'])
+
+    showpnames_chkb.pack(side='left')
+
+    def close():
+        settingswindow.destroy()
+
+    def apply():
+        global config_dict
+        '''Write new config values to config.txt'''
+        with open('config.yml', 'w') as cfg:
+            locale = ('en_US', 'ko_KR')
+
+            if 'selected' in soft_chkb.state():
+                soft_shutdown = 'true'
+            else:
+                soft_shutdown = 'false'
+
+            if 'selected' in showpnames_chkb.state():
+                show_profilename = 'true'
+            else:
+                show_profilename = 'false'
+
+            config_dict = {'locale': locale[locale_cb.current()],
+                           'try_soft_shutdown': soft_shutdown,
+                           'show_profilename': show_profilename}
+
+            yaml = YAML()
+            yaml.dump(config_dict, cfg)
+
+        refresh()
+
+    def ok():
+        apply()
+        close()
+
+    settings_ok = ttk.Button(bottomframe_set,
+                             text=_('OK'),
+                             command=ok,
+                             width=10)
+
+    settings_cancel = ttk.Button(bottomframe_set,
+                                 text=_('Cancel'),
+                                 command=close,
+                                 width=10)
+
+    settings_apply = ttk.Button(bottomframe_set,
+                                text=_('Apply'),
+                                width=10)
+
+    def applybutton():
+        nonlocal settings_apply
+
+        def enable():
+            settings_apply['state'] = 'normal'
+        apply()
+        settings_apply['state'] = 'disabled'
+        settingswindow.after(500, enable)
+
+    settings_apply['command'] = applybutton
+
+    settings_ok.pack(side='left', padx=3, pady=3)
+    settings_cancel.pack(side='left', padx=3, pady=3)
+    settings_apply.pack(side='left', padx=3, pady=3)
+
+
+def exit_after_restart():
+    '''Restart Steam client and exit application'''
     try:
-        if graceful is False:
+        if config_dict['try_soft_shutdown'] == 'false':
             raise FileNotFoundError
         if check_running('Steam.exe'):
             print('Soft shutdown mode')
@@ -692,7 +1083,25 @@ def exit_after_restart(graceful):
             subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                            creationflags=0x08000000, check=True)
             print('Shutdown command sent. Waiting for Steam...')
-            sleep(2.5)
+            sleep(2)
+            for x in range(8):
+                if check_running('Steam.exe'):
+                    if x < 8:
+                        sleep(1.5)
+                        continue
+                    else:
+                        msg = msgbox.askyesno(_('Alert'),
+                                            _('After soft shutdown attempt,') + '\n' +  # NOQA
+                                            _('Steam appears to be still running.') + '\n\n' +   # NOQA
+                                            _('Do you want to force shutdown Steam?'))  # NOQA
+                        if msg:
+                            raise FileNotFoundError
+                        else:
+                            error_msg(_('Error'),
+                                      _('Could not soft shutdown Steam.')
+                                      + '\n' + _('App will now exit.'))
+                else:
+                    break
         else:
             print('Steam is not running.')
     except (FileNotFoundError, subprocess.CalledProcessError):
@@ -709,13 +1118,15 @@ def exit_after_restart(graceful):
         subprocess.run("start steam://open/main",
                        shell=True, check=True)
     except subprocess.CalledProcessError:
-        messagebox.showerror(_('Error'),
-                             _('Could not start Steam automatically')
-                             + '\n' + _('for unknown reason.'))
+        msgbox.showerror(_('Error'),
+                         _('Could not start Steam automatically')
+                         + '\n' + _('for unknown reason.'))
     main.quit()
 
 
-def window_height(accounts):
+def window_height():
+    global accounts
+    '''Return window height according to number of accounts'''
     if accounts:
         to_multiply = len(accounts) - 1
     else:
@@ -728,8 +1139,8 @@ def window_height(accounts):
 main = tk.Tk()
 main.title(_("Account Switcher"))
 
-main.geometry("300x%s+600+250" %  # 기본 창 높이 140 버튼 1개당 32 증가
-              window_height(accounts))  # window_height 함수 참조
+main.geometry("300x%s+600+250" %
+              window_height())
 main.resizable(False, False)
 
 sel_style = ttk.Style(main)
@@ -739,26 +1150,31 @@ def_style = ttk.Style(main)
 def_style.configure(('TButton'))
 
 menubar = tk.Menu(main)
-account_menu = tk.Menu(menubar, tearoff=0)
-account_menu.add_command(label=_('Import accounts from Steam'),
-                         command=importwindow)
-account_menu.add_command(label=_("Add accounts"), command=addwindow)
-account_menu.add_command(label=_("Remove accounts"), command=removewindow)
-account_menu.add_separator()
-account_menu.add_command(label=_("About"), command=about)
-menubar.add_cascade(label=_("Menu"), menu=account_menu)
+menu = tk.Menu(menubar, tearoff=0)
+menu.add_command(label=_('Import accounts from Steam'),
+                 command=importwindow)
+menu.add_command(label=_("Add accounts"),
+                 command=addwindow)
+menu.add_command(label=_("Remove accounts"),
+                 command=removewindow)
+menu.add_command(label=_("Change account order"),
+                 command=orderwindow)
+menu.add_separator()
+menu.add_command(label=_("Settings"),
+                 command=settingswindow)
+menu.add_command(label=_("About"),
+                 command=about)
+
+menubar.add_cascade(label=_("Menu"), menu=menu)
 
 upper_frame = tk.Frame(main)
-upper_frame.pack(side='top', fill='x')
-
 button_frame = tk.Frame(main)
-button_frame.pack(side='top', fill='x')
 
 bottomframe = tk.Frame(main)
 bottomframe.pack(side='bottom')
 
 button_toggle = ttk.Button(bottomframe,
-                           width=14,
+                           width=15,
                            text=_('Toggle auto-login'),
                            command=toggleAutologin)
 
@@ -768,18 +1184,20 @@ button_quit = ttk.Button(bottomframe,
                          command=main.quit)
 
 button_restart = ttk.Button(bottomframe,
-                            width=18,
+                            width=20,
                             text=_('Restart Steam & exit'),
-                            command=lambda: exit_after_restart(True))
+                            command=exit_after_restart)
 
-button_toggle.pack(side='left', padx=4, pady=3)
-button_quit.pack(side='left', padx=4, pady=3)
-button_restart.pack(side='right', padx=4, pady=3)
+button_toggle.pack(side='left', padx=3, pady=3)
+button_quit.pack(side='left', pady=3)
+button_restart.pack(side='right', padx=3, pady=3)
 
 nouser_label = tk.Label(main, text=_('No accounts added'))
 
 
-def draw_button(accounts):
+def draw_button():
+    '''Draw account switch buttons on main window.'''
+    global accounts
     global upper_frame
     global button_frame
     global nouser_label
@@ -815,7 +1233,10 @@ def draw_button(accounts):
 
     def button_func(username):
         current_user = fetch_reg('username')
-        button_dict[current_user].config(style='TButton', state='normal')
+        try:
+            button_dict[current_user].config(style='TButton', state='normal')
+        except KeyError:
+            pass
         setkey('AutoLoginUser', username, winreg.REG_SZ)
         button_dict[username].config(style='sel.TButton', state='disabled')
         user_var.set(fetch_reg('username'))
@@ -865,6 +1286,7 @@ def draw_button(accounts):
 
 
 def refresh():
+    '''Refresh main window widgets'''
     global upper_frame
     global button_frame
     global accounts
@@ -872,15 +1294,19 @@ def refresh():
     upper_frame.destroy()
     button_frame.destroy()
     main.geometry("300x%s" %
-                  window_height(accounts))
-    draw_button(accounts)
+                  window_height())
+    draw_button()
     print('Menu refreshed with %s account(s)' % len(accounts))
 
 
 print('Init complete. Main app starting.')
-draw_button(accounts)
+draw_button()
 main.config(menu=menubar)
 main.after(100, start_checkupdate)
+
+if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
+    main.after(150, afterupdate)
 if not accounts:
-    main.after(150, importwindow)
+    main.after(200, importwindow)
+
 main.mainloop()
