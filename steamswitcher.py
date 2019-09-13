@@ -416,10 +416,10 @@ if accounts:
 
 
 def fetchuser():
-    global acc_dict
-    global accounts
     '''Fetch accounts.yml file, add accountnames to list accounts
     and save it to global list accounts'''
+    global acc_dict
+    global accounts
     with open('accounts.yml', 'r') as acc:
         acc_dict = yaml.load(acc)
         accounts = []
@@ -785,6 +785,7 @@ def removewindow():
 
 
 def orderwindow():
+    '''Open order change window'''
     global accounts
 
     orderwindow = tk.Toplevel(main)
