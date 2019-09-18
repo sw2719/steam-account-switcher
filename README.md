@@ -11,6 +11,9 @@ STEAM is a trademark of Valve.
 
 This app has no affiliation with Steam or Valve.
 
+# Announcements
+There won't be an update for a while to reduce version fragmentation. Versions prior to 1.6 has some issues with going forward. If you see this, please DO update to the latest version.
+
 # Features
 * Switch between your accounts with just few clicks.
 
