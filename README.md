@@ -13,6 +13,7 @@ This app has no affiliation with Steam or Valve.
 
 # Current Status
 * Working on a new update checking system. This will roll out with 1.7.
+* Current auto updating implementation has some issues and i'm looking for better ways.
 
 # Features
 * Switch between your accounts with just few clicks.
