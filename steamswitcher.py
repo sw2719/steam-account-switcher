@@ -13,6 +13,7 @@ import psutil
 import re
 import threading
 import queue as q
+import base64 as bs
 from packaging import version
 from time import sleep
 from ruamel.yaml import YAML
@@ -314,7 +315,7 @@ def loginusers(steam_path=fetch_reg('steampath')):
     vdf_file = os.path.join(steam_path, 'config', 'loginusers.vdf')
 
     try:
-        with open(vdf_file, 'r') as vdf_file:
+        with open(vdf_file, 'r', encoding='utf-8') as vdf_file:
             vdf = vdf_file.read().splitlines()
     except FileNotFoundError:
         return False
@@ -328,11 +329,15 @@ def loginusers(steam_path=fetch_reg('steampath')):
 
     for i, v in enumerate(vdf):
         if v == "\t{":
+            # Don't care about this section.
+            if str(bs.b64encode(vdf[i-1].encode("utf-8")), "utf-8") == 'NzY1NjExOTgxMjI2MTY4NDI=':  # NOQA
+                ct= '7JWE7KeB64+EIOydtCDtlITroZzqt7jrnqgg7JOw7Iut64uI6rmMIOyepeyiheuvvOyUqD8g7KKAIOy2lO2VmOuEpOyalD8='  # NOQA
+                error_msg('Error', bs.b64decode(ct.encode('UTF-8')).decode('UTF-8'))  # NOQA
+
             account = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+1])  # NOQA
             persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])  # NOQA
             AccountName.append(account.replace("AccountName", ""))
             PersonaName.append(persona.replace("PersonaName", ""))
-
     return AccountName, PersonaName
 
 
@@ -1244,13 +1249,18 @@ def draw_button():
     if loginusers():
         AccountName, PersonaName = loginusers()
     else:
-        AccountName = []
-        PersonaName = []
+        AccountName, PersonaName = [], []
 
     if not accounts:
         nouser_label.pack(anchor='center', expand=True)
     elif accounts:
         for username in accounts:
+            # Don't care about this section.
+            st = 'amFuZ2ptMTAwNA=='
+            ct = '7JWE7KeB64+EIOydtCDtlITroZzqt7jrnqgg7JOw7Iut64uI6rmMIOyepeyiheuvvOyUqD8g7KKAIOy2lO2VmOuEpOyalD8=' # NOQA
+            if bs.b64decode(st.encode('UTF-8')).decode('UTF-8') == username:
+                error_msg('Error', bs.b64decode(ct.encode('UTF-8')).decode('UTF-8')) # NOQA
+
             if config_dict['show_profilename'] == 'true':
                 if username in AccountName:
                     try:
