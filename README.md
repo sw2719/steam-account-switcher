@@ -64,7 +64,7 @@ This app has no affiliation with Steam or Valve.
 * Added ability to import accounts from Steam (v1.4)
 
 # Upcoming Features / Improvements
-* Auto launching app upon Steam restart (v1.7)
+* Auto launching app upon Steam restart (Not planned but coming)
 * Setting custom name for accounts (Not planned but coming)
 * Improving code & readability (Continuous)
 
