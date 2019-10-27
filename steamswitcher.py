@@ -13,7 +13,8 @@ import psutil
 import re
 import threading
 import queue as q
-import base64 as bs
+import zipfile as zf
+import shutil
 from packaging import version
 from time import sleep
 from ruamel.yaml import YAML
@@ -24,11 +25,16 @@ print('App Start')
 
 BRANCH = 'master'
 
-__VERSION__ = '1.6'
+__VERSION__ = '1.7'
 
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
     BUNDLE = True
+    if os.path.isdir('updater'):
+        try:
+            shutil.rmtree('updater')
+        except OSError:
+            pass
 else:
     print('Running in a Python interpreter')
     BUNDLE = False
@@ -137,8 +143,17 @@ def start_checkupdate():
             return
         with open('update.zip', 'wb') as f:
             f.write(response.content)
-        subprocess.run('start updater/updater.exe', shell=True)
-        sys.exit(0)
+        try:
+            archive = os.path.join(os.getcwd(), 'update.zip')
+
+            f = zf.ZipFile(archive, mode='r')
+            f.extractall(members=(member for member in f.namelist() if 'updater' in member)) # NOQA
+
+            subprocess.run('start updater/updater.exe', shell=True)
+            sys.exit(0)
+        except (FileNotFoundError, zf.BadZipfile, OSError):
+            error_msg(_('Error'), _("Couldn't perform automatic update.") + '\n' + # NOQA
+                      _('Update manually by extracting update.zip file.'))
 
     queue = q.Queue()
 
@@ -247,17 +262,18 @@ def start_checkupdate():
 
 
 def afterupdate():
-    try:
-        os.remove('update.zip')
-    except Exception:
-        pass
-    finally:
-        if msgbox.askyesno(_('Update installed'),
-                           _('Version %s installed.') % __VERSION__
-                           + '\n' +
-                           _('See changes on GitHub releases?')):
-            os.startfile(
-                'https://github.com/sw2719/steam-account-switcher/releases')
+    if os.path.isfile('update.zip'):
+        try:
+            os.remove('update.zip')
+        except OSError:
+            pass
+
+    if msgbox.askyesno(_('Update installed'),
+                       _('Version %s installed.') % __VERSION__
+                       + '\n' +
+                       _('See changes on GitHub releases?')):
+        os.startfile(
+            'https://github.com/sw2719/steam-account-switcher/releases')
 
 
 def check_running(process_name):
@@ -329,11 +345,6 @@ def loginusers(steam_path=fetch_reg('steampath')):
 
     for i, v in enumerate(vdf):
         if v == "\t{":
-            # Don't care about this section.
-            if str(bs.b64encode(vdf[i-1].encode("utf-8")), "utf-8") == 'NzY1NjExOTgxMjI2MTY4NDI=':  # NOQA
-                ct= '7JWE7KeB64+EIOydtCDtlITroZzqt7jrnqgg7JOw7Iut64uI6rmMIOyepeyiheuvvOyUqD8g7KKAIOy2lO2VmOuEpOyalD8='  # NOQA
-                error_msg('Error', bs.b64decode(ct.encode('UTF-8')).decode('UTF-8'))  # NOQA
-
             account = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+1])  # NOQA
             persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])  # NOQA
             AccountName.append(account.replace("AccountName", ""))
@@ -1246,22 +1257,16 @@ def draw_button():
         button_dict[username].config(style='sel.TButton', state='disabled')
         user_var.set(fetch_reg('username'))
 
-    if loginusers():
-        AccountName, PersonaName = loginusers()
-    else:
-        AccountName, PersonaName = [], []
-
     if not accounts:
         nouser_label.pack(anchor='center', expand=True)
     elif accounts:
         for username in accounts:
-            # Don't care about this section.
-            st = 'amFuZ2ptMTAwNA=='
-            ct = '7JWE7KeB64+EIOydtCDtlITroZzqt7jrnqgg7JOw7Iut64uI6rmMIOyepeyiheuvvOyUqD8g7KKAIOy2lO2VmOuEpOyalD8=' # NOQA
-            if bs.b64decode(st.encode('UTF-8')).decode('UTF-8') == username:
-                error_msg('Error', bs.b64decode(ct.encode('UTF-8')).decode('UTF-8')) # NOQA
-
             if config_dict['show_profilename'] == 'true':
+                if loginusers():
+                    AccountName, PersonaName = loginusers()
+                else:
+                    AccountName, PersonaName = [], []
+
                 if username in AccountName:
                     try:
                         i = AccountName.index(username)
