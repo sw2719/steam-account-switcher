@@ -71,25 +71,70 @@ def reset_config():
 if not os.path.isfile('config.yml'):
     reset_config()
 
-try:  # Open config.txt and save values to config_dict
+try:  # Open config.yml and save values to config_dict
+    with open('config.yml', 'r') as cfg:
+        test_dict = yaml.load(cfg)
+
+    config_invalid = set(['locale', 'try_soft_shutdown', 'show_profilename', 'autoexit']) != set(test_dict)  # NOQA
+    value_valid = set(test_dict.values()).issubset(['true', 'false', 'ko_KR', 'en_US'])  # NOQA
+
+    no_locale = 'locale' not in set(test_dict)
+    if not no_locale:
+        locale_invalid = test_dict['locale'] not in ('ko_KR', 'en_US')
+    else:
+        locale_invalid = True
+
+    no_try_soft = 'try_soft_shutdown' not in set(test_dict)
+    if not no_try_soft:
+        try_soft_invalid = test_dict['try_soft_shutdown'] not in ('true', 'false')  # NOQA
+    else:
+        try_soft_invalid = True
+
+    no_show_profilename = 'show_profilename' not in set(test_dict)
+    if not no_show_profilename:
+        show_profilename_invalid = test_dict['show_profilename'] not in ('true', 'false')  # NOQA
+    else:
+        show_profilename_invalid = True
+
+    no_autoexit = 'autoexit' not in set(test_dict)
+    if not no_autoexit:
+        autoexit_invalid = test_dict['autoexit'] not in ('true', 'false')
+    else:
+        autoexit_invalid = True
+
+    if config_invalid or not value_valid:  # NOQA
+        cfg_write = {}
+        if no_locale or locale_invalid:
+            locale_write = 'en_US'
+
+            if system_locale == 'ko_KR':
+                locale_write = 'ko_KR'
+            cfg_write['locale'] = locale_write
+        else:
+            cfg_write['locale'] = test_dict['locale']
+        if no_try_soft or try_soft_invalid:
+            cfg_write['try_soft_shutdown'] = 'true'
+        else:
+            cfg_write['try_soft_shutdown'] = test_dict['try_soft_shutdown']
+        if no_show_profilename or show_profilename_invalid:
+            cfg_write['show_profilename'] = 'true'
+        else:
+            cfg_write['show_profilename'] = test_dict['show_profilename']
+        if no_autoexit or autoexit_invalid:
+            cfg_write['autoexit'] = 'true'
+        else:
+            cfg_write['autoexit'] = test_dict['autoexit']
+        with open('config.yml', 'w') as cfg:
+            yaml.dump(cfg_write, cfg)
+        del cfg_write
+        del test_dict
     with open('config.yml', 'r') as cfg:
         config_dict = yaml.load(cfg)
 
-    # If config file is invalid
-    if set(['locale', 'try_soft_shutdown', 'show_profilename']) != set(config_dict):  # NOQA
-        reset_config()
-        if system_locale == 'ko_KR':
-            error_msg('설정 오류',
-                      '설정 파일이 유효하지 않아 재설정되었습니다.\n'
-                    + '프로그램을 재실행하십시오.')  # NOQA
-        else:
-            error_msg('Config Error',
-                      'Config file is reset because it was invalid.\n'
-                    + 'Please restart the application.')  # NOQA
 except FileNotFoundError:
     reset_config()
 
-if config_dict['locale'] in ['ko_KR', 'en_US']:
+if config_dict['locale'] in ('ko_KR', 'en_US'):
     LOCALE = config_dict['locale']
 else:
     LOCALE = 'en_US'
@@ -134,16 +179,19 @@ def start_checkupdate():
         button_frame = tk.Frame(updatewindow)
         button_frame.pack(side=tk.BOTTOM, pady=3)
 
-        cancel_button = ttk.Button(button_frame, text=_('Cancel'), command=updatewindow.destroy)
+        cancel_button = ttk.Button(button_frame, text=_('Cancel'),
+                                   command=updatewindow.destroy)
         update_button = ttk.Button(button_frame, text=_('Update now'))
 
         text_frame = tk.Frame(updatewindow)
         text_frame.pack(side=tk.TOP, pady=3)
-        text = tk.Label(text_frame, text=_('New version %s is available.') % sv_version)
+        text = tk.Label(text_frame,
+                        text=_('New version %s is available.') % sv_version)
         text.pack()
 
         changelog_box = tk.Text(updatewindow, width=57)
-        scrollbar = ttk.Scrollbar(updatewindow, orient=tk.VERTICAL, command=changelog_box.yview)
+        scrollbar = ttk.Scrollbar(updatewindow, orient=tk.VERTICAL,
+                                  command=changelog_box.yview)
         changelog_box.config(yscrollcommand=scrollbar.set)
         changelog_box.insert(tk.CURRENT, changelog)
         changelog_box.configure(state=tk.DISABLED)
@@ -165,7 +213,8 @@ def start_checkupdate():
             try:
                 response = req.get(dl_url)
             except req.exceptions.RequestException:
-                msgbox.showwarning(_('Error'), _("Error occured while downloading update."))
+                msgbox.showwarning(_('Error'),
+                                   _("Error occured while downloading update."))  # NOQA
                 updatewindow.destroy()
                 return
             with open('update.zip', 'wb') as f:
@@ -242,13 +291,13 @@ def start_checkupdate():
                 print('Update Available')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('Update %s is available.')  # NOQA
+                                        text=_('New update available')  # NOQA
                                         % sv_version)
                 update_label.pack(side='left', padx=5)
 
                 update_button = ttk.Button(update_frame,
                                             text=_('Update'),
-                                            width=8,
+                                            width=10,
                                             command=lambda: update(sv_version=sv_version, changelog=changelog))  # NOQA
 
                 update_button.pack(side='right', padx=5)
@@ -969,7 +1018,7 @@ def settingswindow():
     global config_dict
     settingswindow = tk.Toplevel(main)
     settingswindow.title(_("Settings"))
-    settingswindow.geometry("260x210+650+300")
+    settingswindow.geometry("260x240+650+300")
     settingswindow.resizable(False, False)
     bottomframe_set = tk.Frame(settingswindow)
     bottomframe_set.pack(side='bottom')
@@ -1027,6 +1076,20 @@ def settingswindow():
 
     showpnames_chkb.pack(side='left')
 
+    autoexit_frame = tk.Frame(settingswindow)
+    autoexit_frame.pack(fill='x', side='top', padx=12, pady=18)
+
+    autoexit_chkb = ttk.Checkbutton(autoexit_frame,
+                                    text=_('Exit app upon Steam restart'))
+
+    autoexit_chkb.state(['!alternate'])
+    if config_dict['autoexit'] == 'true':
+        autoexit_chkb.state(['selected'])
+    else:
+        autoexit_chkb.state(['!selected'])
+
+    autoexit_chkb.pack(side='left')
+
     def close():
         settingswindow.destroy()
 
@@ -1046,9 +1109,15 @@ def settingswindow():
             else:
                 show_profilename = 'false'
 
+            if 'selected' in autoexit_chkb.state():
+                autoexit = 'true'
+            else:
+                autoexit = 'false'
+
             config_dict = {'locale': locale[locale_cb.current()],
                            'try_soft_shutdown': soft_shutdown,
-                           'show_profilename': show_profilename}
+                           'show_profilename': show_profilename,
+                           'autoexit': autoexit}
 
             yaml = YAML()
             yaml.dump(config_dict, cfg)
@@ -1090,7 +1159,8 @@ def settingswindow():
 
 
 def exit_after_restart():
-    '''Restart Steam client and exit application'''
+    '''Restart Steam client and exit application.
+    If autoexit is disabled, app won't exit.'''
     try:
         if config_dict['try_soft_shutdown'] == 'false':
             raise FileNotFoundError
@@ -1147,7 +1217,8 @@ def exit_after_restart():
         msgbox.showerror(_('Error'),
                          _('Could not start Steam automatically')
                          + '\n' + _('for unknown reason.'))
-    main.quit()
+    if config_dict['autoexit'] == 'true':
+        main.quit()
 
 
 def window_height():
@@ -1209,9 +1280,16 @@ button_quit = ttk.Button(bottomframe,
                          text=_('Exit'),
                          command=main.quit)
 
+restartbutton_text = tk.StringVar()
+
+if config_dict['autoexit'] == 'true':
+    restartbutton_text.set(_('Restart Steam & Exit'))
+else:
+    restartbutton_text.set(_('Restart Steam'))
+
 button_restart = ttk.Button(bottomframe,
                             width=20,
-                            text=_('Restart Steam & exit'),
+                            textvariable=restartbutton_text,
                             command=exit_after_restart)
 
 button_toggle.pack(side='left', padx=3, pady=3)
@@ -1321,6 +1399,10 @@ def refresh():
     main.geometry("300x%s" %
                   window_height())
     draw_button()
+    if config_dict['autoexit'] == 'true':
+        restartbutton_text.set(_('Restart Steam & Exit'))
+    else:
+        restartbutton_text.set(_('Restart Steam'))
     print('Menu refreshed with %s account(s)' % len(accounts))
 
 
