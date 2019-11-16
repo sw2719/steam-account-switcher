@@ -37,7 +37,7 @@ if getattr(sys, 'frozen', False):
             pass
 else:
     print('Running in a Python interpreter')
-    BUNDLE = False
+    BUNDLE = True
 
 config_dict = {}
 
@@ -269,6 +269,7 @@ def start_checkupdate():
         except Exception:
             update = 'error'
             sv_version_str = '0'
+            changelog = None
         queue.put((update, sv_version_str, changelog))
 
     update_code = None
