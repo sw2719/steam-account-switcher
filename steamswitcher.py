@@ -37,7 +37,7 @@ if getattr(sys, 'frozen', False):
             pass
 else:
     print('Running in a Python interpreter')
-    BUNDLE = True
+    BUNDLE = False
 
 config_dict = {}
 
@@ -64,7 +64,7 @@ def reset_config():
 
         default = {'locale': locale_write,
                    'try_soft_shutdown': 'true',
-                   'show_profilename': 'true',
+                   'show_profilename': 'bar',
                    'autoexit': 'true'}
         yaml.dump(default, cfg)
 
@@ -77,7 +77,7 @@ try:  # Open config.yml and save values to config_dict
         test_dict = yaml.load(cfg)
 
     config_invalid = set(['locale', 'try_soft_shutdown', 'show_profilename', 'autoexit']) != set(test_dict)  # NOQA
-    value_valid = set(test_dict.values()).issubset(['true', 'false', 'ko_KR', 'en_US'])  # NOQA
+    value_valid = set(test_dict.values()).issubset(['true', 'false', 'ko_KR', 'en_US', 'bar', 'bracket'])  # NOQA
 
     no_locale = 'locale' not in set(test_dict)
     if not no_locale:
@@ -93,7 +93,7 @@ try:  # Open config.yml and save values to config_dict
 
     no_show_profilename = 'show_profilename' not in set(test_dict)
     if not no_show_profilename:
-        show_profilename_invalid = test_dict['show_profilename'] not in ('true', 'false')  # NOQA
+        show_profilename_invalid = test_dict['show_profilename'] not in ('bar', 'bracket', 'false')  # NOQA
     else:
         show_profilename_invalid = True
 
@@ -103,7 +103,7 @@ try:  # Open config.yml and save values to config_dict
     else:
         autoexit_invalid = True
 
-    if config_invalid or not value_valid:  # NOQA
+    if config_invalid or not value_valid or show_profilename_invalid:  # NOQA
         cfg_write = {}
         if no_locale or locale_invalid:
             locale_write = 'en_US'
@@ -118,7 +118,7 @@ try:  # Open config.yml and save values to config_dict
         else:
             cfg_write['try_soft_shutdown'] = test_dict['try_soft_shutdown']
         if no_show_profilename or show_profilename_invalid:
-            cfg_write['show_profilename'] = 'true'
+            cfg_write['show_profilename'] = 'bar'
         else:
             cfg_write['show_profilename'] = test_dict['show_profilename']
         if no_autoexit or autoexit_invalid:
@@ -1050,33 +1050,39 @@ def settingswindow():
                              text=_('Restart app to apply language settings.'))
     restart_label.pack()
 
+    showpnames_frame = tk.Frame(settingswindow)
+    showpnames_frame.pack(fill='x', side='top', padx=10, pady=19)
+
+    showpnames_label = tk.Label(showpnames_frame, text=_('Show profile names'))
+    showpnames_label.pack(side='left', padx=3)
+    showpnames_cb = ttk.Combobox(showpnames_frame,
+                                 state="readonly",
+                                 values=[_('Use bar - |'),  # 0
+                                         _('Use brackets - ( )'),  # 1
+                                         _('Off')])  # 1
+    if config_dict['show_profilename'] == 'bar':
+        showpnames_cb.current(0)
+    elif config_dict['show_profilename'] == 'bracket':
+        showpnames_cb.current(1)
+    elif config_dict['show_profilename'] == 'false':
+        showpnames_cb.current(2)
+
+    showpnames_cb.pack(side='left', padx=3)
+
     softshutdwn_frame = tk.Frame(settingswindow)
-    softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=18)
+    softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=1)
 
     soft_chkb = ttk.Checkbutton(softshutdwn_frame,
                                 text=_('Try to soft shutdown Steam client'))
 
     soft_chkb.state(['!alternate'])
+
     if config_dict['try_soft_shutdown'] == 'true':
         soft_chkb.state(['selected'])
     else:
         soft_chkb.state(['!selected'])
 
     soft_chkb.pack(side='left')
-
-    showpnames_frame = tk.Frame(settingswindow)
-    showpnames_frame.pack(fill='x', side='top', padx=12, pady=1)
-
-    showpnames_chkb = ttk.Checkbutton(showpnames_frame,
-                                      text=_('Show profile names'))
-
-    showpnames_chkb.state(['!alternate'])
-    if config_dict['show_profilename'] == 'true':
-        showpnames_chkb.state(['selected'])
-    else:
-        showpnames_chkb.state(['!selected'])
-
-    showpnames_chkb.pack(side='left')
 
     autoexit_frame = tk.Frame(settingswindow)
     autoexit_frame.pack(fill='x', side='top', padx=12, pady=18)
@@ -1100,16 +1106,12 @@ def settingswindow():
         '''Write new config values to config.txt'''
         with open('config.yml', 'w') as cfg:
             locale = ('en_US', 'ko_KR')
+            show_pname = ('bar', 'bracket', 'false')
 
             if 'selected' in soft_chkb.state():
                 soft_shutdown = 'true'
             else:
                 soft_shutdown = 'false'
-
-            if 'selected' in showpnames_chkb.state():
-                show_profilename = 'true'
-            else:
-                show_profilename = 'false'
 
             if 'selected' in autoexit_chkb.state():
                 autoexit = 'true'
@@ -1118,7 +1120,7 @@ def settingswindow():
 
             config_dict = {'locale': locale[locale_cb.current()],
                            'try_soft_shutdown': soft_shutdown,
-                           'show_profilename': show_profilename,
+                           'show_profilename': show_pname[showpnames_cb.current()],  # NOQA
                            'autoexit': autoexit}
 
             yaml = YAML()
@@ -1342,7 +1344,7 @@ def draw_button():
         nouser_label.pack(anchor='center', expand=True)
     elif accounts:
         for username in accounts:
-            if config_dict['show_profilename'] == 'true':
+            if config_dict['show_profilename'] != 'false':
                 if loginusers():
                     AccountName, PersonaName = loginusers()
                 else:
@@ -1359,10 +1361,16 @@ def draw_button():
                     profilename = ''
 
                 if profilename and n > 4:
-                    if profilename == profilename[:n]:
-                        profilename = ' | ' + profilename[:n] + ''
-                    else:
-                        profilename = ' | ' + profilename[:n] + '..'
+                    if config_dict['show_profilename'] == 'bar':
+                        if profilename == profilename[:n]:
+                            profilename = ' | ' + profilename[:n] + ''
+                        else:
+                            profilename = ' | ' + profilename[:n] + '..'
+                    elif config_dict['show_profilename'] == 'bracket':
+                        if profilename == profilename[:n]:
+                            profilename = ' (' + profilename[:n] + ')'
+                        else:
+                            profilename = ' (' + profilename[:n] + '..)'
             else:
                 profilename = ''
 
