@@ -1173,6 +1173,7 @@ def exit_after_restart():
             sleep(2)
             for x in range(8):
                 if check_running('Steam.exe'):
+                    print('Steam is still running after %s seconds' % str(2+x*2))
                     if x < 8:
                         sleep(1.5)
                         continue
