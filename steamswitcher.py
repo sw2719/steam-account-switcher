@@ -64,7 +64,8 @@ def reset_config():
 
         default = {'locale': locale_write,
                    'try_soft_shutdown': 'true',
-                   'show_profilename': 'true'}
+                   'show_profilename': 'true',
+                   'autoexit': 'true'}
         yaml.dump(default, cfg)
 
 
