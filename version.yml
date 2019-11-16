@@ -1,9 +1,18 @@
 version: 1.7
-changelog: |
-  • Fixed program crash that occured if unicode characters existed in profile name.
+changelog_en: |
+  • Fixed program crash that occured if non-ASCII characters existed in profile name.
   
   • Changed update UI.
   
-  • Changed how auto updating works.
+  • Updated auto updating implementation.
   
   • Changed how profile name is displayed.
+
+changelog_ko: |
+  • 프로필 이름에 비-ASCII 문자가 포함돼있을 경우 프로그램이 종료되던 현상을 수정하였습니다.
+  
+  • 업데이트 UI가 변경되었습니다.
+  
+  • 자동 업데이트 구현 방식을 변경하였습니다.
+  
+  • 프로필 이름이 표시되는 방법을 변경하였습니다.
