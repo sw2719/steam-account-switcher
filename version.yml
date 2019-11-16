@@ -1,0 +1,9 @@
+version: 1.7
+changelog: |
+  • Fixed program crash that occured if unicode characters existed in profile name.
+  
+  • Changed update UI.
+  
+  • Changed how auto updating works.
+  
+  • Changed how profile name is displayed.
