@@ -1141,18 +1141,8 @@ def settingswindow():
 
     settings_apply = ttk.Button(bottomframe_set,
                                 text=_('Apply'),
+                                command=apply,
                                 width=10)
-
-    def applybutton():
-        nonlocal settings_apply
-
-        def enable():
-            settings_apply['state'] = 'normal'
-        apply()
-        settings_apply['state'] = 'disabled'
-        settingswindow.after(500, enable)
-
-    settings_apply['command'] = applybutton
 
     settings_ok.pack(side='left', padx=3, pady=3)
     settings_cancel.pack(side='left', padx=3, pady=3)
