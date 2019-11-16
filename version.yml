@@ -8,7 +8,7 @@ changelog_en: |
   
   • Changed how profile name is displayed.
   
-  • Added option whether app exits after restarting Steam or not.
+  • Added a setting to choose whether app exits after restarting Steam or not.
 
 changelog_ko: |
   • 프로필 이름에 비-ASCII 문자가 포함돼있을 경우 앱이 종료되던 현상을 수정하였습니다.
