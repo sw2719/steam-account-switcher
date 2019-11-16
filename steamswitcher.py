@@ -266,7 +266,7 @@ def start_checkupdate():
             elif sv_version < cl_version:
                 update = 'dev'
 
-        except req.exceptions.RequestException:
+        except Exception:
             update = 'error'
             sv_version_str = '0'
         queue.put((update, sv_version_str, changelog))
