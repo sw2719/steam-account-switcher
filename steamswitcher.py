@@ -23,7 +23,7 @@ system_locale = locale.getdefaultlocale()[0]
 
 print('App Start')
 
-BRANCH = 'update_1.7'
+BRANCH = 'master'
 
 __VERSION__ = '1.7'
 
@@ -1173,7 +1173,7 @@ def exit_after_restart():
             sleep(2)
             for x in range(8):
                 if check_running('Steam.exe'):
-                    print('Steam is still running after %s seconds' % str(2+x*2))
+                    print('Steam is still running after %s seconds' % str(2+x*2))  # NOQA
                     if x < 8:
                         sleep(1.5)
                         continue
