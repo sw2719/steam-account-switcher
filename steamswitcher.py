@@ -23,7 +23,7 @@ system_locale = locale.getdefaultlocale()[0]
 
 print('App Start')
 
-BRANCH = 'master'
+BRANCH = 'update_1.7'
 
 __VERSION__ = '1.7'
 
@@ -104,7 +104,7 @@ _ = t.gettext
 
 print('Running on', os.getcwd())
 
-URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
+URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml'  # NOQA
        % BRANCH)
 
 
@@ -125,35 +125,66 @@ def start_checkupdate():
     checking_label.pack()
     main.update()
 
-    def update(sv_version):
-        nonlocal update_frame
-        update_frame.destroy()
-        update_frame = tk.Frame(main)
-        update_frame.pack(side='bottom')
+    def update(sv_version, changelog):
+        updatewindow = tk.Toplevel(main)
+        updatewindow.title(_('Update'))
+        updatewindow.geometry("400x300+650+300")
+        updatewindow.resizable(False, False)
 
-        dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
-        try:
-            update_text = tk.StringVar()
-            update_text.set(_('Downloading update. Do not exit.'))
-            update_label = tk.Label(update_frame, textvariable=update_text)
-            update_label.pack()
+        button_frame = tk.Frame(updatewindow)
+        button_frame.pack(side=tk.BOTTOM, pady=3)
+
+        cancel_button = ttk.Button(button_frame, text=_('Cancel'), command=updatewindow.destroy)
+        update_button = ttk.Button(button_frame, text=_('Update now'))
+
+        text_frame = tk.Frame(updatewindow)
+        text_frame.pack(side=tk.TOP, pady=3)
+        text = tk.Label(text_frame, text=_('New version %s is available.') % sv_version)
+        text.pack()
+
+        changelog_box = tk.Text(updatewindow, width=57)
+        scrollbar = ttk.Scrollbar(updatewindow, orient=tk.VERTICAL, command=changelog_box.yview)
+        changelog_box.config(yscrollcommand=scrollbar.set)
+        changelog_box.insert(tk.CURRENT, changelog)
+        changelog_box.configure(state=tk.DISABLED)
+        changelog_box.pack(padx=5)
+
+        def start_update():
+            nonlocal button_frame
+            nonlocal cancel_button
+            nonlocal update_button
+
+            cancel_button.destroy()
+            update_button.destroy()
+
+            dl_label = tk.Label(button_frame, text=_('Downloading update...'))
+            dl_label.pack()
             main.update()
-            response = req.get(dl_url)
-        except req.exceptions.RequestException:
-            return
-        with open('update.zip', 'wb') as f:
-            f.write(response.content)
-        try:
-            archive = os.path.join(os.getcwd(), 'update.zip')
 
-            f = zf.ZipFile(archive, mode='r')
-            f.extractall(members=(member for member in f.namelist() if 'updater' in member)) # NOQA
+            dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
+            try:
+                response = req.get(dl_url)
+            except req.exceptions.RequestException:
+                msgbox.showwarning(_('Error'), _("Error occured while downloading update."))
+                updatewindow.destroy()
+                return
+            with open('update.zip', 'wb') as f:
+                f.write(response.content)
+            try:
+                archive = os.path.join(os.getcwd(), 'update.zip')
 
-            subprocess.run('start updater/updater.exe', shell=True)
-            sys.exit(0)
-        except (FileNotFoundError, zf.BadZipfile, OSError):
-            error_msg(_('Error'), _("Couldn't perform automatic update.") + '\n' + # NOQA
-                      _('Update manually by extracting update.zip file.'))
+                f = zf.ZipFile(archive, mode='r')
+                f.extractall(members=(member for member in f.namelist() if 'updater' in member)) # NOQA
+
+                subprocess.run('start updater/updater.exe', shell=True)
+                sys.exit(0)
+            except (FileNotFoundError, zf.BadZipfile, OSError):
+                error_msg(_('Error'), _("Couldn't perform automatic update.") + '\n' + # NOQA
+                        _('Update manually by extracting update.zip file.'))
+
+        update_button['command'] = start_update
+        cancel_button.pack(side='left', padx=1.5)
+        update_button.pack(side='left', padx=1.5)
 
     queue = q.Queue()
 
@@ -161,93 +192,75 @@ def start_checkupdate():
         '''Fetch version information from GitHub and
         return different update codes'''
         print('Update check start')
-        update_code = None
+        update = None
         try:
             response = req.get(URL)
-            text = response.text.splitlines()
-            sv_version_str = text[-1]
-            auto_updatable = text[-2]
-            if auto_updatable not in ['true', 'false']:
-                auto_updatable = 'false'
+            text = response.text
+            version_data = yaml.load(text)
+            sv_version_str = str(version_data['version'])
+            changelog = version_data['changelog']
             print('Server version is', sv_version_str)
-            print(f'Auto updatable: {auto_updatable}')
             print('Client version is', __VERSION__)
 
             sv_version = version.parse(sv_version_str)
             cl_version = version.parse(__VERSION__)
-            if auto_updatable == 'false' and sv_version > cl_version:
-                update_code = 2
-            else:
-                if sv_version > cl_version:
-                    update_code = 1
-                elif sv_version == cl_version:
-                    update_code = 0
-                elif sv_version < cl_version:
-                    update_code = 3
+
+            if sv_version > cl_version:
+                update = 'avail'
+            elif sv_version == cl_version:
+                update = 'latest'
+            elif sv_version < cl_version:
+                update = 'dev'
 
         except req.exceptions.RequestException:
-            update_code = 4
+            update = 'error'
             sv_version_str = '0'
-        queue.put((update_code, sv_version_str))
+        queue.put((update, sv_version_str, changelog))
 
     update_code = None
     sv_version = None
+    changelog = None
 
     def get_output():
         '''Get version info from checkupdate() and draw UI accordingly.'''
         nonlocal update_code
         nonlocal sv_version
+        nonlocal changelog
         nonlocal checking_label
         try:
             v = queue.get_nowait()
             update_code = v[0]
             sv_version = v[1]
+            changelog = v[2]
             checking_label.destroy()
 
-            if update_code == 1:
-                print('Auto update Available')
+            if update_code == 'avail':
+                print('Update Available')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('Auto update %s is available.')  # NOQA
+                                        text=_('Update %s is available.')  # NOQA
                                         % sv_version)
                 update_label.pack(side='left', padx=5)
 
                 update_button = ttk.Button(update_frame,
                                             text=_('Update'),
                                             width=8,
-                                            command=lambda: update(sv_version=sv_version))  # NOQA
+                                            command=lambda: update(sv_version=sv_version, changelog=changelog))  # NOQA
 
                 update_button.pack(side='right', padx=5)
-            if update_code == 2:
-                print('Manual update Available')
-
-                update_label = tk.Label(update_frame,
-                                        text=_('Manual update %s is available.')  # NOQA
-                                        % sv_version)
-                update_label.pack(side='left', padx=5)
-
-                def open_github():
-                    os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
-
-                update_button = ttk.Button(update_frame,
-                                           text=_('Open GitHub'),
-                                           width=12,
-                                           command=open_github)
-
-                update_button.pack(side='right', padx=5)
-            elif update_code == 0:
+            elif update_code == 'latest':
                 print('On latest version')
 
                 update_label = tk.Label(update_frame,
                                         text=_('Using the latest version'))
                 update_label.pack(side='bottom')
-            elif update_code == 3:
+            elif update_code == 'dev':
                 print('Development version')
 
                 update_label = tk.Label(update_frame,
                                         text=_('Development version'))
                 update_label.pack(side='bottom')
-            elif update_code == 4:
+            else:
                 print('Exception while getting server version')
 
                 update_label = tk.Label(update_frame,
@@ -267,13 +280,6 @@ def afterupdate():
             os.remove('update.zip')
         except OSError:
             pass
-
-    if msgbox.askyesno(_('Update installed'),
-                       _('Version %s installed.') % __VERSION__
-                       + '\n' +
-                       _('See changes on GitHub releases?')):
-        os.startfile(
-            'https://github.com/sw2719/steam-account-switcher/releases')
 
 
 def check_running(process_name):
@@ -1279,9 +1285,9 @@ def draw_button():
 
                 if profilename and n > 4:
                     if profilename == profilename[:n]:
-                        profilename = ' (' + profilename[:n] + ')'
+                        profilename = ' | ' + profilename[:n] + ''
                     else:
-                        profilename = ' (' + profilename[:n] + '..)'
+                        profilename = ' | ' + profilename[:n] + '..'
             else:
                 profilename = ''
 
