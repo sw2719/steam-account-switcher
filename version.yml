@@ -1,6 +1,6 @@
 version: 1.7
 changelog_en: |
-  • Fixed crash that occured if non-ASCII characters existed in profile name.
+  • Fixed crash that occured if unicode characters existed in profile name.
   
   • Changed update UI.
   
@@ -11,7 +11,7 @@ changelog_en: |
   • Added a setting to choose whether app exits after restarting Steam or not.
 
 changelog_ko: |
-  • 프로필 이름에 비-ASCII 문자가 포함돼있을 경우 앱이 종료되던 현상을 수정하였습니다.
+  • 프로필 이름에 유니코드 문자가 포함돼있을 경우 앱이 종료되던 현상을 수정하였습니다.
   
   • 업데이트 UI가 변경되었습니다.
   
