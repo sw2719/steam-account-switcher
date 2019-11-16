@@ -195,10 +195,14 @@ def start_checkupdate():
         update = None
         try:
             response = req.get(URL)
+            response.encoding = 'utf-8'
             text = response.text
             version_data = yaml.load(text)
             sv_version_str = str(version_data['version'])
-            changelog = version_data['changelog']
+            if LOCALE == 'ko_KR':
+                changelog = version_data['changelog_ko']
+            else:
+                changelog = version_data['changelog_en']
             print('Server version is', sv_version_str)
             print('Client version is', __VERSION__)
 
