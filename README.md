@@ -20,7 +20,7 @@ This app has no affiliation with Steam or Valve.
 
 * Auto-importing your Steam accounts. Do more clicking, less typing.
 
-* Auto-updating is built-in. (Might be unavailable in certain updates.)
+* Auto-updating is built-in.
 
 * No annoying update pop-up. You can just carry on and update later.
 
@@ -41,8 +41,11 @@ This app has no affiliation with Steam or Valve.
 * If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code.
 
 # Changelogs (for last 3 versions)
-* Fixed a bug where app crashed if profile name contained unicode characters (v1.7)
-* Changed how auto-updating works (v1.7)
+* Fixed crash that occured if unicode characters existed in profile name. (v1.7)
+* Changed update UI. (v1.7)
+* Updated auto updating implementation. (v1.7)
+* Changed how profile name is displayed. (v1.7)
+* Added a setting to choose whether app exits after restarting Steam or not. (v1.7)
 
 * Implemented order changing (v1.6)
 * Addded Settings UI (v1.6)
