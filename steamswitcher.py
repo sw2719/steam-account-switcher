@@ -13,6 +13,8 @@ import psutil
 import re
 import threading
 import queue as q
+import zipfile as zf
+import shutil
 from packaging import version
 from time import sleep
 from ruamel.yaml import YAML
@@ -23,11 +25,16 @@ print('App Start')
 
 BRANCH = 'master'
 
-__VERSION__ = '1.6'
+__VERSION__ = '1.7'
 
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
     BUNDLE = True
+    if os.path.isdir('updater'):
+        try:
+            shutil.rmtree('updater')
+        except OSError:
+            pass
 else:
     print('Running in a Python interpreter')
     BUNDLE = False
@@ -57,32 +64,78 @@ def reset_config():
 
         default = {'locale': locale_write,
                    'try_soft_shutdown': 'true',
-                   'show_profilename': 'true'}
+                   'show_profilename': 'bar',
+                   'autoexit': 'true'}
         yaml.dump(default, cfg)
 
 
 if not os.path.isfile('config.yml'):
     reset_config()
 
-try:  # Open config.txt and save values to config_dict
+try:  # Open config.yml and save values to config_dict
+    with open('config.yml', 'r') as cfg:
+        test_dict = yaml.load(cfg)
+
+    config_invalid = set(['locale', 'try_soft_shutdown', 'show_profilename', 'autoexit']) != set(test_dict)  # NOQA
+    value_valid = set(test_dict.values()).issubset(['true', 'false', 'ko_KR', 'en_US', 'bar', 'bracket'])  # NOQA
+
+    no_locale = 'locale' not in set(test_dict)
+    if not no_locale:
+        locale_invalid = test_dict['locale'] not in ('ko_KR', 'en_US')
+    else:
+        locale_invalid = True
+
+    no_try_soft = 'try_soft_shutdown' not in set(test_dict)
+    if not no_try_soft:
+        try_soft_invalid = test_dict['try_soft_shutdown'] not in ('true', 'false')  # NOQA
+    else:
+        try_soft_invalid = True
+
+    no_show_profilename = 'show_profilename' not in set(test_dict)
+    if not no_show_profilename:
+        show_profilename_invalid = test_dict['show_profilename'] not in ('bar', 'bracket', 'false')  # NOQA
+    else:
+        show_profilename_invalid = True
+
+    no_autoexit = 'autoexit' not in set(test_dict)
+    if not no_autoexit:
+        autoexit_invalid = test_dict['autoexit'] not in ('true', 'false')
+    else:
+        autoexit_invalid = True
+
+    if config_invalid or not value_valid or show_profilename_invalid:  # NOQA
+        cfg_write = {}
+        if no_locale or locale_invalid:
+            locale_write = 'en_US'
+
+            if system_locale == 'ko_KR':
+                locale_write = 'ko_KR'
+            cfg_write['locale'] = locale_write
+        else:
+            cfg_write['locale'] = test_dict['locale']
+        if no_try_soft or try_soft_invalid:
+            cfg_write['try_soft_shutdown'] = 'true'
+        else:
+            cfg_write['try_soft_shutdown'] = test_dict['try_soft_shutdown']
+        if no_show_profilename or show_profilename_invalid:
+            cfg_write['show_profilename'] = 'bar'
+        else:
+            cfg_write['show_profilename'] = test_dict['show_profilename']
+        if no_autoexit or autoexit_invalid:
+            cfg_write['autoexit'] = 'true'
+        else:
+            cfg_write['autoexit'] = test_dict['autoexit']
+        with open('config.yml', 'w') as cfg:
+            yaml.dump(cfg_write, cfg)
+        del cfg_write
+        del test_dict
     with open('config.yml', 'r') as cfg:
         config_dict = yaml.load(cfg)
 
-    # If config file is invalid
-    if set(['locale', 'try_soft_shutdown', 'show_profilename']) != set(config_dict):  # NOQA
-        reset_config()
-        if system_locale == 'ko_KR':
-            error_msg('설정 오류',
-                      '설정 파일이 유효하지 않아 재설정되었습니다.\n'
-                    + '프로그램을 재실행하십시오.')  # NOQA
-        else:
-            error_msg('Config Error',
-                      'Config file is reset because it was invalid.\n'
-                    + 'Please restart the application.')  # NOQA
 except FileNotFoundError:
     reset_config()
 
-if config_dict['locale'] in ['ko_KR', 'en_US']:
+if config_dict['locale'] in ('ko_KR', 'en_US'):
     LOCALE = config_dict['locale']
 else:
     LOCALE = 'en_US'
@@ -97,7 +150,7 @@ _ = t.gettext
 
 print('Running on', os.getcwd())
 
-URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.txt'  # NOQA
+URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml'  # NOQA
        % BRANCH)
 
 
@@ -118,26 +171,70 @@ def start_checkupdate():
     checking_label.pack()
     main.update()
 
-    def update(sv_version):
-        nonlocal update_frame
-        update_frame.destroy()
-        update_frame = tk.Frame(main)
-        update_frame.pack(side='bottom')
+    def update(sv_version, changelog):
+        updatewindow = tk.Toplevel(main)
+        updatewindow.title(_('Update'))
+        updatewindow.geometry("400x300+650+300")
+        updatewindow.resizable(False, False)
 
-        dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
-        try:
-            update_text = tk.StringVar()
-            update_text.set(_('Downloading update. Do not exit.'))
-            update_label = tk.Label(update_frame, textvariable=update_text)
-            update_label.pack()
+        button_frame = tk.Frame(updatewindow)
+        button_frame.pack(side=tk.BOTTOM, pady=3)
+
+        cancel_button = ttk.Button(button_frame, text=_('Cancel'),
+                                   command=updatewindow.destroy)
+        update_button = ttk.Button(button_frame, text=_('Update now'))
+
+        text_frame = tk.Frame(updatewindow)
+        text_frame.pack(side=tk.TOP, pady=3)
+        text = tk.Label(text_frame,
+                        text=_('New version %s is available.') % sv_version)
+        text.pack()
+
+        changelog_box = tk.Text(updatewindow, width=57)
+        scrollbar = ttk.Scrollbar(updatewindow, orient=tk.VERTICAL,
+                                  command=changelog_box.yview)
+        changelog_box.config(yscrollcommand=scrollbar.set)
+        changelog_box.insert(tk.CURRENT, changelog)
+        changelog_box.configure(state=tk.DISABLED)
+        changelog_box.pack(padx=5)
+
+        def start_update():
+            nonlocal button_frame
+            nonlocal cancel_button
+            nonlocal update_button
+
+            cancel_button.destroy()
+            update_button.destroy()
+
+            dl_label = tk.Label(button_frame, text=_('Downloading update...'))
+            dl_label.pack()
             main.update()
-            response = req.get(dl_url)
-        except req.exceptions.RequestException:
-            return
-        with open('update.zip', 'wb') as f:
-            f.write(response.content)
-        subprocess.run('start updater/updater.exe', shell=True)
-        sys.exit(0)
+
+            dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
+            try:
+                response = req.get(dl_url)
+            except req.exceptions.RequestException:
+                msgbox.showwarning(_('Error'),
+                                   _("Error occured while downloading update."))  # NOQA
+                updatewindow.destroy()
+                return
+            with open('update.zip', 'wb') as f:
+                f.write(response.content)
+            try:
+                archive = os.path.join(os.getcwd(), 'update.zip')
+
+                f = zf.ZipFile(archive, mode='r')
+                f.extractall(members=(member for member in f.namelist() if 'updater' in member)) # NOQA
+
+                subprocess.run('start updater/updater.exe', shell=True)
+                sys.exit(0)
+            except (FileNotFoundError, zf.BadZipfile, OSError):
+                error_msg(_('Error'), _("Couldn't perform automatic update.") + '\n' + # NOQA
+                        _('Update manually by extracting update.zip file.'))
+
+        update_button['command'] = start_update
+        cancel_button.pack(side='left', padx=1.5)
+        update_button.pack(side='left', padx=1.5)
 
     queue = q.Queue()
 
@@ -145,93 +242,80 @@ def start_checkupdate():
         '''Fetch version information from GitHub and
         return different update codes'''
         print('Update check start')
-        update_code = None
+        update = None
         try:
             response = req.get(URL)
-            text = response.text.splitlines()
-            sv_version_str = text[-1]
-            auto_updatable = text[-2]
-            if auto_updatable not in ['true', 'false']:
-                auto_updatable = 'false'
+            response.encoding = 'utf-8'
+            text = response.text
+            version_data = yaml.load(text)
+            sv_version_str = str(version_data['version'])
+            if LOCALE == 'ko_KR':
+                changelog = version_data['changelog_ko']
+            else:
+                changelog = version_data['changelog_en']
             print('Server version is', sv_version_str)
-            print(f'Auto updatable: {auto_updatable}')
             print('Client version is', __VERSION__)
 
             sv_version = version.parse(sv_version_str)
             cl_version = version.parse(__VERSION__)
-            if auto_updatable == 'false' and sv_version > cl_version:
-                update_code = 2
-            else:
-                if sv_version > cl_version:
-                    update_code = 1
-                elif sv_version == cl_version:
-                    update_code = 0
-                elif sv_version < cl_version:
-                    update_code = 3
 
-        except req.exceptions.RequestException:
-            update_code = 4
+            if sv_version > cl_version:
+                update = 'avail'
+            elif sv_version == cl_version:
+                update = 'latest'
+            elif sv_version < cl_version:
+                update = 'dev'
+
+        except Exception:
+            update = 'error'
             sv_version_str = '0'
-        queue.put((update_code, sv_version_str))
+            changelog = None
+        queue.put((update, sv_version_str, changelog))
 
     update_code = None
     sv_version = None
+    changelog = None
 
     def get_output():
         '''Get version info from checkupdate() and draw UI accordingly.'''
         nonlocal update_code
         nonlocal sv_version
+        nonlocal changelog
         nonlocal checking_label
         try:
             v = queue.get_nowait()
             update_code = v[0]
             sv_version = v[1]
+            changelog = v[2]
             checking_label.destroy()
 
-            if update_code == 1:
-                print('Auto update Available')
+            if update_code == 'avail':
+                print('Update Available')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('Auto update %s is available.')  # NOQA
+                                        text=_('New update available')  # NOQA
                                         % sv_version)
                 update_label.pack(side='left', padx=5)
 
                 update_button = ttk.Button(update_frame,
                                             text=_('Update'),
-                                            width=8,
-                                            command=lambda: update(sv_version=sv_version))  # NOQA
+                                            width=10,
+                                            command=lambda: update(sv_version=sv_version, changelog=changelog))  # NOQA
 
                 update_button.pack(side='right', padx=5)
-            if update_code == 2:
-                print('Manual update Available')
-
-                update_label = tk.Label(update_frame,
-                                        text=_('Manual update %s is available.')  # NOQA
-                                        % sv_version)
-                update_label.pack(side='left', padx=5)
-
-                def open_github():
-                    os.startfile('https://github.com/sw2719/steam-account-switcher/releases')  # NOQA
-
-                update_button = ttk.Button(update_frame,
-                                           text=_('Open GitHub'),
-                                           width=12,
-                                           command=open_github)
-
-                update_button.pack(side='right', padx=5)
-            elif update_code == 0:
+            elif update_code == 'latest':
                 print('On latest version')
 
                 update_label = tk.Label(update_frame,
                                         text=_('Using the latest version'))
                 update_label.pack(side='bottom')
-            elif update_code == 3:
+            elif update_code == 'dev':
                 print('Development version')
 
                 update_label = tk.Label(update_frame,
                                         text=_('Development version'))
                 update_label.pack(side='bottom')
-            elif update_code == 4:
+            else:
                 print('Exception while getting server version')
 
                 update_label = tk.Label(update_frame,
@@ -246,17 +330,11 @@ def start_checkupdate():
 
 
 def afterupdate():
-    try:
-        os.remove('update.zip')
-    except Exception:
-        pass
-    finally:
-        if msgbox.askyesno(_('Update installed'),
-                           _('Version %s installed.') % __VERSION__
-                           + '\n' +
-                           _('See changes on GitHub releases?')):
-            os.startfile(
-                'https://github.com/sw2719/steam-account-switcher/releases')
+    if os.path.isfile('update.zip'):
+        try:
+            os.remove('update.zip')
+        except OSError:
+            pass
 
 
 def check_running(process_name):
@@ -314,7 +392,7 @@ def loginusers(steam_path=fetch_reg('steampath')):
     vdf_file = os.path.join(steam_path, 'config', 'loginusers.vdf')
 
     try:
-        with open(vdf_file, 'r') as vdf_file:
+        with open(vdf_file, 'r', encoding='utf-8') as vdf_file:
             vdf = vdf_file.read().splitlines()
     except FileNotFoundError:
         return False
@@ -332,7 +410,6 @@ def loginusers(steam_path=fetch_reg('steampath')):
             persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])  # NOQA
             AccountName.append(account.replace("AccountName", ""))
             PersonaName.append(persona.replace("PersonaName", ""))
-
     return AccountName, PersonaName
 
 
@@ -943,7 +1020,7 @@ def settingswindow():
     global config_dict
     settingswindow = tk.Toplevel(main)
     settingswindow.title(_("Settings"))
-    settingswindow.geometry("260x210+650+300")
+    settingswindow.geometry("260x240+650+300")
     settingswindow.resizable(False, False)
     bottomframe_set = tk.Frame(settingswindow)
     bottomframe_set.pack(side='bottom')
@@ -973,13 +1050,33 @@ def settingswindow():
                              text=_('Restart app to apply language settings.'))
     restart_label.pack()
 
+    showpnames_frame = tk.Frame(settingswindow)
+    showpnames_frame.pack(fill='x', side='top', padx=10, pady=19)
+
+    showpnames_label = tk.Label(showpnames_frame, text=_('Show profile names'))
+    showpnames_label.pack(side='left', padx=3)
+    showpnames_cb = ttk.Combobox(showpnames_frame,
+                                 state="readonly",
+                                 values=[_('Use bar - |'),  # 0
+                                         _('Use brackets - ( )'),  # 1
+                                         _('Off')])  # 1
+    if config_dict['show_profilename'] == 'bar':
+        showpnames_cb.current(0)
+    elif config_dict['show_profilename'] == 'bracket':
+        showpnames_cb.current(1)
+    elif config_dict['show_profilename'] == 'false':
+        showpnames_cb.current(2)
+
+    showpnames_cb.pack(side='left', padx=3)
+
     softshutdwn_frame = tk.Frame(settingswindow)
-    softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=18)
+    softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=1)
 
     soft_chkb = ttk.Checkbutton(softshutdwn_frame,
                                 text=_('Try to soft shutdown Steam client'))
 
     soft_chkb.state(['!alternate'])
+
     if config_dict['try_soft_shutdown'] == 'true':
         soft_chkb.state(['selected'])
     else:
@@ -987,19 +1084,19 @@ def settingswindow():
 
     soft_chkb.pack(side='left')
 
-    showpnames_frame = tk.Frame(settingswindow)
-    showpnames_frame.pack(fill='x', side='top', padx=12, pady=1)
+    autoexit_frame = tk.Frame(settingswindow)
+    autoexit_frame.pack(fill='x', side='top', padx=12, pady=18)
 
-    showpnames_chkb = ttk.Checkbutton(showpnames_frame,
-                                      text=_('Show profile names'))
+    autoexit_chkb = ttk.Checkbutton(autoexit_frame,
+                                    text=_('Exit app upon Steam restart'))
 
-    showpnames_chkb.state(['!alternate'])
-    if config_dict['show_profilename'] == 'true':
-        showpnames_chkb.state(['selected'])
+    autoexit_chkb.state(['!alternate'])
+    if config_dict['autoexit'] == 'true':
+        autoexit_chkb.state(['selected'])
     else:
-        showpnames_chkb.state(['!selected'])
+        autoexit_chkb.state(['!selected'])
 
-    showpnames_chkb.pack(side='left')
+    autoexit_chkb.pack(side='left')
 
     def close():
         settingswindow.destroy()
@@ -1009,20 +1106,22 @@ def settingswindow():
         '''Write new config values to config.txt'''
         with open('config.yml', 'w') as cfg:
             locale = ('en_US', 'ko_KR')
+            show_pname = ('bar', 'bracket', 'false')
 
             if 'selected' in soft_chkb.state():
                 soft_shutdown = 'true'
             else:
                 soft_shutdown = 'false'
 
-            if 'selected' in showpnames_chkb.state():
-                show_profilename = 'true'
+            if 'selected' in autoexit_chkb.state():
+                autoexit = 'true'
             else:
-                show_profilename = 'false'
+                autoexit = 'false'
 
             config_dict = {'locale': locale[locale_cb.current()],
                            'try_soft_shutdown': soft_shutdown,
-                           'show_profilename': show_profilename}
+                           'show_profilename': show_pname[showpnames_cb.current()],  # NOQA
+                           'autoexit': autoexit}
 
             yaml = YAML()
             yaml.dump(config_dict, cfg)
@@ -1045,18 +1144,8 @@ def settingswindow():
 
     settings_apply = ttk.Button(bottomframe_set,
                                 text=_('Apply'),
+                                command=apply,
                                 width=10)
-
-    def applybutton():
-        nonlocal settings_apply
-
-        def enable():
-            settings_apply['state'] = 'normal'
-        apply()
-        settings_apply['state'] = 'disabled'
-        settingswindow.after(500, enable)
-
-    settings_apply['command'] = applybutton
 
     settings_ok.pack(side='left', padx=3, pady=3)
     settings_cancel.pack(side='left', padx=3, pady=3)
@@ -1064,7 +1153,8 @@ def settingswindow():
 
 
 def exit_after_restart():
-    '''Restart Steam client and exit application'''
+    '''Restart Steam client and exit application.
+    If autoexit is disabled, app won't exit.'''
     try:
         if config_dict['try_soft_shutdown'] == 'false':
             raise FileNotFoundError
@@ -1086,6 +1176,7 @@ def exit_after_restart():
             sleep(2)
             for x in range(8):
                 if check_running('Steam.exe'):
+                    print('Steam is still running after %s seconds' % str(2+x*2))  # NOQA
                     if x < 8:
                         sleep(1.5)
                         continue
@@ -1121,7 +1212,8 @@ def exit_after_restart():
         msgbox.showerror(_('Error'),
                          _('Could not start Steam automatically')
                          + '\n' + _('for unknown reason.'))
-    main.quit()
+    if config_dict['autoexit'] == 'true':
+        main.quit()
 
 
 def window_height():
@@ -1183,9 +1275,16 @@ button_quit = ttk.Button(bottomframe,
                          text=_('Exit'),
                          command=main.quit)
 
+restartbutton_text = tk.StringVar()
+
+if config_dict['autoexit'] == 'true':
+    restartbutton_text.set(_('Restart Steam & Exit'))
+else:
+    restartbutton_text.set(_('Restart Steam'))
+
 button_restart = ttk.Button(bottomframe,
                             width=20,
-                            text=_('Restart Steam & exit'),
+                            textvariable=restartbutton_text,
                             command=exit_after_restart)
 
 button_toggle.pack(side='left', padx=3, pady=3)
@@ -1241,17 +1340,16 @@ def draw_button():
         button_dict[username].config(style='sel.TButton', state='disabled')
         user_var.set(fetch_reg('username'))
 
-    if loginusers():
-        AccountName, PersonaName = loginusers()
-    else:
-        AccountName = []
-        PersonaName = []
-
     if not accounts:
         nouser_label.pack(anchor='center', expand=True)
     elif accounts:
         for username in accounts:
-            if config_dict['show_profilename'] == 'true':
+            if config_dict['show_profilename'] != 'false':
+                if loginusers():
+                    AccountName, PersonaName = loginusers()
+                else:
+                    AccountName, PersonaName = [], []
+
                 if username in AccountName:
                     try:
                         i = AccountName.index(username)
@@ -1263,10 +1361,16 @@ def draw_button():
                     profilename = ''
 
                 if profilename and n > 4:
-                    if profilename == profilename[:n]:
-                        profilename = ' (' + profilename[:n] + ')'
-                    else:
-                        profilename = ' (' + profilename[:n] + '..)'
+                    if config_dict['show_profilename'] == 'bar':
+                        if profilename == profilename[:n]:
+                            profilename = ' | ' + profilename[:n] + ''
+                        else:
+                            profilename = ' | ' + profilename[:n] + '..'
+                    elif config_dict['show_profilename'] == 'bracket':
+                        if profilename == profilename[:n]:
+                            profilename = ' (' + profilename[:n] + ')'
+                        else:
+                            profilename = ' (' + profilename[:n] + '..)'
             else:
                 profilename = ''
 
@@ -1296,6 +1400,10 @@ def refresh():
     main.geometry("300x%s" %
                   window_height())
     draw_button()
+    if config_dict['autoexit'] == 'true':
+        restartbutton_text.set(_('Restart Steam & Exit'))
+    else:
+        restartbutton_text.set(_('Restart Steam'))
     print('Menu refreshed with %s account(s)' % len(accounts))
 
 

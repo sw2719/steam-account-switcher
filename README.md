@@ -11,10 +11,6 @@ STEAM is a trademark of Valve.
 
 This app has no affiliation with Steam or Valve.
 
-# Current Status
-* Working on a new update checking system. This will roll out with 1.7.
-* Current auto updating implementation has some issues and i'm looking for better ways.
-
 # Features
 * Switch between your accounts with just few clicks.
 
@@ -45,6 +41,9 @@ This app has no affiliation with Steam or Valve.
 * If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code.
 
 # Changelogs (for last 3 versions)
+* Fixed a bug where app crashed if profile name contained unicode characters (v1.7)
+* Changed how auto-updating works (v1.7)
+
 * Implemented order changing (v1.6)
 * Addded Settings UI (v1.6)
 * Addded fallback for soft shutdown Steam mode (v1.6)
@@ -60,11 +59,8 @@ This app has no affiliation with Steam or Valve.
 * Now your profile names are displayed (v1.5)
 * Added settings functionality (v1.5)
 
-* Added soft shutdown of Steam (v1.4)
-* Added ability to import accounts from Steam (v1.4)
-
 # Upcoming Features / Improvements
-* Auto launching app upon Steam restart (v1.7)
+* Auto launching app upon Steam restart (Not planned but coming)
 * Setting custom name for accounts (Not planned but coming)
 * Improving code & readability (Continuous)
 
