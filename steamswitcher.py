@@ -212,14 +212,14 @@ def start_checkupdate():
 
             dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
             try:
-                response = req.get(dl_url)
+                with req.get(dl_url, stream=True) as resp:
+                    with open('update.zip', 'wb') as f:
+                        shutil.copyfileobj(resp.raw, f)
             except req.exceptions.RequestException:
                 msgbox.showwarning(_('Error'),
                                    _("Error occured while downloading update."))  # NOQA
                 updatewindow.destroy()
                 return
-            with open('update.zip', 'wb') as f:
-                f.write(response.content)
             try:
                 archive = os.path.join(os.getcwd(), 'update.zip')
 
