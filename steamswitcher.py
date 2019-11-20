@@ -208,7 +208,10 @@ def start_checkupdate():
 
             dl_p = tk.IntVar()
             dl_p.set(0)
-            dl_pbar = ttk.Progressbar(button_frame, length=150, orient=tk.HORIZONTAL, variable=dl_p)
+            dl_pbar = ttk.Progressbar(button_frame,
+                                      length=180,
+                                      orient=tk.HORIZONTAL,
+                                      variable=dl_p)
             dl_pbar.pack()
             main.update()
 
@@ -232,7 +235,7 @@ def start_checkupdate():
                             done = int(100 * dl / total_length)
                             download_q.put(done)
 
-            def update_gui():
+            def update_pbar():
                 nonlocal download_q
                 nonlocal dl_p
                 while True:
@@ -246,10 +249,10 @@ def start_checkupdate():
                     except q.Empty:
                         main.update()
 
-            dl_thread = threading.Thread(target=lambda url=dl_url: download(url))
+            dl_thread = threading.Thread(target=lambda url=dl_url: download(url))  # NOQA
             dl_thread.start()
 
-            update_gui()
+            update_pbar()
 
             try:
                 archive = os.path.join(os.getcwd(), 'update.zip')
