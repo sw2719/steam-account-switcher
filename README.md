@@ -62,11 +62,6 @@ This app has no affiliation with Steam or Valve.
 * Now your profile names are displayed (v1.5)
 * Added settings functionality (v1.5)
 
-# Upcoming Features / Improvements
-* Auto launching app upon Steam restart (Not planned but coming)
-* Setting custom name for accounts (Not planned but coming)
-* Improving code & readability (Continuous)
-
 # Source code information
 * All other branches except master are considered as acitve-development branch and might have issues, bugs, WIP features, or might not just work at all.
 * Written in Python 3.7
