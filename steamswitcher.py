@@ -206,10 +206,10 @@ def start_checkupdate():
             cancel_button.destroy()
             update_button.destroy()
 
-            dl_text = tk.StringVar()
-            dl_text.set(_('Downloading update') + ' | 0 %')
-            dl_label = tk.Label(button_frame, textvariable=dl_text)
-            dl_label.pack()
+            dl_p = tk.IntVar()
+            dl_p.set(0)
+            dl_pbar = ttk.Progressbar(button_frame, length=150, orient=tk.HORIZONTAL, variable=dl_p)
+            dl_pbar.pack()
             main.update()
 
             download_q = q.Queue()
@@ -234,12 +234,12 @@ def start_checkupdate():
 
             def update_gui():
                 nonlocal download_q
-                nonlocal dl_text
+                nonlocal dl_p
                 while True:
                     try:
                         done = download_q.get_nowait()
                         p = int(done)
-                        dl_text.set(_('Downloading update') + f' | {str(p)} %')
+                        dl_p.set(p)
                         main.update()
                         if p == 100:
                             return
