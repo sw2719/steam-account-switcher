@@ -25,7 +25,7 @@ print('App Start')
 
 BRANCH = 'master'
 
-__VERSION__ = '1.6'
+__VERSION__ = '1.7.1'
 
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
@@ -37,7 +37,7 @@ if getattr(sys, 'frozen', False):
             pass
 else:
     print('Running in a Python interpreter')
-    BUNDLE = True
+    BUNDLE = False
 
 config_dict = {}
 
