@@ -23,9 +23,9 @@ system_locale = locale.getdefaultlocale()[0]
 
 print('App Start')
 
-BRANCH = 'master'
+BRANCH = 'update_1.7.2'
 
-__VERSION__ = '1.7.1'
+__VERSION__ = '1.7.2'
 
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
@@ -287,6 +287,11 @@ def start_checkupdate():
                 changelog = version_data['changelog_ko']
             else:
                 changelog = version_data['changelog_en']
+            try:
+                critical_msg = version_data['msg'][str(__VERSION__)]
+                print(critical_msg)
+            except KeyError:
+                pass
             print('Server version is', sv_version_str)
             print('Client version is', __VERSION__)
 
