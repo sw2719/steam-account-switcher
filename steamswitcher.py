@@ -287,6 +287,17 @@ def start_checkupdate():
                 changelog = version_data['changelog_ko']
             else:
                 changelog = version_data['changelog_en']
+            try:
+                critical_msg = version_data['msg'][str(__VERSION__)]
+                if critical_msg:
+                    if LOCALE == 'ko_KR':
+                        msgbox.showinfo(_('Info'),
+                                        critical_msg['ko'])
+                    else:
+                        msgbox.showinfo(_('Info'),
+                                        critical_msg['en'])
+            except (KeyError, TypeError):
+                pass
             print('Server version is', sv_version_str)
             print('Client version is', __VERSION__)
 
@@ -300,7 +311,8 @@ def start_checkupdate():
             elif sv_version < cl_version:
                 update = 'dev'
 
-        except Exception:
+        except (req.RequestException, req.ConnectionError,
+                req.Timeout, req.ConnectTimeout):
             update = 'error'
             sv_version_str = '0'
             changelog = None
