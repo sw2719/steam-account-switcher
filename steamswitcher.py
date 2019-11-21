@@ -23,7 +23,7 @@ system_locale = locale.getdefaultlocale()[0]
 
 print('App Start')
 
-BRANCH = 'update_1.7.2'
+BRANCH = 'master'
 
 __VERSION__ = '1.7.2'
 
@@ -289,7 +289,13 @@ def start_checkupdate():
                 changelog = version_data['changelog_en']
             try:
                 critical_msg = version_data['msg'][str(__VERSION__)]
-                print(critical_msg)
+                if critical_msg:
+                    if LOCALE == 'ko_KR':
+                        msgbox.showinfo(_('Info'),
+                                        critical_msg['ko'])
+                    else:
+                        msgbox.showinfo(_('Info'),
+                                        critical_msg['en'])
             except KeyError:
                 pass
             print('Server version is', sv_version_str)
