@@ -3,6 +3,8 @@ changelog_en: |
   ----------1.7.1----------
   • Fixed bugs.
 
+  • Optimized update downloading.
+
   • Added progress bar that shows update download progress.
   ----------1.7----------
   • Fixed crash that occured if unicode characters existed in profile name.
@@ -18,6 +20,8 @@ changelog_en: |
 changelog_ko: |
   ----------1.7.1----------
   • 몇몇 버그를 수정하였습니다.
+
+  • 업데이트 다운로드를 최적화하였습니다.
 
   • 업데이트 다운로드 진행 상황을 표시하는 진행 막대를 추가하였습니다.
   ----------1.7----------
