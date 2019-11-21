@@ -1,7 +1,7 @@
 # Steam Account Switcher
 Steam Account Switching made easy (on Windows)
 
-Written entirely in Python.
+Written in Python
 
 [Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
 
@@ -9,7 +9,7 @@ Written entirely in Python.
 
 STEAM is a trademark of Valve.
 
-This app has no affiliation with Steam or Valve.
+This app has no affiliation with Steam and Valve.
 
 # Features
 * Switch between your accounts with just few clicks.
@@ -41,26 +41,13 @@ This app has no affiliation with Steam or Valve.
 * If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code.
 
 # Changelogs (for last 3 versions)
+* Added server message displaying functionality. (v1.7.2)
+* Added update download progress bar. (v1.7.1)
 * Fixed crash that occured if unicode characters existed in profile name. (v1.7)
 * Changed update UI. (v1.7)
 * Updated auto updating implementation. (v1.7)
 * Changed how profile name is displayed. (v1.7)
 * Added a setting to choose whether app exits after restarting Steam or not. (v1.7)
-
-* Implemented order changing (v1.6)
-* Addded Settings UI (v1.6)
-* Addded fallback for soft shutdown Steam mode (v1.6)
-* Addded scrollbar to remove window (v1.6)
-* Implemented mouse wheel-scrolling (v1.6)
-* Fixed #7 (v1.6)
-* Switched to YAML from Plain Text for accounts and config files (v1.6)
-* Changed updater logic (v1.6)
-
-* Changed first launch behaviour (v1.5)
-* Bug fixes (v1.5)
-* Added auto-updating (v1.5)
-* Now your profile names are displayed (v1.5)
-* Added settings functionality (v1.5)
 
 # Source code information
 * All other branches except master are considered as acitve-development branch and might have issues, bugs, WIP features, or might not just work at all.
@@ -75,17 +62,3 @@ This app has no affiliation with Steam or Valve.
 ![window](https://user-images.githubusercontent.com/22590718/63221824-87af7e00-c1d9-11e9-96e2-87508d2128b5.png)
 ![windowremove](https://user-images.githubusercontent.com/22590718/63221825-87af7e00-c1d9-11e9-8887-ed530c305166.png)
 ![windowadd](https://user-images.githubusercontent.com/22590718/63221826-88481480-c1d9-11e9-82eb-2b78dc9d528d.png)
-
-# How it works
-When you launch the program for the first time, the program fetches current auto-login user from registry and then adds it to accounts.txt.
-When you add accounts, it saves your usernames to accounts.yaml.
-(Steam saves your usernames in plain text as well. (It's VDF, but it's in plain text.)
-When you press one of the 'account-changing' buttons, code below runs.
-
-(modified)
-```
-reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam", 0, winreg.KEY_ALL_ACCESS)
-winreg.SetValueEx(reg_key, 'AutoLoginUser', 0, winreg.REG_SZ, *your_username*)
-winreg.CloseKey(reg_key)
-```
-It changes the value of key 'AutoLoginUser' located at Steam registry path, tricking Steam to autologin with that username.
