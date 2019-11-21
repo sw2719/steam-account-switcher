@@ -1,5 +1,7 @@
-version: 1.7.1
+version: 1.7.2
 changelog_en: |
+  ----------1.7.2----------
+  • Added displaying important message capability.
   ----------1.7.1----------
   • Fixed bugs.
 
@@ -18,6 +20,8 @@ changelog_en: |
   • Added a setting to choose whether app exits after restarting Steam or not.
 
 changelog_ko: |
+  ----------1.7.2----------
+  • 중요 메시지 표시 기능을 추가하였습니다.
   ----------1.7.1----------
   • 몇몇 버그를 수정하였습니다.
 
