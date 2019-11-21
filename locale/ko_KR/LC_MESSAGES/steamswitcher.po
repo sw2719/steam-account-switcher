@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-16 22:26+0900\n"
-"PO-Revision-Date: 2019-11-16 22:27+0900\n"
+"POT-Creation-Date: 2019-11-21 15:17+0900\n"
+"PO-Revision-Date: 2019-11-21 15:17+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -29,12 +29,12 @@ msgstr "소스 파일 사용 중"
 msgid "Checking for updates..."
 msgstr "업데이트 확인 중..."
 
-#: steamswitcher.py:176 steamswitcher.py:301
+#: steamswitcher.py:176 steamswitcher.py:334
 msgid "Update"
 msgstr "업데이트"
 
-#: steamswitcher.py:183 steamswitcher.py:647 steamswitcher.py:756
-#: steamswitcher.py:852 steamswitcher.py:997 steamswitcher.py:1141
+#: steamswitcher.py:183 steamswitcher.py:680 steamswitcher.py:789
+#: steamswitcher.py:885 steamswitcher.py:1030 steamswitcher.py:1174
 msgid "Cancel"
 msgstr "취소"
 
@@ -47,327 +47,324 @@ msgstr "지금 업데이트"
 msgid "New version %s is available."
 msgstr "버전 %s이 사용 가능합니다."
 
-#: steamswitcher.py:209
-msgid "Downloading update..."
-msgstr "업데이트 다운로드 중..."
-
-#: steamswitcher.py:217 steamswitcher.py:232 steamswitcher.py:1191
-#: steamswitcher.py:1212
+#: steamswitcher.py:266 steamswitcher.py:1224 steamswitcher.py:1245
 msgid "Error"
 msgstr "오류"
 
-#: steamswitcher.py:218
-msgid "Error occured while downloading update."
-msgstr "업데이트를 다운로드하는 도중 오류가 발생했습니다."
-
-#: steamswitcher.py:232
+#: steamswitcher.py:266
 msgid "Couldn't perform automatic update."
 msgstr "자동 업데이트를 수행할 수 없습니다."
 
-#: steamswitcher.py:233
+#: steamswitcher.py:267
 msgid "Update manually by extracting update.zip file."
 msgstr "update.zip 파일을 수동으로 압축해제하세요."
 
-#: steamswitcher.py:296
+#: steamswitcher.py:330
 msgid "New update available"
 msgstr "새 업데이트 사용 가능"
 
-#: steamswitcher.py:310
+#: steamswitcher.py:343
 msgid "Using the latest version"
 msgstr "최신 버전 사용 중"
 
-#: steamswitcher.py:316
+#: steamswitcher.py:349
 msgid "Development version"
 msgstr "개발 버전"
 
-#: steamswitcher.py:322
+#: steamswitcher.py:355
 msgid "Failed to check for updates"
 msgstr "업데이트 확인 실패"
 
-#: steamswitcher.py:373 steamswitcher.py:528
+#: steamswitcher.py:406 steamswitcher.py:561
 msgid "Registry Error"
 msgstr "레지스트리 오류"
 
-#: steamswitcher.py:374
+#: steamswitcher.py:407
 msgid "Failed to read registry value."
 msgstr "레지스트리 값을 읽을 수 없습니다."
 
-#: steamswitcher.py:375
+#: steamswitcher.py:408
 msgid "Make sure that Steam is installed."
 msgstr "Steam이 설치되어 있는지 확인하세요."
 
-#: steamswitcher.py:420
+#: steamswitcher.py:453
 msgid "Auto-login Enabled"
 msgstr "자동로그인 켜짐"
 
-#: steamswitcher.py:422
+#: steamswitcher.py:455
 msgid "Auto-login Disabled"
 msgstr "자동로그인 꺼짐"
 
-#: steamswitcher.py:454
+#: steamswitcher.py:487
 msgid "Information"
 msgstr "정보"
 
-#: steamswitcher.py:455
+#: steamswitcher.py:488
 msgid "With version 1.6, data format has been changed."
 msgstr "버전 1.6 에서, 데이터 포맷이 변경되었습니다."
 
-#: steamswitcher.py:456
+#: steamswitcher.py:489
 msgid "Attempt to convert your account data has failed."
 msgstr "자동으로 기존 데이터를 변환하는데 실패했습니다."
 
-#: steamswitcher.py:457
+#: steamswitcher.py:490
 msgid "Please add them manually or try again by restarting app."
 msgstr "수동으로 다시 추가하거나 재시작하여 다시 시도하세요."
 
-#: steamswitcher.py:528
+#: steamswitcher.py:561
 msgid "Failed to change registry value."
 msgstr "레지스트리 값을 바꿀 수 없습니다."
 
-#: steamswitcher.py:544 steamswitcher.py:1257
+#: steamswitcher.py:577 steamswitcher.py:1290
 msgid "About"
 msgstr "정보"
 
-#: steamswitcher.py:547
+#: steamswitcher.py:580
 msgid "Made by sw2719 (Myeuaa)"
 msgstr "Made by 꺔먕 (Myeuaa / sw2719)"
 
-#: steamswitcher.py:553
+#: steamswitcher.py:586
 msgid "Warning: The developer of this application is not responsible for"
 msgstr "경고: 본 앱의 사용으로 인한 데이터 손실 및 기타 손해 등"
 
-#: steamswitcher.py:554
+#: steamswitcher.py:587
 msgid "data loss or any other damage from the use of this app."
 msgstr "어떠한 사고나 문제에 대해서 제작자는 책임을 지지 않습니다."
 
-#: steamswitcher.py:555
+#: steamswitcher.py:588
 msgid "STEAM is a registered trademark of Valve Corporation."
 msgstr "STEAM은 Valve Corporation의 등록 상표입니다."
 
-#: steamswitcher.py:565
+#: steamswitcher.py:598
 msgid "Close"
 msgstr "닫기"
 
-#: steamswitcher.py:584 steamswitcher.py:644
+#: steamswitcher.py:617 steamswitcher.py:677
 msgid "Add"
 msgstr "추가"
 
-#: steamswitcher.py:595
+#: steamswitcher.py:628
 msgid "Enter accounts(s) to add."
 msgstr "추가할 계정을 입력하세요."
 
-#: steamswitcher.py:597
+#: steamswitcher.py:630
 msgid "In case of adding multiple accounts,"
 msgstr "다수의 계정을 입력할 경우에는,"
 
-#: steamswitcher.py:598
+#: steamswitcher.py:631
 msgid "seperate each account with '/' (slash)."
 msgstr "'/'(슬래시)로 구분합니다."
 
-#: steamswitcher.py:626
+#: steamswitcher.py:659
 msgid "Duplicate Alert"
 msgstr "중복 경고"
 
-#: steamswitcher.py:627
+#: steamswitcher.py:660
 #, python-format
 msgid "Account %s already exists."
 msgstr "계정 %s은 이미 추가되어 있습니다."
 
-#: steamswitcher.py:663 steamswitcher.py:1184
+#: steamswitcher.py:696 steamswitcher.py:1217
 msgid "Alert"
 msgstr "경고"
 
-#: steamswitcher.py:663
+#: steamswitcher.py:696
 msgid "Could not load loginusers.vdf."
 msgstr "파일 loginusers.vdf를 불러오지 못했습니다."
 
-#: steamswitcher.py:664
+#: steamswitcher.py:697
 msgid "This may be because Steam directory defined"
 msgstr "레지스트리에 설정된 스팀 경로가 올바르지"
 
-#: steamswitcher.py:665
+#: steamswitcher.py:698
 msgid "in registry is invalid."
 msgstr "않을 수 있습니다."
 
-#: steamswitcher.py:666
+#: steamswitcher.py:699
 msgid "Do you want to select Steam directory manually?"
 msgstr "수동으로 스팀 경로를 설정하시겠습니까?"
 
-#: steamswitcher.py:676
+#: steamswitcher.py:709
 msgid "Warning"
 msgstr "경고"
 
-#: steamswitcher.py:677
+#: steamswitcher.py:710
 msgid "Steam directory is invalid."
 msgstr "스팀 경로가 올바르지 않습니다."
 
-#: steamswitcher.py:678
+#: steamswitcher.py:711
 msgid "Try again?"
 msgstr "다시 시도할까요?"
 
-#: steamswitcher.py:687 steamswitcher.py:760
+#: steamswitcher.py:720 steamswitcher.py:793
 msgid "Import"
 msgstr "가져오기"
 
-#: steamswitcher.py:697
+#: steamswitcher.py:730
 msgid "Select accounts to import."
 msgstr "가져올 계정들을 선택하세요."
 
-#: steamswitcher.py:698
+#: steamswitcher.py:731
 msgid "Added accounts don't show up."
 msgstr "이미 추가된 계정은 나타나지 않습니다."
 
-#: steamswitcher.py:772
+#: steamswitcher.py:805
 msgid "No Accounts"
 msgstr "계정 없음"
 
-#: steamswitcher.py:773
+#: steamswitcher.py:806
 msgid "There's no account to remove."
 msgstr "삭제할 계정이 없습니다."
 
-#: steamswitcher.py:776 steamswitcher.py:856
+#: steamswitcher.py:809 steamswitcher.py:889
 msgid "Remove"
 msgstr "삭제"
 
-#: steamswitcher.py:783
+#: steamswitcher.py:816
 msgid "Select accounts to remove."
 msgstr "삭제할 계정을 선택하세요."
 
-#: steamswitcher.py:934
+#: steamswitcher.py:967
 msgid "Drag or use buttons below"
 msgstr "드래그하거나 아래의 버튼으로"
 
-#: steamswitcher.py:935
+#: steamswitcher.py:968
 msgid "to change order."
 msgstr "순서를 변경하세요."
 
-#: steamswitcher.py:986
+#: steamswitcher.py:1019
 msgid "Up"
 msgstr "위"
 
-#: steamswitcher.py:990
+#: steamswitcher.py:1023
 msgid "Down"
 msgstr "아래"
 
-#: steamswitcher.py:994 steamswitcher.py:1136
+#: steamswitcher.py:1027 steamswitcher.py:1169
 msgid "OK"
 msgstr "확인"
 
-#: steamswitcher.py:1001 steamswitcher.py:1146
+#: steamswitcher.py:1034 steamswitcher.py:1179
 msgid "Apply"
 msgstr "적용"
 
-#: steamswitcher.py:1022 steamswitcher.py:1255
+#: steamswitcher.py:1055 steamswitcher.py:1288
 msgid "Settings"
 msgstr "설정"
 
-#: steamswitcher.py:1033
+#: steamswitcher.py:1066
 msgid "Language"
 msgstr "언어"
 
-#: steamswitcher.py:1050
+#: steamswitcher.py:1083
 msgid "Restart app to apply language settings."
 msgstr "언어 설정을 적용하려면 앱을 재시작하세요."
 
-#: steamswitcher.py:1056
+#: steamswitcher.py:1089
 msgid "Show profile names"
 msgstr "프로필 이름 표시"
 
-#: steamswitcher.py:1060
+#: steamswitcher.py:1093
 msgid "Use bar - |"
 msgstr "막대 사용 - |"
 
-#: steamswitcher.py:1061
+#: steamswitcher.py:1094
 msgid "Use brackets - ( )"
 msgstr "괄호 사용 - ( )"
 
-#: steamswitcher.py:1062
+#: steamswitcher.py:1095
 msgid "Off"
 msgstr "끄기"
 
-#: steamswitcher.py:1076
+#: steamswitcher.py:1109
 msgid "Try to soft shutdown Steam client"
 msgstr "스팀 클라이언트 안전 종료"
 
-#: steamswitcher.py:1091
+#: steamswitcher.py:1124
 msgid "Exit app upon Steam restart"
 msgstr "스팀 재시작시 앱 종료"
 
-#: steamswitcher.py:1185
+#: steamswitcher.py:1218
 msgid "After soft shutdown attempt,"
 msgstr "스팀 안전 종료를 시도했으나,"
 
-#: steamswitcher.py:1186
+#: steamswitcher.py:1219
 msgid "Steam appears to be still running."
 msgstr "Steam이 아직 실행 중인 것 같습니다."
 
-#: steamswitcher.py:1187
+#: steamswitcher.py:1220
 msgid "Do you want to force shutdown Steam?"
 msgstr "Steam을 강제 종료 하시겠습니까?"
 
-#: steamswitcher.py:1192
+#: steamswitcher.py:1225
 msgid "Could not soft shutdown Steam."
 msgstr "Steam을 안전 종료할 수 없었습니다."
 
-#: steamswitcher.py:1193
+#: steamswitcher.py:1226
 msgid "App will now exit."
 msgstr "앱이 종료됩니다."
 
-#: steamswitcher.py:1213
+#: steamswitcher.py:1246
 msgid "Could not start Steam automatically"
 msgstr "알 수 없는 이유로 Steam을"
 
-#: steamswitcher.py:1214
+#: steamswitcher.py:1247
 msgid "for unknown reason."
 msgstr "자동으로 실행 할 수 없습니다."
 
-#: steamswitcher.py:1232
+#: steamswitcher.py:1265
 msgid "Account Switcher"
 msgstr "Steam 계정 전환기"
 
-#: steamswitcher.py:1246
+#: steamswitcher.py:1279
 msgid "Import accounts from Steam"
 msgstr "Steam에서 계정 가져오기"
 
-#: steamswitcher.py:1248
+#: steamswitcher.py:1281
 msgid "Add accounts"
 msgstr "계정 추가"
 
-#: steamswitcher.py:1250
+#: steamswitcher.py:1283
 msgid "Remove accounts"
 msgstr "계정 삭제"
 
-#: steamswitcher.py:1252
+#: steamswitcher.py:1285
 msgid "Change account order"
 msgstr "계정 순서 변경"
 
-#: steamswitcher.py:1260
+#: steamswitcher.py:1293
 msgid "Menu"
 msgstr "메뉴"
 
-#: steamswitcher.py:1270
+#: steamswitcher.py:1303
 msgid "Toggle auto-login"
 msgstr "자동로그인 토글"
 
-#: steamswitcher.py:1275
+#: steamswitcher.py:1308
 msgid "Exit"
 msgstr "종료"
 
-#: steamswitcher.py:1281 steamswitcher.py:1404
+#: steamswitcher.py:1314 steamswitcher.py:1437
 msgid "Restart Steam & Exit"
 msgstr "스팀 재시작후 종료"
 
-#: steamswitcher.py:1283 steamswitcher.py:1406
+#: steamswitcher.py:1316 steamswitcher.py:1439
 msgid "Restart Steam"
 msgstr "스팀 재시작"
 
-#: steamswitcher.py:1294 steamswitcher.py:1316
+#: steamswitcher.py:1327 steamswitcher.py:1349
 msgid "No accounts added"
 msgstr "추가된 계정 없음"
 
-#: steamswitcher.py:1318
+#: steamswitcher.py:1351
 msgid "Current Auto-login user:"
 msgstr "현재 자동로그인 계정:"
+
+#~ msgid "Downloading update..."
+#~ msgstr "업데이트 다운로드 중..."
+
+#~ msgid "Error occured while downloading update."
+#~ msgstr "업데이트를 다운로드하는 도중 오류가 발생했습니다."
 
 #~ msgid "Manual update %s is available."
 #~ msgstr "수동 업데이트 %s 사용 가능"
