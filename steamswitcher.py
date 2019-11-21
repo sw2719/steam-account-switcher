@@ -25,7 +25,7 @@ print('App Start')
 
 BRANCH = 'master'
 
-__VERSION__ = '1.7'
+__VERSION__ = '1.7.1'
 
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
@@ -206,20 +206,54 @@ def start_checkupdate():
             cancel_button.destroy()
             update_button.destroy()
 
-            dl_label = tk.Label(button_frame, text=_('Downloading update...'))
-            dl_label.pack()
+            dl_p = tk.IntVar()
+            dl_p.set(0)
+            dl_pbar = ttk.Progressbar(button_frame,
+                                      length=180,
+                                      orient=tk.HORIZONTAL,
+                                      variable=dl_p)
+            dl_pbar.pack()
             main.update()
 
+            download_q = q.Queue()
             dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
-            try:
-                response = req.get(dl_url)
-            except req.exceptions.RequestException:
-                msgbox.showwarning(_('Error'),
-                                   _("Error occured while downloading update."))  # NOQA
-                updatewindow.destroy()
-                return
-            with open('update.zip', 'wb') as f:
-                f.write(response.content)
+
+            def download(url):
+                nonlocal download_q
+                with open('update.zip', "wb") as f:
+                    response = req.get(url, stream=True)
+                    total_length = response.headers.get('content-length')
+
+                    if total_length is None:
+                        f.write(response.content)
+                    else:
+                        dl = 0
+                        total_length = int(total_length)
+                        for data in response.iter_content(chunk_size=4096):
+                            dl += len(data)
+                            f.write(data)
+                            done = int(100 * dl / total_length)
+                            download_q.put(done)
+
+            def update_pbar():
+                nonlocal download_q
+                nonlocal dl_p
+                while True:
+                    try:
+                        done = download_q.get_nowait()
+                        p = int(done)
+                        dl_p.set(p)
+                        main.update()
+                        if p == 100:
+                            return
+                    except q.Empty:
+                        main.update()
+
+            dl_thread = threading.Thread(target=lambda url=dl_url: download(url))  # NOQA
+            dl_thread.start()
+
+            update_pbar()
+
             try:
                 archive = os.path.join(os.getcwd(), 'update.zip')
 
@@ -293,8 +327,7 @@ def start_checkupdate():
                 print('Update Available')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('New update available')  # NOQA
-                                        % sv_version)
+                                        text=_('New update available'))  # NOQA
                 update_label.pack(side='left', padx=5)
 
                 update_button = ttk.Button(update_frame,
