@@ -35,8 +35,3 @@ changelog_ko: |
 
   • 설정에서 스팀 재시작후 앱이 종료되지 않도록 변경할 수 있습니다.
 msg:
-  1.7.2:
-    ko:
-      테스트 메시지
-    en:
-      Test Message
