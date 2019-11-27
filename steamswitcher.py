@@ -38,6 +38,7 @@ if getattr(sys, 'frozen', False):
             pass
 else:
     print('Running in a Python interpreter')
+    from tqdm import tqdm
     BUNDLE = False
 
 config_dict = {}
@@ -241,7 +242,7 @@ def start_checkupdate(debug=False):
             def download(url):
                 nonlocal download_q
                 with open('update.zip', "wb") as f:
-                    start_time = time.time()
+                    start_time = time.process_time()
                     response = req.get(url, stream=True)
                     total_length = response.headers.get('content-length')
 
@@ -250,10 +251,12 @@ def start_checkupdate(debug=False):
                     else:
                         dl = 0
                         total_length = int(total_length)
+                        if BUNDLE is False:
+                            t = tqdm(total=total_length, unit='iB', unit_scale=True)
                         for data in response.iter_content(chunk_size=8192):
                             dl += len(data)
                             done = int(100 * dl / total_length)
-                            dl_speed = dl / (time.time() - start_time)
+                            dl_speed = dl / (time.process_time() - start_time)
                             if dl_speed >= 1024000:
                                 dl_speed_str = str(round(dl_speed / 1024000, 1)) + 'MB/s'
                             elif dl_speed >= 1024:
@@ -262,7 +265,8 @@ def start_checkupdate(debug=False):
                                 dl_speed_str = str(round(dl_speed, 1)) + 'B/s'
                             downloaded = f'{str(round(dl / 1024000, 1))}MB / {str(round(total_length / 1024000, 1))}MB'
                             f.write(data)
-                            print(dl_speed_str, '|', downloaded, '|', done)
+                            if BUNDLE is False:
+                                t.update(len(data))
                             download_q.put((done, downloaded, dl_speed_str))
 
             def update_pbar():
