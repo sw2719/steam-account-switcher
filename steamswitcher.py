@@ -15,7 +15,6 @@ import threading
 import queue as q
 import zipfile as zf
 import shutil
-import time
 from packaging import version
 from time import sleep
 from ruamel.yaml import YAML
@@ -38,7 +37,6 @@ if getattr(sys, 'frozen', False):
             pass
 else:
     print('Running in a Python interpreter')
-    from tqdm import tqdm
     BUNDLE = False
 
 config_dict = {}
@@ -173,13 +171,14 @@ def start_checkupdate(debug=False):
 
     def update(sv_version, changelog):
         nonlocal debug
+
         updatewindow = tk.Toplevel(main)
         updatewindow.title(_('Update'))
         updatewindow.geometry("400x300+650+300")
         updatewindow.resizable(False, False)
 
         button_frame = tk.Frame(updatewindow)
-        button_frame.pack(side=tk.BOTTOM, pady=3)
+        button_frame.pack(side=tk.BOTTOM, pady=3, fill='x')
 
         cancel_button = ttk.Button(button_frame, text=_('Cancel'),
                                    command=updatewindow.destroy)
@@ -207,6 +206,12 @@ def start_checkupdate(debug=False):
             nonlocal update_button
             nonlocal debug
 
+            main.withdraw()
+            try:
+                os.remove('update.zip')
+            except OSError:
+                pass
+
             install = True
 
             if not BUNDLE and debug:
@@ -219,17 +224,17 @@ def start_checkupdate(debug=False):
             dl_p = tk.IntVar()
             dl_p.set(0)
             dl_pbar = ttk.Progressbar(button_frame,
-                                      length=180,
+                                      length=150,
                                       orient=tk.HORIZONTAL,
                                       variable=dl_p)
-            dl_pbar.pack(side='left')
+            dl_pbar.pack(side='left', padx=5)
 
             dl_prog_var = tk.StringVar()
-            dl_prog_var.set('----- / -----')
+            dl_prog_var.set('-------- / --------')
             dl_prog = tk.Label(button_frame, textvariable=dl_prog_var)
 
             dl_speed_var = tk.StringVar()
-            dl_speed_var.set('-----')
+            dl_speed_var.set('---------')
             dl_speed = tk.Label(button_frame, textvariable=dl_speed_var)
 
             dl_prog.pack(side='right', padx=5)
@@ -239,35 +244,71 @@ def start_checkupdate(debug=False):
             download_q = q.Queue()
             dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
 
-            def download(url):
+            def download(URL):
                 nonlocal download_q
-                with open('update.zip', "wb") as f:
-                    start_time = time.process_time()
-                    response = req.get(url, stream=True)
-                    total_length = response.headers.get('content-length')
+                try:
+                    r = req.get(URL, stream=True)
+                    total_size = int(r.headers.get('content-length'))
+                    total_in_MB = round(total_size / 1048576, 1)
+                except req.RequestException:
+                    msgbox.showerror(_('Error'),
+                                     _('Error occured while downloading update.'))  # NOQA
 
-                    if total_length is None:
-                        f.write(response.content)
-                    else:
-                        dl = 0
-                        total_length = int(total_length)
-                        if BUNDLE is False:
-                            t = tqdm(total=total_length, unit='iB', unit_scale=True)
-                        for data in response.iter_content(chunk_size=8192):
-                            dl += len(data)
-                            done = int(100 * dl / total_length)
-                            dl_speed = dl / (time.process_time() - start_time)
-                            if dl_speed >= 1024000:
-                                dl_speed_str = str(round(dl_speed / 1024000, 1)) + 'MB/s'
-                            elif dl_speed >= 1024:
-                                dl_speed_str = str(round(dl_speed / 1024, 1)) + 'KB/s'
+                if round(total_in_MB, 1).is_integer():
+                    total_in_MB = int(total_in_MB)
+
+                def save():
+                    nonlocal r
+                    with open('update.zip', 'wb') as f:
+                        shutil.copyfileobj(r.raw, f)
+
+                dl_thread = threading.Thread(target=save)  # NOQA
+                dl_thread.start()
+
+                last_size = 0
+
+                while True:
+                    try:
+                        current_size = os.path.getsize('update.zip')
+                        current_in_MB = round(current_size / 1048576, 1)
+
+                        if round(current_in_MB, 1).is_integer():
+                            current_in_MB = int(current_in_MB)
+
+                        size_delta = current_size - last_size
+                        bps = size_delta * 2
+
+                        if bps >= 1048576:
+                            dl_spd = bps / 1048576
+                            if round(dl_spd, 1).is_integer():
+                                dl_spd = int(dl_spd)
                             else:
-                                dl_speed_str = str(round(dl_speed, 1)) + 'B/s'
-                            downloaded = f'{str(round(dl / 1024000, 1))}MB / {str(round(total_length / 1024000, 1))}MB'
-                            f.write(data)
-                            if BUNDLE is False:
-                                t.update(len(data))
-                            download_q.put((done, downloaded, dl_speed_str))
+                                dl_spd = round(dl_spd, 1)
+                            dl_spd_str = f'{dl_spd}MB/s'
+                        elif bps >= 1024:
+                            dl_spd = bps / 1024
+                            if round(dl_spd, 1).is_integer():
+                                dl_spd = int(dl_spd)
+                            else:
+                                dl_spd = round(dl_spd, 1)
+                            dl_spd_str = f'{dl_spd}KB/s'
+                        else:
+                            dl_spd = bps
+                            dl_spd_str = f'{dl_spd}B/s'
+
+                        perc = int(current_size / total_size * 100)
+
+                        prog = f'{current_in_MB}MB / {total_in_MB}MB'
+
+                        download_q.put((perc, prog, dl_spd_str))
+                        if perc == 100:
+                            break
+                        else:
+                            last_size = current_size
+                            sleep(0.5)
+                    except OSError:
+                        sleep(0.5)
+                        continue
 
             def update_pbar():
                 nonlocal download_q
@@ -277,7 +318,7 @@ def start_checkupdate(debug=False):
                 while True:
                     try:
                         q_tuple = download_q.get_nowait()
-                        p = int(q_tuple[0])
+                        p = q_tuple[0]
                         dl_p.set(p)
                         dl_prog = q_tuple[1]
                         dl_prog_var.set(dl_prog)
@@ -304,11 +345,17 @@ def start_checkupdate(debug=False):
                     sys.exit(0)
                 except (FileNotFoundError, zf.BadZipfile, OSError):
                     error_msg(_('Error'), _("Couldn't perform automatic update.") + '\n' + # NOQA
-                            _('Update manually by extracting update.zip file.'))
+                            _('Update manually by extracting update.zip file.'))  # NOQA
 
         update_button['command'] = start_update
-        cancel_button.pack(side='left', padx=1.5)
-        update_button.pack(side='left', padx=1.5)
+        cancel_button.pack(side='left', padx=(110, 0))
+        update_button.pack(side='right', padx=(0, 110))
+
+        def cancel():
+            if msgbox.askokcancel(_('Cancel'), _('Are you sure to cancel?')):
+                sys.exit(0)
+
+        updatewindow.protocol("WM_DELETE_WINDOW", cancel)
 
     queue = q.Queue()
 
@@ -379,7 +426,7 @@ def start_checkupdate(debug=False):
             if debug:
                 print('Update debug mode')
                 update_label = tk.Label(update_frame,
-                                        text=f'sv: {sv_version} cl: {str(__VERSION__)} output: {update_code}')
+                                        text=f'sv: {sv_version} cl: {str(__VERSION__)} output: {update_code}')  # NOQA
                 update_label.pack(side='left', padx=5)
 
                 update_button = ttk.Button(update_frame,
@@ -1361,7 +1408,8 @@ menubar.add_cascade(label=_("Menu"), menu=menu)
 if not BUNDLE:
     debug_menu = tk.Menu(menubar, tearoff=0)
     debug_menu.add_command(label='Update Debug',
-                           command=lambda: main.after(10, lambda: start_checkupdate(debug=True)))
+                           command=lambda: main.after(
+                               10, lambda: start_checkupdate(debug=True)))  # NOQA
     menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
 upper_frame = tk.Frame(main)
