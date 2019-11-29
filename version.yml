@@ -6,6 +6,8 @@ changelog_en: |
 
   • Added real-time download speed calculation.
 
+  • Added an icon to excutable.
+
   ----------1.7.2----------
 
   • Added displaying important message capability.
@@ -36,6 +38,8 @@ changelog_ko: |
   ----------1.7.3----------
 
   • 실시간 다운로드 속도 계산을 추가하였습니다.
+
+  • 실행 파일에 아이콘을 추가하였습니다.
 
   ----------1.7.2----------
 
