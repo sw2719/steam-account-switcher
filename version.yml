@@ -1,8 +1,13 @@
-version: 1.7.2
+version: 1.7.3
 changelog_en: |
-  PSA: If download takes too long, download directly from GitHub.
-  https://github.com/sw2719/steam-account-switcher/releases
-  
+  PSA: If download takes too long, download directly from GitHub - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------1.7.3----------
+
+  • Added real-time download speed calculation.
+
+  • Added an icon to executable.
+
   ----------1.7.2----------
 
   • Added displaying important message capability.
@@ -28,8 +33,13 @@ changelog_en: |
   • Added a setting to choose whether app exits after restarting Steam or not.
 
 changelog_ko: |
-  알림: 다운로드가 너무 오래 걸릴 경우, GitHub에서 직접 다운로드하세요.
-  https://github.com/sw2719/steam-account-switcher/releases
+  알림: 다운로드가 너무 오래 걸릴 경우, GitHub에서 직접 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------1.7.3----------
+
+  • 실시간 다운로드 속도 계산을 추가하였습니다.
+
+  • 실행 파일에 아이콘을 추가하였습니다.
 
   ----------1.7.2----------
 
