@@ -25,7 +25,7 @@ print('App Start')
 
 BRANCH = 'master'
 
-__VERSION__ = '1.7.2'
+__VERSION__ = '1.7.3'
 
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
