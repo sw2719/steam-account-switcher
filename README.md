@@ -20,7 +20,7 @@ This app has no affiliation with Steam and Valve.
 
 * Auto-importing your Steam accounts. Do more clicking, less typing.
 
-* Auto-updating is built-in.
+* Auto-updating is built-in, and it's fast. (Unless GitHub's server is having a hard time..)
 
 * No annoying update pop-up. You can just carry on and update later.
 
@@ -31,7 +31,7 @@ This app has no affiliation with Steam and Valve.
 **(Because this program alters your registry values AND is not code-signed, Windows SmartScreen or your Anti-virus might detect it as harmful software. You can just ignore it.)**
 
 4. Import accounts from Steam or add them manually via Menu > Add accounts
-* Your account names are saved in accounts.yaml located in the same folder where exe file is.
+* Your account names are saved in accounts.yml located in the same folder where exe file is.
 * There's no account limit, but window size increases as you add more account.
 
 5. Click one of the buttons to change to desired account.
@@ -41,6 +41,7 @@ This app has no affiliation with Steam and Valve.
 * If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code.
 
 # Changelogs (for last 3 versions)
+* Added real-time download speed calculation. (v1.7.3)
 * Added server message displaying functionality. (v1.7.2)
 * Added update download progress bar. (v1.7.1)
 * Fixed crash that occured if unicode characters existed in profile name. (v1.7)
