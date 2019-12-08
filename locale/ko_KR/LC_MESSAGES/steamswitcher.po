@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-29 15:50+0900\n"
-"PO-Revision-Date: 2019-11-29 15:51+0900\n"
+"POT-Creation-Date: 2019-12-09 04:12+0900\n"
+"PO-Revision-Date: 2019-12-09 04:14+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -31,7 +31,7 @@ msgstr "업데이트"
 
 #: steamswitcher.py:183 steamswitcher.py:355 steamswitcher.py:793
 #: steamswitcher.py:902 steamswitcher.py:998 steamswitcher.py:1143
-#: steamswitcher.py:1287
+#: steamswitcher.py:1287 steamswitcher.py:1504
 msgid "Cancel"
 msgstr "취소"
 
@@ -250,7 +250,7 @@ msgstr "위"
 msgid "Down"
 msgstr "아래"
 
-#: steamswitcher.py:1140 steamswitcher.py:1282
+#: steamswitcher.py:1140 steamswitcher.py:1282 steamswitcher.py:1502
 msgid "OK"
 msgstr "확인"
 
@@ -358,21 +358,34 @@ msgstr "자동로그인 토글"
 msgid "Exit"
 msgstr "종료"
 
-#: steamswitcher.py:1434 steamswitcher.py:1557
+#: steamswitcher.py:1434 steamswitcher.py:1634
 msgid "Restart Steam & Exit"
 msgstr "스팀 재시작후 종료"
 
-#: steamswitcher.py:1436 steamswitcher.py:1559
+#: steamswitcher.py:1436 steamswitcher.py:1636
 msgid "Restart Steam"
 msgstr "스팀 재시작"
 
-#: steamswitcher.py:1447 steamswitcher.py:1469
+#: steamswitcher.py:1447 steamswitcher.py:1470
 msgid "No accounts added"
 msgstr "추가된 계정 없음"
 
-#: steamswitcher.py:1471
+#: steamswitcher.py:1472
 msgid "Current Auto-login user:"
 msgstr "현재 자동로그인 계정:"
+
+#: steamswitcher.py:1510
+#, python-format
+msgid "Set a custom name to display for %s."
+msgstr "%s의 커스텀 이름을 입력하세요."
+
+#: steamswitcher.py:1512
+msgid "Set it blank to display its profile name."
+msgstr "프로필 이름을 표시하려면 빈 칸으로 두세요."
+
+#: steamswitcher.py:1521
+msgid "This is an experimental feature."
+msgstr "실험적 기능입니다."
 
 #~ msgid "Using source file"
 #~ msgstr "소스 파일 사용 중"

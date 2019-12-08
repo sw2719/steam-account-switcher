@@ -25,7 +25,7 @@ print('App Start')
 
 BRANCH = 'master'
 
-__VERSION__ = '1.7.3'
+__VERSION__ = '1.8'
 
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
@@ -609,7 +609,7 @@ if os.path.isfile('accounts.txt'):
         convert_to_yaml()
 
 try:
-    with open('accounts.yml', 'r') as acc:
+    with open('accounts.yml', 'r', encoding='utf-8') as acc:
         acc_dict = yaml.load(acc)
         accounts = []
         if acc_dict:
@@ -643,7 +643,7 @@ def fetchuser():
     and save it to global list accounts'''
     global acc_dict
     global accounts
-    with open('accounts.yml', 'r') as acc:
+    with open('accounts.yml', 'r', encoding='utf-8') as acc:
         acc_dict = yaml.load(acc)
         accounts = []
         if acc_dict:
@@ -753,7 +753,7 @@ def addwindow():
 
     def adduser(userinput):
         global acc_dict
-        '''Write accounts from user's input to accounts.txt
+        '''Write accounts from user's input to accounts.yml
         :param userinput: Account names to add
         '''
         if userinput.strip():
@@ -1385,7 +1385,7 @@ sel_style = ttk.Style(main)
 sel_style.configure('sel.TButton', background="#000")
 
 def_style = ttk.Style(main)
-def_style.configure(('TButton'))
+def_style.configure('TButton')
 
 menubar = tk.Menu(main)
 menu = tk.Menu(menubar, tearoff=0)
@@ -1455,6 +1455,7 @@ def draw_button():
     global nouser_label
 
     button_dict = {}
+    frame_dict = {}
 
     upper_frame.destroy()
     nouser_label.destroy()
@@ -1483,6 +1484,67 @@ def draw_button():
     autolabel = tk.Label(upper_frame, textvariable=auto_var)
     autolabel.pack(side='top')
 
+    def configwindow(username, profilename):
+        configwindow = tk.Toplevel(main)
+        configwindow.title('')
+        configwindow.geometry("270x140+650+300")
+        configwindow.resizable(False, False)
+
+        i = accounts.index(username)
+        try:
+            custom_name = acc_dict[i]['customname']
+        except KeyError:
+            custom_name = ''
+
+        button_frame = tk.Frame(configwindow)
+        button_frame.pack(side='bottom', pady=3)
+
+        ok_button = ttk.Button(button_frame, text=_('OK'))
+        ok_button.pack(side='right', padx=1.5)
+        cancel_button = ttk.Button(button_frame, text=_('Cancel'), command=configwindow.destroy)
+        cancel_button.pack(side='left', padx=1.5)
+
+        label_frame = tk.Frame(configwindow)
+        label_frame.pack(side='top', pady=4)
+
+        label_1 = tk.Label(label_frame, text=_('Set a custom name to display for %s.') % username)
+        label_1.pack()
+        label_2 = tk.Label(label_frame, text=_('Set it blank to display its profile name.'))
+        label_2.pack(pady=(4, 0))
+
+        entry_frame = tk.Frame(configwindow)
+        entry_frame.pack(side='bottom', pady=(10, 1))
+
+        name_entry = ttk.Entry(entry_frame, width=26)
+        name_entry.insert(0, custom_name)
+        name_entry.pack()
+        exp_label = tk.Label(entry_frame, text=_('This is an experimental feature.'))
+        exp_label.pack()
+
+        configwindow.grab_set()
+        configwindow.focus()
+        name_entry.focus()
+
+        def ok(username):
+            if name_entry.get().strip():
+                v = name_entry.get()
+                acc_dict[i]['customname'] = v
+                print(f"Using custom name '{v}' for '{username}'.")
+            else:
+                acc_dict[i].pop('customname', None)
+                print(f"Custom name for '{username}' has been removed.")
+
+            with open('accounts.yml', 'w', encoding='utf-8') as f:
+                yaml.dump(acc_dict, f)
+            refresh()
+            configwindow.destroy()
+
+        def enterkey(event):
+            ok(username)
+
+        configwindow.bind('<Return>', enterkey)
+        ok_button['command'] = lambda username=username: ok(username)
+
     def button_func(username):
         current_user = fetch_reg('username')
         try:
@@ -1503,15 +1565,21 @@ def draw_button():
                 else:
                     AccountName, PersonaName = [], []
 
-                if username in AccountName:
-                    try:
-                        i = AccountName.index(username)
-                        profilename = PersonaName[i]
-                        n = 37 - len(username)
-                    except ValueError:
+                try:
+                    acc_index = accounts.index(username)
+                    profilename = acc_dict[acc_index]['customname']
+                except KeyError:
+                    if username in AccountName:
+                        try:
+                            i = AccountName.index(username)
+                            profilename = PersonaName[i]
+                            n = 37 - len(username)
+                        except ValueError:
+                            profilename = ''
+                    else:
                         profilename = ''
-                else:
-                    profilename = ''
+
+                n = 37 - len(username)
 
                 if profilename and n > 4:
                     if config_dict['show_profilename'] == 'bar':
@@ -1527,19 +1595,28 @@ def draw_button():
             else:
                 profilename = ''
 
+            frame_dict[username] = tk.Frame(button_frame)
+            frame_dict[username].pack(fill='x', padx=5, pady=3)
+
+            config_button = ttk.Button(frame_dict[username],
+                                       text='⚙',
+                                       width=2.6,
+                                       command=lambda name=username, pname=profilename: configwindow(name, pname))
+            config_button.pack(side='right')
+
             if username == fetch_reg('username'):
-                button_dict[username] = ttk.Button(button_frame,
+                button_dict[username] = ttk.Button(frame_dict[username],
                                                    style='sel.TButton',
                                                    text=username + profilename,
                                                    state='disabled',
                                                    command=lambda name=username: button_func(name))  # NOQA
             else:
-                button_dict[username] = ttk.Button(button_frame,
+                button_dict[username] = ttk.Button(frame_dict[username],
                                                    style='TButton',
                                                    text=username + profilename,
                                                    state='normal',
                                                    command=lambda name=username: button_func(name))  # NOQA
-            button_dict[username].pack(fill='x', padx=5, pady=3)
+            button_dict[username].pack(fill='x', padx=(0, 1))
 
 
 def refresh():
