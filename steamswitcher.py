@@ -1487,7 +1487,7 @@ def draw_button():
     def configwindow(username, profilename):
         configwindow = tk.Toplevel(main)
         configwindow.title('')
-        configwindow.geometry("250x160+650+300")
+        configwindow.geometry("270x140+650+300")
         configwindow.resizable(False, False)
 
         i = accounts.index(username)
@@ -1507,7 +1507,7 @@ def draw_button():
         label_frame = tk.Frame(configwindow)
         label_frame.pack(side='top', pady=4)
 
-        label_1 = tk.Label(label_frame, text=_('Set a custom name to display\nin place of a profile name.'))
+        label_1 = tk.Label(label_frame, text=_('Set a custom name to display for %s.') % username)
         label_1.pack()
         label_2 = tk.Label(label_frame, text=_('Set it blank to display its profile name.'))
         label_2.pack(pady=(4, 0))
