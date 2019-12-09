@@ -3,7 +3,7 @@ changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
   ----------1.8----------
 
-  • Added custom name functionality.
+  • Added custom name functionality. (Experimental)
 
   • Added foundation for more features.
 
@@ -44,7 +44,7 @@ changelog_ko: |
 
   ----------1.8----------
 
-  • 커스텀 이름 기능 추가
+  • 커스텀 이름 기능 추가 (실험적)
 
   • 추후 업데이트 준비
 
