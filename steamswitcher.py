@@ -1501,15 +1501,18 @@ def draw_button():
 
         ok_button = ttk.Button(button_frame, text=_('OK'))
         ok_button.pack(side='right', padx=1.5)
-        cancel_button = ttk.Button(button_frame, text=_('Cancel'), command=configwindow.destroy)
+
+        cancel_button = ttk.Button(button_frame,
+                                   text=_('Cancel'),
+                                   command=configwindow.destroy)
         cancel_button.pack(side='left', padx=1.5)
 
         label_frame = tk.Frame(configwindow)
         label_frame.pack(side='top', pady=4)
 
-        label_1 = tk.Label(label_frame, text=_('Set a custom name to display for %s.') % username)
+        label_1 = tk.Label(label_frame, text=_('Set a custom name to display for %s.') % username)  # NOQA
         label_1.pack()
-        label_2 = tk.Label(label_frame, text=_('Set it blank to display its profile name.'))
+        label_2 = tk.Label(label_frame, text=_('Set it blank to display its profile name.'))  # NOQA
         label_2.pack(pady=(4, 0))
 
         entry_frame = tk.Frame(configwindow)
@@ -1518,7 +1521,8 @@ def draw_button():
         name_entry = ttk.Entry(entry_frame, width=26)
         name_entry.insert(0, custom_name)
         name_entry.pack()
-        exp_label = tk.Label(entry_frame, text=_('This is an experimental feature.'))
+        exp_label = tk.Label(entry_frame,
+                             text=_('This is an experimental feature.'))
         exp_label.pack()
 
         configwindow.grab_set()
@@ -1601,7 +1605,7 @@ def draw_button():
             config_button = ttk.Button(frame_dict[username],
                                        text='⚙',
                                        width=2.6,
-                                       command=lambda name=username, pname=profilename: configwindow(name, pname))
+                                       command=lambda name=username, pname=profilename: configwindow(name, pname))  # NOQA
             config_button.pack(side='right')
 
             if username == fetch_reg('username'):
