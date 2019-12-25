@@ -1,6 +1,11 @@
+import os
 from ruamel.yaml import YAML
 
 yaml = YAML()
+
+if not os.path.isfile('accounts.yml'):
+    acc = open('accounts.yml', 'w')
+    acc.close()
 
 
 def acc_getlist():
