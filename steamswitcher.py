@@ -19,6 +19,7 @@ from time import sleep
 from ruamel.yaml import YAML
 from modules.loginusers import loginusers
 from modules.reg import fetch_reg, setkey
+from modules.account import acc_getlist, acc_getdict
 
 system_locale = locale.getdefaultlocale()[0]
 
@@ -544,53 +545,9 @@ if os.path.isfile('accounts.txt'):
     if not os.path.isfile('accounts.yml'):
         convert_to_yaml()
 
-try:
-    with open('accounts.yml', 'r', encoding='utf-8') as acc:
-        acc_dict = yaml.load(acc)
-        accounts = []
-        if acc_dict:
-            for x in range(len(acc_dict)):  # to preserve the order
-                try:
-                    cur_dict = acc_dict[x]
-                    accounts.append(cur_dict['accountname'])
-                except KeyError:
-                    break
-        else:
-            raise FileNotFoundError
-    if not accounts:
-        raise FileNotFoundError
-except (FileNotFoundError, TypeError):
+if not os.path.isfile('accounts.yml'):
     acc = open('accounts.yml', 'w')
     acc.close()
-    accounts = []
-    acc_dict = {}
-
-print('Detected ' + str(len(accounts)) + ' accounts:')
-
-if accounts:
-    print('------------------')
-    for username in accounts:
-        print(username)
-    print('------------------')
-
-
-def fetchuser():
-    '''Fetch accounts.yml file, add accountnames to list accounts
-    and save it to global list accounts'''
-    global acc_dict
-    global accounts
-    with open('accounts.yml', 'r', encoding='utf-8') as acc:
-        acc_dict = yaml.load(acc)
-        accounts = []
-        if acc_dict:
-            for x in range(len(acc_dict)):  # to preserve the order
-                try:
-                    cur_dict = acc_dict[x]
-                    accounts.append(cur_dict['accountname'])
-                except KeyError:
-                    break
-        else:
-            acc_dict = {}
 
 
 def toggleAutologin():
@@ -642,9 +599,6 @@ def about():
 
 def addwindow():
     '''Open add accounts window'''
-    global accounts
-    global acc_dict
-
     addwindow = tk.Toplevel(main)
     addwindow.title(_("Add"))
     addwindow.geometry("300x150+650+300")
@@ -671,10 +625,11 @@ def addwindow():
     print('Opened add window.')
 
     def adduser(userinput):
-        global acc_dict
         '''Write accounts from user's input to accounts.yml
         :param userinput: Account names to add
         '''
+        accounts = acc_getlist()
+        acc_dict = acc_getdict()
         if userinput.strip():
             cfg = open('accounts.yml', 'w')
             name_buffer = userinput.split("/")
@@ -720,8 +675,9 @@ def addwindow():
 
 def importwindow():
     '''Open import accounts window'''
-    global accounts
-    global acc_dict
+    accounts = acc_getlist()
+    acc_dict = acc_getdict()
+
     if loginusers():
         AccountName, PersonaName = loginusers()
     else:
@@ -807,7 +763,6 @@ def importwindow():
             check_dict[v] = tk_var
 
     def import_user():
-        global acc_dict
         for key, value in check_dict.items():
             if value.get() == 1:
                 acc_dict[len(acc_dict)] = {'accountname': key}
@@ -832,10 +787,9 @@ def importwindow():
 
 class removewindow(tk.Toplevel):
     '''Open remove accounts window'''
-    global accounts
-
     def __init__(self, master, **kw):
-        if not accounts:
+        self.accounts = acc_getlist()
+        if not self.accounts:
             msgbox.showinfo(_('No Accounts'),
                             _("There's no account to remove."))
             return
@@ -875,7 +829,7 @@ class removewindow(tk.Toplevel):
 
         self.check_dict = {}
 
-        for v in accounts:
+        for v in self.accounts:
             tk_var = tk.IntVar()
             checkbutton = ttk.Checkbutton(check_frame,
                                           text=v,
@@ -905,7 +859,7 @@ class removewindow(tk.Toplevel):
         ones user wants to delete'''
         print('Remove function start')
         to_remove = []
-        for v in accounts:
+        for v in self.accounts:
             if self.check_dict.get(v).get() == 1:
                 to_remove.append(v)
                 print('%s is to be removed.' % v)
@@ -916,7 +870,7 @@ class removewindow(tk.Toplevel):
 
         print('Removing selected accounts...')
         with open('accounts.yml', 'w') as acc:
-            for username in accounts:
+            for username in self.accounts:
                 if username not in to_remove:
                     dump_dict[len(dump_dict)] = {'accountname': username}
             yaml = YAML()
@@ -931,7 +885,8 @@ class removewindow(tk.Toplevel):
 
 def orderwindow():
     '''Open order change window'''
-    global accounts
+    accounts = acc_getlist()
+    acc_dict = acc_getdict()
 
     orderwindow = tk.Toplevel(main)
     orderwindow.title("")
@@ -1285,8 +1240,8 @@ def exit_after_restart():
 
 
 def window_height():
-    global accounts
     '''Return window height according to number of accounts'''
+    accounts = acc_getlist()
     if accounts:
         to_multiply = len(accounts) - 1
     else:
@@ -1297,9 +1252,11 @@ def window_height():
 
 
 class main(tk.Tk):
-    '''Draw account switch buttons on main window.'''
-    def __init__(self, accounts):
-        self.accounts = accounts
+    '''Draw main window.'''
+
+    def __init__(self):
+        self.accounts = acc_getlist()
+        self.acc_dict = acc_getdict()
         tk.Tk.__init__(self)
         self.title(_("Account Switcher"))
 
@@ -1400,7 +1357,7 @@ class main(tk.Tk):
 
         i = self.accounts.index(username)
         try:
-            custom_name = acc_dict[i]['customname']
+            custom_name = self.acc_dict[i]['customname']
         except KeyError:
             custom_name = ''
 
@@ -1440,14 +1397,14 @@ class main(tk.Tk):
         def ok(username):
             if name_entry.get().strip():
                 v = name_entry.get()
-                acc_dict[i]['customname'] = v
+                self.acc_dict[i]['customname'] = v
                 print(f"Using custom name '{v}' for '{username}'.")
             else:
-                acc_dict[i].pop('customname', None)
+                self.acc_dict[i].pop('customname', None)
                 print(f"Custom name for '{username}' has been removed.")
 
             with open('accounts.yml', 'w', encoding='utf-8') as f:
-                yaml.dump(acc_dict, f)
+                yaml.dump(self.acc_dict, f)
             self.refresh()
             configwindow.destroy()
 
@@ -1478,7 +1435,7 @@ class main(tk.Tk):
 
                     try:
                         acc_index = self.accounts.index(username)
-                        profilename = acc_dict[acc_index]['customname']
+                        profilename = self.acc_dict[acc_index]['customname']
                     except KeyError:
                         if username in AccountName:
                             try:
@@ -1531,7 +1488,7 @@ class main(tk.Tk):
 
     def refresh(self):
         '''Refresh main window widgets'''
-        fetchuser()
+        self.accounts = acc_getlist()
         self.geometry("300x%s" %
                       window_height())
         self.button_frame.destroy()
@@ -1549,12 +1506,12 @@ class main(tk.Tk):
 
 
 print('Init complete. Main app starting.')
-main = main(accounts)
+main = main()
 main.draw_button()
 
 if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
     main.after(150, afterupdate)
-if not accounts:
+if not acc_getlist():
     main.after(200, importwindow)
 
 main.mainloop()
