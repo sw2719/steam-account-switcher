@@ -10,7 +10,6 @@ import requests as req
 import gettext
 import locale
 import psutil
-import re
 import threading
 import queue as q
 import zipfile as zf
@@ -18,6 +17,8 @@ import shutil
 from packaging import version
 from time import sleep
 from ruamel.yaml import YAML
+from modules.loginusers import loginusers
+from modules.reg import fetch_reg, setkey
 
 system_locale = locale.getdefaultlocale()[0]
 
@@ -152,9 +153,6 @@ print('Running on', os.getcwd())
 
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml'  # NOQA
        % BRANCH)
-
-
-HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 
 
 def start_checkupdate(debug=False):
@@ -497,68 +495,6 @@ def check_running(process_name):
     return False
 
 
-def fetch_reg(key):
-    '''Return given key's value from steam registry path.
-    :param key: 'username', 'autologin', 'steamexe', 'steampath'
-    '''
-    if key == 'username':
-        key_name = 'AutoLoginUser'
-    elif key == 'autologin':
-        key_name = 'RememberPassword'
-    elif key == 'steamexe':
-        key_name = 'SteamExe'
-    elif key == 'steampath':
-        key_name = 'SteamPath'
-
-    try:
-        reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam")
-        value_buffer = winreg.QueryValueEx(reg_key, key_name)
-        value = value_buffer[0]
-        winreg.CloseKey(reg_key)
-    except OSError:
-        error_msg(_('Registry Error'),
-                  _('Failed to read registry value.') + '\n' +
-                  _('Make sure that Steam is installed.'))
-    return value
-
-
-def loginusers(steam_path=fetch_reg('steampath')):
-    '''
-    Fetch loginusers.vdf and return AccountName and
-    PersonaName values as lists.
-    :param steam_path: Steam installation path override
-    '''
-    if os.path.isfile('steam_path.txt'):
-        with open('steam_path.txt', 'r') as path:
-            steam_path = path.read()
-
-    if '/' in steam_path:
-        steam_path = steam_path.replace('/', '\\')
-
-    vdf_file = os.path.join(steam_path, 'config', 'loginusers.vdf')
-
-    try:
-        with open(vdf_file, 'r', encoding='utf-8') as vdf_file:
-            vdf = vdf_file.read().splitlines()
-    except FileNotFoundError:
-        return False
-
-    AccountName = []
-    PersonaName = []
-
-    rep = {"\t": "", '"': ""}
-    rep = dict((re.escape(k), v) for k, v in rep.items())
-    pattern = re.compile("|".join(rep.keys()))
-
-    for i, v in enumerate(vdf):
-        if v == "\t{":
-            account = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+1])  # NOQA
-            persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])  # NOQA
-            AccountName.append(account.replace("AccountName", ""))
-            PersonaName.append(persona.replace("PersonaName", ""))
-    return AccountName, PersonaName
-
-
 def autologinstr():
     '''Return autologin status messages according to current config.'''
     value = fetch_reg('autologin')
@@ -657,23 +593,6 @@ def fetchuser():
             acc_dict = {}
 
 
-def setkey(key_name, value, value_type):
-    '''Change given key's value to given value.
-    :param key_name: Name of key to change value of
-    :param value: Value to change to
-    :param value_type: Registry value type
-    '''
-    try:
-        reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam", 0,
-                                 winreg.KEY_ALL_ACCESS)
-
-        winreg.SetValueEx(reg_key, key_name, 0, value_type, value)
-        winreg.CloseKey(reg_key)
-        print("Changed %s's value to %s" % (key_name, str(value)))
-    except OSError:
-        error_msg(_('Registry Error'), _('Failed to change registry value.'))
-
-
 def toggleAutologin():
     '''Toggle autologin registry value between 0 and 1'''
     if fetch_reg('autologin') == 1:
@@ -681,7 +600,7 @@ def toggleAutologin():
     elif fetch_reg('autologin') == 0:
         value = 1
     setkey('RememberPassword', value, winreg.REG_DWORD)
-    refresh()
+    main.refresh()
 
 
 def about():
@@ -692,8 +611,8 @@ def about():
     aboutwindow.resizable(False, False)
     about_row = tk.Label(aboutwindow, text=_('Made by sw2719 (Myeuaa)'))
     about_steam = tk.Label(aboutwindow,
-                           text='Steam: https://steamcommunity.com/'
-                           + 'id/muangmuang')
+                           text='Steam: https://steamcommunity.com/' +
+                           'id/muangmuang')
     about_email = tk.Label(aboutwindow, text='E-mail: sw2719@naver.com')
     about_disclaimer = tk.Label(aboutwindow,
                                 text=_('Warning: The developer of this application is not responsible for')  # NOQA
@@ -765,7 +684,7 @@ def addwindow():
                     if name_to_write not in accounts:
                         acc_dict[len(acc_dict)] = {
                             'accountname': name_to_write
-                            }
+                        }
                     else:
                         print('Alert: Account %s already exists!'
                               % name_to_write)
@@ -777,7 +696,7 @@ def addwindow():
                 yaml.dump(acc_dict, acc)
 
             cfg.close()
-            refresh()
+            main.refresh()
         addwindow.destroy()
 
     def close():
@@ -895,7 +814,7 @@ def importwindow():
         with open('accounts.yml', 'w') as acc:
             yaml = YAML()
             yaml.dump(acc_dict, acc)
-        refresh()
+        main.refresh()
         close()
 
     import_cancel = ttk.Button(bottomframe_imp,
@@ -911,72 +830,83 @@ def importwindow():
     import_ok.pack(side='left', padx=5, pady=3)
 
 
-def removewindow():
+class removewindow(tk.Toplevel):
     '''Open remove accounts window'''
     global accounts
-    if not accounts:
-        msgbox.showinfo(_('No Accounts'),
-                        _("There's no account to remove."))
-        return
-    removewindow = tk.Toplevel(main)
-    removewindow.title(_("Remove"))
-    removewindow.geometry("230x320+650+300")
-    removewindow.resizable(False, False)
-    bottomframe_rm = tk.Frame(removewindow)
-    bottomframe_rm.pack(side='bottom')
-    removewindow.grab_set()
-    removewindow.focus()
-    removelabel = tk.Label(removewindow, text=_('Select accounts to remove.'))
-    removelabel.pack(side='top',
-                     padx=5,
-                     pady=5)
-    print('Opened remove window.')
 
-    def close():
-        removewindow.destroy()
+    def __init__(self, master, **kw):
+        if not accounts:
+            msgbox.showinfo(_('No Accounts'),
+                            _("There's no account to remove."))
+            return
+        tk.Toplevel.__init__(self, master, kw)
+        self.title(_("Remove"))
+        self.geometry("230x320+650+300")
+        self.resizable(False, False)
+        self.grab_set()
+        self.focus()
 
-    def onFrameConfigure(canvas):
-        '''Reset the scroll region to encompass the inner frame'''
-        canvas.configure(scrollregion=canvas.bbox("all"))
+        bottomframe_rm = tk.Frame(self)
+        bottomframe_rm.pack(side='bottom')
 
-    canvas = tk.Canvas(removewindow, borderwidth=0, highlightthickness=0)
-    check_frame = tk.Frame(canvas)
-    scroll_bar = ttk.Scrollbar(removewindow,
-                               orient="vertical",
-                               command=canvas.yview)
+        self.removelabel = tk.Label(self, text=_('Select accounts to remove.'))
+        self.removelabel.pack(side='top',
+                              padx=5,
+                              pady=5)
 
-    canvas.configure(yscrollcommand=scroll_bar.set)
+        def _on_mousewheel(event):
+            '''Scroll window on mousewheel input'''
+            self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
-    scroll_bar.pack(side="right", fill="y")
-    canvas.pack(side="left", fill="both", expand=True)
-    canvas.create_window((4, 4), window=check_frame, anchor="nw")
+        self.canvas = tk.Canvas(self, borderwidth=0, highlightthickness=0)
+        self.canvas.bind("<MouseWheel>", _on_mousewheel)
+        scroll_bar = ttk.Scrollbar(self,
+                                   orient="vertical",
+                                   command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=scroll_bar.set)
 
-    def _on_mousewheel(event):
-        '''Scroll window on mousewheel input'''
-        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        check_frame = tk.Frame(self.canvas)
+        check_frame.bind("<Configure>", lambda event,
+                         canvas=self.canvas: self.onFrameConfigure())
 
-    check_frame.bind("<Configure>", lambda event,
-                     canvas=canvas: onFrameConfigure(canvas))
-    canvas.bind("<MouseWheel>", _on_mousewheel)
+        scroll_bar.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.canvas.create_window((4, 4), window=check_frame, anchor="nw")
 
-    check_dict = {}
+        self.check_dict = {}
 
-    for v in accounts:
-        tk_var = tk.IntVar()
-        checkbutton = ttk.Checkbutton(check_frame,
-                                      text=v,
-                                      variable=tk_var)
-        checkbutton.bind("<MouseWheel>", _on_mousewheel)
-        checkbutton.pack(side='top', padx=2, anchor='w')
-        check_dict[v] = tk_var
+        for v in accounts:
+            tk_var = tk.IntVar()
+            checkbutton = ttk.Checkbutton(check_frame,
+                                          text=v,
+                                          variable=tk_var)
+            checkbutton.bind("<MouseWheel>", _on_mousewheel)
+            checkbutton.pack(side='top', padx=2, anchor='w')
+            self.check_dict[v] = tk_var
 
-    def removeuser():
+        remove_cancel = ttk.Button(bottomframe_rm,
+                                   text=_('Cancel'),
+                                   command=self.close,
+                                   width=9)
+        remove_ok = ttk.Button(bottomframe_rm,
+                               text=_('Remove'),
+                               command=self.removeuser,
+                               width=9)
+
+        remove_cancel.pack(side='left', padx=5, pady=3)
+        remove_ok.pack(side='left', padx=5, pady=3)
+        print('Opened remove window.')
+
+    def close(self):
+        self.destroy()
+
+    def removeuser(self):
         '''Write accounts to accounts.txt except the
         ones user wants to delete'''
         print('Remove function start')
         to_remove = []
         for v in accounts:
-            if check_dict.get(v).get() == 1:
+            if self.check_dict.get(v).get() == 1:
                 to_remove.append(v)
                 print('%s is to be removed.' % v)
             else:
@@ -991,20 +921,12 @@ def removewindow():
                     dump_dict[len(dump_dict)] = {'accountname': username}
             yaml = YAML()
             yaml.dump(dump_dict, acc)
-        refresh()
-        close()
+        main.refresh()
+        self.close()
 
-    remove_cancel = ttk.Button(bottomframe_rm,
-                               text=_('Cancel'),
-                               command=close,
-                               width=9)
-    remove_ok = ttk.Button(bottomframe_rm,
-                           text=_('Remove'),
-                           command=removeuser,
-                           width=9)
-
-    remove_cancel.pack(side='left', padx=5, pady=3)
-    remove_ok.pack(side='left', padx=5, pady=3)
+    def onFrameConfigure(self):
+        '''Reset the scroll region to encompass the inner frame'''
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
 
 def orderwindow():
@@ -1119,7 +1041,7 @@ def orderwindow():
         with open('accounts.yml', 'w') as acc:
             yaml = YAML()
             yaml.dump(dump_dict, acc)
-        refresh()
+        main.refresh()
 
     def close():
         orderwindow.destroy()
@@ -1272,7 +1194,7 @@ def settingswindow():
             yaml = YAML()
             yaml.dump(config_dict, cfg)
 
-        refresh()
+        main.refresh()
 
     def ok():
         apply()
@@ -1374,123 +1296,109 @@ def window_height():
     return height
 
 
-main = tk.Tk()
-main.title(_("Account Switcher"))
-
-main.geometry("300x%s+600+250" %
-              window_height())
-main.resizable(False, False)
-
-sel_style = ttk.Style(main)
-sel_style.configure('sel.TButton', background="#000")
-
-def_style = ttk.Style(main)
-def_style.configure('TButton')
-
-menubar = tk.Menu(main)
-menu = tk.Menu(menubar, tearoff=0)
-menu.add_command(label=_('Import accounts from Steam'),
-                 command=importwindow)
-menu.add_command(label=_("Add accounts"),
-                 command=addwindow)
-menu.add_command(label=_("Remove accounts"),
-                 command=removewindow)
-menu.add_command(label=_("Change account order"),
-                 command=orderwindow)
-menu.add_separator()
-menu.add_command(label=_("Settings"),
-                 command=settingswindow)
-menu.add_command(label=_("About"),
-                 command=about)
-
-menubar.add_cascade(label=_("Menu"), menu=menu)
-
-if not BUNDLE:
-    debug_menu = tk.Menu(menubar, tearoff=0)
-    debug_menu.add_command(label='Update Debug',
-                           command=lambda: main.after(
-                               10, lambda: start_checkupdate(debug=True)))  # NOQA
-    menubar.add_cascade(label=_("Debug"), menu=debug_menu)
-
-upper_frame = tk.Frame(main)
-button_frame = tk.Frame(main)
-
-bottomframe = tk.Frame(main)
-bottomframe.pack(side='bottom')
-
-button_toggle = ttk.Button(bottomframe,
-                           width=15,
-                           text=_('Toggle auto-login'),
-                           command=toggleAutologin)
-
-button_quit = ttk.Button(bottomframe,
-                         width=5,
-                         text=_('Exit'),
-                         command=main.quit)
-
-restartbutton_text = tk.StringVar()
-
-if config_dict['autoexit'] == 'true':
-    restartbutton_text.set(_('Restart Steam & Exit'))
-else:
-    restartbutton_text.set(_('Restart Steam'))
-
-button_restart = ttk.Button(bottomframe,
-                            width=20,
-                            textvariable=restartbutton_text,
-                            command=exit_after_restart)
-
-button_toggle.pack(side='left', padx=3, pady=3)
-button_quit.pack(side='left', pady=3)
-button_restart.pack(side='right', padx=3, pady=3)
-
-nouser_label = tk.Label(main, text=_('No accounts added'))
-
-
-def draw_button():
+class main(tk.Tk):
     '''Draw account switch buttons on main window.'''
-    global accounts
-    global upper_frame
-    global button_frame
-    global nouser_label
+    def __init__(self, accounts):
+        self.accounts = accounts
+        tk.Tk.__init__(self)
+        self.title(_("Account Switcher"))
 
-    button_dict = {}
-    frame_dict = {}
+        self.geometry("300x%s+600+250" %
+                      window_height())
+        self.resizable(False, False)
 
-    upper_frame.destroy()
-    nouser_label.destroy()
-    button_frame.destroy()
+        sel_style = ttk.Style(self)
+        sel_style.configure('sel.TButton', background="#000")
 
-    upper_frame = tk.Frame(main)
-    upper_frame.pack(side='top', fill='x')
+        def_style = ttk.Style(self)
+        def_style.configure('TButton')
 
-    button_frame = tk.Frame(main)
-    button_frame.pack(side='top', fill='x')
+        menubar = tk.Menu(self)
+        menu = tk.Menu(menubar, tearoff=0)
+        menu.add_command(label=_('Import accounts from Steam'),
+                         command=importwindow)
+        menu.add_command(label=_("Add accounts"),
+                         command=addwindow)
+        menu.add_command(label=_("Remove accounts"),
+                         command=lambda: removewindow(self))
+        menu.add_command(label=_("Change account order"),
+                         command=orderwindow)
+        menu.add_separator()
+        menu.add_command(label=_("Settings"),
+                         command=settingswindow)
+        menu.add_command(label=_("About"),
+                         command=about)
 
-    nouser_label = tk.Label(main, text=_('No accounts added'))
+        menubar.add_cascade(label=_("Menu"), menu=menu)
+        self.config(menu=menubar)
 
-    userlabel_1 = tk.Label(upper_frame, text=_('Current Auto-login user:'))
-    userlabel_1.pack(side='top')
+        if not BUNDLE:
+            debug_menu = tk.Menu(menubar, tearoff=0)
+            debug_menu.add_command(label='Update Debug',
+                                command=lambda: self.after(
+                                    10, lambda: start_checkupdate(debug=True)))  # NOQA
+            menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
-    user_var = tk.StringVar()
-    user_var.set(fetch_reg('username'))
+        bottomframe = tk.Frame(self)
+        bottomframe.pack(side='bottom')
 
-    userlabel_2 = tk.Label(upper_frame, textvariable=user_var)
-    userlabel_2.pack(side='top', pady=2)
+        button_toggle = ttk.Button(bottomframe,
+                                   width=15,
+                                   text=_('Toggle auto-login'),
+                                   command=toggleAutologin)
 
-    auto_var = tk.StringVar()
-    auto_var.set(autologinstr())
+        button_quit = ttk.Button(bottomframe,
+                                 width=5,
+                                 text=_('Exit'),
+                                 command=self.quit)
 
-    autolabel = tk.Label(upper_frame, textvariable=auto_var)
-    autolabel.pack(side='top')
+        self.restartbutton_text = tk.StringVar()
 
-    def configwindow(username, profilename):
+        if config_dict['autoexit'] == 'true':
+            self.restartbutton_text.set(_('Restart Steam & Exit'))
+        else:
+            self.restartbutton_text.set(_('Restart Steam'))
+
+        button_restart = ttk.Button(bottomframe,
+                                    width=20,
+                                    textvariable=self.restartbutton_text,
+                                    command=exit_after_restart)
+
+        button_toggle.pack(side='left', padx=3, pady=3)
+        button_quit.pack(side='left', pady=3)
+        button_restart.pack(side='right', padx=3, pady=3)
+
+        self.button_dict = {}
+        self.frame_dict = {}
+
+        upper_frame = tk.Frame(self)
+        upper_frame.pack(side='top', fill='x')
+
+        self.button_frame = tk.Frame(self)
+        self.button_frame.pack(side='top', fill='x')
+
+        userlabel_1 = tk.Label(upper_frame, text=_('Current Auto-login user:'))
+        userlabel_1.pack(side='top')
+
+        self.user_var = tk.StringVar()
+        self.user_var.set(fetch_reg('username'))
+
+        userlabel_2 = tk.Label(upper_frame, textvariable=self.user_var)
+        userlabel_2.pack(side='top', pady=2)
+
+        self.auto_var = tk.StringVar()
+        self.auto_var.set(autologinstr())
+
+        autolabel = tk.Label(upper_frame, textvariable=self.auto_var)
+        autolabel.pack(side='top')
+
+    def configwindow(self, username, profilename):
         configwindow = tk.Toplevel(main)
         configwindow.title('')
         configwindow.geometry("270x140+650+300")
         configwindow.resizable(False, False)
 
-        i = accounts.index(username)
+        i = self.accounts.index(username)
         try:
             custom_name = acc_dict[i]['customname']
         except KeyError:
@@ -1540,7 +1448,7 @@ def draw_button():
 
             with open('accounts.yml', 'w', encoding='utf-8') as f:
                 yaml.dump(acc_dict, f)
-            refresh()
+            self.refresh()
             configwindow.destroy()
 
         def enterkey(event):
@@ -1549,102 +1457,100 @@ def draw_button():
         configwindow.bind('<Return>', enterkey)
         ok_button['command'] = lambda username=username: ok(username)
 
-    def button_func(username):
+    def button_func(self, username):
         current_user = fetch_reg('username')
         try:
-            button_dict[current_user].config(style='TButton', state='normal')
+            self.button_dict[current_user].config(style='TButton', state='normal')  # NOQA
         except KeyError:
             pass
         setkey('AutoLoginUser', username, winreg.REG_SZ)
-        button_dict[username].config(style='sel.TButton', state='disabled')
-        user_var.set(fetch_reg('username'))
+        self.button_dict[username].config(style='sel.TButton', state='disabled')  # NOQA
+        self.user_var.set(fetch_reg('username'))
 
-    if not accounts:
-        nouser_label.pack(anchor='center', expand=True)
-    elif accounts:
-        for username in accounts:
-            if config_dict['show_profilename'] != 'false':
-                if loginusers():
-                    AccountName, PersonaName = loginusers()
-                else:
-                    AccountName, PersonaName = [], []
-
-                try:
-                    acc_index = accounts.index(username)
-                    profilename = acc_dict[acc_index]['customname']
-                except KeyError:
-                    if username in AccountName:
-                        try:
-                            i = AccountName.index(username)
-                            profilename = PersonaName[i]
-                            n = 37 - len(username)
-                        except ValueError:
-                            profilename = ''
+    def draw_button(self):
+        if self.accounts:
+            for username in self.accounts:
+                if config_dict['show_profilename'] != 'false':
+                    if loginusers():
+                        AccountName, PersonaName = loginusers()
                     else:
-                        profilename = ''
+                        AccountName, PersonaName = [], []
 
-                n = 37 - len(username)
-
-                if profilename and n > 4:
-                    if config_dict['show_profilename'] == 'bar':
-                        if profilename == profilename[:n]:
-                            profilename = ' | ' + profilename[:n] + ''
+                    try:
+                        acc_index = self.accounts.index(username)
+                        profilename = acc_dict[acc_index]['customname']
+                    except KeyError:
+                        if username in AccountName:
+                            try:
+                                i = AccountName.index(username)
+                                profilename = PersonaName[i]
+                                n = 37 - len(username)
+                            except ValueError:
+                                profilename = ''
                         else:
-                            profilename = ' | ' + profilename[:n] + '..'
-                    elif config_dict['show_profilename'] == 'bracket':
-                        if profilename == profilename[:n]:
-                            profilename = ' (' + profilename[:n] + ')'
-                        else:
-                            profilename = ' (' + profilename[:n] + '..)'
-            else:
-                profilename = ''
+                            profilename = ''
 
-            frame_dict[username] = tk.Frame(button_frame)
-            frame_dict[username].pack(fill='x', padx=5, pady=3)
+                    n = 37 - len(username)
 
-            config_button = ttk.Button(frame_dict[username],
-                                       text='⚙',
-                                       width=2.6,
-                                       command=lambda name=username, pname=profilename: configwindow(name, pname))  # NOQA
-            config_button.pack(side='right')
+                    if profilename and n > 4:
+                        if config_dict['show_profilename'] == 'bar':
+                            if profilename == profilename[:n]:
+                                profilename = ' | ' + profilename[:n] + ''
+                            else:
+                                profilename = ' | ' + profilename[:n] + '..'
+                        elif config_dict['show_profilename'] == 'bracket':
+                            if profilename == profilename[:n]:
+                                profilename = ' (' + profilename[:n] + ')'
+                            else:
+                                profilename = ' (' + profilename[:n] + '..)'
+                else:
+                    profilename = ''
 
-            if username == fetch_reg('username'):
-                button_dict[username] = ttk.Button(frame_dict[username],
-                                                   style='sel.TButton',
-                                                   text=username + profilename,
-                                                   state='disabled',
-                                                   command=lambda name=username: button_func(name))  # NOQA
-            else:
-                button_dict[username] = ttk.Button(frame_dict[username],
-                                                   style='TButton',
-                                                   text=username + profilename,
-                                                   state='normal',
-                                                   command=lambda name=username: button_func(name))  # NOQA
-            button_dict[username].pack(fill='x', padx=(0, 1))
+                self.frame_dict[username] = tk.Frame(self.button_frame)
+                self.frame_dict[username].pack(fill='x', padx=5, pady=3)
 
+                config_button = ttk.Button(self.frame_dict[username],
+                                        text='⚙',
+                                        width=2.6,
+                                        command=lambda name=username, pname=profilename: self.configwindow(name, pname))  # NOQA
+                config_button.pack(side='right')
 
-def refresh():
-    '''Refresh main window widgets'''
-    global upper_frame
-    global button_frame
-    global accounts
-    fetchuser()
-    upper_frame.destroy()
-    button_frame.destroy()
-    main.geometry("300x%s" %
-                  window_height())
-    draw_button()
-    if config_dict['autoexit'] == 'true':
-        restartbutton_text.set(_('Restart Steam & Exit'))
-    else:
-        restartbutton_text.set(_('Restart Steam'))
-    print('Menu refreshed with %s account(s)' % len(accounts))
+                if username == fetch_reg('username'):
+                    self.button_dict[username] = ttk.Button(self.frame_dict[username],
+                                                    style='sel.TButton',
+                                                    text=username + profilename,
+                                                    state='disabled',
+                                                    command=lambda name=username: self.button_func(name))  # NOQA
+                else:
+                    self.button_dict[username] = ttk.Button(self.frame_dict[username],
+                                                    style='TButton',
+                                                    text=username + profilename,
+                                                    state='normal',
+                                                    command=lambda name=username: self.button_func(name))  # NOQA
+                self.button_dict[username].pack(fill='x', padx=(0, 1))
+
+    def refresh(self):
+        '''Refresh main window widgets'''
+        fetchuser()
+        self.geometry("300x%s" %
+                      window_height())
+        self.button_frame.destroy()
+        self.button_frame = tk.Frame(self)
+        self.button_frame.pack(side='top', fill='x')
+
+        self.user_var.set(fetch_reg('username'))
+        self.auto_var.set(autologinstr())
+        self.draw_button()
+        if config_dict['autoexit'] == 'true':
+            self.restartbutton_text.set(_('Restart Steam & Exit'))
+        else:
+            self.restartbutton_text.set(_('Restart Steam'))
+        print('Menu refreshed with %s account(s)' % len(self.accounts))
 
 
 print('Init complete. Main app starting.')
-draw_button()
-main.config(menu=menubar)
-main.after(100, start_checkupdate)
+main = main(accounts)
+main.draw_button()
 
 if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
     main.after(150, afterupdate)
