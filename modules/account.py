@@ -21,5 +21,7 @@ def acc_getlist():
 def acc_getdict():
     with open('accounts.yml', 'r', encoding='utf-8') as acc:
         acc_dict = yaml.load(acc)
+    if not acc_dict:
+        acc_dict = {}
 
     return acc_dict
