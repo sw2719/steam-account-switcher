@@ -1,25 +1,13 @@
 import os
 import re
 import gettext
-from ruamel.yaml import YAML
 from modules.reg import fetch_reg
+from modules.config import get_config
 
-yaml = YAML()
+LOCALE = get_config('locale')
 
-with open('config.yml', 'r') as cfg:
-    config_dict = yaml.load(cfg)
-
-try:
-    if config_dict['locale'] in ('ko_KR', 'en_US'):
-        LOCALE = config_dict['locale']
-    else:
-        LOCALE = 'en_US'
-except Exception:
-    LOCALE = 'en_US'
-
-
-t = gettext.translation('loginusers',
-                        localedir='../locale',
+t = gettext.translation('steamswitcher',
+                        localedir='locale',
                         languages=[LOCALE],
                         fallback=True)
 _ = t.gettext
