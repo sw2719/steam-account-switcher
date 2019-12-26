@@ -7,7 +7,7 @@ import shutil
 from ruamel.yaml import YAML
 from modules.config import get_config
 from modules.update import start_checkupdate
-from modules.ui import main, importwindow
+from modules.ui import MainApp
 from modules.reg import fetch_reg
 from modules.account import acc_getlist
 
@@ -74,13 +74,15 @@ if fetch_reg('autologin'):
 else:
     print('ERROR: Could not fetch current autologin user!')
 
-main = main(__VERSION__, URL, BUNDLE)
-main.draw_button()
-main.after(100, lambda: start_checkupdate(main, __VERSION__, URL, BUNDLE))
+
+print('Init complete. Main app starting.')
+root = MainApp(__VERSION__, URL, BUNDLE)
+root.draw_button()
+root.after(100, lambda: start_checkupdate(root, __VERSION__, URL, BUNDLE))
 
 if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
-    main.after(150, afterupdate)
+    root.after(150, afterupdate)
 if not acc_getlist():
-    main.after(200, lambda: importwindow(main))
+    root.after(200, root.importwindow)
 
-main.mainloop()
+root.mainloop()
