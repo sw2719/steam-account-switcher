@@ -40,16 +40,6 @@ This app has no affiliation with Steam and Valve.
 
 * If you did not, Login prompt will appear when Steam launches. Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code.
 
-# Changelogs (for last 3 versions)
-* Added real-time download speed calculation. (v1.7.3)
-* Added server message displaying functionality. (v1.7.2)
-* Added update download progress bar. (v1.7.1)
-* Fixed crash that occured if unicode characters existed in profile name. (v1.7)
-* Changed update UI. (v1.7)
-* Updated auto updating implementation. (v1.7)
-* Changed how profile name is displayed. (v1.7)
-* Added a setting to choose whether app exits after restarting Steam or not. (v1.7)
-
 # Source code information
 * All other branches except master are considered as acitve-development branch and might have issues, bugs, WIP features, or might not just work at all.
 * Written in Python 3.7
@@ -57,9 +47,3 @@ This app has no affiliation with Steam and Valve.
 * Requests, packaging, psutil, ruamel.yaml and gettext module are required.
 * threading module needs to be installed if you are using Python version under 3.7.
 * Source code is written in English. Translation to other languages is done with gettext.
-* Keep in mind that I'm _quite_ new to Python. I'm sorry if my code is dirty, hard to read, or poorly written.
-
-# Screenshots
-![window](https://user-images.githubusercontent.com/22590718/63221824-87af7e00-c1d9-11e9-96e2-87508d2128b5.png)
-![windowremove](https://user-images.githubusercontent.com/22590718/63221825-87af7e00-c1d9-11e9-8887-ed530c305166.png)
-![windowadd](https://user-images.githubusercontent.com/22590718/63221826-88481480-c1d9-11e9-82eb-2b78dc9d528d.png)
