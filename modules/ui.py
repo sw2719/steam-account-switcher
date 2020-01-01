@@ -13,6 +13,7 @@ from modules.loginusers import loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config
 from modules.misc import error_msg
+from modules.update import start_checkupdate
 
 yaml = YAML()
 
@@ -51,7 +52,7 @@ def window_height():
     return height
 
 
-class Main(tk.Tk):
+class MainApp(tk.Tk):
     '''Draw main window.'''
     def about(self, version):
         '''Open about window'''
@@ -949,9 +950,9 @@ class Main(tk.Tk):
                 self.frame_dict[username].pack(fill='x', padx=5, pady=3)
 
                 config_button = ttk.Button(self.frame_dict[username],
-                                        text='⚙',
-                                        width=2.6,
-                                        command=lambda name=username, pname=profilename: self.configwindow(name, pname))  # NOQA
+                                           text='⚙',
+                                           width=2.6,
+                                           command=lambda name=username, pname=profilename: self.configwindow(name, pname))  # NOQA
                 config_button.pack(side='right')
 
                 if username == fetch_reg('username'):
