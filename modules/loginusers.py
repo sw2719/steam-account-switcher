@@ -1,16 +1,6 @@
 import os
 import re
-import gettext
 from modules.reg import fetch_reg
-from modules.config import get_config
-
-LOCALE = get_config('locale')
-
-t = gettext.translation('steamswitcher',
-                        localedir='locale',
-                        languages=[LOCALE],
-                        fallback=True)
-_ = t.gettext
 
 
 def loginusers(steam_path=fetch_reg('steampath')):
