@@ -6,6 +6,7 @@ import gettext
 import winreg
 import psutil
 import subprocess
+import os
 from time import sleep
 from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict
@@ -58,13 +59,8 @@ class MainApp(tk.Tk):
         '''Open about window'''
         aboutwindow = tk.Toplevel(self)
         aboutwindow.title(_('About'))
-        aboutwindow.geometry("360x250+650+300")
+        aboutwindow.geometry("360x180+650+300")
         aboutwindow.resizable(False, False)
-        about_row = tk.Label(aboutwindow, text=_('Made by sw2719 (Myeuaa)'))
-        about_steam = tk.Label(aboutwindow,
-                               text='Steam: https://steamcommunity.com/' +
-                               'id/muangmuang')
-        about_email = tk.Label(aboutwindow, text='E-mail: sw2719@naver.com')
         about_disclaimer = tk.Label(aboutwindow,
                                     text=_('Warning: The developer of this application is not responsible for')  # NOQA
                                     + '\n' + _('data loss or any other damage from the use of this app.'))  # NOQA
@@ -74,18 +70,23 @@ class MainApp(tk.Tk):
         ver = tk.Label(aboutwindow,
                        text='Steam Account Switcher | Version ' + version)
 
-        button_exit = ttk.Button(aboutwindow,
+        button_frame = tk.Frame(aboutwindow)
+        button_frame.pack(side='bottom', pady=5)
+
+        button_exit = ttk.Button(button_frame,
                                  text=_('Close'),
                                  width=8,
                                  command=aboutwindow.destroy)
-        about_row.pack(pady=8)
-        about_steam.pack()
-        about_email.pack()
-        about_disclaimer.pack(pady=5)
+        button_github = ttk.Button(button_frame,
+                                   text=_('GitHub page'),
+                                   command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher'))
+        about_disclaimer.pack(pady=8)
         about_steam_trademark.pack()
         copyright_label.pack(pady=5)
         ver.pack()
-        button_exit.pack(side='bottom', pady=5)
+
+        button_exit.pack(side='left', padx=2)
+        button_github.pack(side='right', padx=2)
 
     def addwindow(self):
         '''Open add accounts window'''
@@ -274,101 +275,6 @@ class MainApp(tk.Tk):
 
         import_cancel.pack(side='left', padx=5, pady=3)
         import_ok.pack(side='left', padx=5, pady=3)
-
-    def removewindow(self):
-        '''Open remove accounts window'''
-        accounts = acc_getlist()
-        if not accounts:
-            msgbox.showinfo(_('No Accounts'),
-                            _("There's no account to remove."))
-            return
-        removewindow = tk.Toplevel(self)
-        removewindow.title(_("Remove"))
-        removewindow.geometry("230x320+650+300")
-        removewindow.resizable(False, False)
-        bottomframe_rm = tk.Frame(removewindow)
-        bottomframe_rm.pack(side='bottom')
-        removewindow.grab_set()
-        removewindow.focus()
-        removelabel = tk.Label(removewindow, text=_('Select accounts to remove.'))
-        removelabel.pack(side='top',
-                         padx=5,
-                         pady=5)
-        print('Opened remove window.')
-
-        def close():
-            removewindow.destroy()
-
-        def onFrameConfigure(canvas):
-            '''Reset the scroll region to encompass the inner frame'''
-            canvas.configure(scrollregion=canvas.bbox("all"))
-
-        canvas = tk.Canvas(removewindow, borderwidth=0, highlightthickness=0)
-        check_frame = tk.Frame(canvas)
-        scroll_bar = ttk.Scrollbar(removewindow,
-                                   orient="vertical",
-                                   command=canvas.yview)
-
-        canvas.configure(yscrollcommand=scroll_bar.set)
-
-        scroll_bar.pack(side="right", fill="y")
-        canvas.pack(side="left", fill="both", expand=True)
-        canvas.create_window((4, 4), window=check_frame, anchor="nw")
-
-        def _on_mousewheel(event):
-            '''Scroll window on mousewheel input'''
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-
-        check_frame.bind("<Configure>", lambda event,
-                         canvas=canvas: onFrameConfigure(canvas))
-        canvas.bind("<MouseWheel>", _on_mousewheel)
-
-        check_dict = {}
-
-        for v in accounts:
-            tk_var = tk.IntVar()
-            checkbutton = ttk.Checkbutton(check_frame,
-                                          text=v,
-                                          variable=tk_var)
-            checkbutton.bind("<MouseWheel>", _on_mousewheel)
-            checkbutton.pack(side='top', padx=2, anchor='w')
-            check_dict[v] = tk_var
-
-        def removeuser():
-            '''Write accounts to accounts.txt except the
-            ones user wants to delete'''
-            print('Remove function start')
-            to_remove = []
-            for v in accounts:
-                if check_dict.get(v).get() == 1:
-                    to_remove.append(v)
-                    print('%s is to be removed.' % v)
-                else:
-                    continue
-
-            dump_dict = {}
-
-            print('Removing selected accounts...')
-            with open('accounts.yml', 'w') as acc:
-                for username in accounts:
-                    if username not in to_remove:
-                        dump_dict[len(dump_dict)] = {'accountname': username}
-                yaml = YAML()
-                yaml.dump(dump_dict, acc)
-            self.refresh()
-            close()
-
-        remove_cancel = ttk.Button(bottomframe_rm,
-                                   text=_('Cancel'),
-                                   command=close,
-                                   width=9)
-        remove_ok = ttk.Button(bottomframe_rm,
-                               text=_('Remove'),
-                               command=removeuser,
-                               width=9)
-
-        remove_cancel.pack(side='left', padx=5, pady=3)
-        remove_ok.pack(side='left', padx=5, pady=3)
 
     def orderwindow(self):
         '''Open order change window'''
@@ -683,8 +589,6 @@ class MainApp(tk.Tk):
                          command=self.importwindow)
         menu.add_command(label=_("Add accounts"),
                          command=self.addwindow)
-        menu.add_command(label=_("Remove accounts"),
-                         command=self.removewindow)
         menu.add_command(label=_("Change account order"),
                          command=self.orderwindow)
         menu.add_separator()
@@ -835,7 +739,7 @@ class MainApp(tk.Tk):
     def configwindow(self, username, profilename):
         configwindow = tk.Toplevel(self)
         configwindow.title('')
-        configwindow.geometry("270x140+650+300")
+        configwindow.geometry("240x150+650+320")
         configwindow.resizable(False, False)
 
         i = self.accounts.index(username)
@@ -855,11 +759,14 @@ class MainApp(tk.Tk):
                                    command=configwindow.destroy)
         cancel_button.pack(side='left', padx=1.5)
 
+        top_label = tk.Label(configwindow, text=_('Select name settings for %s.') % username)
+        top_label.pack(side='top', pady=(4, 3))
+
         radio_frame1 = tk.Frame(configwindow)
-        radio_frame1.pack(side='top', padx=5, pady=2, fill='x')
+        radio_frame1.pack(side='top', padx=20, pady=(4, 2), fill='x')
         radio_frame2 = tk.Frame(configwindow)
-        radio_frame2.pack(side='top', padx=5, pady=(0, 3), fill='x')
-        radio_var = tk.StringVar()
+        radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
+        radio_var = tk.IntVar()
 
         if custom_name.strip():
             radio_var.set(1)
@@ -867,7 +774,7 @@ class MainApp(tk.Tk):
             radio_var.set(0)
 
         radio_default = ttk.Radiobutton(radio_frame1,
-                                        text=_('Use profile name'),
+                                        text=_('Use profile name if available'),
                                         variable=radio_var,
                                         value=0)
         radio_custom = ttk.Radiobutton(radio_frame2,
@@ -879,18 +786,29 @@ class MainApp(tk.Tk):
         radio_custom.pack(side='left', pady=2)
 
         entry_frame = tk.Frame(configwindow)
-        entry_frame.pack(side='bottom', pady=(10, 1))
+        entry_frame.pack(side='bottom', pady=(1, 4))
 
         name_entry = ttk.Entry(entry_frame, width=26)
         name_entry.insert(0, custom_name)
         name_entry.pack()
-        exp_label = tk.Label(entry_frame,
-                             text=_('This is an experimental feature.'))
-        exp_label.pack()
 
         configwindow.grab_set()
         configwindow.focus()
-        name_entry.focus()
+
+        if radio_var.get() == 0:
+            name_entry['state'] = 'disabled'
+            name_entry.focus()
+
+        def reset_entry():
+            name_entry.delete(0, 'end')
+            name_entry['state'] = 'disabled'
+
+        def enable_entry():
+            name_entry['state'] = 'normal'
+            name_entry.focus()
+
+        radio_default['command'] = reset_entry
+        radio_custom['command'] = enable_entry
 
         def ok(username):
             if name_entry.get().strip():
@@ -925,22 +843,18 @@ class MainApp(tk.Tk):
 
     def remove_user(self, target):
         '''Write accounts to accounts.txt except the
-        ones user wants to delete'''
-        print('Remove function start')
-        if msgbox.askyesno(_('Confirm'), _('Are you sure want to remove %s?' % target)):
+        one which user wants to delete'''
+        if msgbox.askyesno(_('Confirm'), _('Are you sure want to remove account %s?') % target):
             acc_dict = acc_getdict()
             accounts = acc_getlist()
             dump_dict = {}
 
-            print('Removing selected accounts...')
+            print(f'Removing {target}...')
+            for username in accounts:
+                if username != target:
+                    dump_dict[len(dump_dict)] = acc_dict[accounts.index(username)]
+
             with open('accounts.yml', 'w') as acc:
-                for username in accounts:
-                    if username != target:
-                        dump_dict[len(dump_dict)] = {'accountname': username}
-                        try:
-                            dump_dict[len(dump_dict)]['customname'] = acc_dict[accounts.index(username)]['customname']
-                        except KeyError:
-                            pass
                 yaml.dump(dump_dict, acc)
             self.refresh()
 
@@ -989,11 +903,13 @@ class MainApp(tk.Tk):
                 self.frame_dict[username].pack(fill='x', padx=5, pady=3)
 
                 menu_dict[username] = tk.Menu(self, tearoff=0)
-                menu_dict[username].add_command(label="Change name", command=lambda name=username, pname=profilename: self.configwindow(name, pname))
-                menu_dict[username].add_command(label="Delete", command=lambda name=username: self.remove_user(name))
+                menu_dict[username].add_command(label=_("Set as auto-login account"), command=lambda name=username: self.button_func(name))
+                menu_dict[username].add_separator()
+                menu_dict[username].add_command(label=_("Name settings"), command=lambda name=username, pname=profilename: self.configwindow(name, pname))
+                menu_dict[username].add_command(label=_("Delete"), command=lambda name=username: self.remove_user(name))
 
                 def popup(username, event):
-                    menu_dict[username].tk_popup(event.x_root + 58, event.y_root + 13, 0)
+                    menu_dict[username].tk_popup(event.x_root + 55, event.y_root + 17, 0)
 
                 if username == fetch_reg('username'):
                     self.button_dict[username] = ttk.Button(self.frame_dict[username],
@@ -1013,6 +929,7 @@ class MainApp(tk.Tk):
     def refresh(self):
         '''Refresh main window widgets'''
         self.accounts = acc_getlist()
+        self.acc_dict = acc_getdict()
         self.geometry("300x%s" %
                       window_height())
         self.button_frame.destroy()
