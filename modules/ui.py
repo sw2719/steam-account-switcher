@@ -855,26 +855,28 @@ class MainApp(tk.Tk):
                                    command=configwindow.destroy)
         cancel_button.pack(side='left', padx=1.5)
 
-        radio_frame = tk.Frame(configwindow)
-        radio_frame.pack(side='top', pady=4)
-        radio_var = tk.IntVar()
+        radio_frame1 = tk.Frame(configwindow)
+        radio_frame1.pack(side='top', padx=5, pady=2, fill='x')
+        radio_frame2 = tk.Frame(configwindow)
+        radio_frame2.pack(side='top', padx=5, pady=(0, 3), fill='x')
+        radio_var = tk.StringVar()
 
         if custom_name.strip():
             radio_var.set(1)
         else:
             radio_var.set(0)
 
-        radio_default = ttk.Radiobutton(radio_frame,
+        radio_default = ttk.Radiobutton(radio_frame1,
                                         text=_('Use profile name'),
                                         variable=radio_var,
                                         value=0)
-        radio_custom = ttk.Radiobutton(radio_frame,
+        radio_custom = ttk.Radiobutton(radio_frame2,
                                        text=_('Use custom name'),
                                        variable=radio_var,
                                        value=1)
 
-        radio_default.pack()
-        radio_custom.pack()
+        radio_default.pack(side='left', pady=2)
+        radio_custom.pack(side='left', pady=2)
 
         entry_frame = tk.Frame(configwindow)
         entry_frame.pack(side='bottom', pady=(10, 1))
@@ -909,6 +911,7 @@ class MainApp(tk.Tk):
 
         configwindow.bind('<Return>', enterkey)
         ok_button['command'] = lambda username=username: ok(username)
+        configwindow.wait_window()
 
     def button_func(self, username):
         current_user = fetch_reg('username')
