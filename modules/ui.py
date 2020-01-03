@@ -855,13 +855,26 @@ class MainApp(tk.Tk):
                                    command=configwindow.destroy)
         cancel_button.pack(side='left', padx=1.5)
 
-        label_frame = tk.Frame(configwindow)
-        label_frame.pack(side='top', pady=4)
+        radio_frame = tk.Frame(configwindow)
+        radio_frame.pack(side='top', pady=4)
+        radio_var = tk.IntVar()
 
-        label_1 = tk.Label(label_frame, text=_('Set a custom name to display for %s.') % username)  # NOQA
-        label_1.pack()
-        label_2 = tk.Label(label_frame, text=_('Set it blank to display its profile name.'))  # NOQA
-        label_2.pack(pady=(4, 0))
+        if custom_name.strip():
+            radio_var.set(1)
+        else:
+            radio_var.set(0)
+
+        radio_default = ttk.Radiobutton(radio_frame,
+                                        text=_('Use profile name'),
+                                        variable=radio_var,
+                                        value=0)
+        radio_custom = ttk.Radiobutton(radio_frame,
+                                       text=_('Use custom name'),
+                                       variable=radio_var,
+                                       value=1)
+
+        radio_default.pack()
+        radio_custom.pack()
 
         entry_frame = tk.Frame(configwindow)
         entry_frame.pack(side='bottom', pady=(10, 1))
@@ -901,13 +914,36 @@ class MainApp(tk.Tk):
         current_user = fetch_reg('username')
         try:
             self.button_dict[current_user].config(style='TButton', state='normal')  # NOQA
-        except KeyError:
+        except Exception:
             pass
         setkey('AutoLoginUser', username, winreg.REG_SZ)
         self.button_dict[username].config(style='sel.TButton', state='disabled')  # NOQA
         self.user_var.set(fetch_reg('username'))
 
+    def remove_user(self, target):
+        '''Write accounts to accounts.txt except the
+        ones user wants to delete'''
+        print('Remove function start')
+        if msgbox.askyesno(_('Confirm'), _('Are you sure want to remove %s?' % target)):
+            acc_dict = acc_getdict()
+            accounts = acc_getlist()
+            dump_dict = {}
+
+            print('Removing selected accounts...')
+            with open('accounts.yml', 'w') as acc:
+                for username in accounts:
+                    if username != target:
+                        dump_dict[len(dump_dict)] = {'accountname': username}
+                        try:
+                            dump_dict[len(dump_dict)]['customname'] = acc_dict[accounts.index(username)]['customname']
+                        except KeyError:
+                            pass
+                yaml.dump(dump_dict, acc)
+            self.refresh()
+
     def draw_button(self):
+        menu_dict = {}
+
         if self.accounts:
             for username in self.accounts:
                 if get_config('show_profilename') != 'false':
@@ -949,11 +985,12 @@ class MainApp(tk.Tk):
                 self.frame_dict[username] = tk.Frame(self.button_frame)
                 self.frame_dict[username].pack(fill='x', padx=5, pady=3)
 
-                config_button = ttk.Button(self.frame_dict[username],
-                                           text='⚙',
-                                           width=2.6,
-                                           command=lambda name=username, pname=profilename: self.configwindow(name, pname))  # NOQA
-                config_button.pack(side='right')
+                menu_dict[username] = tk.Menu(self, tearoff=0)
+                menu_dict[username].add_command(label="Change name", command=lambda name=username, pname=profilename: self.configwindow(name, pname))
+                menu_dict[username].add_command(label="Delete", command=lambda name=username: self.remove_user(name))
+
+                def popup(username, event):
+                    menu_dict[username].tk_popup(event.x_root + 58, event.y_root + 13, 0)
 
                 if username == fetch_reg('username'):
                     self.button_dict[username] = ttk.Button(self.frame_dict[username],
@@ -967,6 +1004,7 @@ class MainApp(tk.Tk):
                                                     text=username + profilename,
                                                     state='normal',
                                                     command=lambda name=username: self.button_func(name))  # NOQA
+                self.button_dict[username].bind("<Button-3>", lambda event, username=username: popup(username, event))
                 self.button_dict[username].pack(fill='x', padx=(0, 1))
 
     def refresh(self):

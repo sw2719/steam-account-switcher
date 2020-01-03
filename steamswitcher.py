@@ -14,7 +14,7 @@ from modules.account import acc_getlist
 print('App Start')
 
 BRANCH = 'master'
-__VERSION__ = '1.8'
+__VERSION__ = '1.9'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml' % BRANCH)
 
 
