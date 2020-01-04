@@ -4,7 +4,6 @@
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
 *$py.class
 
 # C extensions
@@ -132,7 +131,6 @@ setup_en.py
 # End of https://www.gitignore.io/api/python
 *.txt
 *.pyw
-steamswitcher_ttk_kr_autoupdateexperiment.py
 setup_updater.py
 *.json
 *.bat

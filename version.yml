@@ -1,6 +1,16 @@
-version: 1.8
+version: 1.9
 changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
+  ----------1.9----------
+
+  • Added right-click context menu to main window buttons.
+
+  • Now you can remove accounts via right-click menu instead of remove menu.
+
+  • Completed name settings UI.
+
+  • Modularized source code.
+
   ----------1.8----------
 
   • Added custom name functionality. (Experimental)
@@ -40,7 +50,16 @@ changelog_en: |
   • Added a setting to choose whether app exits after restarting Steam or not.
 
 changelog_ko: |
-  알림: 다운로드가 너무 오래 걸릴 경우, GitHub에서 직접 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
+  알림: 다운로드가 너무 오래 걸릴 경우, GitHub에서 수동으로 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
+  ----------1.9----------
+
+  • 메인 윈도우 버튼에 우클릭 메뉴 추가
+
+  • 계정 삭제를 우클릭 메뉴로 접근하도록 변경
+
+  • 이름 설정 메뉴의 UI 업데이트
+
+  • 소스코드 모듈화
 
   ----------1.8----------
 

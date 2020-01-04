@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-09 04:12+0900\n"
-"PO-Revision-Date: 2019-12-09 04:14+0900\n"
+"POT-Creation-Date: 2020-01-03 21:00+0900\n"
+"PO-Revision-Date: 2020-01-03 21:00+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -20,372 +20,402 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ../../..\n"
 "X-Poedit-SearchPath-0: steamswitcher.py\n"
+"X-Poedit-SearchPath-1: modules/account.py\n"
+"X-Poedit-SearchPath-2: modules/config.py\n"
+"X-Poedit-SearchPath-3: modules/loginusers.py\n"
+"X-Poedit-SearchPath-4: modules/misc.py\n"
+"X-Poedit-SearchPath-5: modules/reg.py\n"
+"X-Poedit-SearchPath-6: modules/ui.py\n"
+"X-Poedit-SearchPath-7: modules/update.py\n"
 
-#: steamswitcher.py:168
-msgid "Checking for updates..."
-msgstr "업데이트 확인 중..."
-
-#: steamswitcher.py:176 steamswitcher.py:447
-msgid "Update"
-msgstr "업데이트"
-
-#: steamswitcher.py:183 steamswitcher.py:355 steamswitcher.py:793
-#: steamswitcher.py:902 steamswitcher.py:998 steamswitcher.py:1143
-#: steamswitcher.py:1287 steamswitcher.py:1504
-msgid "Cancel"
-msgstr "취소"
-
-#: steamswitcher.py:185
-msgid "Update now"
-msgstr "지금 업데이트"
-
-#: steamswitcher.py:190
-#, python-format
-msgid "New version %s is available."
-msgstr "버전 %s이 사용 가능합니다."
-
-#: steamswitcher.py:254 steamswitcher.py:347 steamswitcher.py:1337
-#: steamswitcher.py:1358
+#: modules/config.py:89 modules/config.py:124 modules/ui.py:676
+#: modules/ui.py:697 modules/update.py:123 modules/update.py:216
 msgid "Error"
 msgstr "오류"
 
-#: steamswitcher.py:255
-msgid "Error occured while downloading update."
-msgstr "업데이트를 다운로드하는 도중 오류가 발생했습니다."
+#: modules/config.py:89 modules/config.py:124
+msgid "Could not load config.yml file."
+msgstr "config.yml 파일을 불러올 수 없습니다."
 
-#: steamswitcher.py:347
-msgid "Couldn't perform automatic update."
-msgstr "자동 업데이트를 수행할 수 없습니다."
-
-#: steamswitcher.py:348
-msgid "Update manually by extracting update.zip file."
-msgstr "수동으로 진행하려면 update.zip 파일을 직접 압축해제하세요."
-
-#: steamswitcher.py:355
-msgid "Are you sure to cancel?"
-msgstr "정말로 취소하시겠습니까?"
-
-#: steamswitcher.py:381 steamswitcher.py:384
-msgid "Info"
-msgstr "정보"
-
-#: steamswitcher.py:443
-msgid "New update available"
-msgstr "새 업데이트 사용 가능"
-
-#: steamswitcher.py:456
-msgid "Using the latest version"
-msgstr "최신 버전 사용 중"
-
-#: steamswitcher.py:462
-msgid "Development version"
-msgstr "개발 버전"
-
-#: steamswitcher.py:468
-msgid "Failed to check for updates"
-msgstr "업데이트 확인 실패"
-
-#: steamswitcher.py:519 steamswitcher.py:674
+#: modules/reg.py:37 modules/reg.py:57
 msgid "Registry Error"
 msgstr "레지스트리 오류"
 
-#: steamswitcher.py:520
+#: modules/reg.py:38
 msgid "Failed to read registry value."
 msgstr "레지스트리 값을 읽을 수 없습니다."
 
-#: steamswitcher.py:521
+#: modules/reg.py:39
 msgid "Make sure that Steam is installed."
 msgstr "Steam이 설치되어 있는지 확인하세요."
 
-#: steamswitcher.py:566
-msgid "Auto-login Enabled"
-msgstr "자동로그인 켜짐"
-
-#: steamswitcher.py:568
-msgid "Auto-login Disabled"
-msgstr "자동로그인 꺼짐"
-
-#: steamswitcher.py:600
-msgid "Information"
-msgstr "정보"
-
-#: steamswitcher.py:601
-msgid "With version 1.6, data format has been changed."
-msgstr "버전 1.6 에서, 데이터 포맷이 변경되었습니다."
-
-#: steamswitcher.py:602
-msgid "Attempt to convert your account data has failed."
-msgstr "자동으로 기존 데이터를 변환하는데 실패했습니다."
-
-#: steamswitcher.py:603
-msgid "Please add them manually or try again by restarting app."
-msgstr "수동으로 다시 추가하거나 재시작하여 다시 시도하세요."
-
-#: steamswitcher.py:674
+#: modules/reg.py:57
 msgid "Failed to change registry value."
 msgstr "레지스트리 값을 바꿀 수 없습니다."
 
-#: steamswitcher.py:690 steamswitcher.py:1403
+#: modules/ui.py:61 modules/ui.py:598
 msgid "About"
 msgstr "정보"
 
-#: steamswitcher.py:693
-msgid "Made by sw2719 (Myeuaa)"
-msgstr "Made by 꺔먕 (Myeuaa / sw2719)"
-
-#: steamswitcher.py:699
+#: modules/ui.py:65
 msgid "Warning: The developer of this application is not responsible for"
 msgstr "경고: 본 앱의 사용으로 인한 데이터 손실 및 기타 손해 등"
 
-#: steamswitcher.py:700
+#: modules/ui.py:66
 msgid "data loss or any other damage from the use of this app."
 msgstr "어떠한 사고나 문제에 대해서 제작자는 책임을 지지 않습니다."
 
-#: steamswitcher.py:701
+#: modules/ui.py:67
 msgid "STEAM is a registered trademark of Valve Corporation."
 msgstr "STEAM은 Valve Corporation의 등록 상표입니다."
 
-#: steamswitcher.py:711
+#: modules/ui.py:77
 msgid "Close"
 msgstr "닫기"
 
-#: steamswitcher.py:730 steamswitcher.py:790
+#: modules/ui.py:81
+msgid "GitHub page"
+msgstr "GitHub 페이지"
+
+#: modules/ui.py:97 modules/ui.py:157
 msgid "Add"
 msgstr "추가"
 
-#: steamswitcher.py:741
+#: modules/ui.py:108
 msgid "Enter accounts(s) to add."
 msgstr "추가할 계정을 입력하세요."
 
-#: steamswitcher.py:743
+#: modules/ui.py:110
 msgid "In case of adding multiple accounts,"
 msgstr "다수의 계정을 입력할 경우에는,"
 
-#: steamswitcher.py:744
+#: modules/ui.py:111
 msgid "seperate each account with '/' (slash)."
 msgstr "'/'(슬래시)로 구분합니다."
 
-#: steamswitcher.py:772
+#: modules/ui.py:139
 msgid "Duplicate Alert"
 msgstr "중복 경고"
 
-#: steamswitcher.py:773
+#: modules/ui.py:140
 #, python-format
 msgid "Account %s already exists."
 msgstr "계정 %s은 이미 추가되어 있습니다."
 
-#: steamswitcher.py:809 steamswitcher.py:1330
+#: modules/ui.py:160 modules/ui.py:268 modules/ui.py:414 modules/ui.py:558
+#: modules/ui.py:759 modules/update.py:52 modules/update.py:224
+msgid "Cancel"
+msgstr "취소"
+
+#: modules/ui.py:175 modules/ui.py:669
 msgid "Alert"
 msgstr "경고"
 
-#: steamswitcher.py:809
+#: modules/ui.py:175
 msgid "Could not load loginusers.vdf."
 msgstr "파일 loginusers.vdf를 불러오지 못했습니다."
 
-#: steamswitcher.py:810
+#: modules/ui.py:176
 msgid "This may be because Steam directory defined"
 msgstr "레지스트리에 설정된 스팀 경로가 올바르지"
 
-#: steamswitcher.py:811
+#: modules/ui.py:177
 msgid "in registry is invalid."
 msgstr "않을 수 있습니다."
 
-#: steamswitcher.py:812
+#: modules/ui.py:178
 msgid "Do you want to select Steam directory manually?"
 msgstr "수동으로 스팀 경로를 설정하시겠습니까?"
 
-#: steamswitcher.py:822
+#: modules/ui.py:188
 msgid "Warning"
 msgstr "경고"
 
-#: steamswitcher.py:823
+#: modules/ui.py:189
 msgid "Steam directory is invalid."
 msgstr "스팀 경로가 올바르지 않습니다."
 
-#: steamswitcher.py:824
+#: modules/ui.py:190
 msgid "Try again?"
 msgstr "다시 시도할까요?"
 
-#: steamswitcher.py:833 steamswitcher.py:906
+#: modules/ui.py:199 modules/ui.py:272
 msgid "Import"
 msgstr "가져오기"
 
-#: steamswitcher.py:843
+#: modules/ui.py:209
 msgid "Select accounts to import."
 msgstr "가져올 계정들을 선택하세요."
 
-#: steamswitcher.py:844
+#: modules/ui.py:210
 msgid "Added accounts don't show up."
 msgstr "이미 추가된 계정은 나타나지 않습니다."
 
-#: steamswitcher.py:918
-msgid "No Accounts"
-msgstr "계정 없음"
-
-#: steamswitcher.py:919
-msgid "There's no account to remove."
-msgstr "삭제할 계정이 없습니다."
-
-#: steamswitcher.py:922 steamswitcher.py:1002
-msgid "Remove"
-msgstr "삭제"
-
-#: steamswitcher.py:929
-msgid "Select accounts to remove."
-msgstr "삭제할 계정을 선택하세요."
-
-#: steamswitcher.py:1080
+#: modules/ui.py:350
 msgid "Drag or use buttons below"
 msgstr "드래그하거나 아래의 버튼으로"
 
-#: steamswitcher.py:1081
+#: modules/ui.py:351
 msgid "to change order."
 msgstr "순서를 변경하세요."
 
-#: steamswitcher.py:1132
+#: modules/ui.py:403
 msgid "Up"
 msgstr "위"
 
-#: steamswitcher.py:1136
+#: modules/ui.py:407
 msgid "Down"
 msgstr "아래"
 
-#: steamswitcher.py:1140 steamswitcher.py:1282 steamswitcher.py:1502
+#: modules/ui.py:411 modules/ui.py:553 modules/ui.py:755
 msgid "OK"
 msgstr "확인"
 
-#: steamswitcher.py:1147 steamswitcher.py:1292
+#: modules/ui.py:418 modules/ui.py:563
 msgid "Apply"
 msgstr "적용"
 
-#: steamswitcher.py:1168 steamswitcher.py:1401
+#: modules/ui.py:439 modules/ui.py:596
 msgid "Settings"
 msgstr "설정"
 
-#: steamswitcher.py:1179
+#: modules/ui.py:450
 msgid "Language"
 msgstr "언어"
 
-#: steamswitcher.py:1196
+#: modules/ui.py:467
 msgid "Restart app to apply language settings."
 msgstr "언어 설정을 적용하려면 앱을 재시작하세요."
 
-#: steamswitcher.py:1202
+#: modules/ui.py:473
 msgid "Show profile names"
 msgstr "프로필 이름 표시"
 
-#: steamswitcher.py:1206
+#: modules/ui.py:477
 msgid "Use bar - |"
 msgstr "막대 사용 - |"
 
-#: steamswitcher.py:1207
+#: modules/ui.py:478
 msgid "Use brackets - ( )"
 msgstr "괄호 사용 - ( )"
 
-#: steamswitcher.py:1208
+#: modules/ui.py:479
 msgid "Off"
 msgstr "끄기"
 
-#: steamswitcher.py:1222
+#: modules/ui.py:493
 msgid "Try to soft shutdown Steam client"
 msgstr "스팀 클라이언트 안전 종료"
 
-#: steamswitcher.py:1237
+#: modules/ui.py:508
 msgid "Exit app upon Steam restart"
 msgstr "스팀 재시작시 앱 종료"
 
-#: steamswitcher.py:1331
-msgid "After soft shutdown attempt,"
-msgstr "스팀 안전 종료를 시도했으나,"
-
-#: steamswitcher.py:1332
-msgid "Steam appears to be still running."
-msgstr "Steam이 아직 실행 중인 것 같습니다."
-
-#: steamswitcher.py:1333
-msgid "Do you want to force shutdown Steam?"
-msgstr "Steam을 강제 종료 하시겠습니까?"
-
-#: steamswitcher.py:1338
-msgid "Could not soft shutdown Steam."
-msgstr "Steam을 안전 종료할 수 없었습니다."
-
-#: steamswitcher.py:1339
-msgid "App will now exit."
-msgstr "앱이 종료됩니다."
-
-#: steamswitcher.py:1359
-msgid "Could not start Steam automatically"
-msgstr "알 수 없는 이유로 Steam을"
-
-#: steamswitcher.py:1360
-msgid "for unknown reason."
-msgstr "자동으로 실행 할 수 없습니다."
-
-#: steamswitcher.py:1378
+#: modules/ui.py:575
 msgid "Account Switcher"
 msgstr "Steam 계정 전환기"
 
-#: steamswitcher.py:1392
+#: modules/ui.py:589
 msgid "Import accounts from Steam"
 msgstr "Steam에서 계정 가져오기"
 
-#: steamswitcher.py:1394
+#: modules/ui.py:591
 msgid "Add accounts"
 msgstr "계정 추가"
 
-#: steamswitcher.py:1396
-msgid "Remove accounts"
-msgstr "계정 삭제"
-
-#: steamswitcher.py:1398
+#: modules/ui.py:593
 msgid "Change account order"
 msgstr "계정 순서 변경"
 
-#: steamswitcher.py:1406
+#: modules/ui.py:601
 msgid "Menu"
 msgstr "메뉴"
 
-#: steamswitcher.py:1413
+#: modules/ui.py:609
 msgid "Debug"
 msgstr "디버그"
 
-#: steamswitcher.py:1423
+#: modules/ui.py:625
 msgid "Toggle auto-login"
 msgstr "자동로그인 토글"
 
-#: steamswitcher.py:1428
+#: modules/ui.py:630
 msgid "Exit"
 msgstr "종료"
 
-#: steamswitcher.py:1434 steamswitcher.py:1634
+#: modules/ui.py:636 modules/ui.py:950
 msgid "Restart Steam & Exit"
 msgstr "스팀 재시작후 종료"
 
-#: steamswitcher.py:1436 steamswitcher.py:1636
+#: modules/ui.py:638 modules/ui.py:952
 msgid "Restart Steam"
 msgstr "스팀 재시작"
 
-#: steamswitcher.py:1447 steamswitcher.py:1470
-msgid "No accounts added"
-msgstr "추가된 계정 없음"
+#: modules/ui.py:670
+msgid "After soft shutdown attempt,"
+msgstr "스팀 안전 종료를 시도했으나,"
 
-#: steamswitcher.py:1472
+#: modules/ui.py:671
+msgid "Steam appears to be still running."
+msgstr "Steam이 아직 실행 중인 것 같습니다."
+
+#: modules/ui.py:672
+msgid "Do you want to force shutdown Steam?"
+msgstr "Steam을 강제 종료 하시겠습니까?"
+
+#: modules/ui.py:677
+msgid "Could not soft shutdown Steam."
+msgstr "Steam을 안전 종료할 수 없었습니다."
+
+#: modules/ui.py:678
+msgid "App will now exit."
+msgstr "앱이 종료됩니다."
+
+#: modules/ui.py:698
+msgid "Could not start Steam automatically"
+msgstr "알 수 없는 이유로 Steam을"
+
+#: modules/ui.py:699
+msgid "for unknown reason."
+msgstr "자동으로 실행 할 수 없습니다."
+
+#: modules/ui.py:721
 msgid "Current Auto-login user:"
 msgstr "현재 자동로그인 계정:"
 
-#: steamswitcher.py:1510
+#: modules/ui.py:733 modules/ui.py:943
+msgid "Auto-login Enabled"
+msgstr "자동로그인 켜짐"
+
+#: modules/ui.py:735 modules/ui.py:945
+msgid "Auto-login Disabled"
+msgstr "자동로그인 꺼짐"
+
+#: modules/ui.py:763
 #, python-format
-msgid "Set a custom name to display for %s."
-msgstr "%s의 커스텀 이름을 입력하세요."
+msgid "Select name settings for %s."
+msgstr "%s의 이름 설정을 선택하세요."
 
-#: steamswitcher.py:1512
-msgid "Set it blank to display its profile name."
-msgstr "프로필 이름을 표시하려면 빈 칸으로 두세요."
+#: modules/ui.py:778
+msgid "Use profile name if available"
+msgstr "가능한 경우 프로필이름 사용"
 
-#: steamswitcher.py:1521
-msgid "This is an experimental feature."
-msgstr "실험적 기능입니다."
+#: modules/ui.py:782
+msgid "Use custom name"
+msgstr "커스텀 이름 사용"
+
+#: modules/ui.py:848
+msgid "Confirm"
+msgstr "확인"
+
+#: modules/ui.py:848
+#, python-format
+msgid "Are you sure want to remove account %s?"
+msgstr "정말로 계정 %s을(를) 삭제하시겠습니까?"
+
+#: modules/ui.py:907
+msgid "Set as auto-login account"
+msgstr "자동로그인 계정으로 설정"
+
+#: modules/ui.py:909
+msgid "Name settings"
+msgstr "이름 설정"
+
+#: modules/ui.py:910
+msgid "Delete"
+msgstr "삭제"
+
+#: modules/update.py:37
+msgid "Checking for updates..."
+msgstr "업데이트 확인 중..."
+
+#: modules/update.py:45 modules/update.py:316
+msgid "Update"
+msgstr "업데이트"
+
+#: modules/update.py:54
+msgid "Update now"
+msgstr "지금 업데이트"
+
+#: modules/update.py:59
+#, python-format
+msgid "New version %s is available."
+msgstr "버전 %s이 사용 가능합니다."
+
+#: modules/update.py:124
+msgid "Error occured while downloading update."
+msgstr "업데이트를 다운로드하는 도중 오류가 발생했습니다."
+
+#: modules/update.py:216
+msgid "Couldn't perform automatic update."
+msgstr "자동 업데이트를 수행할 수 없습니다."
+
+#: modules/update.py:217
+msgid "Update manually by extracting update.zip file."
+msgstr "수동으로 진행하려면 update.zip 파일을 직접 압축해제하세요."
+
+#: modules/update.py:224
+msgid "Are you sure to cancel?"
+msgstr "정말로 취소하시겠습니까?"
+
+#: modules/update.py:250 modules/update.py:253
+msgid "Info"
+msgstr "정보"
+
+#: modules/update.py:312
+msgid "New update available"
+msgstr "새 업데이트 사용 가능"
+
+#: modules/update.py:325
+msgid "Using the latest version"
+msgstr "최신 버전 사용 중"
+
+#: modules/update.py:331
+msgid "Development version"
+msgstr "개발 버전"
+
+#: modules/update.py:337
+msgid "Failed to check for updates"
+msgstr "업데이트 확인 실패"
+
+#~ msgid "No Accounts"
+#~ msgstr "계정 없음"
+
+#~ msgid "There's no account to remove."
+#~ msgstr "삭제할 계정이 없습니다."
+
+#~ msgid "Remove"
+#~ msgstr "삭제"
+
+#~ msgid "Select accounts to remove."
+#~ msgstr "삭제할 계정을 선택하세요."
+
+#~ msgid "Remove accounts"
+#~ msgstr "계정 삭제"
+
+#~ msgid "Information"
+#~ msgstr "정보"
+
+#~ msgid "With version 1.6, data format has been changed."
+#~ msgstr "버전 1.6 에서, 데이터 포맷이 변경되었습니다."
+
+#~ msgid "Attempt to convert your account data has failed."
+#~ msgstr "자동으로 기존 데이터를 변환하는데 실패했습니다."
+
+#~ msgid "Please add them manually or try again by restarting app."
+#~ msgstr "수동으로 다시 추가하거나 재시작하여 다시 시도하세요."
+
+#~ msgid "Made by sw2719 (Myeuaa)"
+#~ msgstr "Made by 꺔먕 (Myeuaa / sw2719)"
+
+#~ msgid "No accounts added"
+#~ msgstr "추가된 계정 없음"
+
+#~ msgid "Set it blank to display its profile name."
+#~ msgstr "프로필 이름을 표시하려면 빈 칸으로 두세요."
+
+#~ msgid "This is an experimental feature."
+#~ msgstr "실험적 기능입니다."
 
 #~ msgid "Using source file"
 #~ msgstr "소스 파일 사용 중"
@@ -413,6 +443,3 @@ msgstr "실험적 기능입니다."
 
 #~ msgid "(You can delete accounts.txt if you want to.)"
 #~ msgstr "(원하신다면 accounts.txt를 삭제하셔도 됩니다.)"
-
-#~ msgid "Use system language"
-#~ msgstr "시스템 언어 사용"
