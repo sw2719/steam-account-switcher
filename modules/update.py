@@ -14,6 +14,7 @@ from time import sleep
 from packaging import version
 from ruamel.yaml import YAML
 from modules.config import get_config
+from modules.misc import error_msg
 
 yaml = YAML()
 
@@ -84,7 +85,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             install = True
 
             if not bundle and debug:
-                if not msgbox.askyesno('', 'Install update?'): # NOQA
+                if not msgbox.askyesno('', 'Install update?'):
                     install = False
 
             cancel_button.destroy()
@@ -111,7 +112,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             master.update()
 
             download_q = q.Queue()
-            dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'  # NOQA
+            dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
 
             def download(URL):
                 nonlocal download_q
@@ -121,7 +122,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                     total_in_MB = round(total_size / 1048576, 1)
                 except req.RequestException:
                     msgbox.showerror(_('Error'),
-                                     _('Error occured while downloading update.'))  # NOQA
+                                     _('Error occured while downloading update.'))
 
                 if round(total_in_MB, 1).is_integer():
                     total_in_MB = int(total_in_MB)
@@ -131,7 +132,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                     with open('update.zip', 'wb') as f:
                         shutil.copyfileobj(r.raw, f)
 
-                dl_thread = threading.Thread(target=save)  # NOQA
+                dl_thread = threading.Thread(target=save)
                 dl_thread.start()
 
                 last_size = 0
@@ -199,7 +200,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                     except q.Empty:
                         master.update()
 
-            dl_thread = threading.Thread(target=lambda url=dl_url: download(url))  # NOQA
+            dl_thread = threading.Thread(target=lambda url=dl_url: download(url))
             dl_thread.start()
 
             update_pbar()
@@ -208,13 +209,13 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                     archive = os.path.join(os.getcwd(), 'update.zip')
 
                     f = zf.ZipFile(archive, mode='r')
-                    f.extractall(members=(member for member in f.namelist() if 'updater' in member)) # NOQA
+                    f.extractall(members=(member for member in f.namelist() if 'updater' in member))
 
                     subprocess.run('start updater/updater.exe', shell=True)
                     sys.exit(0)
                 except (FileNotFoundError, zf.BadZipfile, OSError):
-                    error_msg(_('Error'), _("Couldn't perform automatic update.") + '\n' + # NOQA
-                            _('Update manually by extracting update.zip file.'))  # NOQA
+                    error_msg(_('Error'), _("Couldn't perform automatic update.") + '\n' +
+                              _('Update manually by extracting update.zip file.'))
 
         update_button['command'] = start_update
         cancel_button.pack(side='left', padx=(110, 0))

@@ -62,11 +62,11 @@ class MainApp(tk.Tk):
         aboutwindow.geometry("360x180+650+300")
         aboutwindow.resizable(False, False)
         about_disclaimer = tk.Label(aboutwindow,
-                                    text=_('Warning: The developer of this application is not responsible for')  # NOQA
-                                    + '\n' + _('data loss or any other damage from the use of this app.'))  # NOQA
-        about_steam_trademark = tk.Label(aboutwindow, text=_('STEAM is a registered trademark of Valve Corporation.'))  # NOQA
-        copyright_label = tk.Label(aboutwindow, text='Copyright (c) sw2719 | All Rights Reserved\n'  # NOQA
-                                + 'Licensed under the MIT License.')
+                                    text=_('Warning: The developer of this application is not responsible for')
+                                    + '\n' + _('data loss or any other damage from the use of this app.'))
+        about_steam_trademark = tk.Label(aboutwindow, text=_('STEAM is a registered trademark of Valve Corporation.'))
+        copyright_label = tk.Label(aboutwindow, text='Copyright (c) sw2719 | All Rights Reserved\n' +
+                                   'Licensed under the MIT License.')
         ver = tk.Label(aboutwindow,
                        text='Steam Account Switcher | Version ' + version)
 
@@ -172,10 +172,10 @@ class MainApp(tk.Tk):
         if loginusers():
             AccountName, PersonaName = loginusers()
         else:
-            try_manually = msgbox.askyesno(_('Alert'), _('Could not load loginusers.vdf.')  # NOQA
-                                + '\n' + _('This may be because Steam directory defined')  # NOQA
-                                + '\n' + _('in registry is invalid.')  # NOQA
-                                + '\n\n' + _('Do you want to select Steam directory manually?'))  # NOQA
+            try_manually = msgbox.askyesno(_('Alert'), _('Could not load loginusers.vdf.') + '\n' +
+                                           _('This may be because Steam directory defined') + '\n' +
+                                           _('in registry is invalid.') + '\n\n' +
+                                           _('Do you want to select Steam directory manually?'))
             if try_manually:
                 while True:
                     input_dir = filedialog.askdirectory()
@@ -186,8 +186,8 @@ class MainApp(tk.Tk):
                         break
                     else:
                         try_again = msgbox.askyesno(_('Warning'),
-                                                        _('Steam directory is invalid.')  # NOQA
-                                                        + '\n' + _('Try again?'))
+                                                    _('Steam directory is invalid.') + '\n' +
+                                                    _('Try again?'))
                         if try_again:
                             continue
                         else:
@@ -535,9 +535,9 @@ class MainApp(tk.Tk):
                     autoexit = 'false'
 
                 config_dict = {'locale': locale[locale_cb.current()],
-                            'try_soft_shutdown': soft_shutdown,
-                            'show_profilename': show_pname[showpnames_cb.current()],  # NOQA
-                            'autoexit': autoexit}
+                               'try_soft_shutdown': soft_shutdown,
+                               'show_profilename': show_pname[showpnames_cb.current()],
+                               'autoexit': autoexit}
 
                 yaml = YAML()
                 yaml.dump(config_dict, cfg)
@@ -603,8 +603,7 @@ class MainApp(tk.Tk):
         if not bundle:
             debug_menu = tk.Menu(menubar, tearoff=0)
             debug_menu.add_command(label='Update Debug',
-                                command=lambda: self.after(
-                                    10, lambda: start_checkupdate(self, version, url, bundle, debug=True)))  # NOQA
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, bundle, debug=True)))
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         bottomframe = tk.Frame(self)
@@ -660,15 +659,15 @@ class MainApp(tk.Tk):
                     sleep(2)
                     for x in range(8):
                         if check_running('Steam.exe'):
-                            print('Steam is still running after %s seconds' % str(2+x*2))  # NOQA
+                            print('Steam is still running after %s seconds' % str(2+x*2))
                             if x < 8:
                                 sleep(1.5)
                                 continue
                             else:
                                 msg = msgbox.askyesno(_('Alert'),
-                                                    _('After soft shutdown attempt,') + '\n' +  # NOQA
-                                                    _('Steam appears to be still running.') + '\n\n' +   # NOQA
-                                                    _('Do you want to force shutdown Steam?'))  # NOQA
+                                                      _('After soft shutdown attempt,') + '\n' +
+                                                      _('Steam appears to be still running.') + '\n\n' +
+                                                      _('Do you want to force shutdown Steam?'))
                                 if msg:
                                     raise FileNotFoundError
                                 else:
@@ -903,26 +902,29 @@ class MainApp(tk.Tk):
                 self.frame_dict[username].pack(fill='x', padx=5, pady=3)
 
                 menu_dict[username] = tk.Menu(self, tearoff=0)
-                menu_dict[username].add_command(label=_("Set as auto-login account"), command=lambda name=username: self.button_func(name))
+                menu_dict[username].add_command(label=_("Set as auto-login account"),
+                                                command=lambda name=username: self.button_func(name))
                 menu_dict[username].add_separator()
-                menu_dict[username].add_command(label=_("Name settings"), command=lambda name=username, pname=profilename: self.configwindow(name, pname))
-                menu_dict[username].add_command(label=_("Delete"), command=lambda name=username: self.remove_user(name))
+                menu_dict[username].add_command(label=_("Name settings"),
+                                                command=lambda name=username, pname=profilename: self.configwindow(name, pname))
+                menu_dict[username].add_command(label=_("Delete"),
+                                                command=lambda name=username: self.remove_user(name))
 
                 def popup(username, event):
                     menu_dict[username].tk_popup(event.x_root + 55, event.y_root + 17, 0)
 
                 if username == fetch_reg('username'):
                     self.button_dict[username] = ttk.Button(self.frame_dict[username],
-                                                    style='sel.TButton',
-                                                    text=username + profilename,
-                                                    state='disabled',
-                                                    command=lambda name=username: self.button_func(name))  # NOQA
+                                                            style='sel.TButton',
+                                                            text=username + profilename,
+                                                            state='disabled',
+                                                            command=lambda name=username: self.button_func(name))
                 else:
                     self.button_dict[username] = ttk.Button(self.frame_dict[username],
-                                                    style='TButton',
-                                                    text=username + profilename,
-                                                    state='normal',
-                                                    command=lambda name=username: self.button_func(name))  # NOQA
+                                                            style='TButton',
+                                                            text=username + profilename,
+                                                            state='normal',
+                                                            command=lambda name=username: self.button_func(name))
                 self.button_dict[username].bind("<Button-3>", lambda event, username=username: popup(username, event))
                 self.button_dict[username].pack(fill='x', padx=(0, 1))
 
