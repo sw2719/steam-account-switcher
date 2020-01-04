@@ -911,7 +911,7 @@ class MainApp(tk.Tk):
                                                 command=lambda name=username: self.remove_user(name))
 
                 def popup(username, event):
-                    menu_dict[username].tk_popup(event.x_root + 55, event.y_root + 17, 0)
+                    menu_dict[username].tk_popup(event.x_root + 86, event.y_root + 13, 0)
 
                 if username == fetch_reg('username'):
                     self.button_dict[username] = ttk.Button(self.frame_dict[username],
