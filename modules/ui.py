@@ -55,6 +55,393 @@ def window_height():
 
 class MainApp(tk.Tk):
     '''Draw main window.'''
+    def __init__(self, version, url, bundle):
+        self.accounts = acc_getlist()
+        self.acc_dict = acc_getdict()
+        tk.Tk.__init__(self)
+        self.title(_("Account Switcher"))
+
+        self.geometry("300x%s+600+250" %
+                      window_height())
+        self.resizable(False, False)
+
+        sel_style = ttk.Style(self)
+        sel_style.configure('sel.TButton', background="#000")
+
+        def_style = ttk.Style(self)
+        def_style.configure('TButton')
+
+        menubar = tk.Menu(self)
+        menu = tk.Menu(menubar, tearoff=0)
+        menu.add_command(label=_('Import accounts from Steam'),
+                         command=self.importwindow)
+        menu.add_command(label=_("Add accounts"),
+                         command=self.addwindow)
+        menu.add_command(label=_("Change account order"),
+                         command=self.orderwindow)
+        menu.add_separator()
+        menu.add_command(label=_("Settings"),
+                         command=self.settingswindow)
+        menu.add_command(label=_("About"),
+                         command=lambda: self.about(version))
+
+        menubar.add_cascade(label=_("Menu"), menu=menu)
+        self.config(menu=menubar)
+
+        if not bundle:
+            debug_menu = tk.Menu(menubar, tearoff=0)
+            debug_menu.add_command(label='Update Debug',
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, bundle, debug=True)))
+            menubar.add_cascade(label=_("Debug"), menu=debug_menu)
+
+        bottomframe = tk.Frame(self)
+        bottomframe.pack(side='bottom')
+
+        def toggleAutologin():
+            '''Toggle autologin registry value between 0 and 1'''
+            if fetch_reg('autologin') == 1:
+                value = 0
+            elif fetch_reg('autologin') == 0:
+                value = 1
+            setkey('RememberPassword', value, winreg.REG_DWORD)
+            self.refresh()
+
+        button_toggle = ttk.Button(bottomframe,
+                                   width=15,
+                                   text=_('Toggle auto-login'),
+                                   command=toggleAutologin)
+
+        button_quit = ttk.Button(bottomframe,
+                                 width=5,
+                                 text=_('Exit'),
+                                 command=self.quit)
+
+        self.restartbutton_text = tk.StringVar()
+
+        if get_config('autoexit') == 'true':
+            self.restartbutton_text.set(_('Restart Steam & Exit'))
+        else:
+            self.restartbutton_text.set(_('Restart Steam'))
+
+        def exit_after_restart():
+            '''Restart Steam client and exit application.
+            If autoexit is disabled, app won't exit.'''
+            try:
+                if get_config('try_soft_shutdown') == 'false':
+                    raise FileNotFoundError
+                if check_running('Steam.exe'):
+                    print('Soft shutdown mode')
+                    r_path = fetch_reg('steamexe')
+                    r_path_items = r_path.split('/')
+                    path_items = []
+                    for item in r_path_items:
+                        if ' ' in item:
+                            path_items.append(f'"{item}"')
+                        else:
+                            path_items.append(item)
+                    steam_exe = "\\".join(path_items)
+                    print('Steam.exe path:', steam_exe)
+                    subprocess.run(f"start {steam_exe} -shutdown", shell=True,
+                                   creationflags=0x08000000, check=True)
+                    print('Shutdown command sent. Waiting for Steam...')
+                    sleep(2)
+                    for x in range(8):
+                        if check_running('Steam.exe'):
+                            print('Steam is still running after %s seconds' % str(2+x*2))
+                            if x < 8:
+                                sleep(1.5)
+                                continue
+                            else:
+                                msg = msgbox.askyesno(_('Alert'),
+                                                      _('After soft shutdown attempt,') + '\n' +
+                                                      _('Steam appears to be still running.') + '\n\n' +
+                                                      _('Do you want to force shutdown Steam?'))
+                                if msg:
+                                    raise FileNotFoundError
+                                else:
+                                    error_msg(_('Error'),
+                                              _('Could not soft shutdown Steam.') + '\n' +
+                                              _('App will now exit.'))
+                        else:
+                            break
+                else:
+                    print('Steam is not running.')
+            except (FileNotFoundError, subprocess.CalledProcessError):
+                print('Hard shutdown mode')
+                try:
+                    subprocess.run("TASKKILL /F /IM Steam.exe",
+                                   creationflags=0x08000000, check=True)
+                    print('TASKKILL command sent.')
+                    sleep(1)
+                except subprocess.CalledProcessError:
+                    pass
+            try:
+                print('Launching Steam...')
+                subprocess.run("start steam://open/main",
+                               shell=True, check=True)
+            except subprocess.CalledProcessError:
+                msgbox.showerror(_('Error'),
+                                 _('Could not start Steam automatically') + '\n' +
+                                 _('for unknown reason.'))
+            if get_config('autoexit') == 'true':
+                self.quit()
+
+        button_restart = ttk.Button(bottomframe,
+                                    width=20,
+                                    textvariable=self.restartbutton_text,
+                                    command=exit_after_restart)
+
+        button_toggle.pack(side='left', padx=3, pady=3)
+        button_quit.pack(side='left', pady=3)
+        button_restart.pack(side='right', padx=3, pady=3)
+
+        self.button_dict = {}
+        self.frame_dict = {}
+
+        upper_frame = tk.Frame(self)
+        upper_frame.pack(side='top', fill='x')
+
+        self.button_frame = tk.Frame(self)
+        self.button_frame.pack(side='top', fill='x')
+
+        userlabel_1 = tk.Label(upper_frame, text=_('Current Auto-login user:'))
+        userlabel_1.pack(side='top')
+
+        self.user_var = tk.StringVar()
+        self.user_var.set(fetch_reg('username'))
+
+        userlabel_2 = tk.Label(upper_frame, textvariable=self.user_var)
+        userlabel_2.pack(side='top', pady=2)
+
+        self.auto_var = tk.StringVar()
+
+        if fetch_reg('autologin') == 1:
+            self.auto_var.set(_('Auto-login Enabled'))
+        else:
+            self.auto_var.set(_('Auto-login Disabled'))
+
+        autolabel = tk.Label(upper_frame, textvariable=self.auto_var)
+        autolabel.pack(side='top')
+
+    def configwindow(self, username, profilename):
+        configwindow = tk.Toplevel(self)
+        configwindow.title('')
+        configwindow.geometry("240x150+650+320")
+        configwindow.resizable(False, False)
+
+        i = self.accounts.index(username)
+        try:
+            custom_name = self.acc_dict[i]['customname']
+        except KeyError:
+            custom_name = ''
+
+        button_frame = tk.Frame(configwindow)
+        button_frame.pack(side='bottom', pady=3)
+
+        ok_button = ttk.Button(button_frame, text=_('OK'))
+        ok_button.pack(side='right', padx=1.5)
+
+        cancel_button = ttk.Button(button_frame,
+                                   text=_('Cancel'),
+                                   command=configwindow.destroy)
+        cancel_button.pack(side='left', padx=1.5)
+
+        top_label = tk.Label(configwindow, text=_('Select name settings for %s.') % username)
+        top_label.pack(side='top', pady=(4, 3))
+
+        radio_frame1 = tk.Frame(configwindow)
+        radio_frame1.pack(side='top', padx=20, pady=(4, 2), fill='x')
+        radio_frame2 = tk.Frame(configwindow)
+        radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
+        radio_var = tk.IntVar()
+
+        if custom_name.strip():
+            radio_var.set(1)
+        else:
+            radio_var.set(0)
+
+        radio_default = ttk.Radiobutton(radio_frame1,
+                                        text=_('Use profile name if available'),
+                                        variable=radio_var,
+                                        value=0)
+        radio_custom = ttk.Radiobutton(radio_frame2,
+                                       text=_('Use custom name'),
+                                       variable=radio_var,
+                                       value=1)
+
+        radio_default.pack(side='left', pady=2)
+        radio_custom.pack(side='left', pady=2)
+
+        entry_frame = tk.Frame(configwindow)
+        entry_frame.pack(side='bottom', pady=(1, 4))
+
+        name_entry = ttk.Entry(entry_frame, width=26)
+        name_entry.insert(0, custom_name)
+        name_entry.pack()
+
+        configwindow.grab_set()
+        configwindow.focus()
+
+        if radio_var.get() == 0:
+            name_entry['state'] = 'disabled'
+            name_entry.focus()
+
+        def reset_entry():
+            name_entry.delete(0, 'end')
+            name_entry['state'] = 'disabled'
+
+        def enable_entry():
+            name_entry['state'] = 'normal'
+            name_entry.focus()
+
+        radio_default['command'] = reset_entry
+        radio_custom['command'] = enable_entry
+
+        def ok(username):
+            if name_entry.get().strip():
+                v = name_entry.get()
+                self.acc_dict[i]['customname'] = v
+                print(f"Using custom name '{v}' for '{username}'.")
+            else:
+                self.acc_dict[i].pop('customname', None)
+                print(f"Custom name for '{username}' has been removed.")
+
+            with open('accounts.yml', 'w', encoding='utf-8') as f:
+                yaml.dump(self.acc_dict, f)
+            self.refresh()
+            configwindow.destroy()
+
+        def enterkey(event):
+            ok(username)
+
+        configwindow.bind('<Return>', enterkey)
+        ok_button['command'] = lambda username=username: ok(username)
+        configwindow.wait_window()
+
+    def button_func(self, username):
+        current_user = fetch_reg('username')
+        try:
+            self.button_dict[current_user].config(style='TButton', state='normal')  # NOQA
+        except Exception:
+            pass
+        setkey('AutoLoginUser', username, winreg.REG_SZ)
+        self.button_dict[username].config(style='sel.TButton', state='disabled')  # NOQA
+        self.user_var.set(fetch_reg('username'))
+
+    def remove_user(self, target):
+        '''Write accounts to accounts.txt except the
+        one which user wants to delete'''
+        if msgbox.askyesno(_('Confirm'), _('Are you sure want to remove account %s?') % target):
+            acc_dict = acc_getdict()
+            accounts = acc_getlist()
+            dump_dict = {}
+
+            print(f'Removing {target}...')
+            for username in accounts:
+                if username != target:
+                    dump_dict[len(dump_dict)] = acc_dict[accounts.index(username)]
+
+            with open('accounts.yml', 'w') as acc:
+                yaml.dump(dump_dict, acc)
+            self.refresh()
+
+    def draw_button(self):
+        menu_dict = {}
+
+        if self.accounts:
+            for username in self.accounts:
+                if get_config('show_profilename') != 'false':
+                    if loginusers():
+                        AccountName, PersonaName = loginusers()
+                    else:
+                        AccountName, PersonaName = [], []
+
+                    try:
+                        acc_index = self.accounts.index(username)
+                        profilename = self.acc_dict[acc_index]['customname']
+                    except KeyError:
+                        if username in AccountName:
+                            try:
+                                i = AccountName.index(username)
+                                profilename = PersonaName[i]
+                                n = 37 - len(username)
+                            except ValueError:
+                                profilename = ''
+                        else:
+                            profilename = ''
+
+                    n = 37 - len(username)
+
+                    if profilename and n > 4:
+                        if get_config('show_profilename') == 'bar':
+                            if profilename == profilename[:n]:
+                                profilename = ' | ' + profilename[:n] + ''
+                            else:
+                                profilename = ' | ' + profilename[:n] + '..'
+                        elif get_config('show_profilename') == 'bracket':
+                            if profilename == profilename[:n]:
+                                profilename = ' (' + profilename[:n] + ')'
+                            else:
+                                profilename = ' (' + profilename[:n] + '..)'
+                else:
+                    profilename = ''
+
+                self.frame_dict[username] = tk.Frame(self.button_frame)
+                self.frame_dict[username].pack(fill='x', padx=5, pady=3)
+
+                menu_dict[username] = tk.Menu(self, tearoff=0)
+                menu_dict[username].add_command(label=_("Set as auto-login account"),
+                                                command=lambda name=username: self.button_func(name))
+                menu_dict[username].add_separator()
+                menu_dict[username].add_command(label=_("Name settings"),
+                                                command=lambda name=username, pname=profilename: self.configwindow(name, pname))
+                menu_dict[username].add_command(label=_("Delete"),
+                                                command=lambda name=username: self.remove_user(name))
+
+                def popup(username, event):
+                    menu_dict[username].tk_popup(event.x_root + 86, event.y_root + 13, 0)
+
+                if username == fetch_reg('username'):
+                    self.button_dict[username] = ttk.Button(self.frame_dict[username],
+                                                            style='sel.TButton',
+                                                            text=username + profilename,
+                                                            state='disabled',
+                                                            command=lambda name=username: self.button_func(name))
+                else:
+                    self.button_dict[username] = ttk.Button(self.frame_dict[username],
+                                                            style='TButton',
+                                                            text=username + profilename,
+                                                            state='normal',
+                                                            command=lambda name=username: self.button_func(name))
+                self.button_dict[username].bind("<Button-3>", lambda event, username=username: popup(username, event))
+                self.button_dict[username].pack(fill='x', padx=(0, 1))
+
+    def refresh(self):
+        '''Refresh main window widgets'''
+        self.accounts = acc_getlist()
+        self.acc_dict = acc_getdict()
+        self.geometry("300x%s" %
+                      window_height())
+        self.button_frame.destroy()
+        self.button_frame = tk.Frame(self)
+        self.button_frame.pack(side='top', fill='x')
+
+        self.user_var.set(fetch_reg('username'))
+
+        if fetch_reg('autologin') == 1:
+            self.auto_var.set(_('Auto-login Enabled'))
+        else:
+            self.auto_var.set(_('Auto-login Disabled'))
+
+        self.draw_button()
+
+        if get_config('autoexit') == 'true':
+            self.restartbutton_text.set(_('Restart Steam & Exit'))
+        else:
+            self.restartbutton_text.set(_('Restart Steam'))
+
+        print('Menu refreshed with %s account(s)' % len(self.accounts))
+
     def about(self, version):
         '''Open about window'''
         aboutwindow = tk.Toplevel(self)
@@ -566,390 +953,3 @@ class MainApp(tk.Tk):
         settings_ok.pack(side='left', padx=3, pady=3)
         settings_cancel.pack(side='left', padx=3, pady=3)
         settings_apply.pack(side='left', padx=3, pady=3)
-
-    def __init__(self, version, url, bundle):
-        self.accounts = acc_getlist()
-        self.acc_dict = acc_getdict()
-        tk.Tk.__init__(self)
-        self.title(_("Account Switcher"))
-
-        self.geometry("300x%s+600+250" %
-                      window_height())
-        self.resizable(False, False)
-
-        sel_style = ttk.Style(self)
-        sel_style.configure('sel.TButton', background="#000")
-
-        def_style = ttk.Style(self)
-        def_style.configure('TButton')
-
-        menubar = tk.Menu(self)
-        menu = tk.Menu(menubar, tearoff=0)
-        menu.add_command(label=_('Import accounts from Steam'),
-                         command=self.importwindow)
-        menu.add_command(label=_("Add accounts"),
-                         command=self.addwindow)
-        menu.add_command(label=_("Change account order"),
-                         command=self.orderwindow)
-        menu.add_separator()
-        menu.add_command(label=_("Settings"),
-                         command=self.settingswindow)
-        menu.add_command(label=_("About"),
-                         command=lambda: self.about(version))
-
-        menubar.add_cascade(label=_("Menu"), menu=menu)
-        self.config(menu=menubar)
-
-        if not bundle:
-            debug_menu = tk.Menu(menubar, tearoff=0)
-            debug_menu.add_command(label='Update Debug',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, bundle, debug=True)))
-            menubar.add_cascade(label=_("Debug"), menu=debug_menu)
-
-        bottomframe = tk.Frame(self)
-        bottomframe.pack(side='bottom')
-
-        def toggleAutologin():
-            '''Toggle autologin registry value between 0 and 1'''
-            if fetch_reg('autologin') == 1:
-                value = 0
-            elif fetch_reg('autologin') == 0:
-                value = 1
-            setkey('RememberPassword', value, winreg.REG_DWORD)
-            self.refresh()
-
-        button_toggle = ttk.Button(bottomframe,
-                                   width=15,
-                                   text=_('Toggle auto-login'),
-                                   command=toggleAutologin)
-
-        button_quit = ttk.Button(bottomframe,
-                                 width=5,
-                                 text=_('Exit'),
-                                 command=self.quit)
-
-        self.restartbutton_text = tk.StringVar()
-
-        if get_config('autoexit') == 'true':
-            self.restartbutton_text.set(_('Restart Steam & Exit'))
-        else:
-            self.restartbutton_text.set(_('Restart Steam'))
-
-        def exit_after_restart():
-            '''Restart Steam client and exit application.
-            If autoexit is disabled, app won't exit.'''
-            try:
-                if get_config('try_soft_shutdown') == 'false':
-                    raise FileNotFoundError
-                if check_running('Steam.exe'):
-                    print('Soft shutdown mode')
-                    r_path = fetch_reg('steamexe')
-                    r_path_items = r_path.split('/')
-                    path_items = []
-                    for item in r_path_items:
-                        if ' ' in item:
-                            path_items.append(f'"{item}"')
-                        else:
-                            path_items.append(item)
-                    steam_exe = "\\".join(path_items)
-                    print('Steam.exe path:', steam_exe)
-                    subprocess.run(f"start {steam_exe} -shutdown", shell=True,
-                                   creationflags=0x08000000, check=True)
-                    print('Shutdown command sent. Waiting for Steam...')
-                    sleep(2)
-                    for x in range(8):
-                        if check_running('Steam.exe'):
-                            print('Steam is still running after %s seconds' % str(2+x*2))
-                            if x < 8:
-                                sleep(1.5)
-                                continue
-                            else:
-                                msg = msgbox.askyesno(_('Alert'),
-                                                      _('After soft shutdown attempt,') + '\n' +
-                                                      _('Steam appears to be still running.') + '\n\n' +
-                                                      _('Do you want to force shutdown Steam?'))
-                                if msg:
-                                    raise FileNotFoundError
-                                else:
-                                    error_msg(_('Error'),
-                                              _('Could not soft shutdown Steam.') + '\n' +
-                                              _('App will now exit.'))
-                        else:
-                            break
-                else:
-                    print('Steam is not running.')
-            except (FileNotFoundError, subprocess.CalledProcessError):
-                print('Hard shutdown mode')
-                try:
-                    subprocess.run("TASKKILL /F /IM Steam.exe",
-                                   creationflags=0x08000000, check=True)
-                    print('TASKKILL command sent.')
-                    sleep(1)
-                except subprocess.CalledProcessError:
-                    pass
-            try:
-                print('Launching Steam...')
-                subprocess.run("start steam://open/main",
-                               shell=True, check=True)
-            except subprocess.CalledProcessError:
-                msgbox.showerror(_('Error'),
-                                 _('Could not start Steam automatically') + '\n' +
-                                 _('for unknown reason.'))
-            if get_config('autoexit') == 'true':
-                self.quit()
-
-        button_restart = ttk.Button(bottomframe,
-                                    width=20,
-                                    textvariable=self.restartbutton_text,
-                                    command=exit_after_restart)
-
-        button_toggle.pack(side='left', padx=3, pady=3)
-        button_quit.pack(side='left', pady=3)
-        button_restart.pack(side='right', padx=3, pady=3)
-
-        self.button_dict = {}
-        self.frame_dict = {}
-
-        upper_frame = tk.Frame(self)
-        upper_frame.pack(side='top', fill='x')
-
-        self.button_frame = tk.Frame(self)
-        self.button_frame.pack(side='top', fill='x')
-
-        userlabel_1 = tk.Label(upper_frame, text=_('Current Auto-login user:'))
-        userlabel_1.pack(side='top')
-
-        self.user_var = tk.StringVar()
-        self.user_var.set(fetch_reg('username'))
-
-        userlabel_2 = tk.Label(upper_frame, textvariable=self.user_var)
-        userlabel_2.pack(side='top', pady=2)
-
-        self.auto_var = tk.StringVar()
-
-        if fetch_reg('autologin') == 1:
-            self.auto_var.set(_('Auto-login Enabled'))
-        else:
-            self.auto_var.set(_('Auto-login Disabled'))
-
-        autolabel = tk.Label(upper_frame, textvariable=self.auto_var)
-        autolabel.pack(side='top')
-
-    def configwindow(self, username, profilename):
-        configwindow = tk.Toplevel(self)
-        configwindow.title('')
-        configwindow.geometry("240x150+650+320")
-        configwindow.resizable(False, False)
-
-        i = self.accounts.index(username)
-        try:
-            custom_name = self.acc_dict[i]['customname']
-        except KeyError:
-            custom_name = ''
-
-        button_frame = tk.Frame(configwindow)
-        button_frame.pack(side='bottom', pady=3)
-
-        ok_button = ttk.Button(button_frame, text=_('OK'))
-        ok_button.pack(side='right', padx=1.5)
-
-        cancel_button = ttk.Button(button_frame,
-                                   text=_('Cancel'),
-                                   command=configwindow.destroy)
-        cancel_button.pack(side='left', padx=1.5)
-
-        top_label = tk.Label(configwindow, text=_('Select name settings for %s.') % username)
-        top_label.pack(side='top', pady=(4, 3))
-
-        radio_frame1 = tk.Frame(configwindow)
-        radio_frame1.pack(side='top', padx=20, pady=(4, 2), fill='x')
-        radio_frame2 = tk.Frame(configwindow)
-        radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
-        radio_var = tk.IntVar()
-
-        if custom_name.strip():
-            radio_var.set(1)
-        else:
-            radio_var.set(0)
-
-        radio_default = ttk.Radiobutton(radio_frame1,
-                                        text=_('Use profile name if available'),
-                                        variable=radio_var,
-                                        value=0)
-        radio_custom = ttk.Radiobutton(radio_frame2,
-                                       text=_('Use custom name'),
-                                       variable=radio_var,
-                                       value=1)
-
-        radio_default.pack(side='left', pady=2)
-        radio_custom.pack(side='left', pady=2)
-
-        entry_frame = tk.Frame(configwindow)
-        entry_frame.pack(side='bottom', pady=(1, 4))
-
-        name_entry = ttk.Entry(entry_frame, width=26)
-        name_entry.insert(0, custom_name)
-        name_entry.pack()
-
-        configwindow.grab_set()
-        configwindow.focus()
-
-        if radio_var.get() == 0:
-            name_entry['state'] = 'disabled'
-            name_entry.focus()
-
-        def reset_entry():
-            name_entry.delete(0, 'end')
-            name_entry['state'] = 'disabled'
-
-        def enable_entry():
-            name_entry['state'] = 'normal'
-            name_entry.focus()
-
-        radio_default['command'] = reset_entry
-        radio_custom['command'] = enable_entry
-
-        def ok(username):
-            if name_entry.get().strip():
-                v = name_entry.get()
-                self.acc_dict[i]['customname'] = v
-                print(f"Using custom name '{v}' for '{username}'.")
-            else:
-                self.acc_dict[i].pop('customname', None)
-                print(f"Custom name for '{username}' has been removed.")
-
-            with open('accounts.yml', 'w', encoding='utf-8') as f:
-                yaml.dump(self.acc_dict, f)
-            self.refresh()
-            configwindow.destroy()
-
-        def enterkey(event):
-            ok(username)
-
-        configwindow.bind('<Return>', enterkey)
-        ok_button['command'] = lambda username=username: ok(username)
-        configwindow.wait_window()
-
-    def button_func(self, username):
-        current_user = fetch_reg('username')
-        try:
-            self.button_dict[current_user].config(style='TButton', state='normal')  # NOQA
-        except Exception:
-            pass
-        setkey('AutoLoginUser', username, winreg.REG_SZ)
-        self.button_dict[username].config(style='sel.TButton', state='disabled')  # NOQA
-        self.user_var.set(fetch_reg('username'))
-
-    def remove_user(self, target):
-        '''Write accounts to accounts.txt except the
-        one which user wants to delete'''
-        if msgbox.askyesno(_('Confirm'), _('Are you sure want to remove account %s?') % target):
-            acc_dict = acc_getdict()
-            accounts = acc_getlist()
-            dump_dict = {}
-
-            print(f'Removing {target}...')
-            for username in accounts:
-                if username != target:
-                    dump_dict[len(dump_dict)] = acc_dict[accounts.index(username)]
-
-            with open('accounts.yml', 'w') as acc:
-                yaml.dump(dump_dict, acc)
-            self.refresh()
-
-    def draw_button(self):
-        menu_dict = {}
-
-        if self.accounts:
-            for username in self.accounts:
-                if get_config('show_profilename') != 'false':
-                    if loginusers():
-                        AccountName, PersonaName = loginusers()
-                    else:
-                        AccountName, PersonaName = [], []
-
-                    try:
-                        acc_index = self.accounts.index(username)
-                        profilename = self.acc_dict[acc_index]['customname']
-                    except KeyError:
-                        if username in AccountName:
-                            try:
-                                i = AccountName.index(username)
-                                profilename = PersonaName[i]
-                                n = 37 - len(username)
-                            except ValueError:
-                                profilename = ''
-                        else:
-                            profilename = ''
-
-                    n = 37 - len(username)
-
-                    if profilename and n > 4:
-                        if get_config('show_profilename') == 'bar':
-                            if profilename == profilename[:n]:
-                                profilename = ' | ' + profilename[:n] + ''
-                            else:
-                                profilename = ' | ' + profilename[:n] + '..'
-                        elif get_config('show_profilename') == 'bracket':
-                            if profilename == profilename[:n]:
-                                profilename = ' (' + profilename[:n] + ')'
-                            else:
-                                profilename = ' (' + profilename[:n] + '..)'
-                else:
-                    profilename = ''
-
-                self.frame_dict[username] = tk.Frame(self.button_frame)
-                self.frame_dict[username].pack(fill='x', padx=5, pady=3)
-
-                menu_dict[username] = tk.Menu(self, tearoff=0)
-                menu_dict[username].add_command(label=_("Set as auto-login account"),
-                                                command=lambda name=username: self.button_func(name))
-                menu_dict[username].add_separator()
-                menu_dict[username].add_command(label=_("Name settings"),
-                                                command=lambda name=username, pname=profilename: self.configwindow(name, pname))
-                menu_dict[username].add_command(label=_("Delete"),
-                                                command=lambda name=username: self.remove_user(name))
-
-                def popup(username, event):
-                    menu_dict[username].tk_popup(event.x_root + 86, event.y_root + 13, 0)
-
-                if username == fetch_reg('username'):
-                    self.button_dict[username] = ttk.Button(self.frame_dict[username],
-                                                            style='sel.TButton',
-                                                            text=username + profilename,
-                                                            state='disabled',
-                                                            command=lambda name=username: self.button_func(name))
-                else:
-                    self.button_dict[username] = ttk.Button(self.frame_dict[username],
-                                                            style='TButton',
-                                                            text=username + profilename,
-                                                            state='normal',
-                                                            command=lambda name=username: self.button_func(name))
-                self.button_dict[username].bind("<Button-3>", lambda event, username=username: popup(username, event))
-                self.button_dict[username].pack(fill='x', padx=(0, 1))
-
-    def refresh(self):
-        '''Refresh main window widgets'''
-        self.accounts = acc_getlist()
-        self.acc_dict = acc_getdict()
-        self.geometry("300x%s" %
-                      window_height())
-        self.button_frame.destroy()
-        self.button_frame = tk.Frame(self)
-        self.button_frame.pack(side='top', fill='x')
-
-        self.user_var.set(fetch_reg('username'))
-
-        if fetch_reg('autologin') == 1:
-            self.auto_var.set(_('Auto-login Enabled'))
-        else:
-            self.auto_var.set(_('Auto-login Disabled'))
-
-        self.draw_button()
-
-        if get_config('autoexit') == 'true':
-            self.restartbutton_text.set(_('Restart Steam & Exit'))
-        else:
-            self.restartbutton_text.set(_('Restart Steam'))
-
-        print('Menu refreshed with %s account(s)' % len(self.accounts))
