@@ -77,7 +77,7 @@ class MainApp(tk.Tk):
                          command=self.importwindow)
         menu.add_command(label=_("Add accounts"),
                          command=self.addwindow)
-        menu.add_command(label=_("Change account order"),
+        menu.add_command(label=_("Edit account order"),
                          command=self.orderwindow)
         menu.add_separator()
         menu.add_command(label=_("Settings"),
@@ -492,7 +492,7 @@ class MainApp(tk.Tk):
         bottomframe_add.pack(side='bottom', anchor='e')
 
         addlabel_row1 = tk.Label(topframe_add,
-                                 text=_('Enter accounts(s) to add.'))
+                                 text=_('Enter account(s) to add.'))
         addlabel_row2 = tk.Label(topframe_add,
                                  text=_("In case of adding multiple accounts,") + '\n' +
                                  _("seperate each account with '/' (slash)."))
@@ -669,7 +669,7 @@ class MainApp(tk.Tk):
 
         orderwindow = tk.Toplevel(self)
         orderwindow.title("")
-        orderwindow.geometry("210x300+650+300")
+        orderwindow.geometry("210x270+650+300")
         orderwindow.resizable(False, False)
 
         bottomframe_windowctrl = tk.Frame(orderwindow)
@@ -732,12 +732,6 @@ class MainApp(tk.Tk):
 
         lb.select_set(0)
         lbframe.pack(side='top', pady=5)
-
-        lb_label1 = tk.Label(labelframe, text=_('Drag or use buttons below'))
-        lb_label2 = tk.Label(labelframe, text=_('to change order.'))
-
-        lb_label1.pack()
-        lb_label2.pack()
 
         def down():
             i = lb.curselection()[0]
@@ -856,7 +850,7 @@ class MainApp(tk.Tk):
         showpnames_frame = tk.Frame(settingswindow)
         showpnames_frame.pack(fill='x', side='top', padx=10, pady=19)
 
-        showpnames_label = tk.Label(showpnames_frame, text=_('Show profile names'))
+        showpnames_label = tk.Label(showpnames_frame, text=_('Display profile names'))
         showpnames_label.pack(side='left', padx=3)
         showpnames_cb = ttk.Combobox(showpnames_frame,
                                      state="readonly",
