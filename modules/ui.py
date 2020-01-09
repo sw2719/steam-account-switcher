@@ -503,8 +503,6 @@ class MainApp(tk.Tk):
         addwindow.focus()
         account_entry.focus()
 
-        print('Opened add window.')
-
         def adduser(userinput):
             nonlocal acc_dict
             '''Write accounts from user's input to accounts.yml
@@ -582,11 +580,14 @@ class MainApp(tk.Tk):
             else:
                 return
 
+        if set(AccountName).issubset(set(acc_getlist())):
+            msgbox.showinfo(_('Info'), _("There's no account left to add."))
+            return
+
         importwindow = tk.Toplevel(self)
         importwindow.title(_("Import"))
         importwindow.geometry("280x300+650+300")
         importwindow.resizable(False, False)
-
         importwindow.grab_set()
         importwindow.focus()
 
@@ -598,7 +599,6 @@ class MainApp(tk.Tk):
         importlabel.pack(side='top',
                          padx=5,
                          pady=5)
-        print('Opened import window.')
 
         def close():
             importwindow.destroy()
@@ -823,7 +823,6 @@ class MainApp(tk.Tk):
         bottomframe_set.pack(side='bottom')
         settingswindow.grab_set()
         settingswindow.focus()
-        print('Opened settings window.')
 
         localeframe = tk.Frame(settingswindow)
         localeframe.pack(side='top', padx=10, pady=14)
