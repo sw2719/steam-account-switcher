@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-01-09 20:35+0900\n"
-"PO-Revision-Date: 2020-01-09 20:35+0900\n"
+"PO-Revision-Date: 2020-01-09 20:40+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -157,7 +157,7 @@ msgstr "취소"
 #: modules/ui.py:249
 #, python-format
 msgid "Select name settings for %s."
-msgstr "%s의 이름 설정을 선택하세요."
+msgstr "%s의 이름 설정 편집"
 
 #: modules/ui.py:264
 msgid "Use profile name if available"
