@@ -1,6 +1,7 @@
 import os
 import locale
 import gettext
+import sys
 from ruamel.yaml import YAML
 from modules.misc import error_msg
 
@@ -86,7 +87,7 @@ try:
         del test_dict
 except FileNotFoundError:
     reset_config()
-    error_msg(_('Error'), _('Could not load config file.'))
+    sys.exit(1)
 
 try:
     with open('config.yml', 'r') as cfg:
