@@ -1,9 +1,6 @@
 import sys
 import os
-import gettext
 import shutil
-from ruamel.yaml import YAML
-from modules.config import get_config
 from modules.update import start_checkupdate
 from modules.ui import MainApp
 from modules.reg import fetch_reg
@@ -27,19 +24,6 @@ if getattr(sys, 'frozen', False):
 else:
     print('Running in a Python interpreter')
     BUNDLE = False
-
-
-yaml = YAML()
-
-LOCALE = get_config('locale')
-
-print('Using locale', LOCALE)
-
-t = gettext.translation('steamswitcher',
-                        localedir='locale',
-                        languages=[LOCALE],
-                        fallback=True)
-_ = t.gettext
 
 print('Running on', os.getcwd())
 
