@@ -298,10 +298,13 @@ class MainApp(tk.Tk):
         radio_custom['command'] = enable_entry
 
         def ok(username):
-            if name_entry.get().strip():
+            if name_entry.get().strip() and radio_var.get() == 1:
                 v = name_entry.get()
                 self.acc_dict[i]['customname'] = v
                 print(f"Using custom name '{v}' for '{username}'.")
+            elif radio_var.get() == 1:
+                msgbox.showwarning(_('Info'), _('Enter a custom name to use.'), parent=configwindow)
+                return
             else:
                 self.acc_dict[i].pop('customname', None)
                 print(f"Custom name for '{username}' has been removed.")
