@@ -306,8 +306,8 @@ class MainApp(tk.Tk):
                 msgbox.showwarning(_('Info'), _('Enter a custom name to use.'), parent=configwindow)
                 return
             else:
-                self.acc_dict[i].pop('customname', None)
-                print(f"Custom name for '{username}' has been removed.")
+                if self.acc_dict[i].pop('customname', None):
+                    print(f"Custom name for '{username}' has been removed.")
 
             with open('accounts.yml', 'w', encoding='utf-8') as f:
                 yaml.dump(self.acc_dict, f)
@@ -783,11 +783,11 @@ class MainApp(tk.Tk):
             close()
 
         button_up = ttk.Button(bottomframe_orderctrl,
-                               text=_('Up'), command=up)
+                               text='↑', command=up)
         button_up.pack(side='left', padx=2)
 
         button_down = ttk.Button(bottomframe_orderctrl,
-                                 text=_('Down'), command=down)
+                                 text='↓', command=down)
         button_down.pack(side='right', padx=2)
 
         button_ok = ttk.Button(bottomframe_windowctrl,
