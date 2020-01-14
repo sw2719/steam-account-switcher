@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-01-14 08:58+0900\n"
-"PO-Revision-Date: 2020-01-14 08:59+0900\n"
+"PO-Revision-Date: 2020-01-14 09:00+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -165,7 +165,7 @@ msgstr "가능한 경우 프로필 이름 사용"
 
 #: modules/ui.py:268
 msgid "Use custom name"
-msgstr "커스텀 이름 사용"
+msgstr "사용자 지정 이름 사용"
 
 #: modules/ui.py:306 modules/ui.py:587 modules/update.py:251
 #: modules/update.py:254
@@ -174,7 +174,7 @@ msgstr "정보"
 
 #: modules/ui.py:306
 msgid "Enter a custom name to use."
-msgstr "사용할 커스텀 이름을 입력하세요."
+msgstr "사용할 이름을 입력해야 합니다."
 
 #: modules/ui.py:337
 msgid "Confirm"
