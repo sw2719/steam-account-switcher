@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-09 20:35+0900\n"
-"PO-Revision-Date: 2020-01-09 20:40+0900\n"
+"POT-Creation-Date: 2020-01-14 08:58+0900\n"
+"PO-Revision-Date: 2020-01-14 08:59+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -28,12 +28,12 @@ msgstr ""
 "X-Poedit-SearchPath-6: modules/ui.py\n"
 "X-Poedit-SearchPath-7: modules/update.py\n"
 
-#: modules/config.py:89 modules/config.py:124 modules/ui.py:162
-#: modules/ui.py:183 modules/update.py:124 modules/update.py:217
+#: modules/config.py:125 modules/ui.py:162 modules/ui.py:183
+#: modules/update.py:124 modules/update.py:217
 msgid "Error"
 msgstr "오류"
 
-#: modules/config.py:89 modules/config.py:124
+#: modules/config.py:125
 msgid "Could not load config file."
 msgstr "설정 파일을 불러올 수 없습니다."
 
@@ -69,11 +69,11 @@ msgstr "계정 추가"
 msgid "Edit account order"
 msgstr "계정 순서 편집"
 
-#: modules/ui.py:83 modules/ui.py:819
+#: modules/ui.py:83 modules/ui.py:822
 msgid "Settings"
 msgstr "설정"
 
-#: modules/ui.py:85 modules/ui.py:448
+#: modules/ui.py:85 modules/ui.py:451
 msgid "About"
 msgstr "정보"
 
@@ -93,15 +93,15 @@ msgstr "자동로그인 토글"
 msgid "Exit"
 msgstr "종료"
 
-#: modules/ui.py:122 modules/ui.py:439
+#: modules/ui.py:122 modules/ui.py:442
 msgid "Restart Steam & Exit"
 msgstr "스팀 재시작후 종료"
 
-#: modules/ui.py:124 modules/ui.py:441
+#: modules/ui.py:124 modules/ui.py:444
 msgid "Restart Steam"
 msgstr "스팀 재시작"
 
-#: modules/ui.py:155 modules/ui.py:562
+#: modules/ui.py:155 modules/ui.py:563
 msgid "Alert"
 msgstr "경고"
 
@@ -137,20 +137,20 @@ msgstr "자동으로 실행 할 수 없습니다."
 msgid "Current Auto-login user:"
 msgstr "현재 자동로그인 계정:"
 
-#: modules/ui.py:219 modules/ui.py:432
+#: modules/ui.py:219 modules/ui.py:435
 msgid "Auto-login Enabled"
 msgstr "자동로그인 켜짐"
 
-#: modules/ui.py:221 modules/ui.py:434
+#: modules/ui.py:221 modules/ui.py:437
 msgid "Auto-login Disabled"
 msgstr "자동로그인 꺼짐"
 
-#: modules/ui.py:241 modules/ui.py:791 modules/ui.py:933
+#: modules/ui.py:241 modules/ui.py:794 modules/ui.py:935
 msgid "OK"
 msgstr "확인"
 
-#: modules/ui.py:245 modules/ui.py:547 modules/ui.py:655 modules/ui.py:794
-#: modules/ui.py:938 modules/update.py:53 modules/update.py:225
+#: modules/ui.py:245 modules/ui.py:548 modules/ui.py:658 modules/ui.py:797
+#: modules/ui.py:940 modules/update.py:53 modules/update.py:225
 msgid "Cancel"
 msgstr "취소"
 
@@ -161,159 +161,164 @@ msgstr "%s의 이름 설정 편집"
 
 #: modules/ui.py:264
 msgid "Use profile name if available"
-msgstr "가능한 경우 프로필이름 사용"
+msgstr "가능한 경우 프로필 이름 사용"
 
 #: modules/ui.py:268
 msgid "Use custom name"
 msgstr "커스텀 이름 사용"
 
-#: modules/ui.py:334
+#: modules/ui.py:306 modules/ui.py:587 modules/update.py:251
+#: modules/update.py:254
+msgid "Info"
+msgstr "정보"
+
+#: modules/ui.py:306
+msgid "Enter a custom name to use."
+msgstr "사용할 커스텀 이름을 입력하세요."
+
+#: modules/ui.py:337
 msgid "Confirm"
 msgstr "확인"
 
-#: modules/ui.py:334
+#: modules/ui.py:337
 #, python-format
 msgid "Are you sure want to remove account %s?"
 msgstr "정말로 계정 %s을(를) 삭제하시겠습니까?"
 
-#: modules/ui.py:393
+#: modules/ui.py:396
 msgid "Set as auto-login account"
 msgstr "자동로그인 계정으로 설정"
 
-#: modules/ui.py:396
+#: modules/ui.py:399
 msgid "Name settings"
 msgstr "이름 설정"
 
-#: modules/ui.py:398
+#: modules/ui.py:401
 msgid "Delete"
 msgstr "삭제"
 
-#: modules/ui.py:452
+#: modules/ui.py:455
 msgid "Warning: The developer of this application is not responsible for"
 msgstr "경고: 본 앱의 사용으로 인한 데이터 손실 및 기타 손해 등"
 
-#: modules/ui.py:453
+#: modules/ui.py:456
 msgid "data loss or any other damage from the use of this app."
 msgstr "어떠한 사고나 문제에 대해서 제작자는 책임을 지지 않습니다."
 
-#: modules/ui.py:454
+#: modules/ui.py:457
 msgid "STEAM is a registered trademark of Valve Corporation."
 msgstr "STEAM은 Valve Corporation의 등록 상표입니다."
 
-#: modules/ui.py:464
+#: modules/ui.py:467
 msgid "Close"
 msgstr "닫기"
 
-#: modules/ui.py:468
+#: modules/ui.py:471
 msgid "GitHub page"
 msgstr "GitHub 페이지"
 
-#: modules/ui.py:484 modules/ui.py:544
+#: modules/ui.py:487 modules/ui.py:545
 msgid "Add"
 msgstr "추가"
 
-#: modules/ui.py:495
+#: modules/ui.py:498
 msgid "Enter account(s) to add."
 msgstr "추가할 계정을 입력하세요."
 
-#: modules/ui.py:497
+#: modules/ui.py:500
 msgid "In case of adding multiple accounts,"
 msgstr "다수의 계정을 입력할 경우에는,"
 
-#: modules/ui.py:498
+#: modules/ui.py:501
 msgid "seperate each account with '/' (slash)."
 msgstr "'/'(슬래시)로 구분합니다."
 
-#: modules/ui.py:526
+#: modules/ui.py:527
 msgid "Duplicate Alert"
 msgstr "중복 경고"
 
-#: modules/ui.py:527
+#: modules/ui.py:528
 #, python-format
 msgid "Account %s already exists."
 msgstr "계정 %s은 이미 추가되어 있습니다."
 
-#: modules/ui.py:562
+#: modules/ui.py:563
 msgid "Could not load loginusers.vdf."
 msgstr "파일 loginusers.vdf를 불러오지 못했습니다."
 
-#: modules/ui.py:563
+#: modules/ui.py:564
 msgid "This may be because Steam directory defined"
 msgstr "레지스트리에 설정된 스팀 경로가 올바르지"
 
-#: modules/ui.py:564
+#: modules/ui.py:565
 msgid "in registry is invalid."
 msgstr "않을 수 있습니다."
 
-#: modules/ui.py:565
+#: modules/ui.py:566
 msgid "Do you want to select Steam directory manually?"
 msgstr "수동으로 스팀 경로를 설정하시겠습니까?"
 
-#: modules/ui.py:575
+#: modules/ui.py:576
 msgid "Warning"
 msgstr "경고"
 
-#: modules/ui.py:576
+#: modules/ui.py:577
 msgid "Steam directory is invalid."
 msgstr "스팀 경로가 올바르지 않습니다."
 
-#: modules/ui.py:577
+#: modules/ui.py:578
 msgid "Try again?"
 msgstr "다시 시도할까요?"
 
-#: modules/ui.py:586 modules/ui.py:659
+#: modules/ui.py:587
+msgid "There's no account left to add."
+msgstr "추가할 계정이 없습니다."
+
+#: modules/ui.py:591 modules/ui.py:662
 msgid "Import"
 msgstr "가져오기"
 
-#: modules/ui.py:596
+#: modules/ui.py:600
 msgid "Select accounts to import."
 msgstr "가져올 계정들을 선택하세요."
 
-#: modules/ui.py:597
+#: modules/ui.py:601
 msgid "Added accounts don't show up."
 msgstr "이미 추가된 계정은 나타나지 않습니다."
 
-#: modules/ui.py:783
-msgid "Up"
-msgstr "위"
-
-#: modules/ui.py:787
-msgid "Down"
-msgstr "아래"
-
-#: modules/ui.py:798 modules/ui.py:943
+#: modules/ui.py:801 modules/ui.py:945
 msgid "Apply"
 msgstr "적용"
 
-#: modules/ui.py:830
+#: modules/ui.py:832
 msgid "Language"
 msgstr "언어"
 
-#: modules/ui.py:847
+#: modules/ui.py:849
 msgid "Restart app to apply language settings."
 msgstr "언어 설정을 적용하려면 앱을 재시작하세요."
 
-#: modules/ui.py:853
+#: modules/ui.py:855
 msgid "Display profile names"
 msgstr "프로필 이름 표시"
 
-#: modules/ui.py:857
+#: modules/ui.py:859
 msgid "Use bar - |"
 msgstr "막대 사용 - |"
 
-#: modules/ui.py:858
+#: modules/ui.py:860
 msgid "Use brackets - ( )"
 msgstr "괄호 사용 - ( )"
 
-#: modules/ui.py:859
+#: modules/ui.py:861
 msgid "Off"
 msgstr "끄기"
 
-#: modules/ui.py:873
+#: modules/ui.py:875
 msgid "Try to soft shutdown Steam client"
 msgstr "스팀 클라이언트 안전 종료"
 
-#: modules/ui.py:888
+#: modules/ui.py:890
 msgid "Exit app upon Steam restart"
 msgstr "스팀 재시작시 앱 종료"
 
@@ -350,10 +355,6 @@ msgstr "수동으로 진행하려면 update.zip 파일을 직접 압축해제하
 msgid "Are you sure to cancel?"
 msgstr "정말로 취소하시겠습니까?"
 
-#: modules/update.py:251 modules/update.py:254
-msgid "Info"
-msgstr "정보"
-
 #: modules/update.py:313
 msgid "New update available"
 msgstr "새로운 업데이트 사용 가능"
@@ -370,6 +371,12 @@ msgstr "개발 버전"
 msgid "Failed to check for updates"
 msgstr "업데이트 확인 실패"
 
+#~ msgid "Up"
+#~ msgstr "위"
+
+#~ msgid "Down"
+#~ msgstr "아래"
+
 #~ msgid "Drag or use buttons below"
 #~ msgstr "드래그하거나 아래의 버튼으로"
 
@@ -378,9 +385,6 @@ msgstr "업데이트 확인 실패"
 
 #~ msgid "No Accounts"
 #~ msgstr "계정 없음"
-
-#~ msgid "There's no account to remove."
-#~ msgstr "삭제할 계정이 없습니다."
 
 #~ msgid "Remove"
 #~ msgstr "삭제"
