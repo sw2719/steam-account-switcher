@@ -4,7 +4,6 @@ from tkinter import messagebox as msgbox
 from tkinter import filedialog
 import gettext
 import winreg
-import psutil
 import subprocess
 import os
 from time import sleep
@@ -13,7 +12,7 @@ from modules.account import acc_getlist, acc_getdict
 from modules.loginusers import loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config
-from modules.misc import error_msg
+from modules.misc import error_msg, check_running
 from modules.update import start_checkupdate
 
 yaml = YAML()
@@ -25,20 +24,6 @@ t = gettext.translation('steamswitcher',
                         languages=[LOCALE],
                         fallback=True)
 _ = t.gettext
-
-
-def check_running(process_name):
-    '''Check if given process is running and return boolean value.
-    :param process_name: Name of process to check
-    '''
-    for process in psutil.process_iter():
-        try:
-            if process_name.lower() in process.name().lower():
-                return True
-        except (psutil.NoSuchProcess, psutil.AccessDenied,
-                psutil.ZombieProcess):
-            pass
-    return False
 
 
 def window_height():
