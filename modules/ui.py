@@ -4,7 +4,6 @@ from tkinter import messagebox as msgbox
 from tkinter import filedialog
 import gettext
 import winreg
-import psutil
 import subprocess
 import os
 from time import sleep
@@ -13,7 +12,7 @@ from modules.account import acc_getlist, acc_getdict
 from modules.loginusers import loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config
-from modules.misc import error_msg
+from modules.misc import error_msg, check_running
 from modules.update import start_checkupdate
 
 yaml = YAML()
@@ -25,20 +24,6 @@ t = gettext.translation('steamswitcher',
                         languages=[LOCALE],
                         fallback=True)
 _ = t.gettext
-
-
-def check_running(process_name):
-    '''Check if given process is running and return boolean value.
-    :param process_name: Name of process to check
-    '''
-    for process in psutil.process_iter():
-        try:
-            if process_name.lower() in process.name().lower():
-                return True
-        except (psutil.NoSuchProcess, psutil.AccessDenied,
-                psutil.ZombieProcess):
-            pass
-    return False
 
 
 def window_height():
@@ -77,7 +62,7 @@ class MainApp(tk.Tk):
                          command=self.importwindow)
         menu.add_command(label=_("Add accounts"),
                          command=self.addwindow)
-        menu.add_command(label=_("Change account order"),
+        menu.add_command(label=_("Edit account order"),
                          command=self.orderwindow)
         menu.add_separator()
         menu.add_command(label=_("Settings"),
@@ -298,13 +283,16 @@ class MainApp(tk.Tk):
         radio_custom['command'] = enable_entry
 
         def ok(username):
-            if name_entry.get().strip():
+            if name_entry.get().strip() and radio_var.get() == 1:
                 v = name_entry.get()
                 self.acc_dict[i]['customname'] = v
                 print(f"Using custom name '{v}' for '{username}'.")
+            elif radio_var.get() == 1:
+                msgbox.showwarning(_('Info'), _('Enter a custom name to use.'), parent=configwindow)
+                return
             else:
-                self.acc_dict[i].pop('customname', None)
-                print(f"Custom name for '{username}' has been removed.")
+                if self.acc_dict[i].pop('customname', None):
+                    print(f"Custom name for '{username}' has been removed.")
 
             with open('accounts.yml', 'w', encoding='utf-8') as f:
                 yaml.dump(self.acc_dict, f)
@@ -327,6 +315,7 @@ class MainApp(tk.Tk):
         setkey('AutoLoginUser', username, winreg.REG_SZ)
         self.button_dict[username].config(style='sel.TButton', state='disabled')  # NOQA
         self.user_var.set(fetch_reg('username'))
+        self.focus()
 
     def remove_user(self, target):
         '''Write accounts to accounts.txt except the
@@ -492,7 +481,7 @@ class MainApp(tk.Tk):
         bottomframe_add.pack(side='bottom', anchor='e')
 
         addlabel_row1 = tk.Label(topframe_add,
-                                 text=_('Enter accounts(s) to add.'))
+                                 text=_('Enter account(s) to add.'))
         addlabel_row2 = tk.Label(topframe_add,
                                  text=_("In case of adding multiple accounts,") + '\n' +
                                  _("seperate each account with '/' (slash)."))
@@ -502,8 +491,6 @@ class MainApp(tk.Tk):
         addwindow.grab_set()
         addwindow.focus()
         account_entry.focus()
-
-        print('Opened add window.')
 
         def adduser(userinput):
             nonlocal acc_dict
@@ -582,11 +569,14 @@ class MainApp(tk.Tk):
             else:
                 return
 
+        if set(AccountName).issubset(set(acc_getlist())):
+            msgbox.showinfo(_('Info'), _("There's no account left to add."))
+            return
+
         importwindow = tk.Toplevel(self)
         importwindow.title(_("Import"))
         importwindow.geometry("280x300+650+300")
         importwindow.resizable(False, False)
-
         importwindow.grab_set()
         importwindow.focus()
 
@@ -598,7 +588,6 @@ class MainApp(tk.Tk):
         importlabel.pack(side='top',
                          padx=5,
                          pady=5)
-        print('Opened import window.')
 
         def close():
             importwindow.destroy()
@@ -669,7 +658,7 @@ class MainApp(tk.Tk):
 
         orderwindow = tk.Toplevel(self)
         orderwindow.title("")
-        orderwindow.geometry("210x300+650+300")
+        orderwindow.geometry("210x270+650+300")
         orderwindow.resizable(False, False)
 
         bottomframe_windowctrl = tk.Frame(orderwindow)
@@ -733,12 +722,6 @@ class MainApp(tk.Tk):
         lb.select_set(0)
         lbframe.pack(side='top', pady=5)
 
-        lb_label1 = tk.Label(labelframe, text=_('Drag or use buttons below'))
-        lb_label2 = tk.Label(labelframe, text=_('to change order.'))
-
-        lb_label1.pack()
-        lb_label2.pack()
-
         def down():
             i = lb.curselection()[0]
             if i == lb.size() - 1:
@@ -786,11 +769,11 @@ class MainApp(tk.Tk):
             close()
 
         button_up = ttk.Button(bottomframe_orderctrl,
-                               text=_('Up'), command=up)
+                               text='↑', command=up)
         button_up.pack(side='left', padx=2)
 
         button_down = ttk.Button(bottomframe_orderctrl,
-                                 text=_('Down'), command=down)
+                                 text='↓', command=down)
         button_down.pack(side='right', padx=2)
 
         button_ok = ttk.Button(bottomframe_windowctrl,
@@ -829,7 +812,6 @@ class MainApp(tk.Tk):
         bottomframe_set.pack(side='bottom')
         settingswindow.grab_set()
         settingswindow.focus()
-        print('Opened settings window.')
 
         localeframe = tk.Frame(settingswindow)
         localeframe.pack(side='top', padx=10, pady=14)
@@ -856,7 +838,7 @@ class MainApp(tk.Tk):
         showpnames_frame = tk.Frame(settingswindow)
         showpnames_frame.pack(fill='x', side='top', padx=10, pady=19)
 
-        showpnames_label = tk.Label(showpnames_frame, text=_('Show profile names'))
+        showpnames_label = tk.Label(showpnames_frame, text=_('Display profile names'))
         showpnames_label.pack(side='left', padx=3)
         showpnames_cb = ttk.Combobox(showpnames_frame,
                                      state="readonly",

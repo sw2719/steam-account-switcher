@@ -1,20 +1,16 @@
 import sys
 import os
-import gettext
 import shutil
-from ruamel.yaml import YAML
-from modules.config import get_config
 from modules.update import start_checkupdate
 from modules.ui import MainApp
 from modules.reg import fetch_reg
 from modules.account import acc_getlist
 
-print('App Start')
+print('Init start')
 
+__VERSION__ = '1.9.1'
 BRANCH = 'master'
-__VERSION__ = '1.9'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml' % BRANCH)
-
 
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
@@ -24,35 +20,14 @@ if getattr(sys, 'frozen', False):
             shutil.rmtree('updater')
         except OSError:
             pass
-else:
-    print('Running in a Python interpreter')
-    BUNDLE = False
-
-
-yaml = YAML()
-
-LOCALE = get_config('locale')
-
-print('Using locale', LOCALE)
-
-t = gettext.translation('steamswitcher',
-                        localedir='locale',
-                        languages=[LOCALE],
-                        fallback=True)
-_ = t.gettext
-
-print('Running on', os.getcwd())
-
-
-def afterupdate():
     if os.path.isfile('update.zip'):
         try:
             os.remove('update.zip')
         except OSError:
             pass
-
-
-print('Fetching registry values...')
+else:
+    print('Running in a Python interpreter')
+    BUNDLE = False
 
 if fetch_reg('autologin') != 2:
     print('Autologin value is ' + str(fetch_reg('autologin')))
@@ -63,15 +38,12 @@ if fetch_reg('autologin'):
 else:
     print('ERROR: Could not fetch current autologin user!')
 
-
-print('Init complete. Main app starting.')
 root = MainApp(__VERSION__, URL, BUNDLE)
 root.draw_button()
 root.after(100, lambda: start_checkupdate(root, __VERSION__, URL, BUNDLE))
 
-if os.path.isfile(os.path.join(os.getcwd(), 'update.zip')):
-    root.after(150, afterupdate)
 if not acc_getlist():
     root.after(200, root.importwindow)
 
+print('Init complete.')
 root.mainloop()
