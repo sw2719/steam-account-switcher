@@ -3,7 +3,7 @@
 
 Python 으로 작성됨
 
-[This document is also available in English](https://github.com/sw2719/steam-account-switcher/blob/master/README.md)
+[This document is also available in English.](https://github.com/sw2719/steam-account-switcher/blob/master/README.md)
 
 [Releases 에서 다운로드 하기](https://github.com/sw2719/steam-account-switcher/releases)
 
