@@ -1,7 +1,7 @@
 # Steam Account Switcher
 쉽고 빠른 스팀 계정 전환
 
-Python 으로 작성됨
+Python으로 작성됨
 
 [This document is also available in English.](https://github.com/sw2719/steam-account-switcher/blob/master/README.md)
 
@@ -38,7 +38,7 @@ STEAM은 Valve Corporation 의 등록상표입니다.
 * 로그인 창이 표시되는 경우, 비밀번호를 입력한 후 비밀번호 기억을 꼭 체크한후 로그인 하시면 다음부터는 자동으로 로그인이 됩니다.
 
 # 소스 코드 정보
-* master branch를 제외한 모든 branch 는 개발 branch이며 작동을 보장하지 않습니다.
+* master를 제외한 모든 branch 는 개발 branch이며 작동을 보장하지 않습니다.
 * Python 3.7 64-bit 으로 작성되었습니다.
 * updater.py 는 cx_freeze 로 번들된 배포용 프로그램에서 작동하게 설계되었으므로 Python 인터프리터로 실행하지 마십시오.
 * Requests, packaging, psutil, ruamel.yaml, gettext 모듈이 필요합니다.
