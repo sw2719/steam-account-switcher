@@ -6,8 +6,8 @@ changelog_en: |
 
   • Added Express Mode.
 
-    In Express Mode, when you change account, you don't have to click 'Restart Steam'
-    but instead, Steam will be automatically restarted.
+  In Express Mode, when you change account, you don't have to click 'Restart Steam'
+  but instead, Steam will be automatically restarted.
 
   • Added initial setup window for new users.
 
@@ -76,8 +76,8 @@ changelog_ko: |
 
   • 익스프레스 모드 추가
 
-    익스프레스 모드에서는, 계정 변경후 Steam 재시작 버튼을 누르는 대신,
-    자동으로 Steam이 재시작 됩니다.
+  익스프레스 모드에서는, 계정 변경후 Steam 재시작 버튼을 누르는 대신,
+  자동으로 Steam이 재시작 됩니다.
 
   • 처음 실행시 최초 설정 창이 표시됩니다.
 
