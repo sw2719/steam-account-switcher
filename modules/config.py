@@ -21,19 +21,27 @@ def reset_config():
         default = {'locale': locale_write,
                    'try_soft_shutdown': 'true',
                    'show_profilename': 'bar',
-                   'autoexit': 'true'}
+                   'autoexit': 'true',
+                   'mode': 'normal'}
         yaml.dump(default, cfg)
 
 
 if not os.path.isfile('config.yml'):
     reset_config()
+    first_run = True
+else:
+    first_run = False
 
 try:
     with open('config.yml', 'r') as cfg:
         test_dict = yaml.load(cfg)
 
-    config_invalid = set(['locale', 'try_soft_shutdown', 'show_profilename', 'autoexit']) != set(test_dict)  # NOQA
-    value_valid = set(test_dict.values()).issubset(['true', 'false', 'ko_KR', 'en_US', 'bar', 'bracket'])  # NOQA
+    config_invalid = set(['locale', 'try_soft_shutdown',
+                          'show_profilename', 'autoexit',
+                          'mode']) != set(test_dict)
+    value_valid = set(test_dict.values()).issubset(['true', 'false', 'ko_KR',
+                                                    'en_US', 'bar', 'bracket',
+                                                    'normal', 'express'])
 
     no_locale = 'locale' not in set(test_dict)
     if not no_locale:
@@ -43,13 +51,13 @@ try:
 
     no_try_soft = 'try_soft_shutdown' not in set(test_dict)
     if not no_try_soft:
-        try_soft_invalid = test_dict['try_soft_shutdown'] not in ('true', 'false')  # NOQA
+        try_soft_invalid = test_dict['try_soft_shutdown'] not in ('true', 'false')
     else:
         try_soft_invalid = True
 
     no_show_profilename = 'show_profilename' not in set(test_dict)
     if not no_show_profilename:
-        show_profilename_invalid = test_dict['show_profilename'] not in ('bar', 'bracket', 'false')  # NOQA
+        show_profilename_invalid = test_dict['show_profilename'] not in ('bar', 'bracket', 'false')
     else:
         show_profilename_invalid = True
 
@@ -59,7 +67,13 @@ try:
     else:
         autoexit_invalid = True
 
-    if config_invalid or not value_valid or show_profilename_invalid:  # NOQA
+    no_mode = 'mode' not in set(test_dict)
+    if not no_mode:
+        mode_invalid = test_dict['mode'] not in ('normal', 'express')
+    else:
+        mode_invalid = True
+
+    if config_invalid or not value_valid or show_profilename_invalid:
         cfg_write = {}
         if no_locale or locale_invalid:
             locale_write = 'en_US'
@@ -81,6 +95,10 @@ try:
             cfg_write['autoexit'] = 'true'
         else:
             cfg_write['autoexit'] = test_dict['autoexit']
+        if no_mode or mode_invalid:
+            cfg_write['mode'] = 'normal'
+        else:
+            cfg_write['mode'] = test_dict['mode']
         with open('config.yml', 'w') as cfg:
             yaml.dump(cfg_write, cfg)
         del cfg_write

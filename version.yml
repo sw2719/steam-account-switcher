@@ -1,17 +1,26 @@
-version: 1.9.1
+version: 1.10
 changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------1.10----------
+
+  • Added Express Mode.
+
+    In Express Mode, when you change account, you don't have to click 'Restart Steam'
+    but instead, Steam will be automatically restarted.
+
+  • Added initial setup window for new users.
 
   ----------1.9.1----------
 
   • Now displays a pop up message if there are no accounts left to import.
 
   • Now notifies user if custom name entry is empty.
- 
+
   • UI text improvements.
- 
+
   • UI improvements.
- 
+
   ----------1.9----------
 
   • Added right-click context menu to main window buttons.
@@ -63,16 +72,25 @@ changelog_en: |
 changelog_ko: |
   알림: 다운로드가 너무 오래 걸릴 경우, GitHub에서 수동으로 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
 
+  ----------1.10----------
+
+  • 익스프레스 모드 추가
+
+    익스프레스 모드에서는, 계정 변경후 Steam 재시작 버튼을 누르는 대신,
+    자동으로 Steam이 재시작 됩니다.
+
+  • 처음 실행시 최초 설정 창이 표시됩니다.
+
   ----------1.9.1----------
 
   • 이제 계정 가져오기 메뉴를 불러올때 가져올 계정이 없다면 팝업 창을 대신 표시
 
   • 사용자 지정 이름 입력 칸이 비었을 경우 팝업 창 표시
- 
+
   • UI 텍스트 개선
- 
+
   • UI 개선
- 
+
   ----------1.9----------
 
   • 메인 윈도우 버튼에 우클릭 메뉴 추가
