@@ -385,12 +385,12 @@ class MainApp(tk.Tk):
         except Exception:
             pass
         setkey('AutoLoginUser', username, winreg.REG_SZ)
+        self.button_dict[username].config(style='sel.TButton', state='disabled')  # NOQA
+        self.user_var.set(fetch_reg('username'))
 
         if get_config('mode') == 'express':
             exit_after_restart()
         else:
-            self.button_dict[username].config(style='sel.TButton', state='disabled')  # NOQA
-            self.user_var.set(fetch_reg('username'))
             self.focus()
 
     def remove_user(self, target):
