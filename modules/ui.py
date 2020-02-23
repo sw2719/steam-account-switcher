@@ -387,11 +387,10 @@ class MainApp(tk.Tk):
         setkey('AutoLoginUser', username, winreg.REG_SZ)
         self.button_dict[username].config(style='sel.TButton', state='disabled')  # NOQA
         self.user_var.set(fetch_reg('username'))
+        self.focus()
 
         if get_config('mode') == 'express':
             exit_after_restart()
-        else:
-            self.focus()
 
     def remove_user(self, target):
         '''Write accounts to accounts.txt except the
