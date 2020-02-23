@@ -276,13 +276,6 @@ class MainApp(tk.Tk):
                                _("See GitHub README's How to use for more details. (Menu->About->GitHub Page)"))
 
         ok_button = ttk.Button(welcomewindow, text=_('OK'), command=ok)
-        ok_button['state'] = 'disabled'
-
-        def enable_ok():
-            ok_button['state'] = 'normal'
-
-        radio_normal['command'] = enable_ok
-        radio_express['command'] = enable_ok
         ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
 
         welcomewindow.grab_set()
