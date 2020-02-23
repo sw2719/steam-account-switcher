@@ -6,6 +6,7 @@ import gettext
 import winreg
 import subprocess
 import os
+import sys
 from time import sleep
 from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict
@@ -36,6 +37,70 @@ def window_height():
     height_int = 160 + 31 * to_multiply
     height = str(height_int)
     return height
+
+
+def exit_after_restart():
+    '''Restart Steam client and exit application.
+    If autoexit is disabled, app won't exit.'''
+    try:
+        if get_config('try_soft_shutdown') == 'false':
+            raise FileNotFoundError
+        if check_running('Steam.exe'):
+            print('Soft shutdown mode')
+            r_path = fetch_reg('steamexe')
+            r_path_items = r_path.split('/')
+            path_items = []
+            for item in r_path_items:
+                if ' ' in item:
+                    path_items.append(f'"{item}"')
+                else:
+                    path_items.append(item)
+            steam_exe = "\\".join(path_items)
+            print('Steam.exe path:', steam_exe)
+            subprocess.run(f"start {steam_exe} -shutdown", shell=True,
+                           creationflags=0x08000000, check=True)
+            print('Shutdown command sent. Waiting for Steam...')
+            sleep(2)
+            for x in range(8):
+                if check_running('Steam.exe'):
+                    print('Steam is still running after %s seconds' % str(2+x*2))
+                    if x < 8:
+                        sleep(1.5)
+                        continue
+                    else:
+                        msg = msgbox.askyesno(_('Alert'),
+                                              _('After soft shutdown attempt,') + '\n' +
+                                              _('Steam appears to be still running.') + '\n\n' +
+                                              _('Do you want to force shutdown Steam?'))
+                        if msg:
+                            raise FileNotFoundError
+                        else:
+                            error_msg(_('Error'),
+                                      _('Could not soft shutdown Steam.') + '\n' +
+                                      _('App will now exit.'))
+                else:
+                    break
+        else:
+            print('Steam is not running.')
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        print('Hard shutdown mode')
+        try:
+            subprocess.run("TASKKILL /F /IM Steam.exe",
+                           creationflags=0x08000000, check=True)
+            print('TASKKILL command sent.')
+            sleep(1)
+        except subprocess.CalledProcessError:
+            pass
+    try:
+        print('Launching Steam...')
+        subprocess.run("start steam://open/main",
+                       shell=True, check=True)
+    except subprocess.CalledProcessError:
+        msgbox.showerror(_('Error'),
+                         _('Could not start Steam automatically') + '\n' +
+                         _('for unknown reason.'))
+    if get_config('autoexit') == 'true':
+        sys.exit(0)
 
 
 class MainApp(tk.Tk):
@@ -108,69 +173,6 @@ class MainApp(tk.Tk):
         else:
             self.restartbutton_text.set(_('Restart Steam'))
 
-        def exit_after_restart():
-            '''Restart Steam client and exit application.
-            If autoexit is disabled, app won't exit.'''
-            try:
-                if get_config('try_soft_shutdown') == 'false':
-                    raise FileNotFoundError
-                if check_running('Steam.exe'):
-                    print('Soft shutdown mode')
-                    r_path = fetch_reg('steamexe')
-                    r_path_items = r_path.split('/')
-                    path_items = []
-                    for item in r_path_items:
-                        if ' ' in item:
-                            path_items.append(f'"{item}"')
-                        else:
-                            path_items.append(item)
-                    steam_exe = "\\".join(path_items)
-                    print('Steam.exe path:', steam_exe)
-                    subprocess.run(f"start {steam_exe} -shutdown", shell=True,
-                                   creationflags=0x08000000, check=True)
-                    print('Shutdown command sent. Waiting for Steam...')
-                    sleep(2)
-                    for x in range(8):
-                        if check_running('Steam.exe'):
-                            print('Steam is still running after %s seconds' % str(2+x*2))
-                            if x < 8:
-                                sleep(1.5)
-                                continue
-                            else:
-                                msg = msgbox.askyesno(_('Alert'),
-                                                      _('After soft shutdown attempt,') + '\n' +
-                                                      _('Steam appears to be still running.') + '\n\n' +
-                                                      _('Do you want to force shutdown Steam?'))
-                                if msg:
-                                    raise FileNotFoundError
-                                else:
-                                    error_msg(_('Error'),
-                                              _('Could not soft shutdown Steam.') + '\n' +
-                                              _('App will now exit.'))
-                        else:
-                            break
-                else:
-                    print('Steam is not running.')
-            except (FileNotFoundError, subprocess.CalledProcessError):
-                print('Hard shutdown mode')
-                try:
-                    subprocess.run("TASKKILL /F /IM Steam.exe",
-                                   creationflags=0x08000000, check=True)
-                    print('TASKKILL command sent.')
-                    sleep(1)
-                except subprocess.CalledProcessError:
-                    pass
-            try:
-                print('Launching Steam...')
-                subprocess.run("start steam://open/main",
-                               shell=True, check=True)
-            except subprocess.CalledProcessError:
-                msgbox.showerror(_('Error'),
-                                 _('Could not start Steam automatically') + '\n' +
-                                 _('for unknown reason.'))
-            if get_config('autoexit') == 'true':
-                self.quit()
-
         button_restart = ttk.Button(bottomframe,
                                     width=20,
                                     textvariable=self.restartbutton_text,
@@ -207,6 +209,83 @@ class MainApp(tk.Tk):
 
         autolabel = tk.Label(upper_frame, textvariable=self.auto_var)
         autolabel.pack(side='top')
+
+    def welcomewindow(self):
+        def close_function():
+            os.remove('config.yml')
+            sys.exit(0)
+
+        welcomewindow = tk.Toplevel(self)
+        welcomewindow.title('Welcome')
+        welcomewindow.geometry("270x230+650+320")
+        welcomewindow.resizable(False, False)
+        welcomewindow.protocol("WM_DELETE_WINDOW", close_function)
+
+        upper_frame = tk.Frame(welcomewindow)
+        upper_frame.pack(side='top')
+
+        tk.Label(upper_frame, text=_('Select mode you desire.')).pack(pady=(4, 3))
+
+        radio_frame1 = tk.Frame(welcomewindow)
+        radio_frame1.pack(side='top', padx=20, pady=(4, 10), fill='x')
+        radio_var = tk.IntVar()
+
+        radio_normal = ttk.Radiobutton(radio_frame1,
+                                       text=_('Normal Mode'),
+                                       variable=radio_var,
+                                       value=0)
+        radio_normal.pack(side='top', anchor='w', pady=2)
+
+        tk.Label(radio_frame1, justify='left',
+                 text=_("In normal mode, you restart Steam\nby clicking 'Restart Steam' button.")).pack(side='left', pady=5)
+
+        radio_frame2 = tk.Frame(welcomewindow)
+        radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
+
+        radio_express = ttk.Radiobutton(radio_frame2,
+                                        text=_('Express Mode'),
+                                        variable=radio_var,
+                                        value=1)
+        radio_express.pack(side='top', anchor='w', pady=2)
+
+        tk.Label(radio_frame2, justify='left',
+                 text=_('In express mode, you change account\nand Steam will be automatically restarted.')).pack(side='left', pady=5)
+
+        def ok():
+            if radio_var.get() == 0:
+                mode = 'normal'
+            elif radio_var.get() == 1:
+                mode = 'express'
+
+            dump_dict = {'locale': get_config('locale'),
+                         'try_soft_shutdown': get_config('try_soft_shutdown'),
+                         'show_profilename': get_config('show_profilename'),
+                         'autoexit': get_config('autoexit'),
+                         'mode': mode}
+
+            with open('config.yml', 'w') as cfg:
+                yaml.dump(dump_dict, cfg)
+
+            welcomewindow.destroy()
+
+            if mode == 'normal':
+                msgbox.showinfo('', _('You have chosen Normal Mode. You can always change this in settings.'))
+            elif mode == 'express':
+                msgbox.showinfo('', _('You have chosen Express Mode. You can always change this in settings.'))
+            msgbox.showwarning(_('Important'), _('You need to setup autologin for EVERY account you add.') + '\n' +
+                               _("See GitHub README's How to use for more details. (Menu->About->GitHub Page)"))
+
+        ok_button = ttk.Button(welcomewindow, text=_('OK'), command=ok)
+        ok_button['state'] = 'disabled'
+
+        def enable_ok():
+            ok_button['state'] = 'normal'
+
+        radio_normal['command'] = enable_ok
+        radio_express['command'] = enable_ok
+        ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
+
+        welcomewindow.grab_set()
 
     def configwindow(self, username, profilename):
         configwindow = tk.Toplevel(self)
@@ -313,9 +392,13 @@ class MainApp(tk.Tk):
         except Exception:
             pass
         setkey('AutoLoginUser', username, winreg.REG_SZ)
-        self.button_dict[username].config(style='sel.TButton', state='disabled')  # NOQA
-        self.user_var.set(fetch_reg('username'))
-        self.focus()
+
+        if get_config('mode') == 'express':
+            exit_after_restart()
+        else:
+            self.button_dict[username].config(style='sel.TButton', state='disabled')  # NOQA
+            self.user_var.set(fetch_reg('username'))
+            self.focus()
 
     def remove_user(self, target):
         '''Write accounts to accounts.txt except the
@@ -336,6 +419,7 @@ class MainApp(tk.Tk):
 
     def draw_button(self):
         menu_dict = {}
+        self.no_user_frame = tk.Frame(self)
 
         if self.accounts:
             for username in self.accounts:
@@ -404,6 +488,10 @@ class MainApp(tk.Tk):
                                                             command=lambda name=username: self.button_func(name))
                 self.button_dict[username].bind("<Button-3>", lambda event, username=username: popup(username, event))
                 self.button_dict[username].pack(fill='x', padx=(0, 1))
+        else:
+            self.no_user_frame.pack()
+            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'))
+            no_user.pack(pady=(6, 0))
 
     def refresh(self):
         '''Refresh main window widgets'''
@@ -411,6 +499,7 @@ class MainApp(tk.Tk):
         self.acc_dict = acc_getdict()
         self.geometry("300x%s" %
                       window_height())
+        self.no_user_frame.destroy()
         self.button_frame.destroy()
         self.button_frame = tk.Frame(self)
         self.button_frame.pack(side='top', fill='x')
@@ -806,7 +895,7 @@ class MainApp(tk.Tk):
 
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry("260x240+650+300")
+        settingswindow.geometry("260x300+650+300")
         settingswindow.resizable(False, False)
         bottomframe_set = tk.Frame(settingswindow)
         bottomframe_set.pack(side='bottom')
@@ -814,9 +903,9 @@ class MainApp(tk.Tk):
         settingswindow.focus()
 
         localeframe = tk.Frame(settingswindow)
-        localeframe.pack(side='top', padx=10, pady=14)
+        localeframe.pack(side='top', pady=14, fill='x')
         locale_label = tk.Label(localeframe, text=_('Language'))
-        locale_label.pack(side='left', padx=3)
+        locale_label.pack(side='left', padx=(20, 17))
         locale_cb = ttk.Combobox(localeframe,
                                  state="readonly",
                                  values=['English',  # 0
@@ -826,7 +915,7 @@ class MainApp(tk.Tk):
         elif config_dict['locale'] == 'ko_KR':
             locale_cb.current(1)
 
-        locale_cb.pack(side='left', padx=3)
+        locale_cb.pack(side='left')
 
         restart_frame = tk.Frame(settingswindow)
         restart_frame.pack(side='top')
@@ -836,7 +925,7 @@ class MainApp(tk.Tk):
         restart_label.pack()
 
         showpnames_frame = tk.Frame(settingswindow)
-        showpnames_frame.pack(fill='x', side='top', padx=10, pady=19)
+        showpnames_frame.pack(fill='x', side='top', padx=10, pady=(19, 15))
 
         showpnames_label = tk.Label(showpnames_frame, text=_('Display profile names'))
         showpnames_label.pack(side='left', padx=3)
@@ -853,6 +942,27 @@ class MainApp(tk.Tk):
             showpnames_cb.current(2)
 
         showpnames_cb.pack(side='left', padx=3)
+
+        radio_frame1 = tk.Frame(settingswindow)
+        radio_frame1.pack(side='top', padx=12, pady=(0, 3), fill='x')
+        radio_frame2 = tk.Frame(settingswindow)
+        radio_frame2.pack(side='top', padx=12, pady=(3, 12), fill='x')
+        radio_var = tk.IntVar()
+
+        if get_config('mode') == 'express':
+            radio_var.set(1)
+
+        radio_normal = ttk.Radiobutton(radio_frame1,
+                                       text=_('Normal Mode (Manually restart Steam)'),
+                                       variable=radio_var,
+                                       value=0)
+        radio_normal.pack(side='left', pady=2)
+
+        radio_express = ttk.Radiobutton(radio_frame2,
+                                        text=_('Express Mode (Auto-restart Steam)'),
+                                        variable=radio_var,
+                                        value=1)
+        radio_express.pack(side='left', pady=2)
 
         softshutdwn_frame = tk.Frame(settingswindow)
         softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=1)
@@ -893,6 +1003,11 @@ class MainApp(tk.Tk):
                 locale = ('en_US', 'ko_KR')
                 show_pname = ('bar', 'bracket', 'false')
 
+                if radio_var.get() == 1:
+                    mode = 'express'
+                elif radio_var.get() == 0:
+                    mode = 'normal'
+
                 if 'selected' in soft_chkb.state():
                     soft_shutdown = 'true'
                 else:
@@ -906,7 +1021,8 @@ class MainApp(tk.Tk):
                 config_dict = {'locale': locale[locale_cb.current()],
                                'try_soft_shutdown': soft_shutdown,
                                'show_profilename': show_pname[showpnames_cb.current()],
-                               'autoexit': autoexit}
+                               'autoexit': autoexit,
+                               'mode': mode}
 
                 yaml = YAML()
                 yaml.dump(config_dict, cfg)
