@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-23 21:04+0900\n"
-"PO-Revision-Date: 2020-02-23 21:04+0900\n"
+"PO-Revision-Date: 2020-02-23 21:23+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -191,7 +191,9 @@ msgstr "추가하는 계정마다 자동 로그인을 설정해 주어야 합니
 
 #: modules/ui.py:276
 msgid "See GitHub README's How to use for more details. (Menu->About->GitHub Page)"
-msgstr "자세한 내용은 GitHub README의 사용 방법을 참조하세요. (메뉴->정보->GitHub 페이지)"
+msgstr ""
+"자세한 내용은 GitHub README의 사용 방법을 참조하세요.\n"
+"(메뉴->정보->GitHub 페이지)"
 
 #: modules/ui.py:278 modules/ui.py:305 modules/ui.py:869 modules/ui.py:1037
 msgid "OK"
