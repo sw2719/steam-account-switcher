@@ -8,7 +8,7 @@ from modules.reg import fetch_reg
 
 print('Init start')
 
-__VERSION__ = '1.10'
+__VERSION__ = '2.0'
 BRANCH = 'master'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml' % BRANCH)
 
