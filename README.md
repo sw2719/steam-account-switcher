@@ -42,3 +42,4 @@ This app has no affiliation with Steam and Valve.
 * Requests, packaging, psutil, ruamel.yaml and gettext module are required.
 * threading module needs to be installed if you are using Python version under 3.7.
 * Source code is written in English. Translation to other languages is done with gettext.
+* My code is probably a low-quality, poorly written mess. But hey, at least it works right?
