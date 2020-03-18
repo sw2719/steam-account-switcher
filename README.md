@@ -18,7 +18,7 @@ This app has no affiliation with Steam and Valve.
 
 * No more entering ID, password and Steam Guard code every time you login to another account.
 
-* Auto restarting Steam with single click.
+* Restarting Steam with single click.
 
 * Unlike some other programs, your passwords are **NOT** required. Only uses your usernames.
 
