@@ -222,9 +222,14 @@ class MainApp(tk.Tk):
             os.remove('config.yml')
             sys.exit(0)
 
+        if LOCALE == 'fr_FR':
+            width = '300'
+        else:
+            width = '270'
+
         welcomewindow = tk.Toplevel(self)
         welcomewindow.title('Welcome')
-        welcomewindow.geometry("270x230+650+320")
+        welcomewindow.geometry("%sx230+650+320" % width)
         welcomewindow.resizable(False, False)
         welcomewindow.protocol("WM_DELETE_WINDOW", close_function)
 
