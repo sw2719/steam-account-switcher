@@ -13,10 +13,13 @@ yaml = YAML()
 def reset_config():
     '''Initialize config.txt with default values'''
     with open('config.yml', 'w') as cfg:
-        locale_write = 'en_US'
 
         if system_locale == 'ko_KR':
             locale_write = 'ko_KR'
+        elif system_locale == 'fr_FR':
+            locale_write = 'fr_FR'
+        else:
+            locale_write = 'en_US'
 
         default = {'locale': locale_write,
                    'try_soft_shutdown': 'true',
@@ -40,12 +43,12 @@ try:
                           'show_profilename', 'autoexit',
                           'mode']) != set(test_dict)
     value_valid = set(test_dict.values()).issubset(['true', 'false', 'ko_KR',
-                                                    'en_US', 'bar', 'bracket',
-                                                    'normal', 'express'])
+                                                    'en_US', 'fr_FR', 'bar',
+                                                    'bracket', 'normal', 'express'])
 
     no_locale = 'locale' not in set(test_dict)
     if not no_locale:
-        locale_invalid = test_dict['locale'] not in ('ko_KR', 'en_US')
+        locale_invalid = test_dict['locale'] not in ('ko_KR', 'en_US', 'fr_FR')
     else:
         locale_invalid = True
 

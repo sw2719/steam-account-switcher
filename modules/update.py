@@ -52,7 +52,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
         cancel_button = ttk.Button(button_frame, text=_('Cancel'),
                                    command=updatewindow.destroy)
-        update_button = ttk.Button(button_frame, text=_('Update now'))
+        update_button = ttk.Button(button_frame, width=28, text=_('Update now'))
 
         text_frame = tk.Frame(updatewindow)
         text_frame.pack(side=tk.TOP, pady=3)
@@ -90,6 +90,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
             cancel_button.destroy()
             update_button.destroy()
+
+            def cancel():
+                if msgbox.askokcancel(_('Cancel'), _('Are you sure to cancel?')):
+                    os._exit(0)
+
+            updatewindow.protocol("WM_DELETE_WINDOW", cancel)
 
             dl_p = tk.IntVar()
             dl_p.set(0)
@@ -146,7 +152,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                             current_in_MB = int(current_in_MB)
 
                         size_delta = current_size - last_size
-                        bps = size_delta * 2
+                        bps = size_delta * 5
 
                         if bps >= 1048576:
                             dl_spd = bps / 1048576
@@ -175,9 +181,9 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                             break
                         else:
                             last_size = current_size
-                            sleep(0.5)
+                            sleep(0.2)
                     except OSError:
-                        sleep(0.5)
+                        sleep(0.2)
                         continue
 
             def update_pbar():
@@ -218,14 +224,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                               _('Update manually by extracting update.zip file.'))
 
         update_button['command'] = start_update
-        cancel_button.pack(side='left', padx=(110, 0))
-        update_button.pack(side='right', padx=(0, 110))
-
-        def cancel():
-            if msgbox.askokcancel(_('Cancel'), _('Are you sure to cancel?')):
-                sys.exit(0)
-
-        updatewindow.protocol("WM_DELETE_WINDOW", cancel)
+        if LOCALE == 'fr_FR':
+            padx_int = 80
+        else:
+            padx_int = 110
+        cancel_button.pack(side='left', padx=(padx_int, 0))
+        update_button.pack(side='right', padx=(0, padx_int))
 
     queue = q.Queue()
 

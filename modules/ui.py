@@ -156,13 +156,20 @@ class MainApp(tk.Tk):
             setkey('RememberPassword', value, winreg.REG_DWORD)
             self.refresh()
 
+        if LOCALE == 'fr_FR':
+            toggle_width = 13
+            quit_width = 7
+        else:
+            toggle_width = 15
+            quit_width = 5
+
         button_toggle = ttk.Button(bottomframe,
-                                   width=15,
+                                   width=toggle_width,
                                    text=_('Toggle auto-login'),
                                    command=toggleAutologin)
 
         button_quit = ttk.Button(bottomframe,
-                                 width=5,
+                                 width=quit_width,
                                  text=_('Exit'),
                                  command=self.quit)
 
@@ -514,9 +521,15 @@ class MainApp(tk.Tk):
 
     def about(self, version):
         '''Open about window'''
+
+        if LOCALE == 'fr_FR':
+            width = '480'
+        else:
+            width = '360'
+
         aboutwindow = tk.Toplevel(self)
         aboutwindow.title(_('About'))
-        aboutwindow.geometry("360x180+650+300")
+        aboutwindow.geometry("%sx180+650+300" % width)
         aboutwindow.resizable(False, False)
         about_disclaimer = tk.Label(aboutwindow,
                                     text=_('Warning: The developer of this application is not responsible for')
@@ -885,27 +898,40 @@ class MainApp(tk.Tk):
         '''Open settings window'''
         config_dict = get_config('all')
 
+        if LOCALE == 'fr_FR':
+            width = '330'
+        else:
+            width = '260'
+
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry("260x300+650+300")
+        settingswindow.geometry("%sx300+650+300" % width)  # 260 is original
         settingswindow.resizable(False, False)
         bottomframe_set = tk.Frame(settingswindow)
         bottomframe_set.pack(side='bottom')
         settingswindow.grab_set()
         settingswindow.focus()
 
+        if LOCALE == 'fr_FR':
+            padx_int = 45
+        else:
+            padx_int = 20
+
         localeframe = tk.Frame(settingswindow)
         localeframe.pack(side='top', pady=14, fill='x')
         locale_label = tk.Label(localeframe, text=_('Language'))
-        locale_label.pack(side='left', padx=(20, 17))
+        locale_label.pack(side='left', padx=(padx_int, 17))
         locale_cb = ttk.Combobox(localeframe,
                                  state="readonly",
                                  values=['English',  # 0
-                                         '한국어 (Korean)'])  # 1
+                                         '한국어 (Korean)',  # 1
+                                         'Français (French)'])  # 2
         if config_dict['locale'] == 'en_US':
             locale_cb.current(0)
         elif config_dict['locale'] == 'ko_KR':
             locale_cb.current(1)
+        elif config_dict['locale'] == 'fr_FR':
+            locale_cb.current(2)
 
         locale_cb.pack(side='left')
 
@@ -975,7 +1001,7 @@ class MainApp(tk.Tk):
         autoexit_frame.pack(fill='x', side='top', padx=12, pady=18)
 
         autoexit_chkb = ttk.Checkbutton(autoexit_frame,
-                                        text=_('Exit app upon Steam restart'))
+                                        text=_('Exit app after Steam is restarted'))
 
         autoexit_chkb.state(['!alternate'])
         if config_dict['autoexit'] == 'true':
@@ -992,7 +1018,7 @@ class MainApp(tk.Tk):
             nonlocal config_dict
             '''Write new config values to config.txt'''
             with open('config.yml', 'w') as cfg:
-                locale = ('en_US', 'ko_KR')
+                locale = ('en_US', 'ko_KR', 'fr_FR')
                 show_pname = ('bar', 'bracket', 'false')
 
                 if radio_var.get() == 1:
