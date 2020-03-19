@@ -129,6 +129,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                     if msgbox.askyesno(_('Mirror available'), _('Do you want to download from Mirror?') + '\n' +
                                         _("Note that using mirror doesn't always guarantee faster speeds.")):
                         dl_url = f'http://sw2719.synology.me/mirror/{mirror_yml["mirror_filename"]}'
+                    else:
+                        raise req.RequestException
                 else:
                     raise req.RequestException
             except req.RequestException:
