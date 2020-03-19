@@ -118,17 +118,33 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             master.update()
 
             download_q = q.Queue()
-            dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
+
+            try:
+                mirror = req.get('http://sw2719.synology.me/mirror.yml', timeout=4)
+                mirror.raise_for_status()
+
+                mirror_yml = yaml.load(mirror.text)
+
+                if mirror_yml['mirror_available'] == 'true' and mirror_yml['mirror_version'] == sv_version:
+                    if msgbox.askyesno(_('Mirror available'), _('Do you want to download from Mirror?') + '\n' +
+                                        _("Note that using mirror doesn't always guarantee faster speeds.")):
+                        dl_url = f'http://sw2719.synology.me/mirror/{mirror_yml["mirror_filename"]}'
+                else:
+                    raise req.RequestException
+            except req.RequestException:
+                dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
 
             def download(URL):
                 nonlocal download_q
+
                 try:
                     r = req.get(URL, stream=True)
+                    r.raise_for_status()
                     total_size = int(r.headers.get('content-length'))
                     total_in_MB = round(total_size / 1048576, 1)
                 except req.RequestException:
                     msgbox.showerror(_('Error'),
-                                     _('Error occured while downloading update.'))
+                                    _('Error occured while downloading update.'))
 
                 if round(total_in_MB, 1).is_integer():
                     total_in_MB = int(total_in_MB)
@@ -152,7 +168,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                             current_in_MB = int(current_in_MB)
 
                         size_delta = current_size - last_size
-                        bps = size_delta * 5
+                        bps = size_delta * 2
 
                         if bps >= 1048576:
                             dl_spd = bps / 1048576
@@ -181,9 +197,9 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                             break
                         else:
                             last_size = current_size
-                            sleep(0.2)
+                            sleep(0.5)
                     except OSError:
-                        sleep(0.2)
+                        sleep(0.5)
                         continue
 
             def update_pbar():
