@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-23 02:27+0900\n"
-"PO-Revision-Date: 2020-03-23 02:32+0900\n"
+"POT-Creation-Date: 2020-03-23 03:23+0900\n"
+"PO-Revision-Date: 2020-03-23 03:23+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -52,7 +52,7 @@ msgstr "Steam이 설치되어 있는지 확인하세요."
 msgid "Failed to change registry value."
 msgstr "레지스트리 값을 바꿀 수 없습니다."
 
-#: modules/ui.py:75 modules/ui.py:775
+#: modules/ui.py:75 modules/ui.py:799
 msgid "Alert"
 msgstr "경고"
 
@@ -88,7 +88,7 @@ msgstr "계정 순서 편집"
 msgid "Refresh autologin"
 msgstr "자동로그인 새로고침"
 
-#: modules/ui.py:140 modules/ui.py:1039
+#: modules/ui.py:140 modules/ui.py:1063
 msgid "Settings"
 msgstr "설정"
 
@@ -182,12 +182,12 @@ msgstr ""
 "자세한 내용은 GitHub README의 사용 방법을 참조하세요.\n"
 "(메뉴->정보->GitHub 페이지)"
 
-#: modules/ui.py:297 modules/ui.py:317 modules/ui.py:1006 modules/ui.py:1187
+#: modules/ui.py:297 modules/ui.py:317 modules/ui.py:1030 modules/ui.py:1211
 msgid "OK"
 msgstr "확인"
 
-#: modules/ui.py:321 modules/ui.py:682 modules/ui.py:760 modules/ui.py:870
-#: modules/ui.py:1009 modules/ui.py:1192 modules/update.py:53
+#: modules/ui.py:321 modules/ui.py:706 modules/ui.py:784 modules/ui.py:894
+#: modules/ui.py:1033 modules/ui.py:1216 modules/update.py:53
 #: modules/update.py:95
 msgid "Cancel"
 msgstr "취소"
@@ -205,7 +205,7 @@ msgstr "가능한 경우 프로필 이름 사용"
 msgid "Use custom name"
 msgstr "사용자 지정 이름 사용"
 
-#: modules/ui.py:382 modules/ui.py:799 modules/update.py:274
+#: modules/ui.py:382 modules/ui.py:823 modules/update.py:274
 #: modules/update.py:277
 msgid "Info"
 msgstr "정보"
@@ -267,7 +267,7 @@ msgstr "계정 없음"
 msgid "There's no account added."
 msgstr "추가된 계정이 없습니다."
 
-#: modules/ui.py:581 modules/ui.py:686
+#: modules/ui.py:581 modules/ui.py:710
 msgid "Refresh"
 msgstr "새로고침"
 
@@ -275,132 +275,144 @@ msgstr "새로고침"
 msgid "Select accounts to refresh."
 msgstr "새로고침할 계정을 선택하세요."
 
-#: modules/ui.py:646
-msgid "Starting..."
+#: modules/ui.py:643
+msgid "Accounts with expired autologin token will show login prompt."
+msgstr "이미 만료된 자동로그인 계정인 경우 로그인 창이 표시됩니다."
+
+#: modules/ui.py:644
+msgid "Close the prompt or login to continue the process."
+msgstr "그럴 경우 로그인 창을 닫거나 로그인하면 됩니다."
+
+#: modules/ui.py:652
+msgid "Initializing..."
 msgstr "시작 중..."
 
-#: modules/ui.py:662
+#: modules/ui.py:663
+msgid "Do not touch Steam."
+msgstr "Steam을 건드리지 마세요."
+
+#: modules/ui.py:670
 msgid "Switching account..."
 msgstr "계정 변경 중..."
 
-#: modules/ui.py:668
+#: modules/ui.py:682
 msgid "Waiting for Steam..."
 msgstr "Steam을 기다리는 중..."
 
-#: modules/ui.py:677
-msgid "Do you want to start Steam with last account?"
-msgstr "마지막으로 설정된 계정으로 Steam에 로그인 하시겠습니까?"
+#: modules/ui.py:696
+msgid "Do you want to start Steam with previous autologin account?"
+msgstr "이전 자동로그인 계정으로 Steam을 실행하시겠습니까?"
 
-#: modules/ui.py:699 modules/ui.py:757
+#: modules/ui.py:723 modules/ui.py:781
 msgid "Add"
 msgstr "추가"
 
-#: modules/ui.py:710
+#: modules/ui.py:734
 msgid "Enter account(s) to add."
 msgstr "추가할 계정을 입력하세요."
 
-#: modules/ui.py:712
+#: modules/ui.py:736
 msgid "In case of adding multiple accounts,"
 msgstr "다수의 계정을 입력할 경우에는,"
 
-#: modules/ui.py:713
+#: modules/ui.py:737
 msgid "seperate each account with '/' (slash)."
 msgstr "'/'(슬래시)로 구분합니다."
 
-#: modules/ui.py:739
+#: modules/ui.py:763
 msgid "Duplicate Alert"
 msgstr "중복 경고"
 
-#: modules/ui.py:740
+#: modules/ui.py:764
 #, python-format
 msgid "Account %s already exists."
 msgstr "계정 %s은 이미 추가되어 있습니다."
 
-#: modules/ui.py:775
+#: modules/ui.py:799
 msgid "Could not load loginusers.vdf."
 msgstr "파일 loginusers.vdf를 불러오지 못했습니다."
 
-#: modules/ui.py:776
+#: modules/ui.py:800
 msgid "This may be because Steam directory defined"
 msgstr "레지스트리에 설정된 스팀 경로가 올바르지"
 
-#: modules/ui.py:777
+#: modules/ui.py:801
 msgid "in registry is invalid."
 msgstr "않을 수 있습니다."
 
-#: modules/ui.py:778
+#: modules/ui.py:802
 msgid "Do you want to select Steam directory manually?"
 msgstr "수동으로 스팀 경로를 설정하시겠습니까?"
 
-#: modules/ui.py:788
+#: modules/ui.py:812
 msgid "Warning"
 msgstr "경고"
 
-#: modules/ui.py:789
+#: modules/ui.py:813
 msgid "Steam directory is invalid."
 msgstr "스팀 경로가 올바르지 않습니다."
 
-#: modules/ui.py:790
+#: modules/ui.py:814
 msgid "Try again?"
 msgstr "다시 시도할까요?"
 
-#: modules/ui.py:799
+#: modules/ui.py:823
 msgid "There's no account left to add."
 msgstr "추가할 계정이 없습니다."
 
-#: modules/ui.py:803 modules/ui.py:874
+#: modules/ui.py:827 modules/ui.py:898
 msgid "Import"
 msgstr "가져오기"
 
-#: modules/ui.py:812
+#: modules/ui.py:836
 msgid "Select accounts to import."
 msgstr "가져올 계정들을 선택하세요."
 
-#: modules/ui.py:813
+#: modules/ui.py:837
 msgid "Added accounts don't show up."
 msgstr "이미 추가된 계정은 나타나지 않습니다."
 
-#: modules/ui.py:1013 modules/ui.py:1197
+#: modules/ui.py:1037 modules/ui.py:1221
 msgid "Apply"
 msgstr "적용"
 
-#: modules/ui.py:1054
+#: modules/ui.py:1078
 msgid "Language"
 msgstr "언어"
 
-#: modules/ui.py:1074
+#: modules/ui.py:1098
 msgid "Restart app to apply language settings."
 msgstr "언어 설정을 적용하려면 앱을 재시작하세요."
 
-#: modules/ui.py:1080
+#: modules/ui.py:1104
 msgid "Display profile names"
 msgstr "프로필 이름 표시"
 
-#: modules/ui.py:1084
+#: modules/ui.py:1108
 msgid "Use bar - |"
 msgstr "막대 사용 - |"
 
-#: modules/ui.py:1085
+#: modules/ui.py:1109
 msgid "Use brackets - ( )"
 msgstr "괄호 사용 - ( )"
 
-#: modules/ui.py:1086
+#: modules/ui.py:1110
 msgid "Off"
 msgstr "끄기"
 
-#: modules/ui.py:1106
+#: modules/ui.py:1130
 msgid "Normal Mode (Manually restart Steam)"
 msgstr "일반 모드 (수동 Steam 재시작)"
 
-#: modules/ui.py:1112
+#: modules/ui.py:1136
 msgid "Express Mode (Auto-restart Steam)"
 msgstr "익스프레스 모드 (자동 Steam 재시작)"
 
-#: modules/ui.py:1121
+#: modules/ui.py:1145
 msgid "Try to soft shutdown Steam client"
 msgstr "스팀 클라이언트 안전 종료"
 
-#: modules/ui.py:1136
+#: modules/ui.py:1160
 msgid "Exit app after Steam is restarted"
 msgstr "스팀 재시작시 앱 종료"
 
@@ -471,9 +483,6 @@ msgstr "업데이트 확인 실패"
 
 #~ msgid "Do you want to force shutdown Steam?"
 #~ msgstr "Steam을 강제 종료 하시겠습니까?"
-
-#~ msgid "Could not soft shutdown Steam."
-#~ msgstr "Steam을 안전 종료할 수 없었습니다."
 
 #~ msgid "App will now exit."
 #~ msgstr "앱이 종료됩니다."

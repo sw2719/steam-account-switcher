@@ -158,7 +158,7 @@ class MainApp(tk.Tk):
             '''Toggle autologin registry value between 0 and 1'''
             if fetch_reg('RememberPassword') == 1:
                 value = 0
-            elif fetch_reg('RememberPasswordn') == 0:
+            elif fetch_reg('RememberPassword') == 0:
                 value = 1
             setkey('RememberPassword', value, winreg.REG_DWORD)
             self.refresh()
@@ -640,8 +640,12 @@ class MainApp(tk.Tk):
 
             self.withdraw()
 
+            msgbox.showinfo('', _('Accounts with expired autologin token will show login prompt.') + '\n\n' +
+                            _('Close the prompt or login to continue the process.'))
+
             popup = tk.Toplevel()
-            popup.geometry("190x130+650+300")
+            popup.title('')
+            popup.geometry("180x100+650+300")
             popup.resizable(False, False)
 
             popup_var = tk.StringVar()
@@ -653,7 +657,7 @@ class MainApp(tk.Tk):
             popup_label = tk.Label(popup, textvariable=popup_var)
             popup_user = tk.Label(popup, textvariable=popup_uservar)
 
-            popup_label.pack(pady=6)
+            popup_label.pack(pady=17)
             popup_user.pack()
 
             self.update()
@@ -665,13 +669,24 @@ class MainApp(tk.Tk):
                     self.update()
 
                     setkey('AutoLoginUser', username, winreg.REG_SZ)
-                    exit_after_restart(refresh_override=True)
+                    if username == accounts[-1] and username == current_user:
+                        exit_after_restart(refresh_override=True, silent=False)
+                    else:
+                        exit_after_restart(refresh_override=True)
+
+                    while fetch_reg('pid') == 0:
+                        sleep(1)
 
                     popup_var.set(_('Waiting for Steam...'))
                     self.update()
-                    while fetch_reg('ActiveUser') != 0:
+
+                    while fetch_reg('ActiveUser') == 0:
                         sleep(1)
-                    sleep(5)
+                        if fetch_reg('pid') == 0:
+                            break
+
+                    sleep(3)
+
             popup.destroy()
             self.update()
 
@@ -679,8 +694,11 @@ class MainApp(tk.Tk):
                 if msgbox.askyesno('', _('Do you want to start Steam with previous autologin account?')):
                     setkey('AutoLoginUser', current_user, winreg.REG_SZ)
                     exit_after_restart(refresh_override=True, silent=False)
+            else:
+                subprocess.run("start steam://open/main", shell=True)
 
             self.deiconify()
+            self.refresh()
 
         refresh_cancel = ttk.Button(bottomframe_rm,
                                     text=_('Cancel'),
