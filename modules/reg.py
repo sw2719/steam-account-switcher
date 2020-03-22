@@ -1,6 +1,6 @@
 import winreg
 import gettext
-from modules.misc import error_msg
+from modules.errormsg import error_msg
 from modules.config import get_config
 
 LOCALE = get_config('locale')
@@ -16,21 +16,16 @@ HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 
 
 def fetch_reg(key):
-    '''Return given key's value from steam registry path.
-    :param key: 'username', 'autologin', 'steamexe', 'steampath'
-    '''
-    if key == 'username':
-        key_name = 'AutoLoginUser'
-    elif key == 'autologin':
-        key_name = 'RememberPassword'
-    elif key == 'steamexe':
-        key_name = 'SteamExe'
-    elif key == 'steampath':
-        key_name = 'SteamPath'
+    '''Return given key's value from steam registry path.'''
+
+    if key in ('pid', 'ActiveUser'):
+        reg_path = r"Software\Valve\Steam\ActiveProcess"
+    else:
+        reg_path = r"Software\Valve\Steam"
 
     try:
-        reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam")
-        value_buffer = winreg.QueryValueEx(reg_key, key_name)
+        reg_key = winreg.OpenKey(HKCU, reg_path)
+        value_buffer = winreg.QueryValueEx(reg_key, key)
         value = value_buffer[0]
         winreg.CloseKey(reg_key)
     except OSError:

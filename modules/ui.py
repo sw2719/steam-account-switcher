@@ -13,7 +13,7 @@ from modules.account import acc_getlist, acc_getdict
 from modules.loginusers import loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config
-from modules.misc import error_msg, check_running
+from modules.misc import steam_running
 from modules.update import start_checkupdate
 
 yaml = YAML()
@@ -39,15 +39,15 @@ def window_height():
     return height
 
 
-def exit_after_restart():
+def exit_after_restart(refresh_override=False, autoexit=get_config('autoexit'), silent=True):
     '''Restart Steam client and exit application.
     If autoexit is disabled, app won't exit.'''
     try:
         if get_config('try_soft_shutdown') == 'false':
             raise FileNotFoundError
-        if check_running('Steam.exe'):
+        if steam_running():
             print('Soft shutdown mode')
-            r_path = fetch_reg('steamexe')
+            r_path = fetch_reg('SteamExe')
             r_path_items = r_path.split('/')
             path_items = []
             for item in r_path_items:
@@ -61,23 +61,26 @@ def exit_after_restart():
                            creationflags=0x08000000, check=True)
             print('Shutdown command sent. Waiting for Steam...')
             sleep(2)
-            for x in range(8):
-                if check_running('Steam.exe'):
-                    print('Steam is still running after %s seconds' % str(2+x*2))
-                    if x < 8:
-                        sleep(1.5)
+
+            counter = 0
+
+            while True:
+                if steam_running():
+                    print('Steam is still running after %s seconds' % str(counter))
+                    if counter <= 20:
+                        counter += 1
+                        sleep(1)
                         continue
                     else:
                         msg = msgbox.askyesno(_('Alert'),
                                               _('After soft shutdown attempt,') + '\n' +
                                               _('Steam appears to be still running.') + '\n\n' +
-                                              _('Do you want to force shutdown Steam?'))
+                                              _('Click yes to wait more for 20 seconds or no to force-exit Steam.'))
                         if msg:
-                            raise FileNotFoundError
+                            counter = 0
+                            continue
                         else:
-                            error_msg(_('Error'),
-                                      _('Could not soft shutdown Steam.') + '\n' +
-                                      _('App will now exit.'))
+                            raise FileNotFoundError
                 else:
                     break
         else:
@@ -91,15 +94,17 @@ def exit_after_restart():
             sleep(1)
         except subprocess.CalledProcessError:
             pass
-    try:
+
+    if refresh_override and silent:
+        print('Launching Steam silently...')
+        subprocess.run("start steam://open",
+                       shell=True, check=True)
+    else:
         print('Launching Steam...')
         subprocess.run("start steam://open/main",
                        shell=True, check=True)
-    except subprocess.CalledProcessError:
-        msgbox.showerror(_('Error'),
-                         _('Could not start Steam automatically') + '\n' +
-                         _('for unknown reason.'))
-    if get_config('autoexit') == 'true':
+
+    if autoexit == 'true' and not refresh_override:
         sys.exit(0)
 
 
@@ -129,6 +134,8 @@ class MainApp(tk.Tk):
                          command=self.addwindow)
         menu.add_command(label=_("Edit account order"),
                          command=self.orderwindow)
+        menu.add_command(label=_("Refresh autologin"),
+                         command=self.refreshwindow)
         menu.add_separator()
         menu.add_command(label=_("Settings"),
                          command=self.settingswindow)
@@ -149,20 +156,27 @@ class MainApp(tk.Tk):
 
         def toggleAutologin():
             '''Toggle autologin registry value between 0 and 1'''
-            if fetch_reg('autologin') == 1:
+            if fetch_reg('RememberPassword') == 1:
                 value = 0
-            elif fetch_reg('autologin') == 0:
+            elif fetch_reg('RememberPassword') == 0:
                 value = 1
             setkey('RememberPassword', value, winreg.REG_DWORD)
             self.refresh()
 
+        if LOCALE == 'fr_FR':
+            toggle_width = 13
+            quit_width = 7
+        else:
+            toggle_width = 15
+            quit_width = 5
+
         button_toggle = ttk.Button(bottomframe,
-                                   width=15,
+                                   width=toggle_width,
                                    text=_('Toggle auto-login'),
                                    command=toggleAutologin)
 
         button_quit = ttk.Button(bottomframe,
-                                 width=5,
+                                 width=quit_width,
                                  text=_('Exit'),
                                  command=self.quit)
 
@@ -195,14 +209,14 @@ class MainApp(tk.Tk):
         userlabel_1.pack(side='top')
 
         self.user_var = tk.StringVar()
-        self.user_var.set(fetch_reg('username'))
+        self.user_var.set(fetch_reg('AutoLoginUser'))
 
         userlabel_2 = tk.Label(upper_frame, textvariable=self.user_var)
         userlabel_2.pack(side='top', pady=2)
 
         self.auto_var = tk.StringVar()
 
-        if fetch_reg('autologin') == 1:
+        if fetch_reg('RememberPassword') == 1:
             self.auto_var.set(_('Auto-login Enabled'))
         else:
             self.auto_var.set(_('Auto-login Disabled'))
@@ -215,9 +229,14 @@ class MainApp(tk.Tk):
             os.remove('config.yml')
             sys.exit(0)
 
+        if LOCALE == 'fr_FR':
+            width = '300'
+        else:
+            width = '270'
+
         welcomewindow = tk.Toplevel(self)
         welcomewindow.title('Welcome')
-        welcomewindow.geometry("270x230+650+320")
+        welcomewindow.geometry("%sx230+650+320" % width)
         welcomewindow.resizable(False, False)
         welcomewindow.protocol("WM_DELETE_WINDOW", close_function)
 
@@ -379,14 +398,14 @@ class MainApp(tk.Tk):
         configwindow.wait_window()
 
     def button_func(self, username):
-        current_user = fetch_reg('username')
+        current_user = fetch_reg('AutoLoginUser')
         try:
             self.button_dict[current_user].config(style='TButton', state='normal')  # NOQA
         except Exception:
             pass
         setkey('AutoLoginUser', username, winreg.REG_SZ)
         self.button_dict[username].config(style='sel.TButton', state='disabled')  # NOQA
-        self.user_var.set(fetch_reg('username'))
+        self.user_var.set(fetch_reg('AutoLoginUser'))
         self.focus()
 
         if get_config('mode') == 'express':
@@ -466,7 +485,7 @@ class MainApp(tk.Tk):
                 def popup(username, event):
                     menu_dict[username].tk_popup(event.x_root + 86, event.y_root + 13, 0)
 
-                if username == fetch_reg('username'):
+                if username == fetch_reg('AutoLoginUser'):
                     self.button_dict[username] = ttk.Button(self.frame_dict[username],
                                                             style='sel.TButton',
                                                             text=username + profilename,
@@ -496,9 +515,9 @@ class MainApp(tk.Tk):
         self.button_frame = tk.Frame(self)
         self.button_frame.pack(side='top', fill='x')
 
-        self.user_var.set(fetch_reg('username'))
+        self.user_var.set(fetch_reg('AutoLoginUser'))
 
-        if fetch_reg('autologin') == 1:
+        if fetch_reg('RememberPassword') == 1:
             self.auto_var.set(_('Auto-login Enabled'))
         else:
             self.auto_var.set(_('Auto-login Disabled'))
@@ -514,9 +533,15 @@ class MainApp(tk.Tk):
 
     def about(self, version):
         '''Open about window'''
+
+        if LOCALE == 'fr_FR':
+            width = '480'
+        else:
+            width = '360'
+
         aboutwindow = tk.Toplevel(self)
         aboutwindow.title(_('About'))
-        aboutwindow.geometry("360x180+650+300")
+        aboutwindow.geometry("%sx180+650+300" % width)
         aboutwindow.resizable(False, False)
         about_disclaimer = tk.Label(aboutwindow,
                                     text=_('Warning: The developer of this application is not responsible for')
@@ -544,6 +569,148 @@ class MainApp(tk.Tk):
 
         button_exit.pack(side='left', padx=2)
         button_github.pack(side='right', padx=2)
+
+    def refreshwindow(self):
+        '''Open remove accounts window'''
+        accounts = acc_getlist()
+        if not accounts:
+            msgbox.showinfo(_('No Accounts'),
+                            _("There's no account added."))
+            return
+        refreshwindow = tk.Toplevel(self)
+        refreshwindow.title(_("Refresh"))
+        refreshwindow.geometry("230x320+650+300")
+        refreshwindow.resizable(False, False)
+        bottomframe_rm = tk.Frame(refreshwindow)
+        bottomframe_rm.pack(side='bottom')
+        refreshwindow.grab_set()
+        refreshwindow.focus()
+        removelabel = tk.Label(refreshwindow, text=_('Select accounts to refresh.'))
+        removelabel.pack(side='top',
+                         padx=5,
+                         pady=5)
+
+        def close():
+            refreshwindow.destroy()
+
+        def onFrameConfigure(canvas):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+        canvas = tk.Canvas(refreshwindow, borderwidth=0, highlightthickness=0)
+        check_frame = tk.Frame(canvas)
+        scroll_bar = ttk.Scrollbar(refreshwindow,
+                                   orient="vertical",
+                                   command=canvas.yview)
+
+        canvas.configure(yscrollcommand=scroll_bar.set)
+
+        scroll_bar.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True)
+        canvas.create_window((4, 4), window=check_frame, anchor="nw")
+
+        def _on_mousewheel(event):
+            '''Scroll window on mousewheel input'''
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+        check_frame.bind("<Configure>", lambda event,
+                         canvas=canvas: onFrameConfigure(canvas))
+        canvas.bind("<MouseWheel>", _on_mousewheel)
+
+        check_dict = {}
+
+        for v in accounts:
+            tk_var = tk.IntVar()
+            checkbutton = ttk.Checkbutton(check_frame,
+                                          text=v,
+                                          variable=tk_var)
+            checkbutton.bind("<MouseWheel>", _on_mousewheel)
+            checkbutton.pack(side='top', padx=2, anchor='w')
+            check_dict[v] = tk_var
+
+        def refreshuser():
+            refreshwindow.destroy()
+            to_refresh = []
+            current_user = fetch_reg('AutoLoginUser')
+
+            for v in accounts:
+                if check_dict.get(v).get() == 1:
+                    to_refresh.append(v)
+                else:
+                    continue
+
+            self.withdraw()
+
+            msgbox.showinfo('', _('Accounts with expired autologin token will show login prompt.') + '\n\n' +
+                            _('Close the prompt or login to continue the process.'))
+
+            popup = tk.Toplevel()
+            popup.title('')
+            popup.geometry("180x100+650+300")
+            popup.resizable(False, False)
+
+            popup_var = tk.StringVar()
+            popup_var.set(_('Initializing...'))
+
+            popup_uservar = tk.StringVar()
+            popup_uservar.set('---------')
+
+            popup_label = tk.Label(popup, textvariable=popup_var)
+            popup_user = tk.Label(popup, textvariable=popup_uservar)
+
+            popup_label.pack(pady=17)
+            popup_user.pack()
+
+            self.update()
+
+            for username in accounts:
+                if username in to_refresh:
+                    popup_uservar.set(username)
+                    popup_var.set(_('Switching account...'))
+                    self.update()
+
+                    setkey('AutoLoginUser', username, winreg.REG_SZ)
+                    if username == accounts[-1] and username == current_user:
+                        exit_after_restart(refresh_override=True, silent=False)
+                    else:
+                        exit_after_restart(refresh_override=True)
+
+                    while fetch_reg('pid') == 0:
+                        sleep(1)
+
+                    popup_var.set(_('Waiting for Steam...'))
+                    self.update()
+
+                    while fetch_reg('ActiveUser') == 0:
+                        sleep(1)
+                        if fetch_reg('pid') == 0:
+                            break
+
+                    sleep(3)
+
+            popup.destroy()
+            self.update()
+
+            if current_user != fetch_reg('AutoLoginUser'):
+                if msgbox.askyesno('', _('Do you want to start Steam with previous autologin account?')):
+                    setkey('AutoLoginUser', current_user, winreg.REG_SZ)
+                    exit_after_restart(refresh_override=True, silent=False)
+            else:
+                subprocess.run("start steam://open/main", shell=True)
+
+            self.deiconify()
+            self.refresh()
+
+        refresh_cancel = ttk.Button(bottomframe_rm,
+                                    text=_('Cancel'),
+                                    command=close,
+                                    width=9)
+        refresh_ok = ttk.Button(bottomframe_rm,
+                                text=_('Refresh'),
+                                command=refreshuser,
+                                width=9)
+
+        refresh_cancel.pack(side='left', padx=5, pady=3)
+        refresh_ok.pack(side='left', padx=5, pady=3)
 
     def addwindow(self):
         '''Open add accounts window'''
@@ -885,27 +1052,40 @@ class MainApp(tk.Tk):
         '''Open settings window'''
         config_dict = get_config('all')
 
+        if LOCALE == 'fr_FR':
+            width = '330'
+        else:
+            width = '260'
+
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry("260x300+650+300")
+        settingswindow.geometry("%sx300+650+300" % width)  # 260 is original
         settingswindow.resizable(False, False)
         bottomframe_set = tk.Frame(settingswindow)
         bottomframe_set.pack(side='bottom')
         settingswindow.grab_set()
         settingswindow.focus()
 
+        if LOCALE == 'fr_FR':
+            padx_int = 45
+        else:
+            padx_int = 20
+
         localeframe = tk.Frame(settingswindow)
         localeframe.pack(side='top', pady=14, fill='x')
         locale_label = tk.Label(localeframe, text=_('Language'))
-        locale_label.pack(side='left', padx=(20, 17))
+        locale_label.pack(side='left', padx=(padx_int, 17))
         locale_cb = ttk.Combobox(localeframe,
                                  state="readonly",
                                  values=['English',  # 0
-                                         '한국어 (Korean)'])  # 1
+                                         '한국어 (Korean)',  # 1
+                                         'Français (French)'])  # 2
         if config_dict['locale'] == 'en_US':
             locale_cb.current(0)
         elif config_dict['locale'] == 'ko_KR':
             locale_cb.current(1)
+        elif config_dict['locale'] == 'fr_FR':
+            locale_cb.current(2)
 
         locale_cb.pack(side='left')
 
@@ -975,7 +1155,7 @@ class MainApp(tk.Tk):
         autoexit_frame.pack(fill='x', side='top', padx=12, pady=18)
 
         autoexit_chkb = ttk.Checkbutton(autoexit_frame,
-                                        text=_('Exit app upon Steam restart'))
+                                        text=_('Exit app after Steam is restarted'))
 
         autoexit_chkb.state(['!alternate'])
         if config_dict['autoexit'] == 'true':
@@ -992,7 +1172,7 @@ class MainApp(tk.Tk):
             nonlocal config_dict
             '''Write new config values to config.txt'''
             with open('config.yml', 'w') as cfg:
-                locale = ('en_US', 'ko_KR')
+                locale = ('en_US', 'ko_KR', 'fr_FR')
                 show_pname = ('bar', 'bracket', 'false')
 
                 if radio_var.get() == 1:

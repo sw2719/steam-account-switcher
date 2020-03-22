@@ -14,7 +14,7 @@ from time import sleep
 from packaging import version
 from ruamel.yaml import YAML
 from modules.config import get_config
-from modules.misc import error_msg
+from modules.errormsg import error_msg
 
 yaml = YAML()
 
@@ -52,7 +52,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
         cancel_button = ttk.Button(button_frame, text=_('Cancel'),
                                    command=updatewindow.destroy)
-        update_button = ttk.Button(button_frame, text=_('Update now'))
+        update_button = ttk.Button(button_frame, width=28, text=_('Update now'))
 
         text_frame = tk.Frame(updatewindow)
         text_frame.pack(side=tk.TOP, pady=3)
@@ -91,6 +91,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             cancel_button.destroy()
             update_button.destroy()
 
+            def cancel():
+                if msgbox.askokcancel(_('Cancel'), _('Are you sure to cancel?')):
+                    os._exit(0)
+
+            updatewindow.protocol("WM_DELETE_WINDOW", cancel)
+
             dl_p = tk.IntVar()
             dl_p.set(0)
             dl_pbar = ttk.Progressbar(button_frame,
@@ -112,12 +118,31 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             master.update()
 
             download_q = q.Queue()
-            dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
+
+            try:
+                mirror = req.get('http://sw2719.synology.me/mirror.yml', timeout=4)
+                mirror.raise_for_status()
+
+                mirror_yml = yaml.load(mirror.text)
+
+                if mirror_yml['mirror_available'] == 'true' and mirror_yml['mirror_version'] == sv_version:
+                    if msgbox.askyesno(_('Mirror available'), _('Do you want to download from Mirror?') + '\n' +
+                                       _("Using mirror doesn't always guarantee faster speeds.") + '\n' +
+                                       _('(Note that mirror is located in South Korea.)')):
+                        dl_url = f'http://sw2719.synology.me/mirror/{mirror_yml["mirror_filename"]}'
+                    else:
+                        raise req.RequestException
+                else:
+                    raise req.RequestException
+            except req.RequestException:
+                dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
 
             def download(URL):
                 nonlocal download_q
+
                 try:
                     r = req.get(URL, stream=True)
+                    r.raise_for_status()
                     total_size = int(r.headers.get('content-length'))
                     total_in_MB = round(total_size / 1048576, 1)
                 except req.RequestException:
@@ -218,14 +243,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                               _('Update manually by extracting update.zip file.'))
 
         update_button['command'] = start_update
-        cancel_button.pack(side='left', padx=(110, 0))
-        update_button.pack(side='right', padx=(0, 110))
-
-        def cancel():
-            if msgbox.askokcancel(_('Cancel'), _('Are you sure to cancel?')):
-                sys.exit(0)
-
-        updatewindow.protocol("WM_DELETE_WINDOW", cancel)
+        if LOCALE == 'fr_FR':
+            padx_int = 80
+        else:
+            padx_int = 110
+        cancel_button.pack(side='left', padx=(padx_int, 0))
+        update_button.pack(side='right', padx=(0, padx_int))
 
     queue = q.Queue()
 
