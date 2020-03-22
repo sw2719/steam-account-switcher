@@ -1,16 +1,8 @@
-import tkinter as tk
-from tkinter import messagebox as msgbox
-import sys
 import psutil
+import winreg
+from modules.reg import fetch_reg
 
-
-def error_msg(title, content):
-    '''Show error message and exit'''
-    root = tk.Tk()
-    root.withdraw()
-    msgbox.showerror(title, content)
-    root.destroy()
-    sys.exit(1)
+HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 
 
 def check_running(process_name):
@@ -25,3 +17,11 @@ def check_running(process_name):
                 psutil.ZombieProcess):
             pass
     return False
+
+
+def steam_running():
+    """Check if Steam is running using registry key 'pid'"""
+    if fetch_reg('pid') == 0:
+        return False
+    else:
+        return True

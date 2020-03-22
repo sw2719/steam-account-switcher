@@ -14,7 +14,7 @@ from time import sleep
 from packaging import version
 from ruamel.yaml import YAML
 from modules.config import get_config
-from modules.misc import error_msg
+from modules.errormsg import error_msg
 
 yaml = YAML()
 
@@ -127,7 +127,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
                 if mirror_yml['mirror_available'] == 'true' and mirror_yml['mirror_version'] == sv_version:
                     if msgbox.askyesno(_('Mirror available'), _('Do you want to download from Mirror?') + '\n' +
-                                        _("Note that using mirror doesn't always guarantee faster speeds.")):
+                                       _("Using mirror doesn't always guarantee faster speeds.") + '\n' +
+                                       _('(Note that mirror is located in South Korea.)')):
                         dl_url = f'http://sw2719.synology.me/mirror/{mirror_yml["mirror_filename"]}'
                     else:
                         raise req.RequestException
@@ -146,7 +147,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                     total_in_MB = round(total_size / 1048576, 1)
                 except req.RequestException:
                     msgbox.showerror(_('Error'),
-                                    _('Error occured while downloading update.'))
+                                     _('Error occured while downloading update.'))
 
                 if round(total_in_MB, 1).is_integer():
                     total_in_MB = int(total_in_MB)

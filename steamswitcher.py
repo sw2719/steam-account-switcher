@@ -4,7 +4,6 @@ import shutil
 from modules.config import first_run
 from modules.update import start_checkupdate
 from modules.ui import MainApp
-from modules.reg import fetch_reg
 
 print('Init start')
 

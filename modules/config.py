@@ -3,7 +3,7 @@ import locale
 import gettext
 import sys
 from ruamel.yaml import YAML
-from modules.misc import error_msg
+from modules.errormsg import error_msg
 
 system_locale = locale.getdefaultlocale()[0]
 
