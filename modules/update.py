@@ -127,7 +127,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
                 if mirror_yml['mirror_available'] == 'true' and mirror_yml['mirror_version'] == sv_version:
                     if msgbox.askyesno(_('Mirror available'), _('Do you want to download from Mirror?') + '\n' +
-                                       _("Using mirror doesn't always guarantee faster speeds.") + '\n' +
+                                       _("If you live outside South East Asia, it is advised not to use it.") + '\n' +
                                        _('(Note that mirror is located in South Korea.)')):
                         dl_url = f'http://sw2719.synology.me/mirror/{mirror_yml["mirror_filename"]}'
                     else:
