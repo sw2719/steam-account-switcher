@@ -1068,13 +1068,15 @@ class MainApp(tk.Tk):
 
         if LOCALE == 'fr_FR':
             padx_int = 45
+        elif LOCALE == 'en_US':
+            padx_int = 13
         else:
             padx_int = 20
 
         localeframe = tk.Frame(settingswindow)
         localeframe.pack(side='top', pady=14, fill='x')
         locale_label = tk.Label(localeframe, text=_('Language'))
-        locale_label.pack(side='left', padx=(padx_int, 17))
+        locale_label.pack(side='left', padx=(padx_int, 13))
         locale_cb = ttk.Combobox(localeframe,
                                  state="readonly",
                                  values=['English',  # 0
