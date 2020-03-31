@@ -1161,7 +1161,7 @@ class MainApp(tk.Tk):
         settings_cancel.pack(side='left', padx=3, pady=3)
         settings_apply.pack(side='left', padx=3, pady=3)
 
-    def exit_after_restart(self, refresh_override=False, autoexit=get_config('autoexit'), silent=True):
+    def exit_after_restart(self, refresh_override=False, silent=True):
         '''Restart Steam client and exit application.
         If autoexit is disabled, app won't exit.'''
         label_var = tk.StringVar()
@@ -1191,9 +1191,7 @@ class MainApp(tk.Tk):
                 force_button['state'] = 'normal'
 
             cancel_button.pack(side='bottom', padx=3, pady=3, fill='x')
-
-            if autoexit == 'false':
-                force_button.pack(side='bottom', padx=3, fill='x')
+            force_button.pack(side='bottom', padx=3, fill='x')
 
             label_var = tk.StringVar()
             label_var.set(_('Waiting for Steam to exit...'))
@@ -1272,7 +1270,7 @@ class MainApp(tk.Tk):
                     subprocess.run("start steam://open/main",
                                    shell=True, check=True)
 
-                if autoexit == 'true' and not refresh_override:
+                if get_config('autoexit') == 'true' and not refresh_override:
                     sys.exit(0)
                 elif not refresh_override:
                     cleanup()
