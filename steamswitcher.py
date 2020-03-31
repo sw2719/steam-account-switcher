@@ -7,7 +7,7 @@ from modules.ui import MainApp
 
 print('Init start')
 
-__VERSION__ = '2.1'
+__VERSION__ = '2.1.1'
 BRANCH = 'master'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml' % BRANCH)
 
