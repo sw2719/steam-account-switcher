@@ -27,6 +27,7 @@ if getattr(sys, 'frozen', False):
 else:
     print('Running in a Python interpreter')
     BUNDLE = False
+
 root = MainApp(__VERSION__, URL, BUNDLE)
 root.draw_button()
 root.after(100, lambda: start_checkupdate(root, __VERSION__, URL, BUNDLE))
