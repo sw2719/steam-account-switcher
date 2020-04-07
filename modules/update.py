@@ -129,8 +129,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
                     if mirror_yml['mirror_available'] == 'true' and mirror_yml['mirror_version'] == sv_version:
                         if msgbox.askyesno(_('Mirror available'), _('Do you want to download from Mirror?') + '\n' +
-                                        _("If you live outside South East Asia, it is advised not to use it.") + '\n' +
-                                        _('(Note that mirror is located in South Korea.)')):
+                                           _("If you live outside South East Asia, it is advised not to use it.") + '\n' +
+                                           _('(Note that mirror is located in South Korea.)')):
                             dl_url = f'http://sw2719.synology.me/mirror/{mirror_yml["mirror_filename"]}'
                         else:
                             raise req.RequestException
@@ -267,10 +267,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             text = response.text
             version_data = yaml.load(text)
             sv_version_str = str(version_data['version'])
+
             if LOCALE == 'ko_KR':
                 changelog = version_data['changelog_ko']
             else:
                 changelog = version_data['changelog_en']
+
             try:
                 critical_msg = version_data['msg'][str(cl_ver_str)]
                 if critical_msg:
@@ -282,6 +284,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                                         critical_msg['en'])
             except (KeyError, TypeError):
                 pass
+
             mirror_url = version_data['mirror_url']
             print('Server version is', sv_version_str)
             print('Client version is', cl_ver_str)
