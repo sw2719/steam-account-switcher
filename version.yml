@@ -162,4 +162,5 @@ changelog_ko: |
   • 프로필 이름 표시 방법 변경
 
   • 설정에서 스팀 재시작후 앱이 종료되지 않도록 변경 가능
+mirror_url: http://sw2719.synology.me/mirror.yml
 msg:
