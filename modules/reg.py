@@ -50,3 +50,7 @@ def setkey(key_name, value, value_type):
         print("Changed %s's value to %s" % (key_name, str(value)))
     except OSError:
         error_msg(_('Registry Error'), _('Failed to change registry value.'))
+
+
+for key in ('AutoLoginUser', 'RememberPassword', 'SteamExe', 'SteamPath', 'pid', 'ActiveUser'):
+    print(f'{key}:', fetch_reg(key))
