@@ -39,7 +39,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     checking_label.pack()
     master.update()
 
-    def update(sv_version, changelog):
+    def update(sv_version, changelog, mirror_url):
         nonlocal debug
 
         updatewindow = tk.Toplevel(master)
@@ -70,11 +70,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
         updatewindow.grab_set()
 
-        def start_update():
+        def start_update(mirror_url):
             nonlocal button_frame
             nonlocal cancel_button
             nonlocal update_button
             nonlocal debug
+            nonlocal sv_version
 
             master.withdraw()
             try:
@@ -120,16 +121,19 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             download_q = q.Queue()
 
             try:
-                mirror = req.get('http://sw2719.synology.me/mirror.yml', timeout=4)
-                mirror.raise_for_status()
+                if mirror_url:
+                    mirror = req.get(mirror_url, timeout=4)
+                    mirror.raise_for_status()
 
-                mirror_yml = yaml.load(mirror.text)
+                    mirror_yml = yaml.load(mirror.text)
 
-                if mirror_yml['mirror_available'] == 'true' and mirror_yml['mirror_version'] == sv_version:
-                    if msgbox.askyesno(_('Mirror available'), _('Do you want to download from Mirror?') + '\n' +
-                                       _("If you live outside South East Asia, it is advised not to use it.") + '\n' +
-                                       _('(Note that mirror is located in South Korea.)')):
-                        dl_url = f'http://sw2719.synology.me/mirror/{mirror_yml["mirror_filename"]}'
+                    if mirror_yml['mirror_available'] == 'true' and mirror_yml['mirror_version'] == sv_version:
+                        if msgbox.askyesno(_('Mirror available'), _('Do you want to download from Mirror?') + '\n' +
+                                        _("If you live outside South East Asia, it is advised not to use it.") + '\n' +
+                                        _('(Note that mirror is located in South Korea.)')):
+                            dl_url = f'http://sw2719.synology.me/mirror/{mirror_yml["mirror_filename"]}'
+                        else:
+                            raise req.RequestException
                     else:
                         raise req.RequestException
                 else:
@@ -242,7 +246,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                     error_msg(_('Error'), _("Couldn't perform automatic update.") + '\n' +
                               _('Update manually by extracting update.zip file.'))
 
-        update_button['command'] = start_update
+        update_button['command'] = lambda: start_update(mirror_url)
         if LOCALE == 'fr_FR':
             padx_int = 80
         else:
@@ -278,6 +282,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                                         critical_msg['en'])
             except (KeyError, TypeError):
                 pass
+            mirror_url = version_data['mirror_url']
             print('Server version is', sv_version_str)
             print('Client version is', cl_ver_str)
 
@@ -296,17 +301,19 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             update = 'error'
             sv_version_str = '0'
             changelog = None
-        queue.put((update, sv_version_str, changelog))
+        queue.put((update, sv_version_str, changelog, mirror_url))
 
     update_code = None
     sv_version = None
     changelog = None
+    mirror_url = None
 
     def get_output():
         '''Get version info from checkupdate() and draw UI accordingly.'''
         nonlocal update_code
         nonlocal sv_version
         nonlocal changelog
+        nonlocal mirror_url
         nonlocal checking_label
         nonlocal debug
         try:
@@ -314,6 +321,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             update_code = v[0]
             sv_version = v[1]
             changelog = v[2]
+            mirror_url = v[3]
             checking_label.destroy()
 
             if debug:
@@ -325,7 +333,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 update_button = ttk.Button(update_frame,
                                             text='Open UI',
                                             width=10,
-                                            command=lambda: update(sv_version=sv_version, changelog=changelog))  # NOQA
+                                            command=lambda: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))  # NOQA
                 update_button.pack(side='right', padx=5)
                 return
 
@@ -339,7 +347,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 update_button = ttk.Button(update_frame,
                                             text=_('Update'),
                                             width=10,
-                                            command=lambda: update(sv_version=sv_version, changelog=changelog))  # NOQA
+                                            command=lambda: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))  # NOQA
 
                 update_button.pack(side='right', padx=5)
             elif update_code == 'latest':
