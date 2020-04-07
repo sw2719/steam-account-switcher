@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-31 18:29+0900\n"
-"PO-Revision-Date: 2020-03-31 18:36+0900\n"
+"POT-Creation-Date: 2020-04-08 00:10+0900\n"
+"PO-Revision-Date: 2020-04-08 00:10+0900\n"
 "Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -25,7 +25,7 @@ msgstr ""
 "X-Poedit-SearchPath-6: modules/ui.py\n"
 "X-Poedit-SearchPath-7: modules/update.py\n"
 
-#: modules/config.py:146 modules/update.py:149 modules/update.py:242
+#: modules/config.py:146 modules/update.py:153 modules/update.py:246
 msgid "Error"
 msgstr "Erruer"
 
@@ -176,7 +176,7 @@ msgstr "OK"
 
 #: modules/ui.py:254 modules/ui.py:639 modules/ui.py:717 modules/ui.py:827
 #: modules/ui.py:966 modules/ui.py:1151 modules/ui.py:1182 modules/update.py:53
-#: modules/update.py:95
+#: modules/update.py:96
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -193,8 +193,8 @@ msgstr "Utiliser le nom du profil si disponible"
 msgid "Use custom name"
 msgstr "Utiliser un nom personnalisé"
 
-#: modules/ui.py:315 modules/ui.py:756 modules/update.py:274
-#: modules/update.py:277
+#: modules/ui.py:315 modules/ui.py:756 modules/update.py:280
+#: modules/update.py:283
 msgid "Info"
 msgstr "Info"
 
@@ -414,11 +414,11 @@ msgstr "Quitter l'app au redémarrage de Steam"
 msgid "Force quit Steam"
 msgstr "Forcer à quitter Steam"
 
-#: modules/ui.py:1199
+#: modules/ui.py:1197
 msgid "Waiting for Steam to exit..."
 msgstr "Attendre que Steam quitte..."
 
-#: modules/ui.py:1263
+#: modules/ui.py:1261
 msgid "Launching Steam..."
 msgstr "Démarrage de Steam..."
 
@@ -426,7 +426,7 @@ msgstr "Démarrage de Steam..."
 msgid "Checking for updates..."
 msgstr "Vérification des mises à jour ..."
 
-#: modules/update.py:46 modules/update.py:340
+#: modules/update.py:46 modules/update.py:351
 msgid "Update"
 msgstr "Mise à jour"
 
@@ -439,53 +439,53 @@ msgstr "Mettez à jour maintenant"
 msgid "New version %s is available."
 msgstr "La nouvelle version %s est disponible."
 
-#: modules/update.py:95
+#: modules/update.py:96
 msgid "Are you sure to cancel?"
 msgstr "Voulez-vous vraiment annuler ?"
 
-#: modules/update.py:129
+#: modules/update.py:131
 msgid "Mirror available"
 msgstr "Serveur miroir disponible"
 
-#: modules/update.py:129
+#: modules/update.py:131
 msgid "Do you want to download from Mirror?"
 msgstr "Voulez-vous télécharger à partir du serveur miroir?"
 
-#: modules/update.py:130
+#: modules/update.py:132
 msgid "If you live outside South East Asia, it is advised not to use it."
 msgstr ""
 "Si vous vivez en dehors de l'Asie du Sud-Est, il est conseillé de ne pas "
 "l'utiliser."
 
-#: modules/update.py:131
+#: modules/update.py:133
 msgid "(Note that mirror is located in South Korea.)"
 msgstr "(Notez que le miroir est situé en Corée du Sud.)"
 
-#: modules/update.py:150
+#: modules/update.py:154
 msgid "Error occured while downloading update."
 msgstr "Une erreur s'est produite lors du téléchargement de la mise à jour."
 
-#: modules/update.py:242
+#: modules/update.py:246
 msgid "Couldn't perform automatic update."
 msgstr "Impossible d'effectuer une mise à jour automatique."
 
-#: modules/update.py:243
+#: modules/update.py:247
 msgid "Update manually by extracting update.zip file."
 msgstr "Mettez à jour manuellement en extrayant le fichier update.zip."
 
-#: modules/update.py:336
+#: modules/update.py:347
 msgid "New update available"
 msgstr "Nouvelle mise à jour disponible"
 
-#: modules/update.py:349
+#: modules/update.py:360
 msgid "Using the latest version"
 msgstr "Utilisation de la dernière version"
 
-#: modules/update.py:355
+#: modules/update.py:366
 msgid "Development version"
 msgstr "Version de développement"
 
-#: modules/update.py:361
+#: modules/update.py:372
 msgid "Failed to check for updates"
 msgstr "Impossible de modifier la valeur de registre."
 
