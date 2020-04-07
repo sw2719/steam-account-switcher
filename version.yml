@@ -2,6 +2,18 @@ version: 2.1
 changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
 
+  ----------2.2----------
+
+  • Improved Steam restart UI.
+
+  • Now you can force-quit Steam even in soft-shutdown mode.
+
+  • Now you can cancel Steam restart process.
+
+  • Reverted to old process checker.
+
+  • Fixed various UI issues.
+
   ----------2.1----------
 
   • Added autologin refreshing.
@@ -83,6 +95,18 @@ changelog_en: |
 
 changelog_ko: |
   알림: 다운로드가 너무 오래 걸릴 경우, GitHub에서 수동으로 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------2.2----------
+
+  • 스팀 재시작 UI를 개선하였습니다.
+
+  • 이제 스팀 안전 종료 모드에서도 강제 종료가 가능합니다.
+
+  • 이제 스팀 재시작 과정을 취소할 수 있습니다.
+
+  • 이전의 프로세스 체커로 롤백했습니다.
+
+  • 여러가지 UI 문제를 수정했습니다.
 
   ----------2.1----------
 
