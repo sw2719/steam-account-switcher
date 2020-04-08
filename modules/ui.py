@@ -15,6 +15,7 @@ from modules.loginusers import loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config
 from modules.misc import check_running
+from modules.misc import steam_running
 from modules.misc import StoppableThread
 from modules.update import start_checkupdate
 
@@ -39,6 +40,72 @@ def window_height():
     height_int = 160 + 31 * to_multiply
     height = str(height_int)
     return height
+
+
+def legacy_restart(silent=True):
+    '''Legacy steam restart function for refresh function.
+    New restarter with threading doesn't seem to work well with refreshing.'''
+    try:
+        if get_config('try_soft_shutdown') == 'false':
+            raise FileNotFoundError
+        if steam_running():
+            print('Soft shutdown mode')
+            r_path = fetch_reg('SteamExe')
+            r_path_items = r_path.split('/')
+            path_items = []
+            for item in r_path_items:
+                if ' ' in item:
+                    path_items.append(f'"{item}"')
+                else:
+                    path_items.append(item)
+            steam_exe = "\\".join(path_items)
+            print('Steam.exe path:', steam_exe)
+            subprocess.run(f"start {steam_exe} -shutdown", shell=True,
+                           creationflags=0x08000000, check=True)
+            print('Shutdown command sent. Waiting for Steam...')
+            sleep(2)
+
+            counter = 0
+
+            while True:
+                if steam_running():
+                    print('Steam is still running after %s seconds' % str(counter))
+                    if counter <= 10:
+                        counter += 1
+                        sleep(1)
+                        continue
+                    else:
+                        msg = msgbox.askyesno(_('Alert'),
+                                              _('After soft shutdown attempt,') + '\n' +
+                                              _('Steam appears to be still running.') + '\n\n' +
+                                              _('Click yes to wait more for 10 seconds or no to force-exit Steam.'))
+                        if msg:
+                            counter = 0
+                            continue
+                        else:
+                            raise FileNotFoundError
+                else:
+                    break
+        else:
+            print('Steam is not running.')
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        print('Hard shutdown mode')
+        try:
+            subprocess.run("TASKKILL /F /IM Steam.exe",
+                           creationflags=0x08000000, check=True)
+            print('TASKKILL command sent.')
+            sleep(1)
+        except subprocess.CalledProcessError:
+            pass
+
+    if silent:
+        print('Launching Steam silently...')
+        subprocess.run("start steam://open",
+                       shell=True, check=True)
+    else:
+        print('Launching Steam...')
+        subprocess.run("start steam://open/main",
+                       shell=True, check=True)
 
 
 class MainApp(tk.Tk):
@@ -597,6 +664,10 @@ class MainApp(tk.Tk):
 
             self.update()
 
+            if steam_running():
+                if not check_running('steam.exe'):
+                    setkey('pid', 0, winreg.REG_DWORD, path=r"Software\Valve\Steam\ActiveProcess")
+
             for username in accounts:
                 if username in to_refresh:
                     popup_uservar.set(username)
@@ -605,9 +676,9 @@ class MainApp(tk.Tk):
 
                     setkey('AutoLoginUser', username, winreg.REG_SZ)
                     if username == accounts[-1] and username == current_user:
-                        self.exit_after_restart(refresh_override=True, silent=False)
+                        legacy_restart(silent=False)
                     else:
-                        self.exit_after_restart(refresh_override=True)
+                        legacy_restart()
 
                     while fetch_reg('pid') == 0:
                         sleep(1)
@@ -615,12 +686,11 @@ class MainApp(tk.Tk):
                     popup_var.set(_('Waiting for Steam...'))
                     self.update()
 
-                    while fetch_reg('ActiveUser') == 0:
+                    while True:
                         sleep(1)
-                        if fetch_reg('pid') == 0:
+                        if fetch_reg('ActiveUser') != 0:
+                            sleep(4)
                             break
-
-                    sleep(3)
 
             popup.destroy()
             self.update()
@@ -628,7 +698,7 @@ class MainApp(tk.Tk):
             if current_user != fetch_reg('AutoLoginUser'):
                 if msgbox.askyesno('', _('Do you want to start Steam with previous autologin account?')):
                     setkey('AutoLoginUser', current_user, winreg.REG_SZ)
-                    self.exit_after_restart(refresh_override=True, silent=False)
+                    legacy_restart(silent=False)
             else:
                 subprocess.run("start steam://open/main", shell=True)
 
@@ -1228,11 +1298,11 @@ class MainApp(tk.Tk):
 
             def steam_checker():
                 nonlocal queue
+                sleep(1)
                 while True:
-                    sleep(1)
                     if t.stopped():
                         break
-                    if check_running('Steam.exe'):
+                    if check_running('steam.exe'):
                         sleep(1)
                         continue
                     else:
@@ -1246,7 +1316,8 @@ class MainApp(tk.Tk):
 
             t = StoppableThread(target=steam_checker)
             t.start()
-            cancel_button['command'] = cancel
+            if not refresh_override:
+                cancel_button['command'] = cancel
         else:
             queue.put(1)
 
@@ -1276,8 +1347,8 @@ class MainApp(tk.Tk):
                     cleanup()
             except q.Empty:
                 counter += 1
-                if counter == 5:
+                if counter == 5 and not refresh_override:
                     enable_button()
                 self.after(1000, launch_steam)
 
-        launch_steam()
+        self.after(1000, launch_steam)
