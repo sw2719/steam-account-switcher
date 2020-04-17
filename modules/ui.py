@@ -1074,9 +1074,9 @@ class MainApp(tk.Tk):
         if LOCALE == 'fr_FR':
             padx_int = 45
         elif LOCALE == 'en_US':
-            padx_int = 13
+            padx_int = 11
         else:
-            padx_int = 20
+            padx_int = 24
 
         localeframe = tk.Frame(settingswindow)
         localeframe.pack(side='top', pady=14, fill='x')
