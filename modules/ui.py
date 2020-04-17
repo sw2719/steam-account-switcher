@@ -18,6 +18,8 @@ from modules.misc import check_running
 from modules.misc import steam_running
 from modules.misc import StoppableThread
 from modules.update import start_checkupdate
+from modules.update import hide_update
+from modules.update import show_update
 
 yaml = YAML()
 
@@ -664,9 +666,8 @@ class MainApp(tk.Tk):
 
             self.update()
 
-            if steam_running():
-                if not check_running('steam.exe'):
-                    setkey('pid', 0, winreg.REG_DWORD, path=r"Software\Valve\Steam\ActiveProcess")
+            if steam_running() and not check_running('steam.exe'):
+                setkey('pid', 0, winreg.REG_DWORD, path=r"Software\Valve\Steam\ActiveProcess")
 
             for username in accounts:
                 if username in to_refresh:
@@ -1234,6 +1235,7 @@ class MainApp(tk.Tk):
     def exit_after_restart(self, refresh_override=False, silent=True):
         '''Restart Steam client and exit application.
         If autoexit is disabled, app won't exit.'''
+
         label_var = tk.StringVar()
 
         def forcequit():
@@ -1246,6 +1248,7 @@ class MainApp(tk.Tk):
             self.no_user_frame.destroy()
             self.button_frame.destroy()
             self.bottomframe.pack_forget()
+            hide_update()
             button_frame = tk.Frame(self)
             button_frame.pack(side='bottom', fill='x')
             cancel_button = ttk.Button(button_frame,
@@ -1273,6 +1276,7 @@ class MainApp(tk.Tk):
                 button_frame.destroy()
                 self.refresh(no_frame=True)
                 self.bottomframe.pack(side='bottom')
+                show_update()
             self.update()
 
         queue = q.Queue()
