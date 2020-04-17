@@ -26,9 +26,13 @@ t = gettext.translation('steamswitcher',
                         fallback=True)
 _ = t.gettext
 
+update_frame = None
+
 
 def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     '''Check if application has update'''
+    global update_frame
+
     update_frame = tk.Frame(master)
     update_frame.pack(side='bottom')
 
@@ -377,3 +381,13 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     t = threading.Thread(target=checkupdate)
     t.start()
     master.after(300, get_output)
+
+
+def hide_update():
+    global update_frame
+    update_frame.pack_forget()
+
+
+def show_update():
+    global update_frame
+    update_frame.pack(side='bottom')
