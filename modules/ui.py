@@ -7,13 +7,16 @@ import winreg
 import subprocess
 import os
 import sys
+import queue as q
 from time import sleep
 from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict
 from modules.loginusers import loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config
+from modules.misc import check_running
 from modules.misc import steam_running
+from modules.misc import StoppableThread
 from modules.update import start_checkupdate
 
 yaml = YAML()
@@ -39,9 +42,9 @@ def window_height():
     return height
 
 
-def exit_after_restart(refresh_override=False, autoexit=get_config('autoexit'), silent=True):
-    '''Restart Steam client and exit application.
-    If autoexit is disabled, app won't exit.'''
+def legacy_restart(silent=True):
+    '''Legacy steam restart function for refresh function.
+    New restarter with threading doesn't seem to work well with refreshing.'''
     try:
         if get_config('try_soft_shutdown') == 'false':
             raise FileNotFoundError
@@ -67,7 +70,7 @@ def exit_after_restart(refresh_override=False, autoexit=get_config('autoexit'), 
             while True:
                 if steam_running():
                     print('Steam is still running after %s seconds' % str(counter))
-                    if counter <= 20:
+                    if counter <= 10:
                         counter += 1
                         sleep(1)
                         continue
@@ -75,7 +78,7 @@ def exit_after_restart(refresh_override=False, autoexit=get_config('autoexit'), 
                         msg = msgbox.askyesno(_('Alert'),
                                               _('After soft shutdown attempt,') + '\n' +
                                               _('Steam appears to be still running.') + '\n\n' +
-                                              _('Click yes to wait more for 20 seconds or no to force-exit Steam.'))
+                                              _('Click yes to wait more for 10 seconds or no to force-exit Steam.'))
                         if msg:
                             counter = 0
                             continue
@@ -95,7 +98,7 @@ def exit_after_restart(refresh_override=False, autoexit=get_config('autoexit'), 
         except subprocess.CalledProcessError:
             pass
 
-    if refresh_override and silent:
+    if silent:
         print('Launching Steam silently...')
         subprocess.run("start steam://open",
                        shell=True, check=True)
@@ -103,9 +106,6 @@ def exit_after_restart(refresh_override=False, autoexit=get_config('autoexit'), 
         print('Launching Steam...')
         subprocess.run("start steam://open/main",
                        shell=True, check=True)
-
-    if autoexit == 'true' and not refresh_override:
-        sys.exit(0)
 
 
 class MainApp(tk.Tk):
@@ -151,8 +151,8 @@ class MainApp(tk.Tk):
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, bundle, debug=True)))
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
-        bottomframe = tk.Frame(self)
-        bottomframe.pack(side='bottom')
+        self.bottomframe = tk.Frame(self)
+        self.bottomframe.pack(side='bottom')
 
         def toggleAutologin():
             '''Toggle autologin registry value between 0 and 1'''
@@ -170,12 +170,12 @@ class MainApp(tk.Tk):
             toggle_width = 15
             quit_width = 5
 
-        button_toggle = ttk.Button(bottomframe,
+        button_toggle = ttk.Button(self.bottomframe,
                                    width=toggle_width,
                                    text=_('Toggle auto-login'),
                                    command=toggleAutologin)
 
-        button_quit = ttk.Button(bottomframe,
+        button_quit = ttk.Button(self.bottomframe,
                                  width=quit_width,
                                  text=_('Exit'),
                                  command=self.quit)
@@ -187,10 +187,10 @@ class MainApp(tk.Tk):
         else:
             self.restartbutton_text.set(_('Restart Steam'))
 
-        button_restart = ttk.Button(bottomframe,
+        button_restart = ttk.Button(self.bottomframe,
                                     width=20,
                                     textvariable=self.restartbutton_text,
-                                    command=exit_after_restart)
+                                    command=self.exit_after_restart)
 
         button_toggle.pack(side='left', padx=3, pady=3)
         button_quit.pack(side='left', pady=3)
@@ -409,7 +409,7 @@ class MainApp(tk.Tk):
         self.focus()
 
         if get_config('mode') == 'express':
-            exit_after_restart()
+            self.exit_after_restart()
 
     def remove_user(self, target):
         '''Write accounts to accounts.txt except the
@@ -504,14 +504,16 @@ class MainApp(tk.Tk):
             no_user = tk.Label(self.no_user_frame, text=_('No accounts added'))
             no_user.pack(pady=(6, 0))
 
-    def refresh(self):
+    def refresh(self, no_frame=False):
         '''Refresh main window widgets'''
         self.accounts = acc_getlist()
         self.acc_dict = acc_getdict()
         self.geometry("300x%s" %
                       window_height())
-        self.no_user_frame.destroy()
-        self.button_frame.destroy()
+        if not no_frame:
+            self.no_user_frame.destroy()
+            self.button_frame.destroy()
+
         self.button_frame = tk.Frame(self)
         self.button_frame.pack(side='top', fill='x')
 
@@ -662,6 +664,10 @@ class MainApp(tk.Tk):
 
             self.update()
 
+            if steam_running():
+                if not check_running('steam.exe'):
+                    setkey('pid', 0, winreg.REG_DWORD, path=r"Software\Valve\Steam\ActiveProcess")
+
             for username in accounts:
                 if username in to_refresh:
                     popup_uservar.set(username)
@@ -670,9 +676,9 @@ class MainApp(tk.Tk):
 
                     setkey('AutoLoginUser', username, winreg.REG_SZ)
                     if username == accounts[-1] and username == current_user:
-                        exit_after_restart(refresh_override=True, silent=False)
+                        legacy_restart(silent=False)
                     else:
-                        exit_after_restart(refresh_override=True)
+                        legacy_restart()
 
                     while fetch_reg('pid') == 0:
                         sleep(1)
@@ -680,12 +686,11 @@ class MainApp(tk.Tk):
                     popup_var.set(_('Waiting for Steam...'))
                     self.update()
 
-                    while fetch_reg('ActiveUser') == 0:
+                    while True:
                         sleep(1)
-                        if fetch_reg('pid') == 0:
+                        if fetch_reg('ActiveUser') != 0:
+                            sleep(4)
                             break
-
-                    sleep(3)
 
             popup.destroy()
             self.update()
@@ -693,7 +698,7 @@ class MainApp(tk.Tk):
             if current_user != fetch_reg('AutoLoginUser'):
                 if msgbox.askyesno('', _('Do you want to start Steam with previous autologin account?')):
                     setkey('AutoLoginUser', current_user, winreg.REG_SZ)
-                    exit_after_restart(refresh_override=True, silent=False)
+                    legacy_restart(silent=False)
             else:
                 subprocess.run("start steam://open/main", shell=True)
 
@@ -1068,13 +1073,15 @@ class MainApp(tk.Tk):
 
         if LOCALE == 'fr_FR':
             padx_int = 45
+        elif LOCALE == 'en_US':
+            padx_int = 11
         else:
-            padx_int = 20
+            padx_int = 24
 
         localeframe = tk.Frame(settingswindow)
         localeframe.pack(side='top', pady=14, fill='x')
         locale_label = tk.Label(localeframe, text=_('Language'))
-        locale_label.pack(side='left', padx=(padx_int, 17))
+        locale_label.pack(side='left', padx=(padx_int, 13))
         locale_cb = ttk.Combobox(localeframe,
                                  state="readonly",
                                  values=['English',  # 0
@@ -1223,3 +1230,125 @@ class MainApp(tk.Tk):
         settings_ok.pack(side='left', padx=3, pady=3)
         settings_cancel.pack(side='left', padx=3, pady=3)
         settings_apply.pack(side='left', padx=3, pady=3)
+
+    def exit_after_restart(self, refresh_override=False, silent=True):
+        '''Restart Steam client and exit application.
+        If autoexit is disabled, app won't exit.'''
+        label_var = tk.StringVar()
+
+        def forcequit():
+            print('Hard shutdown mode')
+            subprocess.run("TASKKILL /F /IM Steam.exe",
+                           creationflags=0x08000000, check=True)
+            print('TASKKILL command sent.')
+
+        if not refresh_override:
+            self.no_user_frame.destroy()
+            self.button_frame.destroy()
+            self.bottomframe.pack_forget()
+            button_frame = tk.Frame(self)
+            button_frame.pack(side='bottom', fill='x')
+            cancel_button = ttk.Button(button_frame,
+                                       text=_('Cancel'))
+            cancel_button['state'] = 'disabled'
+            force_button = ttk.Button(button_frame,
+                                      text=_('Force quit Steam'),
+                                      command=forcequit)
+            force_button['state'] = 'disabled'
+
+            def enable_button():
+                cancel_button['state'] = 'normal'
+                force_button['state'] = 'normal'
+
+            cancel_button.pack(side='bottom', padx=3, pady=3, fill='x')
+            force_button.pack(side='bottom', padx=3, fill='x')
+
+            label_var = tk.StringVar()
+            label_var.set(_('Waiting for Steam to exit...'))
+            label = tk.Label(self, textvariable=label_var)
+            label.pack(pady=(90, 0))
+
+            def cleanup():
+                label.destroy()
+                button_frame.destroy()
+                self.refresh(no_frame=True)
+                self.bottomframe.pack(side='bottom')
+            self.update()
+
+        queue = q.Queue()
+
+        if check_running('Steam.exe'):
+            if get_config('try_soft_shutdown') == 'false':
+                forcequit()
+            elif get_config('try_soft_shutdown') == 'true':
+                print('Soft shutdown mode')
+                r_path = fetch_reg('SteamExe')
+                r_path_items = r_path.split('/')
+                path_items = []
+                for item in r_path_items:
+                    if ' ' in item:
+                        path_items.append(f'"{item}"')
+                    else:
+                        path_items.append(item)
+                steam_exe = "\\".join(path_items)
+                print('Steam.exe path:', steam_exe)
+                subprocess.run(f"start {steam_exe} -shutdown", shell=True,
+                               creationflags=0x08000000, check=True)
+                print('Shutdown command sent. Waiting for Steam...')
+
+            def steam_checker():
+                nonlocal queue
+                sleep(1)
+                while True:
+                    if t.stopped():
+                        break
+                    if check_running('steam.exe'):
+                        sleep(1)
+                        continue
+                    else:
+                        queue.put(1)
+                        break
+
+            def cancel():
+                t.stop()
+                cleanup()
+                return
+
+            t = StoppableThread(target=steam_checker)
+            t.start()
+            if not refresh_override:
+                cancel_button['command'] = cancel
+        else:
+            queue.put(1)
+
+        counter = 0
+
+        def launch_steam():
+            nonlocal queue
+            nonlocal counter
+
+            try:
+                queue.get_nowait()
+                label_var.set(_('Launching Steam...'))
+                self.update()
+
+                if refresh_override and silent:
+                    print('Launching Steam silently...')
+                    subprocess.run("start steam://open",
+                                   shell=True, check=True)
+                else:
+                    print('Launching Steam...')
+                    subprocess.run("start steam://open/main",
+                                   shell=True, check=True)
+
+                if get_config('autoexit') == 'true' and not refresh_override:
+                    sys.exit(0)
+                elif not refresh_override:
+                    cleanup()
+            except q.Empty:
+                counter += 1
+                if counter == 5 and not refresh_override:
+                    enable_button()
+                self.after(1000, launch_steam)
+
+        self.after(1000, launch_steam)

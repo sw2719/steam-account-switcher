@@ -35,14 +35,14 @@ def fetch_reg(key):
     return value
 
 
-def setkey(key_name, value, value_type):
+def setkey(key_name, value, value_type, path=r"Software\Valve\Steam"):
     '''Change given key's value to given value.
     :param key_name: Name of key to change value of
     :param value: Value to change to
     :param value_type: Registry value type
     '''
     try:
-        reg_key = winreg.OpenKey(HKCU, r"Software\Valve\Steam", 0,
+        reg_key = winreg.OpenKey(HKCU, path, 0,
                                  winreg.KEY_ALL_ACCESS)
 
         winreg.SetValueEx(reg_key, key_name, 0, value_type, value)
@@ -50,3 +50,7 @@ def setkey(key_name, value, value_type):
         print("Changed %s's value to %s" % (key_name, str(value)))
     except OSError:
         error_msg(_('Registry Error'), _('Failed to change registry value.'))
+
+
+for key in ('AutoLoginUser', 'RememberPassword', 'SteamExe', 'SteamPath', 'pid', 'ActiveUser'):
+    print(f'{key}:', fetch_reg(key))

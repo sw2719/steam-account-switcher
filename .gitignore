@@ -139,3 +139,5 @@ messages.po
 *.ico
 updater/python37.dll
 updater/updater.exe
+setup_c.py
+*.png
