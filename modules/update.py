@@ -289,7 +289,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             except (KeyError, TypeError):
                 pass
 
-            mirror_url = version_data['mirror_url']
+            try:
+                mirror_url = version_data['mirror_url']
+            except KeyError:
+                print('No mirror data')
+                mirror_url = None
+
             print('Server version is', sv_version_str)
             print('Client version is', cl_ver_str)
 
