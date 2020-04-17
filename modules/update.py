@@ -5,11 +5,12 @@ import gettext
 import os
 import queue as q
 import requests as req
+import shutil
 import zipfile as zf
 import subprocess
 import sys
 import threading
-import time
+from time import sleep
 from packaging import version
 from ruamel.yaml import YAML
 from modules.config import get_config
@@ -25,13 +26,9 @@ t = gettext.translation('steamswitcher',
                         fallback=True)
 _ = t.gettext
 
-update_frame = None
-
 
 def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     '''Check if application has update'''
-
-    global update_frame
     update_frame = tk.Frame(master)
     update_frame.pack(side='bottom')
 
@@ -121,6 +118,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             dl_speed.pack(side='right', padx=5)
             master.update()
 
+            download_q = q.Queue()
+
             try:
                 if mirror_url:
                     mirror = req.get(mirror_url, timeout=4)
@@ -140,58 +139,100 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 else:
                     raise req.RequestException
             except req.RequestException:
-                dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v1.6/Steam_Account_Switcher_v1.6.zip'
+                dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
 
-            try:
-                r = req.get(dl_url, stream=True)
-                r.raise_for_status()
-                total_size = int(r.headers.get('content-length'))
-                total_in_MB = round(total_size / 1048576, 1)
-            except req.RequestException:
-                msgbox.showerror(_('Error'),
-                                 _('Error occured while downloading update.'))
+            def download(URL):
+                nonlocal download_q
 
-            if round(total_in_MB, 1).is_integer():
-                total_in_MB = int(total_in_MB)
+                try:
+                    r = req.get(URL, stream=True)
+                    r.raise_for_status()
+                    total_size = int(r.headers.get('content-length'))
+                    total_in_MB = round(total_size / 1048576, 1)
+                except req.RequestException:
+                    msgbox.showerror(_('Error'),
+                                     _('Error occured while downloading update.'))
 
-            with open('update.zip', "wb") as f:
-                dl = 0
-                last_time = time.perf_counter()
-                for data in r.iter_content(chunk_size=10240):
-                    dl += len(data)
-                    f.write(data)
-                    time_delta = time.perf_counter() - last_time
+                if round(total_in_MB, 1).is_integer():
+                    total_in_MB = int(total_in_MB)
 
-                    bps = 10240 / time_delta
-                    print(time_delta)
-                    last_time = time.perf_counter()
+                def save():
+                    nonlocal r
+                    with open('update.zip', 'wb') as f:
+                        shutil.copyfileobj(r.raw, f)
 
-                    current_in_MB = round(dl / 1048576, 1)
+                dl_thread = threading.Thread(target=save)
+                dl_thread.start()
 
-                    if round(current_in_MB, 1).is_integer():
-                        current_in_MB = int(current_in_MB)
+                last_size = 0
 
-                    if bps >= 1048576:
-                        dl_spd = bps / 1048576
-                        if round(dl_spd, 1).is_integer():
-                            dl_spd = int(dl_spd)
+                while True:
+                    try:
+                        current_size = os.path.getsize('update.zip')
+                        current_in_MB = round(current_size / 1048576, 1)
+
+                        if round(current_in_MB, 1).is_integer():
+                            current_in_MB = int(current_in_MB)
+
+                        size_delta = current_size - last_size
+                        bps = size_delta * 2
+
+                        if bps >= 1048576:
+                            dl_spd = bps / 1048576
+                            if round(dl_spd, 1).is_integer():
+                                dl_spd = int(dl_spd)
+                            else:
+                                dl_spd = round(dl_spd, 1)
+                            dl_spd_str = f'{dl_spd}MB/s'
+                        elif bps >= 1024:
+                            dl_spd = bps / 1024
+                            if round(dl_spd, 1).is_integer():
+                                dl_spd = int(dl_spd)
+                            else:
+                                dl_spd = round(dl_spd, 1)
+                            dl_spd_str = f'{dl_spd}KB/s'
                         else:
-                            dl_spd = round(dl_spd, 1)
-                        dl_spd_str = f'{dl_spd}MB/s'
-                    elif bps >= 1024:
-                        dl_spd = int(bps / 1024)
-                        dl_spd_str = f'{dl_spd}KB/s'
-                    else:
-                        dl_spd = int(bps)
-                        dl_spd_str = f'{dl_spd}B/s'
+                            dl_spd = bps
+                            dl_spd_str = f'{dl_spd}B/s'
 
-                    prog = f'{current_in_MB}MB / {total_in_MB}MB'
-                    done = int(100 * dl / total_size)
-                    dl_p.set(done)
-                    dl_speed_var.set(dl_spd_str)
-                    dl_prog_var.set(prog)
-                    master.update()
+                        perc = int(current_size / total_size * 100)
 
+                        prog = f'{current_in_MB}MB / {total_in_MB}MB'
+
+                        download_q.put((perc, prog, dl_spd_str))
+                        if perc == 100:
+                            break
+                        else:
+                            last_size = current_size
+                            sleep(0.5)
+                    except OSError:
+                        sleep(0.5)
+                        continue
+
+            def update_pbar():
+                nonlocal download_q
+                nonlocal dl_p
+                nonlocal dl_speed_var
+                nonlocal dl_prog_var
+                while True:
+                    try:
+                        q_tuple = download_q.get_nowait()
+                        p = q_tuple[0]
+                        dl_p.set(p)
+                        dl_prog = q_tuple[1]
+                        dl_prog_var.set(dl_prog)
+                        dl_spd = q_tuple[2]
+                        dl_speed_var.set(dl_spd)
+                        master.update()
+                        if p == 100:
+                            return
+                    except q.Empty:
+                        master.update()
+
+            dl_thread = threading.Thread(target=lambda url=dl_url: download(url))
+            dl_thread.start()
+
+            update_pbar()
             if install:
                 try:
                     archive = os.path.join(os.getcwd(), 'update.zip')
@@ -244,11 +285,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             except (KeyError, TypeError):
                 pass
 
-            try:
-                mirror_url = version_data['mirror_url']
-            except KeyError:
-                mirror_url = ''
-
+            mirror_url = version_data['mirror_url']
             print('Server version is', sv_version_str)
             print('Client version is', cl_ver_str)
 
@@ -340,13 +377,3 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     t = threading.Thread(target=checkupdate)
     t.start()
     master.after(300, get_output)
-
-
-def hide_update():
-    global update_frame
-    update_frame.pack_forget()
-
-
-def show_update():
-    global update_frame
-    update_frame.pack(side='bottom')
