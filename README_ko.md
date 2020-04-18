@@ -39,5 +39,5 @@ STEAM은 Valve Corporation 의 등록상표입니다.
 * master를 제외한 모든 branch 는 개발 branch이며 작동을 보장하지 않습니다.
 * Python 3.7 64-bit 으로 작성되었습니다.
 * updater.py 는 cx_freeze 로 번들된 배포용 프로그램에서 작동하게 설계되었으므로 Python 인터프리터로 실행하지 마십시오.
-* Requests, packaging, ruamel.yaml, gettext 모듈이 필요합니다.
+* Requests, packaging, psutil, ruamel.yaml, gettext 모듈이 필요합니다.
 * 소스코드 원문은 영어이며 gettext 로 한글로 번역됩니다.
