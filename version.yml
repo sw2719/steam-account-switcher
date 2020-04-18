@@ -1,6 +1,10 @@
-version: 2.2
+version: 2.2.1
 changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------2.2.1----------
+
+  • Fixed issue which after Steam restart, update UI would show at the very bottom.
 
   ----------2.2----------
 
@@ -96,6 +100,10 @@ changelog_en: |
 changelog_ko: |
   알림: 다운로드가 너무 오래 걸릴 경우, GitHub에서 수동으로 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
 
+  ----------2.2.1----------
+
+  • 스팀 재시작시 업데이트 UI가 최하단에 표시되던 문제를 수정했습니다.
+
   ----------2.2----------
 
   • 스팀 재시작 UI를 개선하였습니다.
@@ -188,3 +196,8 @@ changelog_ko: |
   • 설정에서 스팀 재시작후 앱이 종료되지 않도록 변경 가능
 mirror_url: http://sw2719.synology.me/mirror.yml
 msg:
+  2.2:
+    ko:
+      'UI 문제로 인해 2.2.1 버전으로 업데이트 할 것을 권장합니다.'
+    en:
+      'Due to UI issue, it is recommended to update to version 2.2.1.'

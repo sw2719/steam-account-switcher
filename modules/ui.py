@@ -18,6 +18,8 @@ from modules.misc import check_running
 from modules.misc import steam_running
 from modules.misc import StoppableThread
 from modules.update import start_checkupdate
+from modules.update import hide_update
+from modules.update import show_update
 
 yaml = YAML()
 
@@ -1245,6 +1247,7 @@ class MainApp(tk.Tk):
         if not refresh_override:
             self.no_user_frame.destroy()
             self.button_frame.destroy()
+            hide_update()
             self.bottomframe.pack_forget()
             button_frame = tk.Frame(self)
             button_frame.pack(side='bottom', fill='x')
@@ -1273,6 +1276,7 @@ class MainApp(tk.Tk):
                 button_frame.destroy()
                 self.refresh(no_frame=True)
                 self.bottomframe.pack(side='bottom')
+                show_update()
             self.update()
 
         queue = q.Queue()
