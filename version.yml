@@ -1,6 +1,10 @@
-version: 2.2
+version: 2.2.1
 changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------2.2.1----------
+
+  • Fixed issue which after Steam restart, update UI would show at the very bottom.
 
   ----------2.2----------
 
@@ -95,6 +99,10 @@ changelog_en: |
 
 changelog_ko: |
   알림: 다운로드가 너무 오래 걸릴 경우, GitHub에서 수동으로 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------2.2.1----------
+
+  • 스팀 재시작시 업데이트 UI가 최하단에 표시되던 문제를 수정했습니다.
 
   ----------2.2----------
 
