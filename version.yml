@@ -188,3 +188,8 @@ changelog_ko: |
   • 설정에서 스팀 재시작후 앱이 종료되지 않도록 변경 가능
 mirror_url: http://sw2719.synology.me/mirror.yml
 msg:
+  '2.2':
+    ko:
+      'UI 문제로 인해 2.2.1 버전으로 업데이트 할 것을 권장합니다.'
+    en:
+      'Due to UI issue, it is recommended to update to version 2.2.1.'
