@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox as msgbox
 import gettext
 import os
@@ -64,10 +65,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                         text=_('New version %s is available.') % sv_version)
         text.pack()
 
-        changelog_box = tk.Text(updatewindow, width=57)
-        scrollbar = ttk.Scrollbar(updatewindow, orient=tk.VERTICAL,
-                                  command=changelog_box.yview)
-        changelog_box.config(yscrollcommand=scrollbar.set)
+        changelog_box = ScrolledText(updatewindow, width=57)
         changelog_box.insert(tk.CURRENT, changelog)
         changelog_box.configure(state=tk.DISABLED)
         changelog_box.pack(padx=5)
