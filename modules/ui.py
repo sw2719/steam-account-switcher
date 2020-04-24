@@ -1161,7 +1161,7 @@ class MainApp(tk.Tk):
         soft_chkb.pack(side='left')
 
         autoexit_frame = tk.Frame(settingswindow)
-        autoexit_frame.pack(fill='x', side='top', padx=12, pady=18)
+        autoexit_frame.pack(fill='x', side='top', padx=12, pady=17)
 
         autoexit_chkb = ttk.Checkbutton(autoexit_frame,
                                         text=_('Exit app after Steam is restarted'))
