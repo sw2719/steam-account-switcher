@@ -26,6 +26,11 @@ This app has no affiliation with Steam and Valve.
 
 * Auto-updating is built-in, and it's fast. (Unless GitHub's server is having a hard time..)
 
+# Requirements
+* 64-bit Windows
+* Steam installed correctly
+* And that's pretty much it.
+
 # How to use
 1. Unpack the archive to desired folder
 2. Run the exe
