@@ -126,6 +126,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 if mirror_url:
                     mirror = req.get(mirror_url, timeout=4)
                     mirror.raise_for_status()
+                    if mirror.elapsed.total_seconds() >= 0.4:
+                        raise req.RequestException
 
                     mirror_yml = yaml.load(mirror.text)
 
@@ -140,7 +142,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                         raise req.RequestException
                 else:
                     raise req.RequestException
-            except req.RequestException:
+            except (req.RequestException, KeyError):
                 dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
 
             def download(URL):
