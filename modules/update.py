@@ -51,6 +51,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
         updatewindow.title(_('Update'))
         updatewindow.geometry("400x300+650+300")
         updatewindow.resizable(False, False)
+        updatewindow.focus()
 
         button_frame = tk.Frame(updatewindow)
         button_frame.pack(side=tk.BOTTOM, pady=3, fill='x')
@@ -73,6 +74,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
         updatewindow.grab_set()
 
         def start_update(mirror_url):
+            '''Withdraw main window and start update download'''
             nonlocal button_frame
             nonlocal cancel_button
             nonlocal update_button
@@ -87,6 +89,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
             install = True
 
+            # For development purposes
             if not bundle and debug:
                 if not msgbox.askyesno('', 'Install update?'):
                     install = False
@@ -98,8 +101,10 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 if msgbox.askokcancel(_('Cancel'), _('Are you sure to cancel?')):
                     os._exit(0)
 
+            # There's no cancel button so we use close button as one instead
             updatewindow.protocol("WM_DELETE_WINDOW", cancel)
 
+            # Define progress variables
             dl_p = tk.IntVar()
             dl_p.set(0)
             dl_pbar = ttk.Progressbar(button_frame,
@@ -122,11 +127,16 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
             download_q = q.Queue()
 
-            try:
+            try:  # Check if mirror is available and should we use it
                 if mirror_url:
                     mirror = req.get(mirror_url, timeout=4)
                     mirror.raise_for_status()
-                    if mirror.elapsed.total_seconds() >= 0.4:
+
+                    r_time = mirror.elapsed.total_seconds()
+                    print(f'Mirror server took {str(r_time)} seconds to respond.')
+
+                    if r_time >= 0.5:
+                        print('Mirror is too slow.')
                         raise req.RequestException
 
                     mirror_yml = yaml.load(mirror.text)
@@ -135,14 +145,19 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                         if msgbox.askyesno(_('Mirror available'), _('Do you want to download from Mirror?') + '\n' +
                                            _("If you live outside South East Asia, it is advised not to use it.") + '\n' +
                                            _('(Note that mirror is located in South Korea.)')):
+                            print('Using mirror for downloading update...')
                             dl_url = f'http://sw2719.synology.me/mirror/{mirror_yml["mirror_filename"]}'
                         else:
+                            print('User abort')
                             raise req.RequestException
                     else:
+                        print('Mirror validation error.')
                         raise req.RequestException
                 else:
+                    print('Cannot reach mirror or mirror is not online.')
                     raise req.RequestException
             except (req.RequestException, KeyError):
+                print('Reverting to GitHub for downloading update...')
                 dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
 
             def download(URL):
