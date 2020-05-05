@@ -241,6 +241,7 @@ class MainApp(tk.Tk):
         welcomewindow.geometry("%sx230+650+320" % width)
         welcomewindow.resizable(False, False)
         welcomewindow.protocol("WM_DELETE_WINDOW", close_function)
+        welcomewindow.focus()
 
         upper_frame = tk.Frame(welcomewindow)
         upper_frame.pack(side='top')
@@ -547,6 +548,7 @@ class MainApp(tk.Tk):
         aboutwindow.title(_('About'))
         aboutwindow.geometry("%sx180+650+300" % width)
         aboutwindow.resizable(False, False)
+        aboutwindow.focus()
         about_disclaimer = tk.Label(aboutwindow,
                                     text=_('Warning: The developer of this application is not responsible for')
                                     + '\n' + _('data loss or any other damage from the use of this app.'))
