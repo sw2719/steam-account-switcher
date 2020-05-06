@@ -226,6 +226,7 @@ class MainApp(tk.Tk):
         autolabel = tk.Label(upper_frame, textvariable=self.auto_var)
         autolabel.pack(side='top')
 
+        self.draw_button()
     def welcomewindow(self):
         def close_function():
             os.remove('config.yml')

@@ -27,7 +27,6 @@ else:
     BUNDLE = False
 
 root = MainApp(VERSION, URL, BUNDLE)
-root.draw_button()
 root.after(100, lambda: start_checkupdate(root, VERSION, URL, BUNDLE))
 
 if first_run:
