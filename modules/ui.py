@@ -10,8 +10,7 @@ import sys
 import queue as q
 from time import sleep
 from ruamel.yaml import YAML
-from modules.account import acc_getlist, acc_getdict
-from modules.loginusers import loginusers
+from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config
 from modules.misc import check_running
