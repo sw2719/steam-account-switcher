@@ -24,7 +24,7 @@ if getattr(sys, 'frozen', False):
             pass
 else:
     print('Running in a Python interpreter')
-    BUNDLE = True
+    BUNDLE = False
 
 root = MainApp(VERSION, URL, BUNDLE)
 root.after(100, lambda: start_checkupdate(root, VERSION, URL, BUNDLE))
