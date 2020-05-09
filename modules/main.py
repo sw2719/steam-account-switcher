@@ -430,19 +430,18 @@ class MainApp(tk.Tk):
 
     def draw_button(self):
         menu_dict = {}
-        self.no_user_frame = tk.Frame(self)
+        self.no_user_frame = tk.Frame(self.button_frame, bg='white')
 
         def onFrameConfigure(canvas):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
-        canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
-        canvas.config(bg='white')
-        buttonframe = tk.Frame(canvas)
-        scroll_bar = ttk.Scrollbar(self.button_frame,
-                                   orient="vertical",
-                                   command=canvas.yview)
-
         if self.accounts:
+            canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
+            canvas.config(bg='white')
+            buttonframe = tk.Frame(canvas)
+            scroll_bar = ttk.Scrollbar(self.button_frame,
+                                       orient="vertical",
+                                       command=canvas.yview)
             for username in self.accounts:
                 if get_config('show_profilename') != 'false':
                     if loginusers():
@@ -511,9 +510,9 @@ class MainApp(tk.Tk):
                              canvas=canvas: onFrameConfigure(canvas))
             self.bind("<MouseWheel>", _on_mousewheel)
         else:
-            self.no_user_frame.pack()
-            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'))
-            no_user.pack(pady=(6, 0))
+            self.no_user_frame.pack(side='top')
+            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg='white')
+            no_user.pack(pady=(160, 0))
 
     def refresh(self, no_frame=False):
         '''Refresh main window widgets'''
