@@ -459,13 +459,13 @@ class MainApp(tk.Tk):
                                 i = AccountName.index(username)
                                 profilename = PersonaName[i]
                             except ValueError:
-                                profilename = 'Profile name not available'
+                                profilename = _('Profile name not available')
                         else:
-                            profilename = 'Profile name not available'
+                            profilename = _('Profile name not available')
 
                     profilename = profilename[:30]
                 else:
-                    profilename = 'Profile name not available'
+                    profilename = _('Profile name not available')
 
                 menu_dict[username] = tk.Menu(self, tearoff=0)
                 menu_dict[username].add_command(label=_("Set as auto-login account"),
