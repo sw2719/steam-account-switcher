@@ -35,12 +35,15 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     global update_frame
 
     update_frame = tk.Frame(master)
-    update_frame.pack(side='bottom')
+    update_frame.config(bg='white')
+    update_frame.pack(side='bottom', fill='x')
+
 
     if not bundle and not debug:
         return
 
-    checking_label = tk.Label(update_frame, text=_('Checking for updates...'))
+    ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+    checking_label = tk.Label(update_frame, text=_('Checking for updates...'), bg='white')
     checking_label.pack()
     master.update()
 
@@ -354,40 +357,36 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             if debug:
                 print('Update debug mode')
                 update_label = tk.Label(update_frame,
-                                        text=f'sv: {sv_version} cl: {str(cl_ver_str)} output: {update_code}')  # NOQA
-                update_label.pack(side='left', padx=5)
-
-                update_button = ttk.Button(update_frame,
-                                            text='Open UI',
-                                            width=10,
-                                            command=lambda: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))  # NOQA
-                update_button.pack(side='right', padx=5)
+                                        text=f'Client: {cl_ver_str} / Server: {sv_version} / {update_code} / Click to open UI',
+                                        bg='white')
+                update_label.pack(side='bottom')
+                update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
+                update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
                 return
 
             if update_code == 'avail':
                 print('Update Available')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('New update available'))  # NOQA
-                update_label.pack(side='left', padx=5)
-
-                update_button = ttk.Button(update_frame,
-                                            text=_('Update'),
-                                            width=10,
-                                            command=lambda: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))  # NOQA
-
-                update_button.pack(side='right', padx=5)
+                                        text=_('Version %s is available. Click here to update!' % sv_version),
+                                        bg='white',
+                                        fg='green')  # NOQA
+                update_label.pack(side='bottom')
+                update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
+                update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
             elif update_code == 'latest':
                 print('On latest version')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('Using the latest version'))
+                                        text=_('Using the latest version'),
+                                        bg='white')
                 update_label.pack(side='bottom')
             elif update_code == 'dev':
                 print('Development version')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('Development version'))
+                                        text=_('Development version'),
+                                        bg='white')
                 update_label.pack(side='bottom')
             else:
                 print('Exception while getting server version')
@@ -410,4 +409,4 @@ def hide_update():
 
 def show_update():
     global update_frame
-    update_frame.pack(side='bottom')
+    update_frame.pack(side='bottom', fill='x')
