@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-10 05:02+0900\n"
-"PO-Revision-Date: 2020-05-10 05:02+0900\n"
+"PO-Revision-Date: 2020-05-10 05:06+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -481,7 +481,7 @@ msgstr "수동으로 진행하려면 update.zip 파일을 직접 압축해제하
 #: modules/update.py:374
 #, python-format
 msgid "Version %s is available. Click here to update!"
-msgstr "버전 %s이 사용 가능합니다. 여기를 눌러 업데이트하세요!"
+msgstr "버전 %s로 업데이트하려면 여기를 누르세요!"
 
 #: modules/update.py:384
 msgid "Using the latest version"

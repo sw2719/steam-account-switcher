@@ -371,7 +371,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 print('Update Available')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('Version %s is available. Click here to update!' % sv_version),
+                                        text=_('Version %s is available. Click here to update!') % sv_version,
                                         bg='white',
                                         fg='green')  # NOQA
                 update_label.pack(side='bottom')
