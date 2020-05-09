@@ -30,11 +30,16 @@ class DragDropListbox(tk.Listbox):
 
 class ButtonwithLabels:
     def __init__(self, master, text='<>', command=None, rightcommand=None):
-        self.f, self.command = tk.Frame(master, borderwidth=3), command
-        self.f.config(bg='white')
-        self.f.bind('<Button-1>', lambda event: self.__click())
-        self.f.bind('<ButtonRelease-1>', lambda event: self.__release())
-        self.f.bind('<Button-3>', rightcommand)
+        self.frame, self.command = tk.Frame(master, borderwidth=3), command
+        self.frame.config(bg='white')
+        self.frame.bind('<Button-1>', lambda event: self.__click())
+        self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.frame.bind('<Button-3>', rightcommand)
+
+        self.frame.bind('<Enter>', lambda event: self.__enter())
+        self.frame.bind('<Leave>', lambda event: self.__leave())
+        self.onbutton = False
+        self.clicked = False
 
         sections = [i.split('>') for i in text.split('<')[1:]]
 
@@ -54,7 +59,7 @@ class ButtonwithLabels:
                         pass
 
             temp_font = tkfont.Font(**kw)
-            self.label_dict[index] = tk.Label(self.f, text=section[1].replace('\n', ''), font=temp_font)
+            self.label_dict[index] = tk.Label(self.frame, text=section[1].replace('\n', ''), font=temp_font)
             self.label_dict[index].config(bg='white')
             self.label_dict[index].pack(anchor='w', padx=(3, 0))
             self.label_dict[index].bind('<Button-1>', lambda event: self.__click())
@@ -63,31 +68,42 @@ class ButtonwithLabels:
 
             if section[1].count('\n') >= 1:
                 for i in range(section[1].count('\n') - 1):
-                    self.alt_label_dict[i] = tk.Label(self.f, text='', font=temp_font)
+                    self.alt_label_dict[i] = tk.Label(self.frame, text='', font=temp_font)
                     self.alt_label_dict[i].pack()
                     self.alt_label_dict[i].bind('<Button-1>', lambda event: self.__click())
                     self.alt_label_dict[i].bind('<ButtonRelease-1>', lambda event: self.__release())
                     self.alt_label_dict[i].bind('<Button-3>', rightcommand)
 
     def __click(self):
-        self.f.config(bg='grey')
+        self.clicked = True
+        self.frame.config(bg='grey')
 
         for label in self.label_dict.values():
             label.config(bg='grey')
 
     def __release(self):
-        self.f.config(bg='white')
+        self.clicked = False
+        self.frame.config(bg='white')
 
         for label in self.label_dict.values():
             label.config(bg='white')
 
-        if self.command:
+        if self.command and self.onbutton:
             self.command()
 
+    def __enter(self):
+        self.onbutton = True
+
+    def __leave(self):
+        self.onbutton = False
+
+        if self.clicked:
+            self.__release()
+
     def enable(self):
-        self.f.bind('<Button-1>', lambda event: self.__click())
-        self.f.bind('<ButtonRelease-1>', lambda event: self.__release())
-        self.f.config(bg='white')
+        self.frame.bind('<Button-1>', lambda event: self.__click())
+        self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.frame.config(bg='white')
 
         for label in self.label_dict.values():
             label.bind('<Button-1>', lambda event: self.__click())
@@ -100,9 +116,9 @@ class ButtonwithLabels:
             label.config(bg='white')
 
     def disable(self):
-        self.f.unbind('<Button-1>')
-        self.f.unbind('<ButtonRelease-1>')
-        self.f.config(bg='#bdbdbd')
+        self.frame.unbind('<Button-1>')
+        self.frame.unbind('<ButtonRelease-1>')
+        self.frame.config(bg='#bdbdbd')
 
         for label in self.label_dict.values():
             label.unbind('<Button-1>')
@@ -115,4 +131,4 @@ class ButtonwithLabels:
             label.config(bg='#bdbdbd')
 
     def pack(self, **kw):
-        self.f.pack(**kw)
+        self.frame.pack(**kw)
