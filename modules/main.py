@@ -221,6 +221,7 @@ class MainApp(tk.Tk):
         autolabel.pack(side='top')
 
         self.draw_button()
+
     def welcomewindow(self):
         def close_function():
             os.remove('config.yml')
@@ -457,7 +458,6 @@ class MainApp(tk.Tk):
                             try:
                                 i = AccountName.index(username)
                                 profilename = PersonaName[i]
-                                n = 37 - len(username)
                             except ValueError:
                                 profilename = 'Profile name not available'
                         else:

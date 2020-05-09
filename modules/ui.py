@@ -27,11 +27,11 @@ class DragDropListbox(tk.Listbox):
             self.insert(i-1, x)
             self.curIndex = i
 
+
 class ButtonwithLabels:
     def __init__(self, master, text='<>', command=None, rightcommand=None):
         self.f, self.command = tk.Frame(master, borderwidth=3), command
         self.f.config(bg='white')
-        #self.f.config(highlightbackground='black', highlightthickness=1)
         self.f.bind('<Button-1>', lambda event: self.__click())
         self.f.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.f.bind('<Button-3>', rightcommand)

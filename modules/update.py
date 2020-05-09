@@ -34,6 +34,9 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     '''Check if application has update'''
     global update_frame
 
+    if update_frame is not None:
+        update_frame.destroy()
+
     update_frame = tk.Frame(master)
     update_frame.config(bg='white')
 
