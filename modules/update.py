@@ -36,11 +36,11 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
     update_frame = tk.Frame(master)
     update_frame.config(bg='white')
-    update_frame.pack(side='bottom', fill='x')
-
 
     if not bundle and not debug:
         return
+    else:
+        update_frame.pack(side='bottom', fill='x')
 
     ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
     checking_label = tk.Label(update_frame, text=_('Checking for updates...'), bg='white')
