@@ -120,7 +120,7 @@ class MainApp(tk.Tk):
         self['bg'] = 'white'
         self.title(_("Account Switcher"))
 
-        self.geometry("300x436+600+250")
+        self.geometry("300x438+600+250")
         self.resizable(False, False)
 
         menubar = tk.Menu(self, bg='white')
@@ -219,6 +219,7 @@ class MainApp(tk.Tk):
 
         autolabel = tk.Label(upper_frame, textvariable=self.auto_var, bg='white')
         autolabel.pack(side='top')
+        ttk.Separator(upper_frame, orient='horizontal').pack(fill='x')
 
         self.draw_button()
 
@@ -441,7 +442,6 @@ class MainApp(tk.Tk):
                                    orient="vertical",
                                    command=canvas.yview)
 
-        ttk.Separator(buttonframe, orient='horizontal').pack(fill='x')
         if self.accounts:
             for username in self.accounts:
                 if get_config('show_profilename') != 'false':
