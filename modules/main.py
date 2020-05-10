@@ -521,7 +521,7 @@ class MainApp(tk.Tk):
             self.no_user_frame.pack(side='top', fill='both', expand=True)
             no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg='white')
             self.unbind("<MouseWheel>")
-            no_user.pack(pady=(160, 0))
+            no_user.pack(pady=(150, 0))
 
     def refresh(self, no_frame=False):
         '''Refresh main window widgets'''
