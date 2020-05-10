@@ -118,17 +118,17 @@ class ButtonwithLabels:
     def disable(self):
         self.frame.unbind('<Button-1>')
         self.frame.unbind('<ButtonRelease-1>')
-        self.frame.config(bg='#bdbdbd')
+        self.frame.config(bg='#cfcfcf')
 
         for label in self.label_dict.values():
             label.unbind('<Button-1>')
             label.unbind('<ButtonRelease-1>')
-            label.config(bg='#bdbdbd')
+            label.config(bg='#cfcfcf')
 
         for label in self.alt_label_dict.values():
             label.unbind('<Button-1>')
             label.unbind('<ButtonRelease-1>')
-            label.config(bg='#bdbdbd')
+            label.config(bg='#cfcfcf')
 
     def pack(self, **kw):
         self.frame.pack(**kw)
