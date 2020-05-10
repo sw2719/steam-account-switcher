@@ -158,7 +158,13 @@ class MainApp(tk.Tk):
             elif fetch_reg('RememberPassword') == 0:
                 value = 1
             setkey('RememberPassword', value, winreg.REG_DWORD)
-            self.refresh()
+
+            if fetch_reg('RememberPassword') == 1:
+                self.auto_var.set(_('Auto-login Enabled'))
+                self.autolabel['fg'] = 'green'
+            else:
+                self.auto_var.set(_('Auto-login Disabled'))
+                self.autolabel['fg'] = 'red'
 
         if LOCALE == 'fr_FR':
             toggle_width = 13
@@ -214,11 +220,13 @@ class MainApp(tk.Tk):
 
         if fetch_reg('RememberPassword') == 1:
             self.auto_var.set(_('Auto-login Enabled'))
+            auto_color = 'green'
         else:
             self.auto_var.set(_('Auto-login Disabled'))
+            auto_color = 'red'
 
-        autolabel = tk.Label(upper_frame, textvariable=self.auto_var, bg='white')
-        autolabel.pack(side='top')
+        self.autolabel = tk.Label(upper_frame, textvariable=self.auto_var, bg='white', fg=auto_color)
+        self.autolabel.pack(side='top')
         ttk.Separator(upper_frame, orient='horizontal').pack(fill='x')
 
         self.draw_button()
