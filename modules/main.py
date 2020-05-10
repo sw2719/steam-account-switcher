@@ -518,8 +518,9 @@ class MainApp(tk.Tk):
                              canvas=canvas: onFrameConfigure(canvas))
             self.bind("<MouseWheel>", _on_mousewheel)
         else:
-            self.no_user_frame.pack(side='top')
+            self.no_user_frame.pack(side='top', fill='both', expand=True)
             no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg='white')
+            self.unbind("<MouseWheel>")
             no_user.pack(pady=(160, 0))
 
     def refresh(self, no_frame=False):
