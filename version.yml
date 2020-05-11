@@ -1,6 +1,22 @@
-version: 2.2.1
+version: 2.3
 changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------2.3----------
+
+  • Implemented brand-new main UI.
+
+  • Added an scrollbar to main UI.
+
+  • Colored autologin status text.
+
+  • File structure changed due to update to cx_freeze 6.1.
+
+  • Automatically drop mirror download if response time is slow.
+
+  • Replaced Text with ScrolledText for displaying changelog.
+
+  • Fixed some windows not getting focus properly after being opened.
 
   ----------2.2.1----------
 
@@ -98,7 +114,23 @@ changelog_en: |
   • Added a setting to choose whether app exits after restarting Steam or not.
 
 changelog_ko: |
-  알림: 다운로드가 너무 오래 걸릴 경우, GitHub에서 수동으로 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
+  알림: 미러를 사용하지 않을 때 다운로드가 너무 오래 걸릴 경우, GitHub에서 수동으로 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------2.3----------
+
+  • 새로운 메인 UI를 적용했습니다.
+
+  • 메인 UI에 스크롤바를 추가했습니다.
+
+  • 자동로그인 상태 표시에 색상을 적용했습니다.
+
+  • cx_freeze 6.1 로의 업데이트로 인해 파일 구조가 변경되었습니다.
+
+  • 미러 서버의 응답 속도가 느릴 경우 자동으로 취소합니다.
+
+  • 업데이트 변경사항을 표시하는데 Text 대신 ScrolledText를 사용합니다.
+
+  • 몇몇 창이 열린 후 제대로 활성화되지 않던 문제를 수정했습니다.
 
   ----------2.2.1----------
 

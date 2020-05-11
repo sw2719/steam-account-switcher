@@ -3,9 +3,9 @@ import os
 import shutil
 from modules.config import first_run
 from modules.update import start_checkupdate
-from modules.ui import MainApp
+from modules.main import MainApp
 
-__VERSION__ = '2.2.1'
+VERSION = '2.3'
 BRANCH = 'master'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml' % BRANCH)
 
@@ -26,9 +26,8 @@ else:
     print('Running in a Python interpreter')
     BUNDLE = False
 
-root = MainApp(__VERSION__, URL, BUNDLE)
-root.draw_button()
-root.after(100, lambda: start_checkupdate(root, __VERSION__, URL, BUNDLE))
+root = MainApp(VERSION, URL, BUNDLE)
+root.after(100, lambda: start_checkupdate(root, VERSION, URL, BUNDLE))
 
 if first_run:
     root.after(200, root.welcomewindow)

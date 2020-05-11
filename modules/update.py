@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox as msgbox
 import gettext
 import os
@@ -33,13 +34,19 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     '''Check if application has update'''
     global update_frame
 
+    if update_frame is not None:
+        update_frame.destroy()
+
     update_frame = tk.Frame(master)
-    update_frame.pack(side='bottom')
+    update_frame.config(bg='white')
 
     if not bundle and not debug:
         return
+    else:
+        update_frame.pack(side='bottom', fill='x')
 
-    checking_label = tk.Label(update_frame, text=_('Checking for updates...'))
+    ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+    checking_label = tk.Label(update_frame, text=_('Checking for updates...'), bg='white')
     checking_label.pack()
     master.update()
 
@@ -50,6 +57,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
         updatewindow.title(_('Update'))
         updatewindow.geometry("400x300+650+300")
         updatewindow.resizable(False, False)
+        updatewindow.focus()
 
         button_frame = tk.Frame(updatewindow)
         button_frame.pack(side=tk.BOTTOM, pady=3, fill='x')
@@ -64,10 +72,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                         text=_('New version %s is available.') % sv_version)
         text.pack()
 
-        changelog_box = tk.Text(updatewindow, width=57)
-        scrollbar = ttk.Scrollbar(updatewindow, orient=tk.VERTICAL,
-                                  command=changelog_box.yview)
-        changelog_box.config(yscrollcommand=scrollbar.set)
+        changelog_box = ScrolledText(updatewindow, width=57)
         changelog_box.insert(tk.CURRENT, changelog)
         changelog_box.configure(state=tk.DISABLED)
         changelog_box.pack(padx=5)
@@ -75,6 +80,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
         updatewindow.grab_set()
 
         def start_update(mirror_url):
+            '''Withdraw main window and start update download'''
             nonlocal button_frame
             nonlocal cancel_button
             nonlocal update_button
@@ -89,6 +95,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
             install = True
 
+            # For development purposes
             if not bundle and debug:
                 if not msgbox.askyesno('', 'Install update?'):
                     install = False
@@ -100,8 +107,10 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 if msgbox.askokcancel(_('Cancel'), _('Are you sure to cancel?')):
                     os._exit(0)
 
+            # There's no cancel button so we use close button as one instead
             updatewindow.protocol("WM_DELETE_WINDOW", cancel)
 
+            # Define progress variables
             dl_p = tk.IntVar()
             dl_p.set(0)
             dl_pbar = ttk.Progressbar(button_frame,
@@ -124,10 +133,17 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
             download_q = q.Queue()
 
-            try:
+            try:  # Check if mirror is available and should we use it
                 if mirror_url:
                     mirror = req.get(mirror_url, timeout=4)
                     mirror.raise_for_status()
+
+                    r_time = mirror.elapsed.total_seconds()
+                    print(f'Mirror server took {str(r_time)} seconds to respond.')
+
+                    if r_time >= 0.5:
+                        print('Mirror is too slow.')
+                        raise req.RequestException
 
                     mirror_yml = yaml.load(mirror.text)
 
@@ -135,14 +151,19 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                         if msgbox.askyesno(_('Mirror available'), _('Do you want to download from Mirror?') + '\n' +
                                            _("If you live outside South East Asia, it is advised not to use it.") + '\n' +
                                            _('(Note that mirror is located in South Korea.)')):
+                            print('Using mirror for downloading update...')
                             dl_url = f'http://sw2719.synology.me/mirror/{mirror_yml["mirror_filename"]}'
                         else:
+                            print('User abort')
                             raise req.RequestException
                     else:
+                        print('Mirror validation error.')
                         raise req.RequestException
                 else:
+                    print('Cannot reach mirror or mirror is not online.')
                     raise req.RequestException
-            except req.RequestException:
+            except (req.RequestException, KeyError):
+                print('Reverting to GitHub for downloading update...')
                 dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
 
             def download(URL):
@@ -339,40 +360,36 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             if debug:
                 print('Update debug mode')
                 update_label = tk.Label(update_frame,
-                                        text=f'sv: {sv_version} cl: {str(cl_ver_str)} output: {update_code}')  # NOQA
-                update_label.pack(side='left', padx=5)
-
-                update_button = ttk.Button(update_frame,
-                                            text='Open UI',
-                                            width=10,
-                                            command=lambda: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))  # NOQA
-                update_button.pack(side='right', padx=5)
+                                        text=f'Client: {cl_ver_str} / Server: {sv_version} / {update_code} / Click to open UI',
+                                        bg='white')
+                update_label.pack(side='bottom')
+                update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
+                update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
                 return
 
             if update_code == 'avail':
                 print('Update Available')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('New update available'))  # NOQA
-                update_label.pack(side='left', padx=5)
-
-                update_button = ttk.Button(update_frame,
-                                            text=_('Update'),
-                                            width=10,
-                                            command=lambda: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))  # NOQA
-
-                update_button.pack(side='right', padx=5)
+                                        text=_('Version %s is available. Click here to update!') % sv_version,
+                                        bg='white',
+                                        fg='green')  # NOQA
+                update_label.pack(side='bottom')
+                update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
+                update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
             elif update_code == 'latest':
                 print('On latest version')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('Using the latest version'))
+                                        text=_('Using the latest version'),
+                                        bg='white')
                 update_label.pack(side='bottom')
             elif update_code == 'dev':
                 print('Development version')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('Development version'))
+                                        text=_('Development version'),
+                                        bg='white')
                 update_label.pack(side='bottom')
             else:
                 print('Exception while getting server version')
@@ -395,4 +412,4 @@ def hide_update():
 
 def show_update():
     global update_frame
-    update_frame.pack(side='bottom')
+    update_frame.pack(side='bottom', fill='x')
