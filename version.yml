@@ -10,6 +10,8 @@ changelog_en: |
 
   • Colored autologin status text.
 
+  • File structure changed due to update to cx_freeze 6.1.
+
   • Automatically drop mirror download if response time is slow.
 
   • Replaced Text with ScrolledText for displaying changelog.
@@ -121,6 +123,8 @@ changelog_ko: |
   • 메인 UI에 스크롤바를 추가했습니다.
 
   • 자동로그인 상태 표시에 색상을 적용했습니다.
+
+  • cx_freeze 6.1 로의 업데이트로 인해 파일 구조가 변경되었습니다.
 
   • 미러 서버의 응답 속도가 느릴 경우 자동으로 취소합니다.
 
