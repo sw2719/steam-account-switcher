@@ -1267,7 +1267,7 @@ class MainApp(tk.Tk):
             label_var = tk.StringVar()
             label_var.set(_('Waiting for Steam to exit...'))
             label = tk.Label(self, textvariable=label_var, bg='white')
-            label.pack(pady=(90, 0))
+            label.pack(pady=(150, 0))
 
             def cleanup():
                 label.destroy()
