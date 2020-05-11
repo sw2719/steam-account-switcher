@@ -7,7 +7,7 @@ Written in Python
 
 [Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
 
-[See this program in action](https://youtu.be/WFtv10RZ_UA)
+[See this program in action (Doesn't represent the latest version.)](https://youtu.be/WFtv10RZ_UA)
 
 STEAM is a trademark of Valve Corporation.
 
