@@ -39,13 +39,6 @@ try:
     with open('config.yml', 'r') as cfg:
         test_dict = yaml.load(cfg)
 
-    config_invalid = set(['locale', 'try_soft_shutdown',
-                          'show_profilename', 'autoexit',
-                          'mode']) != set(test_dict)
-    value_valid = set(test_dict.values()).issubset(['true', 'false', 'ko_KR',
-                                                    'en_US', 'fr_FR', 'bar',
-                                                    'bracket', 'normal', 'express'])
-
     no_locale = 'locale' not in set(test_dict)
     if not no_locale:
         locale_invalid = test_dict['locale'] not in ('ko_KR', 'en_US', 'fr_FR')
@@ -57,12 +50,6 @@ try:
         try_soft_invalid = test_dict['try_soft_shutdown'] not in ('true', 'false')
     else:
         try_soft_invalid = True
-
-    no_show_profilename = 'show_profilename' not in set(test_dict)
-    if not no_show_profilename:
-        show_profilename_invalid = test_dict['show_profilename'] not in ('bar', 'bracket', 'false')
-    else:
-        show_profilename_invalid = True
 
     no_autoexit = 'autoexit' not in set(test_dict)
     if not no_autoexit:
@@ -76,7 +63,7 @@ try:
     else:
         mode_invalid = True
 
-    if config_invalid or not value_valid or show_profilename_invalid:
+    if True in (locale_invalid, try_soft_invalid, autoexit_invalid, mode_invalid):
         cfg_write = {}
         if no_locale or locale_invalid:
             locale_write = 'en_US'
@@ -86,14 +73,6 @@ try:
             cfg_write['locale'] = locale_write
         else:
             cfg_write['locale'] = test_dict['locale']
-        if no_try_soft or try_soft_invalid:
-            cfg_write['try_soft_shutdown'] = 'true'
-        else:
-            cfg_write['try_soft_shutdown'] = test_dict['try_soft_shutdown']
-        if no_show_profilename or show_profilename_invalid:
-            cfg_write['show_profilename'] = 'bar'
-        else:
-            cfg_write['show_profilename'] = test_dict['show_profilename']
         if no_autoexit or autoexit_invalid:
             cfg_write['autoexit'] = 'true'
         else:

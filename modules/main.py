@@ -451,28 +451,25 @@ class MainApp(tk.Tk):
                                        orient="vertical",
                                        command=canvas.yview)
             for username in self.accounts:
-                if get_config('show_profilename') != 'false':
-                    if loginusers():
-                        AccountName, PersonaName = loginusers()
-                    else:
-                        AccountName, PersonaName = [], []
+                if loginusers():
+                    AccountName, PersonaName = loginusers()
+                else:
+                    AccountName, PersonaName = [], []
 
-                    try:
-                        acc_index = self.accounts.index(username)
-                        profilename = self.acc_dict[acc_index]['customname']
-                    except KeyError:
-                        if username in AccountName:
-                            try:
-                                i = AccountName.index(username)
-                                profilename = PersonaName[i]
-                            except ValueError:
-                                profilename = _('Profile name not available')
-                        else:
+                try:
+                    acc_index = self.accounts.index(username)
+                    profilename = self.acc_dict[acc_index]['customname']
+                except KeyError:
+                    if username in AccountName:
+                        try:
+                            i = AccountName.index(username)
+                            profilename = PersonaName[i]
+                        except ValueError:
                             profilename = _('Profile name not available')
+                    else:
+                        profilename = _('Profile name not available')
 
                     profilename = profilename[:30]
-                else:
-                    profilename = _('Profile name not available')
 
                 menu_dict[username] = tk.Menu(self, tearoff=0)
                 menu_dict[username].add_command(label=_("Set as auto-login account"),
@@ -1064,7 +1061,7 @@ class MainApp(tk.Tk):
 
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry("%sx300+650+300" % width)  # 260 is original
+        settingswindow.geometry("%sx260+650+300" % width)  # 260 is original
         settingswindow.resizable(False, False)
         bottomframe_set = tk.Frame(settingswindow)
         bottomframe_set.pack(side='bottom')
@@ -1101,29 +1098,10 @@ class MainApp(tk.Tk):
 
         restart_label = tk.Label(restart_frame,
                                  text=_('Restart app to apply language settings.'))
-        restart_label.pack()
-
-        showpnames_frame = tk.Frame(settingswindow)
-        showpnames_frame.pack(fill='x', side='top', padx=10, pady=(19, 15))
-
-        showpnames_label = tk.Label(showpnames_frame, text=_('Display profile names'))
-        showpnames_label.pack(side='left', padx=3)
-        showpnames_cb = ttk.Combobox(showpnames_frame,
-                                     state="readonly",
-                                     values=[_('Use bar - |'),  # 0
-                                             _('Use brackets - ( )'),  # 1
-                                             _('Off')])  # 1
-        if config_dict['show_profilename'] == 'bar':
-            showpnames_cb.current(0)
-        elif config_dict['show_profilename'] == 'bracket':
-            showpnames_cb.current(1)
-        elif config_dict['show_profilename'] == 'false':
-            showpnames_cb.current(2)
-
-        showpnames_cb.pack(side='left', padx=3)
+        restart_label.pack(pady=(1, 0))
 
         radio_frame1 = tk.Frame(settingswindow)
-        radio_frame1.pack(side='top', padx=12, pady=(0, 3), fill='x')
+        radio_frame1.pack(side='top', padx=12, pady=(13, 3), fill='x')
         radio_frame2 = tk.Frame(settingswindow)
         radio_frame2.pack(side='top', padx=12, pady=(3, 12), fill='x')
         radio_var = tk.IntVar()
@@ -1180,7 +1158,6 @@ class MainApp(tk.Tk):
             '''Write new config values to config.txt'''
             with open('config.yml', 'w') as cfg:
                 locale = ('en_US', 'ko_KR', 'fr_FR')
-                show_pname = ('bar', 'bracket', 'false')
 
                 if radio_var.get() == 1:
                     mode = 'express'
@@ -1199,7 +1176,6 @@ class MainApp(tk.Tk):
 
                 config_dict = {'locale': locale[locale_cb.current()],
                                'try_soft_shutdown': soft_shutdown,
-                               'show_profilename': show_pname[showpnames_cb.current()],
                                'autoexit': autoexit,
                                'mode': mode}
 
