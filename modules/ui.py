@@ -40,6 +40,8 @@ class ButtonwithLabels:
         self.frame.bind('<Leave>', lambda event: self.__leave())
         self.onbutton = False
         self.clicked = False
+        self.onpress = False
+        self.enabled = True
 
         sections = [i.split('>') for i in text.split('<')[1:]]
 
@@ -94,13 +96,28 @@ class ButtonwithLabels:
     def __enter(self):
         self.onbutton = True
 
+        if self.clicked:
+            self.frame.config(bg='grey')
+
+            for label in self.label_dict.values():
+                label.config(bg='grey')
+        elif self.enabled:
+            self.frame.config(bg='#ededed')
+
+            for label in self.label_dict.values():
+                label.config(bg='#ededed')
+
     def __leave(self):
         self.onbutton = False
 
-        if self.clicked:
-            self.__release()
+        if self.clicked or self.enabled:
+            self.frame.config(bg='white')
+
+            for label in self.label_dict.values():
+                label.config(bg='white')
 
     def enable(self):
+        self.enabled = True
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.frame.config(bg='white')
@@ -116,6 +133,7 @@ class ButtonwithLabels:
             label.config(bg='white')
 
     def disable(self):
+        self.enabled = False
         self.frame.unbind('<Button-1>')
         self.frame.unbind('<ButtonRelease-1>')
         self.frame.config(bg='#cfcfcf')
