@@ -78,17 +78,17 @@ class ButtonwithLabels:
 
     def __click(self):
         self.clicked = True
-        self.frame.config(bg='grey')
+        self.frame.config(bg='#363636')
 
         for label in self.label_dict.values():
-            label.config(bg='grey')
+            label.config(bg='#363636', fg='white')
 
     def __release(self):
         self.clicked = False
         self.frame.config(bg='white')
 
         for label in self.label_dict.values():
-            label.config(bg='white')
+            label.config(bg='white', fg='black')
 
         if self.command and self.onbutton:
             self.command()
@@ -97,10 +97,10 @@ class ButtonwithLabels:
         self.onbutton = True
 
         if self.clicked:
-            self.frame.config(bg='grey')
+            self.frame.config(bg='#363636')
 
             for label in self.label_dict.values():
-                label.config(bg='grey')
+                label.config(bg='#363636', fg='white')
         elif self.enabled:
             self.frame.config(bg='#ededed')
 
@@ -114,7 +114,7 @@ class ButtonwithLabels:
             self.frame.config(bg='white')
 
             for label in self.label_dict.values():
-                label.config(bg='white')
+                label.config(bg='white', fg='black')
 
     def enable(self):
         self.enabled = True
