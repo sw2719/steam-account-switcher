@@ -41,6 +41,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     update_frame.config(bg='white')
 
     if not bundle and not debug:
+        ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 0), fill='x')
+        update_frame.pack(side='bottom', fill='x')
         return
     else:
         update_frame.pack(side='bottom', fill='x')
