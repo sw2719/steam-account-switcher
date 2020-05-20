@@ -1,6 +1,9 @@
 import tkinter as tk
 import tkinter.font as tkfont
 
+COLOR_DISABLED = '#cfcfcf'
+COLOR_CLICKED = '#363636'
+COLOR_HOVER = '#ededed'
 
 class DragDropListbox(tk.Listbox):
     '''Listbox with drag reordering of entries'''
@@ -78,10 +81,10 @@ class ButtonwithLabels:
 
     def __click(self):
         self.clicked = True
-        self.frame.config(bg='#363636')
+        self.frame.config(bg=COLOR_CLICKED)
 
         for label in self.label_dict.values():
-            label.config(bg='#363636', fg='white')
+            label.config(bg=COLOR_CLICKED, fg='white')
 
     def __release(self):
         self.clicked = False
@@ -97,15 +100,15 @@ class ButtonwithLabels:
         self.onbutton = True
 
         if self.clicked:
-            self.frame.config(bg='#363636')
+            self.frame.config(bg=COLOR_CLICKED)
 
             for label in self.label_dict.values():
-                label.config(bg='#363636', fg='white')
+                label.config(bg=COLOR_CLICKED, fg='white')
         elif self.enabled:
-            self.frame.config(bg='#ededed')
+            self.frame.config(bg=COLOR_HOVER)
 
             for label in self.label_dict.values():
-                label.config(bg='#ededed')
+                label.config(bg=COLOR_HOVER)
 
     def __leave(self):
         self.onbutton = False
@@ -127,26 +130,16 @@ class ButtonwithLabels:
             label.bind('<ButtonRelease-1>', lambda event: self.__release())
             label.config(bg='white')
 
-        for label in self.alt_label_dict.values():
-            label.bind('<Button-1>', lambda event: self.__click())
-            label.bind('<ButtonRelease-1>', lambda event: self.__release())
-            label.config(bg='white')
-
     def disable(self):
         self.enabled = False
         self.frame.unbind('<Button-1>')
         self.frame.unbind('<ButtonRelease-1>')
-        self.frame.config(bg='#cfcfcf')
+        self.frame.config(bg=COLOR_DISABLED)
 
         for label in self.label_dict.values():
             label.unbind('<Button-1>')
             label.unbind('<ButtonRelease-1>')
-            label.config(bg='#cfcfcf')
-
-        for label in self.alt_label_dict.values():
-            label.unbind('<Button-1>')
-            label.unbind('<ButtonRelease-1>')
-            label.config(bg='#cfcfcf')
+            label.config(bg=COLOR_DISABLED)
 
     def pack(self, **kw):
         self.frame.pack(**kw)
