@@ -13,9 +13,9 @@ from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config
-from modules.misc import check_running
-from modules.misc import steam_running
-from modules.misc import StoppableThread
+from modules.util import check_running
+from modules.util import steam_running
+from modules.util import StoppableThread
 from modules.update import start_checkupdate
 from modules.update import hide_update
 from modules.update import show_update
