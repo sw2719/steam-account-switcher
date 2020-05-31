@@ -34,6 +34,7 @@ class DragDropListbox(tk.Listbox):
 
 class ButtonwithLabels:
     def __init__(self, master, username, profilename, command=None, rightcommand=None):
+        self.master = master
         self.frame = tk.Frame(master, borderwidth=3)
         self.command = command
         self.frame.config(bg='white')
@@ -43,6 +44,7 @@ class ButtonwithLabels:
         self.frame.bind('<Enter>', lambda event: self.__enter())
         self.frame.bind('<Leave>', lambda event: self.__leave())
 
+        self.current_widget = None
         self.onbutton = False
         self.clicked = False
         self.onpress = False
@@ -65,6 +67,14 @@ class ButtonwithLabels:
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.profile_label.bind('<Button-3>', rightcommand)
 
+    def check_cursor(self, event):
+        widget = event.widget.winfo_containing(event.x_root, event.y_root)
+
+        if widget in (self.frame, self.acc_label, self.profile_label):
+            self.__enter()
+        else:
+            self.__leave()
+
     def color_clicked(self):
         self.frame.config(bg=COLOR_CLICKED)
 
@@ -86,6 +96,7 @@ class ButtonwithLabels:
     def __click(self):
         self.clicked = True
         self.color_clicked()
+        self.master.bind_all("<B1-Motion>", self.check_cursor)
 
     def __release(self):
         self.clicked = False
