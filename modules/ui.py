@@ -96,11 +96,12 @@ class ButtonwithLabels:
     def __click(self):
         self.clicked = True
         self.color_clicked()
-        self.master.bind_all("<B1-Motion>", self.check_cursor)
+        self.master.bind_all('<B1-Motion>', self.check_cursor)
 
     def __release(self):
         self.clicked = False
         self.color_normal()
+        self.master.unbind('<B1-Motion>')
 
         if self.command and self.onbutton:
             self.command()
