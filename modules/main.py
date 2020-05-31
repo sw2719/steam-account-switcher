@@ -1043,6 +1043,7 @@ class MainApp(tk.Tk):
     def settingswindow(self):
         '''Open settings window'''
         config_dict = get_config('all')
+        last_locale = config_dict['locale']
 
         if LOCALE == 'fr_FR':
             width = '330'
@@ -1173,6 +1174,9 @@ class MainApp(tk.Tk):
                 yaml.dump(config_dict, cfg)
 
             self.refresh()
+            if last_locale != locale[locale_cb.current()]:
+                self.after(100, lambda: msgbox.showinfo(_('Locale has been changed'),
+                                                        _('Restart app to apply new locale settings.')))
 
         def ok():
             apply()
