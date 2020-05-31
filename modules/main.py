@@ -485,13 +485,15 @@ class MainApp(tk.Tk):
 
                 if username == fetch_reg('AutoLoginUser'):
                     self.button_dict[username] = ButtonwithLabels(buttonframe,
-                                                                  text=f"<13_BOLD>{username}\n<10>{profilename}",
+                                                                  username=username,
+                                                                  profilename=profilename,
                                                                   command=lambda name=username: self.button_func(name),
                                                                   rightcommand=lambda event, username=username: popup(username, event))
                     self.button_dict[username].disable()
                 else:
                     self.button_dict[username] = ButtonwithLabels(buttonframe,
-                                                                  text=f"<13_BOLD>{username}\n<10>{profilename}",
+                                                                  username=username,
+                                                                  profilename=profilename,
                                                                   command=lambda name=username: self.button_func(name),
                                                                   rightcommand=lambda event, username=username: popup(username, event))
                 self.button_dict[username].pack(fill='x')
