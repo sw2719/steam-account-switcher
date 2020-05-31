@@ -33,18 +33,6 @@ t = gettext.translation('steamswitcher',
 _ = t.gettext
 
 
-def window_height():
-    '''Return window height according to number of accounts'''
-    accounts = acc_getlist()
-    if accounts:
-        to_multiply = len(accounts) - 1
-    else:
-        to_multiply = 0
-    height_int = 160 + 31 * to_multiply
-    height = str(height_int)
-    return height
-
-
 def legacy_restart(silent=True):
     '''Legacy steam restart function for refresh function.
     New restarter with threading doesn't seem to work well with refreshing.'''
