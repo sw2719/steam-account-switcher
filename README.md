@@ -44,7 +44,7 @@ This app has no affiliation with Steam and Valve.
 
 # Source code information
 * All other branches except master are considered as acitve-development branch and might have issues, bugs, WIP features, or might not just work at all.
-* Written in Python 3.7
+* Written in Python 3.7 64-bit
 * Do not run updater.py in python interpreter. It's designed to run only in frozen environment.
 * Requests, packaging, psutil, ruamel.yaml and gettext module are required.
 * threading module needs to be installed if you are using Python version under 3.7.
