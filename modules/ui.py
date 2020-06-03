@@ -69,7 +69,6 @@ class ButtonwithLabels:
 
     def check_cursor(self, event):
         widget = event.widget.winfo_containing(event.x_root, event.y_root)
-        event_widget = str(event.widget)
 
         if widget in (self.frame, self.acc_label, self.profile_label):
             self.__enter()
