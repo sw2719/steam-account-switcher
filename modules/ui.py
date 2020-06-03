@@ -71,9 +71,7 @@ class ButtonwithLabels:
         widget = event.widget.winfo_containing(event.x_root, event.y_root)
         event_widget = str(event.widget)
 
-        if '!canvas' not in event_widget or '!toplevel' in event_widget or '!separator' in event_widget:
-            return
-        elif widget in (self.frame, self.acc_label, self.profile_label):
+        if widget in (self.frame, self.acc_label, self.profile_label):
             self.__enter()
         else:
             self.__leave()
@@ -99,12 +97,16 @@ class ButtonwithLabels:
     def __click(self):
         self.clicked = True
         self.color_clicked()
-        self.master.bind_all('<B1-Motion>', self.check_cursor)
+        self.frame.bind('<B1-Motion>', self.check_cursor)
+        self.acc_label.bind('<B1-Motion>', self.check_cursor)
+        self.profile_label.bind('<B1-Motion>', self.check_cursor)
 
     def __release(self):
         self.clicked = False
         self.color_normal()
         self.master.unbind('<B1-Motion>')
+        self.acc_label.unbind('<B1-Motion>')
+        self.profile_label.unbind('<B1-Motion>')
 
         if self.command and self.onbutton:
             self.command()
