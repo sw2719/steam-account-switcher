@@ -3,6 +3,8 @@ Steam Account Switching made easy (on Windows)
 
 Written in Python
 
+Note that I manage this project to get experience with Python. This is my first Python project.
+
 [이 문서는 한국어로도 읽을 수 있습니다.](https://github.com/sw2719/steam-account-switcher/blob/master/README_ko.md)
 
 [Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
