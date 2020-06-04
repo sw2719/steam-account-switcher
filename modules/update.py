@@ -29,6 +29,8 @@ _ = t.gettext
 
 update_frame = None
 
+#  Update code is a real mess right now. You have been warned.
+
 
 def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     '''Check if application has update'''

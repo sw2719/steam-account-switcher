@@ -37,14 +37,11 @@ def legacy_restart(silent=True):
     '''Legacy steam restart function for refresh function.
     New restarter with threading doesn't seem to work well with refreshing.'''
     try:
-        if get_config('try_soft_shutdown') == 'false':
-            raise FileNotFoundError
         if steam_running():
-            print('Soft shutdown mode')
-            r_path = fetch_reg('SteamExe')
-            r_path_items = r_path.split('/')
+            raw_path = fetch_reg('SteamExe')
+            raw_path_items = raw_path.split('/')
             path_items = []
-            for item in r_path_items:
+            for item in raw_path_items:
                 if ' ' in item:
                     path_items.append(f'"{item}"')
                 else:
@@ -58,36 +55,30 @@ def legacy_restart(silent=True):
 
             counter = 0
 
-            while True:
-                if steam_running():
-                    print('Steam is still running after %s seconds' % str(2 + counter))
-                    if counter <= 10:
-                        counter += 1
-                        sleep(1)
+            while steam_running():
+                print('Steam is still running after %s seconds' % str(2 + counter))
+                if counter <= 10:
+                    counter += 1
+                    sleep(1)
+                    continue
+                else:
+                    msg = msgbox.askyesno(_('Alert'),
+                                          _('After soft shutdown attempt,') + '\n' +
+                                          _('Steam appears to be still running.') + '\n\n' +
+                                          _('Click yes to wait more for 10 seconds or no to force-exit Steam.'))
+                    if msg:
+                        counter = 0
                         continue
                     else:
-                        msg = msgbox.askyesno(_('Alert'),
-                                              _('After soft shutdown attempt,') + '\n' +
-                                              _('Steam appears to be still running.') + '\n\n' +
-                                              _('Click yes to wait more for 10 seconds or no to force-exit Steam.'))
-                        if msg:
-                            counter = 0
-                            continue
-                        else:
-                            raise FileNotFoundError
-                else:
-                    break
+                        raise FileNotFoundError
         else:
             print('Steam is not running.')
     except (FileNotFoundError, subprocess.CalledProcessError):
         print('Hard shutdown mode')
-        try:
-            subprocess.run("TASKKILL /F /IM Steam.exe",
-                           creationflags=0x08000000, check=True)
-            print('TASKKILL command sent.')
-            sleep(1)
-        except subprocess.CalledProcessError:
-            pass
+        subprocess.run("TASKKILL /F /IM Steam.exe",
+                       creationflags=0x08000000, check=True)
+        print('TASKKILL command sent.')
+        sleep(1)
 
     if silent:
         print('Launching Steam silently...')

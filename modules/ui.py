@@ -38,13 +38,13 @@ class ButtonwithLabels:
         self.frame = tk.Frame(master, borderwidth=3)
         self.command = command
         self.frame.config(bg='white')
+
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.frame.bind('<Button-3>', rightcommand)
         self.frame.bind('<Enter>', lambda event: self.__enter())
         self.frame.bind('<Leave>', lambda event: self.__leave())
 
-        self.current_widget = None
         self.onbutton = False
         self.clicked = False
         self.onpress = False
