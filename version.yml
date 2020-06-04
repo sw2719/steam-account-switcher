@@ -227,6 +227,7 @@ changelog_ko: |
 
   • 설정에서 스팀 재시작후 앱이 종료되지 않도록 변경 가능
 mirror_url: http://sw2719.synology.me/mirror.yml
+mirror_url_new: http://sw2719.synology.me/
 msg:
   '2.2':
     ko:

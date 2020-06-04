@@ -137,7 +137,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
             try:  # Check if mirror is available and should we use it
                 if mirror_url:
-                    mirror = req.get(mirror_url, timeout=4)
+                    mirror = req.get(mirror_url + 'mirror.yml', timeout=4)
                     mirror.raise_for_status()
 
                     r_time = mirror.elapsed.total_seconds()
@@ -154,7 +154,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                                            _("If you live outside South East Asia, it is advised not to use it.") + '\n' +
                                            _('(Note that mirror is located in South Korea.)')):
                             print('Using mirror for downloading update...')
-                            dl_url = f'http://sw2719.synology.me/mirror/{mirror_yml["mirror_filename"]}'
+                            dl_url = mirror_url + mirror_yml["mirror_filename"]
                         else:
                             print('User abort')
                             raise req.RequestException
@@ -171,6 +171,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             def download(URL):
                 nonlocal download_q
 
+                # This download speed calculation is not really accurate.
+                # This is my best effort to make real-time one instad of average one.
                 try:
                     r = req.get(URL, stream=True)
                     r.raise_for_status()
@@ -202,16 +204,16 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                             current_in_MB = int(current_in_MB)
 
                         size_delta = current_size - last_size
-                        bps = size_delta * 2
+                        bps = size_delta * 2  # Multiply size delta by 2 since we calculate speed every 0.5s
 
-                        if bps >= 1048576:
+                        if bps >= 1048576:  # Above 1MiB/s
                             dl_spd = bps / 1048576
                             if round(dl_spd, 1).is_integer():
                                 dl_spd = int(dl_spd)
                             else:
                                 dl_spd = round(dl_spd, 1)
                             dl_spd_str = f'{dl_spd}MB/s'
-                        elif bps >= 1024:
+                        elif bps >= 1024:  # Above 1KiB/s
                             dl_spd = bps / 1024
                             if round(dl_spd, 1).is_integer():
                                 dl_spd = int(dl_spd)
@@ -242,14 +244,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 nonlocal dl_speed_var
                 nonlocal dl_prog_var
                 while True:
-                    try:
+                    try:  # Update tk variables
                         q_tuple = download_q.get_nowait()
                         p = q_tuple[0]
                         dl_p.set(p)
-                        dl_prog = q_tuple[1]
-                        dl_prog_var.set(dl_prog)
-                        dl_spd = q_tuple[2]
-                        dl_speed_var.set(dl_spd)
+                        dl_prog_var.set(q_tuple[1])
+                        dl_speed_var.set(q_tuple[2])
                         master.update()
                         if p == 100:
                             return
@@ -313,7 +313,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 pass
 
             try:
-                mirror_url = version_data['mirror_url']
+                mirror_url = version_data['mirror_url_new']
             except KeyError:
                 print('No mirror data')
                 mirror_url = None
