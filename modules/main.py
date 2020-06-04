@@ -60,7 +60,7 @@ def legacy_restart(silent=True):
 
             while True:
                 if steam_running():
-                    print('Steam is still running after %s seconds' % str(counter))
+                    print('Steam is still running after %s seconds' % str(2 + counter))
                     if counter <= 10:
                         counter += 1
                         sleep(1)
@@ -371,9 +371,9 @@ class MainApp(tk.Tk):
 
         def ok(username):
             if name_entry.get().strip() and radio_var.get() == 1:
-                v = name_entry.get()
-                self.acc_dict[i]['customname'] = v
-                print(f"Using custom name '{v}' for '{username}'.")
+                input_name = name_entry.get()
+                self.acc_dict[i]['customname'] = input_name
+                print(f"Using custom name '{input_name}' for '{username}'.")
             elif radio_var.get() == 1:
                 msgbox.showwarning(_('Info'), _('Enter a custom name to use.'), parent=configwindow)
                 return
@@ -395,10 +395,12 @@ class MainApp(tk.Tk):
 
     def button_func(self, username):
         current_user = fetch_reg('AutoLoginUser')
+
         try:
             self.button_dict[current_user].enable()
         except Exception:
             pass
+
         setkey('AutoLoginUser', username, winreg.REG_SZ)
         self.button_dict[username].disable()
         self.user_var.set(fetch_reg('AutoLoginUser'))
@@ -408,7 +410,7 @@ class MainApp(tk.Tk):
             self.exit_after_restart()
 
     def remove_user(self, target):
-        '''Write accounts to accounts.txt except the
+        '''Write accounts to accounts.yml except the
         one which user wants to delete'''
         if msgbox.askyesno(_('Confirm'), _('Are you sure want to remove account %s?') % target):
             acc_dict = acc_getdict()
@@ -447,7 +449,7 @@ class MainApp(tk.Tk):
                 try:
                     acc_index = self.accounts.index(username)
                     profilename = self.acc_dict[acc_index]['customname']
-                except KeyError:
+                except KeyError:  # No custon name set
                     if username in AccountName:
                         try:
                             i = AccountName.index(username)
@@ -459,6 +461,7 @@ class MainApp(tk.Tk):
 
                     profilename = profilename[:30]
 
+                # We have to make a menu for every account! Sounds ridiculous? Me too.
                 menu_dict[username] = tk.Menu(self, tearoff=0)
                 menu_dict[username].add_command(label=_("Set as auto-login account"),
                                                 command=lambda name=username: self.button_func(name))
@@ -471,19 +474,15 @@ class MainApp(tk.Tk):
                 def popup(username, event):
                     menu_dict[username].tk_popup(event.x_root + 86, event.y_root + 13, 0)
 
+                self.button_dict[username] = ButtonwithLabels(buttonframe,
+                                                              username=username,
+                                                              profilename=profilename,
+                                                              command=lambda name=username: self.button_func(name),
+                                                              rightcommand=lambda event, username=username: popup(username, event))
+
                 if username == fetch_reg('AutoLoginUser'):
-                    self.button_dict[username] = ButtonwithLabels(buttonframe,
-                                                                  username=username,
-                                                                  profilename=profilename,
-                                                                  command=lambda name=username: self.button_func(name),
-                                                                  rightcommand=lambda event, username=username: popup(username, event))
                     self.button_dict[username].disable()
-                else:
-                    self.button_dict[username] = ButtonwithLabels(buttonframe,
-                                                                  username=username,
-                                                                  profilename=profilename,
-                                                                  command=lambda name=username: self.button_func(name),
-                                                                  rightcommand=lambda event, username=username: popup(username, event))
+
                 self.button_dict[username].pack(fill='x')
                 ttk.Separator(buttonframe, orient='horizontal').pack(fill='x')
 
@@ -551,6 +550,7 @@ class MainApp(tk.Tk):
         aboutwindow.geometry("%sx180+650+300" % width)
         aboutwindow.resizable(False, False)
         aboutwindow.focus()
+
         about_disclaimer = tk.Label(aboutwindow,
                                     text=_('Warning: The developer of this application is not responsible for')
                                     + '\n' + _('data loss or any other damage from the use of this app.'))
@@ -618,9 +618,7 @@ class MainApp(tk.Tk):
 
         def _on_mousewheel(event):
             '''Scroll window on mousewheel input'''
-            if 'disabled' in scroll_bar.state():
-                return
-            else:
+            if 'disabled' not in scroll_bar.state():
                 canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
         check_frame.bind("<Configure>", lambda event,
@@ -652,7 +650,7 @@ class MainApp(tk.Tk):
             self.withdraw()
 
             msgbox.showinfo('', _('Accounts with expired autologin token will show login prompt.') + '\n\n' +
-                            _('Close the prompt or login to continue the process.'))
+                                _('Close the prompt or login to continue the process.'))  # NOQA
 
             popup = tk.Toplevel()
             popup.title('')
@@ -673,9 +671,8 @@ class MainApp(tk.Tk):
 
             self.update()
 
-            if steam_running():
-                if not check_running('steam.exe'):
-                    setkey('pid', 0, winreg.REG_DWORD, path=r"Software\Valve\Steam\ActiveProcess")
+            if steam_running() and not check_running('steam.exe'):
+                setkey('pid', 0, winreg.REG_DWORD, path=r"Software\Valve\Steam\ActiveProcess")
 
             for username in accounts:
                 if username in to_refresh:
@@ -695,7 +692,7 @@ class MainApp(tk.Tk):
                     popup_var.set(_('Waiting for Steam...'))
                     self.update()
 
-                    while True:
+                    while True:  # Wait for Steam to log in
                         sleep(1)
                         if fetch_reg('ActiveUser') != 0:
                             sleep(4)
@@ -762,19 +759,16 @@ class MainApp(tk.Tk):
             if userinput.strip():
                 cfg = open('accounts.yml', 'w')
                 name_buffer = userinput.split("/")
+                accounts_to_add = [name.strip() for name in name_buffer if name.strip()]
 
-                for name_to_write in name_buffer:
-                    if name_to_write.strip():
-                        if name_to_write not in accounts:
-                            acc_dict[len(acc_dict)] = {
-                                'accountname': name_to_write
-                            }
-                        else:
-                            print('Alert: Account %s already exists!'
-                                  % name_to_write)
-                            msgbox.showinfo(_('Duplicate Alert'),
-                                            _('Account %s already exists.')
-                                            % name_to_write)
+                for name_to_write in accounts_to_add:
+                    if name_to_write not in accounts:
+                        acc_dict[len(acc_dict)] = {'accountname': name_to_write}
+                    else:
+                        print(f'Account {name_to_write} already exists!')
+                        msgbox.showinfo(_('Duplicate Alert'),
+                                        _('Account %s already exists.')
+                                        % name_to_write)
                 with open('accounts.yml', 'w') as acc:
                     yaml = YAML()
                     yaml.dump(acc_dict, acc)
@@ -875,28 +869,26 @@ class MainApp(tk.Tk):
 
         def _on_mousewheel(event):
             '''Scroll window on mousewheel input'''
-            if 'disabled' in scroll_bar.state():
-                return
-            else:
+            if 'disabled' not in scroll_bar.state():
                 canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
         canvas.bind("<MouseWheel>", _on_mousewheel)
 
-        check_dict = {}
+        checkbox_dict = {}
 
-        for i, v in enumerate(AccountName):
-            if v not in accounts:
-                tk_var = tk.IntVar()
+        for index, username in enumerate(AccountName):
+            if username not in accounts:
+                int_var = tk.IntVar()
                 checkbutton = ttk.Checkbutton(check_frame,
-                                              text=v + f' ({PersonaName[i]})',
-                                              variable=tk_var)
+                                              text=username + f' ({PersonaName[index]})',
+                                              variable=int_var)
                 checkbutton.bind("<MouseWheel>", _on_mousewheel)
                 checkbutton.pack(side='top', padx=2, anchor='w')
-                check_dict[v] = tk_var
+                checkbox_dict[username] = int_var
 
         def import_user():
             nonlocal acc_dict
-            for key, value in check_dict.items():
+            for key, value in checkbox_dict.items():
                 if value.get() == 1:
                     acc_dict[len(acc_dict)] = {'accountname': key}
             with open('accounts.yml', 'w') as acc:

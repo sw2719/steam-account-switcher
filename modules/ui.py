@@ -11,14 +11,14 @@ class DragDropListbox(tk.Listbox):
     def __init__(self, master, **kw):
         kw['selectmode'] = tk.SINGLE
         tk.Listbox.__init__(self, master, kw)
-        self.bind('<Button-1>', self.setCurrent)
-        self.bind('<B1-Motion>', self.shiftSelection)
-        self.curIndex = None
+        self.bind('<Button-1>', self.click)
+        self.bind('<B1-Motion>', self.drag)
+        self.cur_index = None
 
-    def setCurrent(self, event):
-        self.curIndex = self.nearest(event.y)
+    def click(self, event):
+        self.cur_index = self.nearest(event.y)
 
-    def shiftSelection(self, event):
+    def drag(self, event):
         i = self.nearest(event.y)
         if i < self.curIndex:
             x = self.get(i)
