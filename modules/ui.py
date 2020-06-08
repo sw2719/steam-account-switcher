@@ -103,7 +103,7 @@ class ButtonwithLabels:
     def __release(self):
         self.clicked = False
         self.color_normal()
-        self.master.unbind('<B1-Motion>')
+        self.frame.unbind('<B1-Motion>')
         self.acc_label.unbind('<B1-Motion>')
         self.profile_label.unbind('<B1-Motion>')
 
