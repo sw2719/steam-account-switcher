@@ -183,6 +183,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 except req.RequestException:
                     msgbox.showerror(_('Error'),
                                      _('Error occured while downloading update.'))
+                    os._exit(1)
 
                 if round(total_in_MB, 1).is_integer():
                     total_in_MB = int(total_in_MB)
