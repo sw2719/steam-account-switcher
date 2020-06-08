@@ -3,7 +3,7 @@ import tkinter.font as tkfont
 
 COLOR_DISABLED = '#cfcfcf'
 COLOR_CLICKED = '#363636'
-COLOR_HOVER = '#ededed'
+COLOR_HOVER = '#f2f2f2'
 
 
 class DragDropListbox(tk.Listbox):
