@@ -316,7 +316,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 pass
 
             try:
-                mirror_url = version_data['mirror_url_new']
+                mirror_url = version_data['mirror_baseurl']
             except KeyError:
                 print('No mirror data')
                 mirror_url = None
