@@ -6,7 +6,7 @@ changelog_en: |
 
   • Fixed issue which even if you clicked on a label and moved cursor out, button would be still selected. (#27)
 
-  • Made selected color more noticable.
+  • Made selected color more noticeable.
 
   • Added a popup notification to restart app when you change locale settings.
 
