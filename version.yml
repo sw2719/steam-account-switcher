@@ -1,6 +1,15 @@
-version: 2.3
+version: '2.3.1'
 changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------2.3.1----------
+
+  • Fixed issue which even if you clicked on a label and moved cursor out, button would be still selected. (#27)
+
+  • Made selected color more noticeable.
+
+  • Added a popup notification to restart app when you change locale settings.
+
 
   ----------2.3----------
 
@@ -116,6 +125,14 @@ changelog_en: |
 changelog_ko: |
   알림: 미러를 사용하지 않을 때 다운로드가 너무 오래 걸릴 경우, GitHub에서 수동으로 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
 
+  ----------2.3.1----------
+
+  • 버튼의 텍스트 부분에 클릭했을 때, 커서를 밖으로 움직여도 버튼이 선택되있던 버그를 수정하였습니다. (#27)
+
+  • 선택 색상을 더 눈에 띄게 수정하였습니다.
+
+  • 이제 언어 설정을 바꾸면, 앱을 재시작하라는 팝업이 표시됩니다.
+
   ----------2.3----------
 
   • 새로운 메인 UI를 적용했습니다.
@@ -227,6 +244,7 @@ changelog_ko: |
 
   • 설정에서 스팀 재시작후 앱이 종료되지 않도록 변경 가능
 mirror_url: http://sw2719.synology.me/mirror.yml
+mirror_baseurl: http://sw2719.synology.me/
 msg:
   '2.2':
     ko:

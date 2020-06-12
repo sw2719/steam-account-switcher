@@ -1,20 +1,24 @@
 import tkinter as tk
 import tkinter.font as tkfont
 
+COLOR_DISABLED = '#cfcfcf'
+COLOR_CLICKED = '#363636'
+COLOR_HOVER = '#f2f2f2'
+
 
 class DragDropListbox(tk.Listbox):
     '''Listbox with drag reordering of entries'''
     def __init__(self, master, **kw):
         kw['selectmode'] = tk.SINGLE
         tk.Listbox.__init__(self, master, kw)
-        self.bind('<Button-1>', self.setCurrent)
-        self.bind('<B1-Motion>', self.shiftSelection)
-        self.curIndex = None
+        self.bind('<Button-1>', self.click)
+        self.bind('<B1-Motion>', self.drag)
+        self.cur_index = None
 
-    def setCurrent(self, event):
-        self.curIndex = self.nearest(event.y)
+    def click(self, event):
+        self.cur_index = self.nearest(event.y)
 
-    def shiftSelection(self, event):
+    def drag(self, event):
         i = self.nearest(event.y)
         if i < self.curIndex:
             x = self.get(i)
@@ -29,66 +33,79 @@ class DragDropListbox(tk.Listbox):
 
 
 class ButtonwithLabels:
-    def __init__(self, master, text='<>', command=None, rightcommand=None):
-        self.frame, self.command = tk.Frame(master, borderwidth=3), command
+    def __init__(self, master, username, profilename, command=None, rightcommand=None):
+        self.master = master
+        self.frame = tk.Frame(master, borderwidth=3)
+        self.command = command
         self.frame.config(bg='white')
+
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.frame.bind('<Button-3>', rightcommand)
-
         self.frame.bind('<Enter>', lambda event: self.__enter())
         self.frame.bind('<Leave>', lambda event: self.__leave())
+
         self.onbutton = False
         self.clicked = False
         self.onpress = False
         self.enabled = True
 
-        sections = [i.split('>') for i in text.split('<')[1:]]
+        username_font = tkfont.Font(weight=tkfont.BOLD, size=13)
+        persona_font = tkfont.Font(size=10)
 
-        self.label_dict = {}
-        self.alt_label_dict = {}
+        self.acc_label = tk.Label(self.frame, text=username, font=username_font)
+        self.acc_label.config(bg='white')
+        self.acc_label.pack(anchor='w', padx=(3, 0))
+        self.acc_label.bind('<Button-1>', lambda event: self.__click())
+        self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.acc_label.bind('<Button-3>', rightcommand)
 
-        for index, section in enumerate(sections):
+        self.profile_label = tk.Label(self.frame, text=profilename, font=persona_font)
+        self.profile_label.config(bg='white')
+        self.profile_label.pack(anchor='w', padx=(3, 0))
+        self.profile_label.bind('<Button-1>', lambda event: self.__click())
+        self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.profile_label.bind('<Button-3>', rightcommand)
 
-            font_decomp, kw = section[0].split('_'), {}
-            for keyword in font_decomp:
-                if keyword == 'BOLD':
-                    kw['weight'] = tkfont.BOLD
-                else:
-                    try:
-                        kw['size'] = int(keyword)
-                    except ValueError:
-                        pass
+    def check_cursor(self, event):
+        widget = event.widget.winfo_containing(event.x_root, event.y_root)
 
-            temp_font = tkfont.Font(**kw)
-            self.label_dict[index] = tk.Label(self.frame, text=section[1].replace('\n', ''), font=temp_font)
-            self.label_dict[index].config(bg='white')
-            self.label_dict[index].pack(anchor='w', padx=(3, 0))
-            self.label_dict[index].bind('<Button-1>', lambda event: self.__click())
-            self.label_dict[index].bind('<ButtonRelease-1>', lambda event: self.__release())
-            self.label_dict[index].bind('<Button-3>', rightcommand)
+        if widget in (self.frame, self.acc_label, self.profile_label):
+            self.__enter()
+        else:
+            self.__leave()
 
-            if section[1].count('\n') >= 1:
-                for i in range(section[1].count('\n') - 1):
-                    self.alt_label_dict[i] = tk.Label(self.frame, text='', font=temp_font)
-                    self.alt_label_dict[i].pack()
-                    self.alt_label_dict[i].bind('<Button-1>', lambda event: self.__click())
-                    self.alt_label_dict[i].bind('<ButtonRelease-1>', lambda event: self.__release())
-                    self.alt_label_dict[i].bind('<Button-3>', rightcommand)
+    def color_clicked(self):
+        self.frame.config(bg=COLOR_CLICKED)
+
+        self.acc_label.config(bg=COLOR_CLICKED, fg='white')
+        self.profile_label.config(bg=COLOR_CLICKED, fg='white')
+
+    def color_hover(self):
+        self.frame.config(bg=COLOR_HOVER)
+
+        self.acc_label.config(bg=COLOR_HOVER)
+        self.profile_label.config(bg=COLOR_HOVER)
+
+    def color_normal(self):
+        self.frame.config(bg='white')
+
+        self.acc_label.config(bg='white', fg='black')
+        self.profile_label.config(bg='white', fg='black')
 
     def __click(self):
         self.clicked = True
-        self.frame.config(bg='grey')
-
-        for label in self.label_dict.values():
-            label.config(bg='grey')
+        self.color_clicked()
+        self.frame.bind('<B1-Motion>', self.check_cursor)
+        self.acc_label.bind('<B1-Motion>', self.check_cursor)
+        self.profile_label.bind('<B1-Motion>', self.check_cursor)
 
     def __release(self):
         self.clicked = False
-        self.frame.config(bg='white')
-
-        for label in self.label_dict.values():
-            label.config(bg='white')
+        self.color_normal()
+        self.frame.unbind('<B1-Motion>')
+        self.acc_label.unbind('<B1-Motion>')
+        self.profile_label.unbind('<B1-Motion>')
 
         if self.command and self.onbutton:
             self.command()
@@ -97,24 +114,15 @@ class ButtonwithLabels:
         self.onbutton = True
 
         if self.clicked:
-            self.frame.config(bg='grey')
-
-            for label in self.label_dict.values():
-                label.config(bg='grey')
+            self.color_clicked()
         elif self.enabled:
-            self.frame.config(bg='#ededed')
-
-            for label in self.label_dict.values():
-                label.config(bg='#ededed')
+            self.color_hover()
 
     def __leave(self):
         self.onbutton = False
 
         if self.clicked or self.enabled:
-            self.frame.config(bg='white')
-
-            for label in self.label_dict.values():
-                label.config(bg='white')
+            self.color_normal()
 
     def enable(self):
         self.enabled = True
@@ -122,31 +130,27 @@ class ButtonwithLabels:
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.frame.config(bg='white')
 
-        for label in self.label_dict.values():
-            label.bind('<Button-1>', lambda event: self.__click())
-            label.bind('<ButtonRelease-1>', lambda event: self.__release())
-            label.config(bg='white')
+        self.acc_label.bind('<Button-1>', lambda event: self.__click())
+        self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.acc_label.config(bg='white')
 
-        for label in self.alt_label_dict.values():
-            label.bind('<Button-1>', lambda event: self.__click())
-            label.bind('<ButtonRelease-1>', lambda event: self.__release())
-            label.config(bg='white')
+        self.profile_label.bind('<Button-1>', lambda event: self.__click())
+        self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.profile_label.config(bg='white')
 
     def disable(self):
         self.enabled = False
         self.frame.unbind('<Button-1>')
         self.frame.unbind('<ButtonRelease-1>')
-        self.frame.config(bg='#cfcfcf')
+        self.frame.config(bg=COLOR_DISABLED)
 
-        for label in self.label_dict.values():
-            label.unbind('<Button-1>')
-            label.unbind('<ButtonRelease-1>')
-            label.config(bg='#cfcfcf')
+        self.acc_label.unbind('<Button-1>')
+        self.acc_label.unbind('<ButtonRelease-1>')
+        self.acc_label.config(bg=COLOR_DISABLED)
 
-        for label in self.alt_label_dict.values():
-            label.unbind('<Button-1>')
-            label.unbind('<ButtonRelease-1>')
-            label.config(bg='#cfcfcf')
+        self.profile_label.unbind('<Button-1>')
+        self.profile_label.unbind('<ButtonRelease-1>')
+        self.profile_label.config(bg=COLOR_DISABLED)
 
     def pack(self, **kw):
         self.frame.pack(**kw)

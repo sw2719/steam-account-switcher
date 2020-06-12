@@ -55,6 +55,7 @@ def loginusers(steam_path=fetch_reg('steampath')):
     except FileNotFoundError:
         return False
 
+    #  Right, I used CamelCasing here because that's the one used in the vdf file.
     AccountName = []
     PersonaName = []
 

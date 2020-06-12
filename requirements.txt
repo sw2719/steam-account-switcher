@@ -1,0 +1,4 @@
+packaging
+psutil
+requests
+ruamel.yaml==0.16.10
