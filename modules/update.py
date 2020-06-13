@@ -156,7 +156,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                                            _("If you live outside South East Asia, it is advised not to use it.") + '\n' +
                                            _('(Note that mirror is located in South Korea.)')):
                             print('Using mirror for downloading update...')
-                            dl_url = mirror_url + mirror_yml["mirror_filename"]
+                            dl_url = f'{mirror_url}mirror/{mirror_yml["mirror_filename"]}'
                         else:
                             print('User abort')
                             raise req.RequestException
