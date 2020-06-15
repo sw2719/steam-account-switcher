@@ -368,8 +368,14 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                                         text=f'Client: {cl_ver_str} / Server: {sv_version} / {update_code} / Click to open UI',
                                         bg='white')
                 update_label.pack(side='bottom')
-                update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
-                update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
+
+                update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version,
+                                                                            changelog=changelog,
+                                                                            mirror_url=mirror_url))
+
+                update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version,
+                                                                            changelog=changelog,
+                                                                            mirror_url=mirror_url))
                 return
 
             if update_code == 'avail':
