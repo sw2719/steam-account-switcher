@@ -156,7 +156,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                                            _("If you live outside South East Asia, it is advised not to use it.") + '\n' +
                                            _('(Note that mirror is located in South Korea.)')):
                             print('Using mirror for downloading update...')
-                            dl_url = mirror_url + mirror_yml["mirror_filename"]
+                            dl_url = f'{mirror_url}mirror/{mirror_yml["mirror_filename"]}'
                         else:
                             print('User abort')
                             raise req.RequestException
@@ -368,8 +368,14 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                                         text=f'Client: {cl_ver_str} / Server: {sv_version} / {update_code} / Click to open UI',
                                         bg='white')
                 update_label.pack(side='bottom')
-                update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
-                update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
+
+                update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version,
+                                                                            changelog=changelog,
+                                                                            mirror_url=mirror_url))
+
+                update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version,
+                                                                            changelog=changelog,
+                                                                            mirror_url=mirror_url))
                 return
 
             if update_code == 'avail':
