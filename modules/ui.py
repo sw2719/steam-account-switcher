@@ -20,16 +20,16 @@ class DragDropListbox(tk.Listbox):
 
     def drag(self, event):
         i = self.nearest(event.y)
-        if i < self.curIndex:
+        if i < self.cur_index:
             x = self.get(i)
             self.delete(i)
             self.insert(i+1, x)
-            self.curIndex = i
-        elif i > self.curIndex:
+            self.cur_index = i
+        elif i > self.cur_index:
             x = self.get(i)
             self.delete(i)
             self.insert(i-1, x)
-            self.curIndex = i
+            self.cur_index = i
 
 
 class ButtonwithLabels:
