@@ -1,6 +1,10 @@
-version: '2.3.2'
+version: '2.3.3'
 changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------2.3.3----------
+
+  • Fixed drag and drop in accounts order editing not working
 
   ----------2.3.2----------
 
@@ -129,9 +133,13 @@ changelog_en: |
 changelog_ko: |
   알림: 미러를 사용하지 않을 때 다운로드가 너무 오래 걸릴 경우, GitHub에서 수동으로 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
 
+  ----------2.3.3----------
+
+  • 계정 순서 편집에서 드래그 앤 드롭이 되지 않던 현상을 수정하였습니다.
+
   ----------2.3.2----------
 
-  • 미러 다운로드가 불가능하던 현상을 수정했습니다.
+  • 미러 다운로드가 불가능하던 현상을 수정하였습니다.
 
   ----------2.3.1----------
 
