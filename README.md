@@ -42,15 +42,16 @@ This app has no affiliation with Steam and Valve.
 * Your account names are saved in accounts.yml located in the same folder where exe file is.
 
 4. Click one of the buttons to change to desired account.
-* IMPORTANT: If it's your first time using account switcher with selected account or login prompt appears, Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code. 
-  - **You need to do this EVERY TIME you add new accounts. And if you don't login for certain amount of time, you will have to do this again due to Steam revoking your autologin access.**
+* Steam login prompt might appear if you are using this program for the first time. Just check 'Remember password' and login. It will work next time. 
+  - You need to do this for every account except the one you have been using as autologin account prior to using this program.
+  - **If you ever add more accounts, you have to do this for them as well. And if you don't login to certain account for a while, you will have to do this again for that account due to Steam revoking autologin access.**
 
 # FAQ
 * Login prompt appears! Fake program!
   - See How to use-4. Right above.
 
 * Windows SmartScreen says this program is potentially harmful!
-  - I didn't sign my executable with EV certificate which is expensive as f#@!. Great job, M$.
+  - That's because I didn't sign my executable with EV certificate which is expensive as f#@!. Great job, M$.
 
 * I have a request! / I found a bug!
   - Bug reports and requests are always welcome. Please submit a issue.
