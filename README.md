@@ -44,6 +44,16 @@ This app has no affiliation with Steam and Valve.
 4. Click one of the buttons to change to desired account.
 * IMPORTANT: If it's your first time using account switcher with selected account or login prompt appears, Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code. **You need to do this EVERY TIME you add new accounts. And if you don't login for certain amount of time, you will have to do this again due to Steam revoking your autologin access.**
 
+# FAQ
+* Login prompt appears! Fake program!
+- See How to use-4. Right above.
+
+* Windows SmartScreen says this program is potentially harmful!
+- I didn't sign my executable with EV certificate which is expensive as f#@!. Great job, M$.
+
+* I have a request! / I found a bug!
+- Bug reports and requests are always welcome. Please submit a issue.
+
 # Source code information
 * All other branches except master are considered as acitve-development branch and might have issues, bugs, WIP features, or might not just work at all.
 * Written in Python 3.7 64-bit
