@@ -904,6 +904,11 @@ class MainApp(tk.Tk):
         '''Open order change window'''
         accounts = acc_getlist()
 
+        if not accounts:
+            msgbox.showinfo(_('No Accounts'),
+                            _("There's no account added."))
+            return
+
         orderwindow = tk.Toplevel(self)
         orderwindow.title("")
         orderwindow.geometry("210x270+650+300")
