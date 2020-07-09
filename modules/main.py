@@ -431,24 +431,28 @@ class MainApp(tk.Tk):
             scroll_bar = ttk.Scrollbar(self.button_frame,
                                        orient="vertical",
                                        command=canvas.yview)
+
             for username in self.accounts:
-                if loginusers():
-                    AccountName, PersonaName = loginusers()
+                steam64_list, account_name, persona_name = loginusers()
+
+                if username in account_name:
+                    i = account_name.index(username)
                 else:
-                    AccountName, PersonaName = [], []
+                    i = None
 
                 try:
                     acc_index = self.accounts.index(username)
                     profilename = self.acc_dict[acc_index]['customname']
-                except KeyError:  # No custon name set
-                    if username in AccountName:
-                        try:
-                            i = AccountName.index(username)
-                            profilename = PersonaName[i]
-                        except ValueError:
-                            profilename = _('Profile name not available')
+
+                except KeyError:  # No custom name set
+                    if i is not None:  # i could be 0 so we can't use if i:
+                        profilename = persona_name[i]
                     else:
                         profilename = _('Profile name not available')
+
+                finally:
+                    if i is not None:  # i could be 0 so we can't use if i:
+                        steam64 = steam64_list[i]
 
                     profilename = profilename[:30]
 
@@ -457,6 +461,11 @@ class MainApp(tk.Tk):
                 menu_dict[username].add_command(label=_("Set as auto-login account"),
                                                 command=lambda name=username: self.button_func(name))
                 menu_dict[username].add_separator()
+
+                if i is not None:  # i could be 0 so we can't use if i:
+                    menu_dict[username].add_command(label=_('Open profile in browser'),
+                                                    command=lambda steam64id=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steam64id}'))
+
                 menu_dict[username].add_command(label=_("Name settings"),
                                                 command=lambda name=username, pname=profilename: self.configwindow(name, pname))
                 menu_dict[username].add_command(label=_("Delete"),

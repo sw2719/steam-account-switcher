@@ -53,11 +53,11 @@ def loginusers(steam_path=fetch_reg('steampath')):
         with open(vdf_file, 'r', encoding='utf-8') as vdf_file:
             vdf = vdf_file.read().splitlines()
     except FileNotFoundError:
-        return False
+        return [], [], []
 
-    #  Right, I used CamelCasing here because that's the one used in the vdf file.
-    AccountName = []
-    PersonaName = []
+    steam64_list = []
+    account_name = []
+    persona_name = []
 
     rep = {"\t": "", '"': ""}
     rep = dict((re.escape(k), v) for k, v in rep.items())
@@ -65,8 +65,10 @@ def loginusers(steam_path=fetch_reg('steampath')):
 
     for i, v in enumerate(vdf):
         if v == "\t{":
-            account = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+1])  # NOQA
-            persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])  # NOQA
-            AccountName.append(account.replace("AccountName", ""))
-            PersonaName.append(persona.replace("PersonaName", ""))
-    return AccountName, PersonaName
+            steam64 = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i-1])
+            account = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+1])
+            persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])
+            steam64_list.append(steam64)
+            account_name.append(account.replace("AccountName", ""))
+            persona_name.append(persona.replace("PersonaName", ""))
+    return steam64_list, account_name, persona_name
