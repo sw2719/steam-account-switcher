@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-09 16:51+0900\n"
-"PO-Revision-Date: 2020-07-09 17:23+0900\n"
+"POT-Creation-Date: 2020-07-16 19:43+0900\n"
+"PO-Revision-Date: 2020-07-16 19:43+0900\n"
 "Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -115,9 +115,13 @@ msgstr "Redémarrer Steam"
 msgid "Current Auto-login user:"
 msgstr "Utilisateur actuel de connexion automatique :"
 
+#: modules/main.py:224
+msgid "Welcome"
+msgstr "Bienvenue"
+
 #: modules/main.py:233
-msgid "Select mode you desire."
-msgstr "Sélectionnez le mode que vous désirez."
+msgid "Please select restart mode."
+msgstr "Sélectionner le mode de redémarrage."
 
 #: modules/main.py:240
 msgid "Normal Mode"
@@ -504,6 +508,9 @@ msgstr "Version de développement"
 #: modules/update.py:409
 msgid "Failed to check for updates"
 msgstr "Impossible de modifier la valeur de registre"
+
+#~ msgid "Select mode you desire."
+#~ msgstr "Sélectionnez le mode que vous désirez."
 
 #~ msgid "Display profile names"
 #~ msgstr "Afficher les noms de profil"

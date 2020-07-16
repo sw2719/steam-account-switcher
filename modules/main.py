@@ -221,7 +221,7 @@ class MainApp(tk.Tk):
             width = '270'
 
         welcomewindow = tk.Toplevel(self)
-        welcomewindow.title('Welcome')
+        welcomewindow.title(_('Welcome'))
         welcomewindow.geometry("%sx230+650+320" % width)
         welcomewindow.resizable(False, False)
         welcomewindow.protocol("WM_DELETE_WINDOW", close_function)
@@ -230,7 +230,7 @@ class MainApp(tk.Tk):
         upper_frame = tk.Frame(welcomewindow)
         upper_frame.pack(side='top')
 
-        tk.Label(upper_frame, text=_('Select mode you desire.')).pack(pady=(4, 3))
+        tk.Label(upper_frame, text=_('Please select restart mode.')).pack(pady=(4, 3))
 
         radio_frame1 = tk.Frame(welcomewindow)
         radio_frame1.pack(side='top', padx=20, pady=(4, 10), fill='x')
@@ -800,7 +800,7 @@ class MainApp(tk.Tk):
         accounts = acc_getlist()
         acc_dict = acc_getdict()
         if loginusers():
-            AccountName, PersonaName = loginusers()
+            steamid, account_name, persona_name = loginusers()
         else:
             try_manually = msgbox.askyesno(_('Alert'), _('Could not load loginusers.vdf.') + '\n' +
                                            _('This may be because Steam directory defined') + '\n' +
@@ -810,7 +810,7 @@ class MainApp(tk.Tk):
                 while True:
                     input_dir = filedialog.askdirectory()
                     if loginusers(steam_path=input_dir):
-                        AccountName, PersonaName = loginusers(steam_path=input_dir)
+                        account_name, persona_name = loginusers(steam_path=input_dir)
                         with open('steam_path.txt', 'w') as path:
                             path.write(input_dir)
                         break
@@ -825,7 +825,7 @@ class MainApp(tk.Tk):
             else:
                 return
 
-        if set(AccountName).issubset(set(acc_getlist())):
+        if set(account_name).issubset(set(acc_getlist())):
             msgbox.showinfo(_('Info'), _("There's no account left to add."))
             return
 
@@ -876,11 +876,11 @@ class MainApp(tk.Tk):
 
         checkbox_dict = {}
 
-        for index, username in enumerate(AccountName):
+        for index, username in enumerate(account_name):
             if username not in accounts:
                 int_var = tk.IntVar()
                 checkbutton = ttk.Checkbutton(check_frame,
-                                              text=username + f' ({PersonaName[index]})',
+                                              text=username + f' ({persona_name[index]})',
                                               variable=int_var)
                 checkbutton.bind("<MouseWheel>", _on_mousewheel)
                 checkbutton.pack(side='top', padx=2, anchor='w')
