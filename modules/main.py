@@ -108,7 +108,7 @@ class MainApp(tk.Tk):
                          command=self.importwindow)
         menu.add_command(label=_("Add accounts"),
                          command=self.addwindow)
-        menu.add_command(label=_("Edit account order"),
+        menu.add_command(label=_("Edit account list"),
                          command=self.orderwindow)
         menu.add_command(label=_("Refresh autologin"),
                          command=self.refreshwindow)

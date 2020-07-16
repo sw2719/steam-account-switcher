@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-16 19:43+0900\n"
-"PO-Revision-Date: 2020-07-16 19:43+0900\n"
+"POT-Creation-Date: 2020-07-16 19:49+0900\n"
+"PO-Revision-Date: 2020-07-16 19:49+0900\n"
 "Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -64,8 +64,8 @@ msgid "Add accounts"
 msgstr "Ajouter des comptes"
 
 #: modules/main.py:111
-msgid "Edit account order"
-msgstr "Modifier l'ordre des comptes"
+msgid "Edit account list"
+msgstr "Modifier la liste des comptes"
 
 #: modules/main.py:113
 msgid "Refresh autologin"

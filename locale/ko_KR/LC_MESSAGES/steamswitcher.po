@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-16 19:42+0900\n"
-"PO-Revision-Date: 2020-07-16 19:43+0900\n"
+"POT-Creation-Date: 2020-07-16 19:49+0900\n"
+"PO-Revision-Date: 2020-07-16 19:49+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -65,8 +65,8 @@ msgid "Add accounts"
 msgstr "계정 추가"
 
 #: modules/main.py:111
-msgid "Edit account order"
-msgstr "계정 순서 편집"
+msgid "Edit account list"
+msgstr "계정 목록 편집"
 
 #: modules/main.py:113
 msgid "Refresh autologin"
