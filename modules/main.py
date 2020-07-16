@@ -495,9 +495,9 @@ class MainApp(tk.Tk):
 
             def _on_mousewheel(event):
                 '''Scroll window on mousewheel input'''
-                if 'disabled' in scroll_bar.state():
-                    return
-                else:
+                widget = event.widget.winfo_containing(event.x_root, event.y_root)
+
+                if 'disabled' not in scroll_bar.state() and '!canvas' in str(widget):
                     canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
             buttonframe.bind("<Configure>", lambda event,
