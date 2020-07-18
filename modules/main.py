@@ -99,7 +99,7 @@ class MainApp(tk.Tk):
         self['bg'] = 'white'
         self.title(_("Account Switcher"))
 
-        self.geometry("300x438+600+250")
+        self.geometry("300x452+600+250")
         self.resizable(False, False)
 
         menubar = tk.Menu(self, bg='white')
@@ -123,8 +123,12 @@ class MainApp(tk.Tk):
 
         if not bundle:
             debug_menu = tk.Menu(menubar, tearoff=0)
-            debug_menu.add_command(label='Update Debug',
+            debug_menu.add_command(label='Check for updates with debug mode',
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, bundle, debug=True)))
+            debug_menu.add_command(label='Check for updates without debug mode',
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True)))
+            debug_menu.add_command(label='Check for updates (with exception)',
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True, exception=True)))
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         self.bottomframe = tk.Frame(self, bg='white')
@@ -488,7 +492,7 @@ class MainApp(tk.Tk):
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
-            h = 52 * len(self.accounts)
+            h = 50 * len(self.accounts)
             canvas.create_window((0, 0), height=h, width=285, window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())

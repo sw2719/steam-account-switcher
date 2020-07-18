@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.ttk as ttk
 import tkinter.font as tkfont
 
 COLOR_DISABLED = '#cfcfcf'
@@ -37,7 +38,7 @@ class ButtonwithLabels:
         self.master = master
         self.frame = tk.Frame(master, borderwidth=3)
         self.command = command
-        self.frame.config(bg='white')
+        self.frame.config(background='white')
 
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
@@ -51,17 +52,16 @@ class ButtonwithLabels:
         self.enabled = True
 
         username_font = tkfont.Font(weight=tkfont.BOLD, size=13)
-        persona_font = tkfont.Font(size=10)
 
-        self.acc_label = tk.Label(self.frame, text=username, font=username_font)
-        self.acc_label.config(bg='white')
+        self.acc_label = ttk.Label(self.frame, text=username, font=username_font)
+        self.acc_label.config(background='white')
         self.acc_label.pack(anchor='w', padx=(3, 0))
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.acc_label.bind('<Button-3>', rightcommand)
 
-        self.profile_label = tk.Label(self.frame, text=profilename, font=persona_font)
-        self.profile_label.config(bg='white')
+        self.profile_label = ttk.Label(self.frame, text=profilename)
+        self.profile_label.config(background='white')
         self.profile_label.pack(anchor='w', padx=(3, 0))
         self.profile_label.bind('<Button-1>', lambda event: self.__click())
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
@@ -76,22 +76,22 @@ class ButtonwithLabels:
             self.__leave()
 
     def color_clicked(self):
-        self.frame.config(bg=COLOR_CLICKED)
+        self.frame.config(background=COLOR_CLICKED)
 
-        self.acc_label.config(bg=COLOR_CLICKED, fg='white')
-        self.profile_label.config(bg=COLOR_CLICKED, fg='white')
+        self.acc_label.config(background=COLOR_CLICKED, foreground='white')
+        self.profile_label.config(background=COLOR_CLICKED, foreground='white')
 
     def color_hover(self):
-        self.frame.config(bg=COLOR_HOVER)
+        self.frame.config(background=COLOR_HOVER)
 
-        self.acc_label.config(bg=COLOR_HOVER)
-        self.profile_label.config(bg=COLOR_HOVER)
+        self.acc_label.config(background=COLOR_HOVER)
+        self.profile_label.config(background=COLOR_HOVER)
 
     def color_normal(self):
-        self.frame.config(bg='white')
+        self.frame.config(background='white')
 
-        self.acc_label.config(bg='white', fg='black')
-        self.profile_label.config(bg='white', fg='black')
+        self.acc_label.config(background='white', foreground='black')
+        self.profile_label.config(background='white', foreground='black')
 
     def __click(self):
         self.clicked = True
@@ -128,29 +128,29 @@ class ButtonwithLabels:
         self.enabled = True
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
-        self.frame.config(bg='white')
+        self.frame.config(background='white')
 
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
-        self.acc_label.config(bg='white')
+        self.acc_label.config(background='white')
 
         self.profile_label.bind('<Button-1>', lambda event: self.__click())
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
-        self.profile_label.config(bg='white')
+        self.profile_label.config(background='white')
 
     def disable(self):
         self.enabled = False
         self.frame.unbind('<Button-1>')
         self.frame.unbind('<ButtonRelease-1>')
-        self.frame.config(bg=COLOR_DISABLED)
+        self.frame.config(background=COLOR_DISABLED)
 
         self.acc_label.unbind('<Button-1>')
         self.acc_label.unbind('<ButtonRelease-1>')
-        self.acc_label.config(bg=COLOR_DISABLED)
+        self.acc_label.config(background=COLOR_DISABLED)
 
         self.profile_label.unbind('<Button-1>')
         self.profile_label.unbind('<ButtonRelease-1>')
-        self.profile_label.config(bg=COLOR_DISABLED)
+        self.profile_label.config(background=COLOR_DISABLED)
 
     def pack(self, **kw):
         self.frame.pack(**kw)
