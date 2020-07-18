@@ -1,6 +1,18 @@
-version: '2.3.3'
+version: '2.4'
 changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------2.4----------
+
+  • Now user can open an account's steam profile in browser via right click menu.
+
+  • Now user can attempt to check for updates again when error has occured.
+
+  • Use system font for profile names / custom names
+
+  • Show update status message only if error has occured or update is available for cleaner menu.
+
+  • A few UI string changes
 
   ----------2.3.3----------
 
@@ -132,6 +144,18 @@ changelog_en: |
 
 changelog_ko: |
   알림: 미러를 사용하지 않을 때 다운로드가 너무 오래 걸릴 경우, GitHub에서 수동으로 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------2.4----------
+
+  • 이제 우클릭 메뉴로 그 계정의 프로필을 열 수 있습니다.
+
+  • 이제 업데이트 확인 중 오류가 발생할 경우 다시 시도가 가능합니다.
+
+  • 프로필 이름 / 커스텀 이름을 표시하는데 시스템 글꼴을 사용합니다.
+
+  • 깔끔한 UI를 위해 업데이트 확인 중 오류가 발생했거나 업데이트가 있는 경우에만 메시지가 표시됩니다.
+
+  • 몇몇 UI 문자열이 수정되었습니다.
 
   ----------2.3.3----------
 
