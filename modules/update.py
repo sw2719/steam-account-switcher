@@ -441,8 +441,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                                         text=_('Failed checking for updates. Click here to try again.'),
                                         bg='white',
                                         fg='red')
-                update_frame.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, version, URL, bundle, debug=debug))
-                update_label.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, version, URL, bundle, debug=debug))
+                update_frame.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, cl_ver_str, URL, bundle, debug=debug))
+                update_label.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, cl_ver_str, URL, bundle, debug=debug))
                 update_label.pack(side='bottom')
         except q.Empty:
             master.after(300, get_output)
