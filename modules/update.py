@@ -32,9 +32,14 @@ update_frame = None
 #  Update code is a real mess right now. You have been warned.
 
 
-def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
+def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
     '''Check if application has update'''
     global update_frame
+
+    try:
+        exception = kw['exception']
+    except KeyError:
+        exception = False
 
     if update_frame is not None:
         update_frame.destroy()
@@ -49,9 +54,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     else:
         update_frame.pack(side='bottom', fill='x')
 
-    ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
-    checking_label = tk.Label(update_frame, text=_('Checking for updates...'), bg='white')
-    checking_label.pack()
+    ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 0), fill='x')
     master.update()
 
     def update(sv_version, changelog, mirror_url):
@@ -158,7 +161,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                             print('Using mirror for downloading update...')
                             dl_url = f'{mirror_url}mirror/{mirror_yml["mirror_filename"]}'
                         else:
-                            print('User abort')
+                            print('User cancelled mirror download.')
                             raise req.RequestException
                     else:
                         print('Mirror validation error.')
@@ -173,8 +176,6 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             def download(URL):
                 nonlocal download_q
 
-                # This download speed calculation is not really accurate.
-                # This is my best effort to make real-time one instad of average one.
                 try:
                     r = req.get(URL, stream=True)
                     r.raise_for_status()
@@ -198,6 +199,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
                 last_size = 0
 
+                # This download speed calculation is not really accurate.
+                # This is my best effort to make real-time one instad of average one.
                 while True:
                     try:
                         current_size = os.path.getsize('update.zip')
@@ -292,6 +295,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
         print('Update check start')
         update = None
         try:
+            if exception:
+                raise req.RequestException
             response = req.get(URL)
             response.encoding = 'utf-8'
             text = response.text
@@ -339,6 +344,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             update = 'error'
             sv_version_str = '0'
             changelog = None
+            mirror_url = None
+
         queue.put((update, sv_version_str, changelog, mirror_url))
 
     update_code = None
@@ -348,11 +355,11 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
     def get_output():
         '''Get version info from checkupdate() and draw UI accordingly.'''
+        global update_frame
         nonlocal update_code
         nonlocal sv_version
         nonlocal changelog
         nonlocal mirror_url
-        nonlocal checking_label
         nonlocal debug
         try:
             v = queue.get_nowait()
@@ -360,10 +367,16 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             sv_version = v[1]
             changelog = v[2]
             mirror_url = v[3]
-            checking_label.destroy()
 
             if debug:
                 print('Update debug mode')
+
+                update_frame.destroy()
+
+                update_frame = tk.Frame(master, bg='white')
+                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                update_frame.pack(side='bottom', fill='x')
+
                 update_label = tk.Label(update_frame,
                                         text=f'Client: {cl_ver_str} / Server: {sv_version} / {update_code} / Click to open UI',
                                         bg='white')
@@ -381,6 +394,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             if update_code == 'avail':
                 print('Update Available')
 
+                update_frame.destroy()
+
+                update_frame = tk.Frame(master, bg='white')
+                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                update_frame.pack(side='bottom', fill='x')
+
                 update_label = tk.Label(update_frame,
                                         text=_('Version %s is available. Click here to update!') % sv_version,
                                         bg='white',
@@ -391,12 +410,19 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             elif update_code == 'latest':
                 print('On latest version')
 
-                update_label = tk.Label(update_frame,
-                                        text=_('Using the latest version'),
-                                        bg='white')
-                update_label.pack(side='bottom')
+                update_frame.destroy()
+
+                update_frame = tk.Frame(master, bg='white')
+                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 0), fill='x')
+                update_frame.pack(side='bottom', fill='x')
             elif update_code == 'dev':
                 print('Development version')
+
+                update_frame.destroy()
+
+                update_frame = tk.Frame(master, bg='white')
+                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                update_frame.pack(side='bottom', fill='x')
 
                 update_label = tk.Label(update_frame,
                                         text=_('Development version'),
@@ -405,8 +431,18 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             else:
                 print('Exception while getting server version')
 
+                update_frame.destroy()
+
+                update_frame = tk.Frame(master, bg='white')
+                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                update_frame.pack(side='bottom', fill='x')
+
                 update_label = tk.Label(update_frame,
-                                        text=_('Failed to check for updates'))  # NOQA
+                                        text=_('Failed checking for updates. Click here to try again.'),
+                                        bg='white',
+                                        fg='red')
+                update_frame.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, version, URL, bundle, debug=debug))
+                update_label.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, version, URL, bundle, debug=debug))
                 update_label.pack(side='bottom')
         except q.Empty:
             master.after(300, get_output)
