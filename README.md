@@ -1,5 +1,5 @@
 # Steam Account Switcher
-Steam Account Switching made easy (on Windows)
+Lightweight, fast account switcher for Steam.
 
 Written in Python
 
