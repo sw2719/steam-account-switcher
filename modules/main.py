@@ -100,9 +100,10 @@ class MainApp(tk.Tk):
         self['bg'] = 'white'
         self.title(_("Account Switcher"))
 
-        self.geometry("300x452+600+250")
+        self.geometry("300x472+600+250")
         self.resizable(False, False)
 
+        self.iconbitmap('icon.ico')
         menubar = tk.Menu(self, bg='white')
         menu = tk.Menu(menubar, tearoff=0)
         menu.add_command(label=_('Import accounts from Steam'),
@@ -113,6 +114,8 @@ class MainApp(tk.Tk):
                          command=self.orderwindow)
         menu.add_command(label=_("Refresh autologin"),
                          command=self.refreshwindow)
+        menu.add_command(label=_("Update avatar images"),
+                         command=self.update_avatar)
         menu.add_separator()
         menu.add_command(label=_("Settings"),
                          command=self.settingswindow)
@@ -548,6 +551,11 @@ class MainApp(tk.Tk):
 
         print('Menu refreshed with %s account(s)' % len(self.accounts))
 
+    def update_avatar(self):
+        steamid_list = loginusers()[0]
+        download_avatar(steamid_list)
+        self.refresh()
+
     def about(self, version):
         '''Open about window'''
 
@@ -738,6 +746,7 @@ class MainApp(tk.Tk):
         '''Open add accounts window'''
         accounts = acc_getlist()
         acc_dict = acc_getdict()
+        steamid_list, account_name, persona_name = loginusers()
 
         addwindow = tk.Toplevel(self)
         addwindow.title(_("Add"))
@@ -763,18 +772,23 @@ class MainApp(tk.Tk):
         account_entry.focus()
 
         def adduser(userinput):
-            nonlocal acc_dict
             '''Write accounts from user's input to accounts.yml
             :param userinput: Account names to add
             '''
+            nonlocal acc_dict
+            dl_list = []
+
             if userinput.strip():
-                cfg = open('accounts.yml', 'w')
                 name_buffer = userinput.split("/")
                 accounts_to_add = [name.strip() for name in name_buffer if name.strip()]
 
                 for name_to_write in accounts_to_add:
                     if name_to_write not in accounts:
                         acc_dict[len(acc_dict)] = {'accountname': name_to_write}
+
+                        if name_to_write in account_name:
+                            dl_list.append(steamid_list[account_name.index(name_to_write)])
+
                     else:
                         print(f'Account {name_to_write} already exists!')
                         msgbox.showinfo(_('Duplicate Alert'),
@@ -784,7 +798,9 @@ class MainApp(tk.Tk):
                     yaml = YAML()
                     yaml.dump(acc_dict, acc)
 
-                cfg.close()
+                if dl_list:
+                    download_avatar(dl_list)
+
                 self.refresh()
             addwindow.destroy()
 
@@ -811,7 +827,7 @@ class MainApp(tk.Tk):
         accounts = acc_getlist()
         acc_dict = acc_getdict()
         if loginusers():
-            steamid, account_name, persona_name = loginusers()
+            steamid_list, account_name, persona_name = loginusers()
         else:
             try_manually = msgbox.askyesno(_('Alert'), _('Could not load loginusers.vdf.') + '\n' +
                                            _('This may be because Steam directory defined') + '\n' +
@@ -821,7 +837,7 @@ class MainApp(tk.Tk):
                 while True:
                     input_dir = filedialog.askdirectory()
                     if loginusers(steam_path=input_dir):
-                        account_name, persona_name = loginusers(steam_path=input_dir)
+                        steamid_list, account_name, persona_name = loginusers(steam_path=input_dir)
                         with open('steam_path.txt', 'w') as path:
                             path.write(input_dir)
                         break
@@ -899,12 +915,18 @@ class MainApp(tk.Tk):
 
         def import_user():
             nonlocal acc_dict
+            dl_list = []
+
             for key, value in checkbox_dict.items():
                 if value.get() == 1:
                     acc_dict[len(acc_dict)] = {'accountname': key}
+                    dl_list.append(steamid_list[account_name.index(key)])
+
             with open('accounts.yml', 'w') as acc:
                 yaml = YAML()
                 yaml.dump(acc_dict, acc)
+
+            download_avatar(dl_list)
             self.refresh()
             close()
 
