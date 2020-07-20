@@ -6,7 +6,6 @@ import sys
 import gettext
 from PIL import Image, ImageTk
 from modules.config import get_config
-from modules.avatar import download_avatar
 from ruamel.yaml import YAML
 
 COLOR_DISABLED = '#cfcfcf'
@@ -252,7 +251,6 @@ class WelcomeWindow(tk.Toplevel):
 
             if 'selected' in self.avatar_chkb.state():
                 self.avatar = 'true'
-                download_avatar()
             else:
                 self.avatar = 'false'
 
