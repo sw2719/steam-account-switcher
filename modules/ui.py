@@ -1,12 +1,24 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.font as tkfont
+import os
+import sys
+import gettext
 from PIL import Image, ImageTk
 from modules.config import get_config
+from modules.avatar import download_avatar
+from ruamel.yaml import YAML
 
 COLOR_DISABLED = '#cfcfcf'
 COLOR_CLICKED = '#363636'
 COLOR_HOVER = '#f2f2f2'
+yaml = YAML()
+
+t = gettext.translation('steamswitcher',
+                        localedir='locale',
+                        languages=[get_config('locale')],
+                        fallback=True)
+_ = t.gettext
 
 
 class DragDropListbox(tk.Listbox):
@@ -181,3 +193,158 @@ class AccountButton:
 
     def pack(self, **kw):
         self.frame.pack(**kw)
+
+
+class WelcomeWindow(tk.Toplevel):
+    def __init__(self):
+        tk.Toplevel.__init__(self)
+        self.title(_('Welcome'))
+        self.geometry("300x230+650+320")
+        self.resizable(False, False)
+        self.protocol("WM_DELETE_WINDOW", self.on_window_close)
+        self.focus()
+
+        self.radio_var = tk.IntVar()
+        self.active_page = 0
+
+        self.upper_frame = tk.Frame(self)
+        self.upper_frame.pack(side='top')
+
+        ok_button = ttk.Button(self, text=_('OK'), command=self.ok)
+        ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
+
+        self.welcome_label = tk.Label(self, text=_('Thank you for downloading this app.\nClick OK to continue.'))
+        self.welcome_label.pack(expand=True, fill='both')
+
+        self.grab_set()
+
+    def on_window_close(self):
+        os.remove('config.yml')
+        sys.exit(0)
+
+    def ok(self):
+        if self.active_page == 0:
+            self.welcome_label.destroy()
+            self.top_label = tk.Label(self.upper_frame, text=_('Customize your settings.'))
+            self.top_label.pack(pady=(4, 3))
+            self.page_1()
+
+        elif self.active_page == 1:
+            if self.radio_var.get() == 0:
+                self.mode = 'normal'
+            elif self.radio_var.get() == 1:
+                self.mode = 'express'
+
+            self.radio_frame1.destroy()
+            self.radio_frame2.destroy()
+            self.page_2()
+
+        elif self.active_page == 2:
+            if 'selected' in self.soft_chkb.state():
+                self.soft_shutdown = 'true'
+            else:
+                self.soft_shutdown = 'false'
+
+            if 'selected' in self.autoexit_chkb.state():
+                self.autoexit = 'true'
+            else:
+                self.autoexit = 'false'
+
+            if 'selected' in self.avatar_chkb.state():
+                self.avatar = 'true'
+                download_avatar()
+            else:
+                self.avatar = 'false'
+
+            self.softshutdown_frame.destroy()
+            self.autoexit_frame.destroy()
+            self.avatar_frame.destroy()
+
+            self.save()
+            self.page_3()
+        elif self.active_page == 3:
+            self.destroy()
+
+    def page_1(self):
+        self.active_page = 1
+
+        self.radio_frame1 = tk.Frame(self)
+        self.radio_frame1.pack(side='top', padx=20, pady=(4, 10), fill='x')
+
+        radio_normal = ttk.Radiobutton(self.radio_frame1,
+                                       text=_('Normal Mode'),
+                                       variable=self.radio_var,
+                                       value=0)
+        radio_normal.pack(side='top', anchor='w', pady=2)
+
+        tk.Label(self.radio_frame1, justify='left',
+                 text=_("In normal mode, you restart Steam\nby clicking 'Restart Steam' button.")).pack(side='left', pady=5)
+
+        self.radio_frame2 = tk.Frame(self)
+        self.radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
+
+        radio_express = ttk.Radiobutton(self.radio_frame2,
+                                        text=_('Express Mode'),
+                                        variable=self.radio_var,
+                                        value=1)
+        radio_express.pack(side='top', anchor='w', pady=2)
+
+        tk.Label(self.radio_frame2, justify='left',
+                 text=_('In express mode, Steam will be automatically\nrestarted when you change account.')).pack(side='left', pady=5)
+
+    def page_2(self):
+        self.active_page = 2
+
+        self.softshutdown_frame = tk.Frame(self)
+        self.softshutdown_frame.pack(fill='x', side='top', padx=(14, 0), pady=(4, 0))
+
+        self.soft_chkb = ttk.Checkbutton(self.softshutdown_frame,
+                                         text=_('Try to soft shutdown Steam client'))
+
+        self.soft_chkb.state(['!alternate'])
+        self.soft_chkb.state(['selected'])
+
+        self.soft_chkb.pack(side='top', anchor='w')
+        tk.Label(self.softshutdown_frame, text=_('Shutdown Steam instead of killing Steam process')).pack(side='top', anchor='w')
+
+        self.autoexit_frame = tk.Frame(self)
+        self.autoexit_frame.pack(fill='x', side='top', padx=(14, 0), pady=15)
+
+        self.autoexit_chkb = ttk.Checkbutton(self.autoexit_frame,
+                                             text=_('Exit app after Steam is restarted'))
+
+        self.autoexit_chkb.state(['!alternate'])
+        self.autoexit_chkb.state(['selected'])
+
+        self.autoexit_chkb.pack(side='top', anchor='w')
+        tk.Label(self.autoexit_frame, text=_('Exit app automatically after restarting Steam')).pack(side='top', anchor='w')
+
+        self.avatar_frame = tk.Frame(self)
+        self.avatar_frame.pack(fill='x', side='top', padx=(14, 0))
+
+        self.avatar_chkb = ttk.Checkbutton(self.avatar_frame,
+                                           text=_('Show avatar images'))
+
+        self.avatar_chkb.state(['!alternate'])
+        self.avatar_chkb.state(['selected'])
+
+        self.avatar_chkb.pack(side='top', anchor='w')
+        tk.Label(self.avatar_frame, text=_('Show avatars in account list')).pack(side='top', anchor='w')
+
+    def page_3(self):
+        self.active_page = 3
+        self.top_label['text'] = _('Good to go!')
+
+        # tkinter doesn't like three quotes string, so... yeah.
+        self.finish_label = tk.Label(self, text=_("You can change settings in Menu > Settings\nif you don't like the settings you just set.\n\nPlease read GitHub README's How to use-4\nif you are using this app for first time.\n\nYou can open GitHub repo via Menu > About."))
+        self.finish_label.pack(expand=True, fill='both')
+
+    def save(self):
+        dump_dict = {'locale': get_config('locale'),
+                     'try_soft_shutdown': self.soft_shutdown,
+                     'autoexit': self.autoexit,
+                     'mode': self.mode,
+                     'show_avatar': self.avatar}
+
+        with open('config.yml', 'w') as cfg:
+            yaml.dump(dump_dict, cfg)

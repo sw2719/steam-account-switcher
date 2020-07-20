@@ -13,14 +13,9 @@ from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config
-from modules.util import check_running
-from modules.util import steam_running
-from modules.util import StoppableThread
-from modules.update import start_checkupdate
-from modules.update import hide_update
-from modules.update import show_update
-from modules.ui import DragDropListbox
-from modules.ui import AccountButton
+from modules.util import check_running, steam_running, StoppableThread
+from modules.update import start_checkupdate, hide_update, show_update
+from modules.ui import DragDropListbox, AccountButton, WelcomeWindow
 from modules.avatar import download_avatar
 
 yaml = YAML()
@@ -221,80 +216,13 @@ class MainApp(tk.Tk):
         self.draw_button()
 
     def welcomewindow(self):
-        def close_function():
-            os.remove('config.yml')
-            sys.exit(0)
+        window = WelcomeWindow()
 
-        if LOCALE == 'fr_FR':
-            width = '300'
-        else:
-            width = '270'
+        def event_function(event):
+            if str(event.widget) == '.!welcomewindow':
+                self.refresh()
 
-        welcomewindow = tk.Toplevel(self)
-        welcomewindow.title(_('Welcome'))
-        welcomewindow.geometry("%sx230+650+320" % width)
-        welcomewindow.resizable(False, False)
-        welcomewindow.protocol("WM_DELETE_WINDOW", close_function)
-        welcomewindow.focus()
-
-        upper_frame = tk.Frame(welcomewindow)
-        upper_frame.pack(side='top')
-
-        tk.Label(upper_frame, text=_('Please select restart mode.')).pack(pady=(4, 3))
-
-        radio_frame1 = tk.Frame(welcomewindow)
-        radio_frame1.pack(side='top', padx=20, pady=(4, 10), fill='x')
-        radio_var = tk.IntVar()
-
-        radio_normal = ttk.Radiobutton(radio_frame1,
-                                       text=_('Normal Mode'),
-                                       variable=radio_var,
-                                       value=0)
-        radio_normal.pack(side='top', anchor='w', pady=2)
-
-        tk.Label(radio_frame1, justify='left',
-                 text=_("In normal mode, you restart Steam\nby clicking 'Restart Steam' button.")).pack(side='left', pady=5)
-
-        radio_frame2 = tk.Frame(welcomewindow)
-        radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
-
-        radio_express = ttk.Radiobutton(radio_frame2,
-                                        text=_('Express Mode'),
-                                        variable=radio_var,
-                                        value=1)
-        radio_express.pack(side='top', anchor='w', pady=2)
-
-        tk.Label(radio_frame2, justify='left',
-                 text=_('In express mode, you change account\nand Steam will be automatically restarted.')).pack(side='left', pady=5)
-
-        def ok():
-            if radio_var.get() == 0:
-                mode = 'normal'
-            elif radio_var.get() == 1:
-                mode = 'express'
-
-            dump_dict = {'locale': get_config('locale'),
-                         'try_soft_shutdown': get_config('try_soft_shutdown'),
-                         'show_profilename': get_config('show_profilename'),
-                         'autoexit': get_config('autoexit'),
-                         'mode': mode}
-
-            with open('config.yml', 'w') as cfg:
-                yaml.dump(dump_dict, cfg)
-
-            welcomewindow.destroy()
-
-            if mode == 'normal':
-                msgbox.showinfo('', _('You have chosen Normal Mode. You can always change this in settings.'))
-            elif mode == 'express':
-                msgbox.showinfo('', _('You have chosen Express Mode. You can always change this in settings.'))
-            msgbox.showwarning(_('Important'), _('You need to setup autologin for EVERY account you add.') + '\n' +
-                               _("See GitHub README's How to use for more details. (Menu->About->GitHub Page)"))
-
-        ok_button = ttk.Button(welcomewindow, text=_('OK'), command=ok)
-        ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
-
-        welcomewindow.grab_set()
+        window.bind('<Destroy>', event_function)
 
     def configwindow(self, username, profilename):
         configwindow = tk.Toplevel(self)
