@@ -109,7 +109,7 @@ class MainApp(tk.Tk):
                          command=self.orderwindow)
         menu.add_command(label=_("Refresh autologin"),
                          command=self.refreshwindow)
-        menu.add_command(label=_("Update avatar images"),
+        menu.add_command(label=_("Update all avatars"),
                          command=self.update_avatar)
         menu.add_separator()
         menu.add_command(label=_("Settings"),
