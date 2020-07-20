@@ -57,10 +57,20 @@ class AccountButton:
 
         if get_config('show_avatar') == 'true':
             self.avatar = tk.Canvas(self.frame, width=40, height=40, bd=0, highlightthickness=0)
-            img = Image.open(f"avatar/{image}.jpg").resize((40, 40))
+
+            try:
+                if image != 'default':
+                    img = Image.open(f"avatar/{image}.jpg").resize((40, 40))
+                else:
+                    raise FileNotFoundError
+
+            except FileNotFoundError:
+                img = Image.open(f"asset/default.jpg").resize((40, 40))
+
             self.imgtk = ImageTk.PhotoImage(img)
             self.avatar.create_image(20, 20, image=self.imgtk)
             self.avatar.pack(side='left', padx=(2, 3), pady=0)
+
             self.avatar.bind('<Button-1>', lambda event: self.__click())
             self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release())
             self.avatar.bind('<Button-3>', rightcommand)
