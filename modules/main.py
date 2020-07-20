@@ -20,7 +20,8 @@ from modules.update import start_checkupdate
 from modules.update import hide_update
 from modules.update import show_update
 from modules.ui import DragDropListbox
-from modules.ui import ButtonwithLabels
+from modules.ui import AccountButton
+from modules.avatar import download_avatar
 
 yaml = YAML()
 
@@ -129,6 +130,8 @@ class MainApp(tk.Tk):
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True)))
             debug_menu.add_command(label='Check for updates (with exception)',
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True, exception=True)))
+            debug_menu.add_command(label="Download avatar images",
+                                   command=download_avatar)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         self.bottomframe = tk.Frame(self, bg='white')
@@ -457,6 +460,9 @@ class MainApp(tk.Tk):
                 finally:
                     if i is not None:  # i could be 0 so we can't use if i:
                         steam64 = steam64_list[i]
+                        image = steam64
+                    else:
+                        image = 'default'
 
                     profilename = profilename[:30]
 
@@ -478,11 +484,12 @@ class MainApp(tk.Tk):
                 def popup(username, event):
                     menu_dict[username].tk_popup(event.x_root + 86, event.y_root + 13, 0)
 
-                self.button_dict[username] = ButtonwithLabels(buttonframe,
-                                                              username=username,
-                                                              profilename=profilename,
-                                                              command=lambda name=username: self.button_func(name),
-                                                              rightcommand=lambda event, username=username: popup(username, event))
+                self.button_dict[username] = AccountButton(buttonframe,
+                                                           username=username,
+                                                           profilename=profilename,
+                                                           command=lambda name=username: self.button_func(name),
+                                                           rightcommand=lambda event, username=username: popup(username, event),
+                                                           image=image)
 
                 if username == fetch_reg('AutoLoginUser'):
                     self.button_dict[username].disable()

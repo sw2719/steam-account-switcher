@@ -25,7 +25,8 @@ def reset_config():
                    'try_soft_shutdown': 'true',
                    'show_profilename': 'bar',
                    'autoexit': 'true',
-                   'mode': 'normal'}
+                   'mode': 'normal',
+                   'show_avatar': 'true'}
         yaml.dump(default, cfg)
 
 
@@ -35,6 +36,7 @@ if not os.path.isfile('config.yml'):
 else:
     first_run = False
 
+# TODO: Simplify config file test code
 try:
     with open('config.yml', 'r') as cfg:
         test_dict = yaml.load(cfg)
@@ -63,7 +65,13 @@ try:
     else:
         mode_invalid = True
 
-    if True in (locale_invalid, try_soft_invalid, autoexit_invalid, mode_invalid):
+    no_avatar = 'show_avatar' not in set(test_dict)
+    if not no_avatar:
+        avatar_invalid = test_dict['show_avatar'] not in ('true', 'false')
+    else:
+        avatar_invalid = True
+
+    if True in (locale_invalid, try_soft_invalid, autoexit_invalid, mode_invalid, avatar_invalid):
         cfg_write = {}
         if no_locale or locale_invalid:
             locale_write = 'en_US'
@@ -81,6 +89,14 @@ try:
             cfg_write['mode'] = 'normal'
         else:
             cfg_write['mode'] = test_dict['mode']
+        if no_try_soft or try_soft_invalid:
+            cfg_write['try_soft_shutdown'] = 'true'
+        else:
+            cfg_write['try_soft_shutdown'] = test_dict['try_soft_shutdown']
+        if no_avatar or avatar_invalid:
+            cfg_write['show_avatar'] = 'true'
+        else:
+            cfg_write['show_avatar'] = test_dict['show_avatar']
         with open('config.yml', 'w') as cfg:
             yaml.dump(cfg_write, cfg)
         del cfg_write

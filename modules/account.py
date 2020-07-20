@@ -36,7 +36,7 @@ def acc_getdict():
 
 def loginusers(steam_path=fetch_reg('steampath')):
     '''
-    Fetch loginusers.vdf and return AccountName and
+    Fetch loginusers.vdf and return SteamID64, AccountName,
     PersonaName values as lists.
     :param steam_path: Steam installation path override
     '''

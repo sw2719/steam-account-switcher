@@ -1,6 +1,8 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.font as tkfont
+from PIL import Image, ImageTk
+from modules.config import get_config
 
 COLOR_DISABLED = '#cfcfcf'
 COLOR_CLICKED = '#363636'
@@ -33,8 +35,8 @@ class DragDropListbox(tk.Listbox):
             self.cur_index = i
 
 
-class ButtonwithLabels:
-    def __init__(self, master, username, profilename, command=None, rightcommand=None):
+class AccountButton:
+    def __init__(self, master, username, profilename, command=None, rightcommand=None, image='default'):
         self.master = master
         self.frame = tk.Frame(master, borderwidth=3)
         self.command = command
@@ -53,6 +55,16 @@ class ButtonwithLabels:
 
         username_font = tkfont.Font(weight=tkfont.BOLD, size=13)
 
+        if get_config('show_avatar') == 'true':
+            self.avatar = tk.Canvas(self.frame, width=40, height=40, bd=0, highlightthickness=0)
+            img = Image.open(f"avatar/{image}.jpg").resize((40, 40))
+            self.imgtk = ImageTk.PhotoImage(img)
+            self.avatar.create_image(20, 20, image=self.imgtk)
+            self.avatar.pack(side='left', padx=(2, 3), pady=0)
+            self.avatar.bind('<Button-1>', lambda event: self.__click())
+            self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release())
+            self.avatar.bind('<Button-3>', rightcommand)
+
         self.acc_label = ttk.Label(self.frame, text=username, font=username_font)
         self.acc_label.config(background='white')
         self.acc_label.pack(anchor='w', padx=(3, 0))
@@ -70,7 +82,7 @@ class ButtonwithLabels:
     def check_cursor(self, event):
         widget = event.widget.winfo_containing(event.x_root, event.y_root)
 
-        if widget in (self.frame, self.acc_label, self.profile_label):
+        if widget in (self.frame, self.acc_label, self.profile_label, self.avatar):
             self.__enter()
         else:
             self.__leave()
@@ -99,6 +111,7 @@ class ButtonwithLabels:
         self.frame.bind('<B1-Motion>', self.check_cursor)
         self.acc_label.bind('<B1-Motion>', self.check_cursor)
         self.profile_label.bind('<B1-Motion>', self.check_cursor)
+        self.avatar.bind('<B1-Motion>', self.check_cursor)
 
     def __release(self):
         self.clicked = False
