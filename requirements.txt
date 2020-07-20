@@ -3,3 +3,4 @@ psutil
 requests
 ruamel.yaml
 Pillow
+steam
