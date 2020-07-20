@@ -478,6 +478,8 @@ class MainApp(tk.Tk):
                 if i is not None:  # i could be 0 so we can't use if i:
                     menu_dict[username].add_command(label=_('Open profile in browser'),
                                                     command=lambda steam64id=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steam64id}'))
+                    menu_dict[username].add_command(label=_('Update avatar'),
+                                                    command=lambda steam64id=steam64: self.update_avatar(steamid_list=[steam64id]))
 
                 menu_dict[username].add_command(label=_("Name settings"),
                                                 command=lambda name=username, pname=profilename: self.configwindow(name, pname))
@@ -551,8 +553,7 @@ class MainApp(tk.Tk):
 
         print('Menu refreshed with %s account(s)' % len(self.accounts))
 
-    def update_avatar(self):
-        steamid_list = loginusers()[0]
+    def update_avatar(self, steamid_list=loginusers()[0]):
         download_avatar(steamid_list)
         self.refresh()
 
@@ -1073,7 +1074,7 @@ class MainApp(tk.Tk):
     def settingswindow(self):
         '''Open settings window'''
         config_dict = get_config('all')
-        last_locale = config_dict['locale']
+        last_config = config_dict
 
         if LOCALE == 'fr_FR':
             width = '330'
@@ -1082,7 +1083,7 @@ class MainApp(tk.Tk):
 
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry("%sx260+650+300" % width)  # 260 is original
+        settingswindow.geometry("%sx300+650+300" % width)  # 260 is original
         settingswindow.resizable(False, False)
         bottomframe_set = tk.Frame(settingswindow)
         bottomframe_set.pack(side='bottom')
@@ -1143,7 +1144,7 @@ class MainApp(tk.Tk):
         radio_express.pack(side='left', pady=2)
 
         softshutdwn_frame = tk.Frame(settingswindow)
-        softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=1)
+        softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=(1, 0))
 
         soft_chkb = ttk.Checkbutton(softshutdwn_frame,
                                     text=_('Try to soft shutdown Steam client'))
@@ -1171,6 +1172,21 @@ class MainApp(tk.Tk):
 
         autoexit_chkb.pack(side='left')
 
+        avatar_frame = tk.Frame(settingswindow)
+        avatar_frame.pack(fill='x', side='top', padx=12)
+
+        avatar_chkb = ttk.Checkbutton(avatar_frame,
+                                      text=_('Show avatar images'))
+
+        avatar_chkb.state(['!alternate'])
+
+        if config_dict['show_avatar'] == 'true':
+            avatar_chkb.state(['selected'])
+        else:
+            avatar_chkb.state(['!selected'])
+
+        avatar_chkb.pack(side='left')
+
         def close():
             settingswindow.destroy()
 
@@ -1195,16 +1211,26 @@ class MainApp(tk.Tk):
                 else:
                     autoexit = 'false'
 
+                if 'selected' in avatar_chkb.state():
+                    avatar = 'true'
+                else:
+                    avatar = 'false'
+
                 config_dict = {'locale': locale[locale_cb.current()],
                                'try_soft_shutdown': soft_shutdown,
                                'autoexit': autoexit,
-                               'mode': mode}
+                               'mode': mode,
+                               'show_avatar': avatar}
 
                 yaml = YAML()
                 yaml.dump(config_dict, cfg)
 
+            if last_config['show_avatar'] == 'false' and 'selected' in avatar_chkb.state():
+                if msgbox.askyesno('', _('Do you want to download avatar images now?'), parent=settingswindow):
+                    download_avatar(loginusers()[0])
+
             self.refresh()
-            if last_locale != locale[locale_cb.current()]:
+            if last_config['locale'] != locale[locale_cb.current()]:
                 self.after(100, lambda: msgbox.showinfo(_('Locale has been changed'),
                                                         _('Restart app to apply new locale settings.')))
 
