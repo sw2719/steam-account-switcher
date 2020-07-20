@@ -10,6 +10,8 @@ VERSION = '2.4'
 BRANCH = 'master'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml' % BRANCH)
 
+after_update = False
+
 if getattr(sys, 'frozen', False):
     print('Running in a bundle')
     BUNDLE = True
@@ -19,6 +21,7 @@ if getattr(sys, 'frozen', False):
         except OSError:
             pass
     if os.path.isfile('update.zip'):
+        after_update = True
         try:
             os.remove('update.zip')
         except OSError:
@@ -33,7 +36,7 @@ root.after(100, lambda: start_checkupdate(root, VERSION, URL, BUNDLE))
 if no_avatar or avatar_invalid:
     download_avatar()
 
-if first_run:
+if first_run or after_update:
     root.after(200, root.welcomewindow)
 
 print('Init complete.')
