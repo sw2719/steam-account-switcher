@@ -13,7 +13,7 @@ from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config
-from modules.util import check_running, steam_running, StoppableThread
+from modules.util import check_running, steam_running, StoppableThread, open_screenshot
 from modules.update import start_checkupdate, hide_update, show_update
 from modules.ui import DragDropListbox, AccountButton, WelcomeWindow
 from modules.avatar import download_avatar
@@ -405,9 +405,12 @@ class MainApp(tk.Tk):
 
                 if i is not None:  # i could be 0 so we can't use if i:
                     menu_dict[username].add_command(label=_('Open profile in browser'),
-                                                    command=lambda steam64id=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steam64id}'))
+                                                    command=lambda steamid64=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steamid64}'))
+                    menu_dict[username].add_command(label=_('Open screenshots folder'),
+                                                    command=lambda steamid64=steam64: open_screenshot(steamid64))
                     menu_dict[username].add_command(label=_('Update avatar'),
-                                                    command=lambda steam64id=steam64: self.update_avatar(steamid_list=[steam64id]))
+                                                    command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
+                    menu_dict[username].add_separator()
 
                 menu_dict[username].add_command(label=_("Name settings"),
                                                 command=lambda name=username, pname=profilename: self.configwindow(name, pname))

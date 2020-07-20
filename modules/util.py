@@ -1,5 +1,7 @@
 import threading
 import psutil
+import os
+from steam.steamid import SteamID
 from modules.reg import fetch_reg
 
 
@@ -37,3 +39,19 @@ def steam_running():
         return False
     else:
         return True
+
+
+def steam64_to_3(steamid64):
+    steamid_3 = SteamID(steamid64).as_steam3  # [U:1:xxxxxxxxxx]
+    return steamid_3.split(':')[2].replace(']', '')
+
+
+def open_screenshot(steamid64, steam_path=fetch_reg('steampath')):
+    if os.path.isfile('steam_path.txt'):
+        with open('steam_path.txt', 'r') as path:
+            steam_path = path.read()
+
+    if '/' in steam_path:
+        steam_path = steam_path.replace('/', '\\')
+
+    os.startfile(f'{steam_path}\\userdata\\{steam64_to_3(steamid64)}\\760\\remote')
