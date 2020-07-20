@@ -52,6 +52,7 @@ class AccountButton:
         self.clicked = False
         self.onpress = False
         self.enabled = True
+        self.avatar = None
 
         username_font = tkfont.Font(weight=tkfont.BOLD, size=13)
 
@@ -121,7 +122,8 @@ class AccountButton:
         self.frame.bind('<B1-Motion>', self.check_cursor)
         self.acc_label.bind('<B1-Motion>', self.check_cursor)
         self.profile_label.bind('<B1-Motion>', self.check_cursor)
-        self.avatar.bind('<B1-Motion>', self.check_cursor)
+        if self.avatar:
+            self.avatar.bind('<B1-Motion>', self.check_cursor)
 
     def __release(self):
         self.clicked = False
@@ -129,6 +131,8 @@ class AccountButton:
         self.frame.unbind('<B1-Motion>')
         self.acc_label.unbind('<B1-Motion>')
         self.profile_label.unbind('<B1-Motion>')
+        if self.avatar:
+            self.avatar.unbind('<B1-Motion>')
 
         if self.command and self.onbutton:
             self.command()
