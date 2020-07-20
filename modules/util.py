@@ -1,9 +1,6 @@
-import winreg
 import threading
 import psutil
 from modules.reg import fetch_reg
-
-HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
 
 
 class StoppableThread(threading.Thread):
