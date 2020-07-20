@@ -1,9 +1,10 @@
 import sys
 import os
 import shutil
-from modules.config import first_run
+from modules.config import first_run, no_avatar, avatar_invalid
 from modules.update import start_checkupdate
 from modules.main import MainApp
+from modules.avatar import download_avatar
 
 VERSION = '2.4'
 BRANCH = 'master'
@@ -28,6 +29,9 @@ else:
 
 root = MainApp(VERSION, URL, BUNDLE)
 root.after(100, lambda: start_checkupdate(root, VERSION, URL, BUNDLE))
+
+if no_avatar or avatar_invalid:
+    download_avatar()
 
 if first_run:
     root.after(200, root.welcomewindow)
