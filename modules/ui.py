@@ -375,9 +375,9 @@ def steamid_window(master, username, steamid64):
     close_button = ttk.Button(steamid_window, text=_('Close'), command=steamid_window.destroy)
     close_button.pack(side='bottom', pady=(0, 3))
 
-    ReadonlyEntryWithLabel(steamid_window, 'Username', username).pack(pady=(6, 0), fill='x')
+    ReadonlyEntryWithLabel(steamid_window, _('Username'), username).pack(pady=(6, 0), fill='x')
     ReadonlyEntryWithLabel(steamid_window, 'SteamID64', steamid64).pack(pady=(6, 0), fill='x')
     ReadonlyEntryWithLabel(steamid_window, 'SteamID2', steam64_to_2(steamid64)).pack(pady=(6, 0), fill='x')
     ReadonlyEntryWithLabel(steamid_window, 'SteamID3', steam64_to_3(steamid64)).pack(pady=(6, 0), fill='x')
-    ReadonlyEntryWithLabel(steamid_window, 'Friend code', steam64_to_32(steamid64)).pack(pady=(6, 0), fill='x')
+    ReadonlyEntryWithLabel(steamid_window, _('Friend code'), steam64_to_32(steamid64)).pack(pady=(6, 0), fill='x')
 

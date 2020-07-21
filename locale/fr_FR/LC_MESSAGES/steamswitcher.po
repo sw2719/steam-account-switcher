@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-21 09:48+0900\n"
-"PO-Revision-Date: 2020-07-21 09:48+0900\n"
+"POT-Creation-Date: 2020-07-21 09:51+0900\n"
+"PO-Revision-Date: 2020-07-21 09:51+0900\n"
 "Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -465,6 +465,14 @@ msgid ""
 "if you are using this app for first time.\n"
 "\n"
 "You can open GitHub repo via Menu > About."
+msgstr ""
+
+#: modules/ui.py:378
+msgid "Username"
+msgstr "Utiliser un nom personnalisé"
+
+#: modules/ui.py:382
+msgid "Friend code"
 msgstr ""
 
 #: modules/update.py:64
