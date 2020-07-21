@@ -12,10 +12,10 @@ from time import sleep
 from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
-from modules.config import get_config
-from modules.util import check_running, steam_running, StoppableThread, open_screenshot
+from modules.config import get_config, config_write_dict
+from modules.util import check_running, steam_running, StoppableThread, open_screenshot, raise_exception, test
 from modules.update import start_checkupdate, hide_update, show_update
-from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window
+from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, ask_steam_dir
 from modules.avatar import download_avatar
 
 yaml = YAML()
@@ -88,7 +88,9 @@ def legacy_restart(silent=True):
 
 class MainApp(tk.Tk):
     '''Main application'''
-    def __init__(self, version, url, bundle):
+    def __init__(self, version, url, bundle, std_out, std_err):
+        sys.stdout = std_out
+        sys.stderr = std_err
         self.accounts = acc_getlist()
         self.acc_dict = acc_getdict()
         self.demo_mode = False
@@ -99,7 +101,14 @@ class MainApp(tk.Tk):
         self.geometry("300x472+600+250")
         self.resizable(False, False)
 
-        self.iconbitmap('asset/icon.ico')
+        try:
+            self.iconbitmap('asset/icon.ico')
+        except FileNotFoundError:
+            pass
+
+        if not test():
+            ask_steam_dir()
+
         menubar = tk.Menu(self, bg='white')
         menu = tk.Menu(menubar, tearoff=0)
         menu.add_command(label=_('Import accounts from Steam'),
@@ -135,6 +144,8 @@ class MainApp(tk.Tk):
                                    command=self.welcomewindow)
             debug_menu.add_command(label="Toggle demo mode",
                                    command=self.toggle_demo)
+            debug_menu.add_command(label="Raise exception",
+                                   command=raise_exception)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         self.bottomframe = tk.Frame(self, bg='white')
@@ -1217,37 +1228,36 @@ class MainApp(tk.Tk):
         def apply():
             nonlocal config_dict
             '''Write new config values to config.txt'''
-            with open('config.yml', 'w') as cfg:
-                locale = ('en_US', 'ko_KR', 'fr_FR')
+            locale = ('en_US', 'ko_KR', 'fr_FR')
 
-                if radio_var.get() == 1:
-                    mode = 'express'
-                elif radio_var.get() == 0:
-                    mode = 'normal'
+            if radio_var.get() == 1:
+                mode = 'express'
+            elif radio_var.get() == 0:
+                mode = 'normal'
 
-                if 'selected' in soft_chkb.state():
-                    soft_shutdown = 'true'
-                else:
-                    soft_shutdown = 'false'
+            if 'selected' in soft_chkb.state():
+                soft_shutdown = 'true'
+            else:
+                soft_shutdown = 'false'
 
-                if 'selected' in autoexit_chkb.state():
-                    autoexit = 'true'
-                else:
-                    autoexit = 'false'
+            if 'selected' in autoexit_chkb.state():
+                autoexit = 'true'
+            else:
+                autoexit = 'false'
 
-                if 'selected' in avatar_chkb.state():
-                    avatar = 'true'
-                else:
-                    avatar = 'false'
+            if 'selected' in avatar_chkb.state():
+                avatar = 'true'
+            else:
+                avatar = 'false'
 
-                config_dict = {'locale': locale[locale_cb.current()],
-                               'try_soft_shutdown': soft_shutdown,
-                               'autoexit': autoexit,
-                               'mode': mode,
-                               'show_avatar': avatar}
+            config_dict = {'locale': locale[locale_cb.current()],
+                           'try_soft_shutdown': soft_shutdown,
+                           'autoexit': autoexit,
+                           'mode': mode,
+                           'show_avatar': avatar,
+                           'steam_path': get_config('steam_path')}
 
-                yaml = YAML()
-                yaml.dump(config_dict, cfg)
+            config_write_dict(config_dict)
 
             if last_config['show_avatar'] == 'false' and 'selected' in avatar_chkb.state():
                 if msgbox.askyesno('', _('Do you want to download avatar images now?'), parent=settingswindow):

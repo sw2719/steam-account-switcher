@@ -23,10 +23,10 @@ def reset_config():
 
         default = {'locale': locale_write,
                    'try_soft_shutdown': 'true',
-                   'show_profilename': 'bar',
                    'autoexit': 'true',
                    'mode': 'normal',
-                   'show_avatar': 'true'}
+                   'show_avatar': 'true',
+                   'steam_path': 'reg'}
         yaml.dump(default, cfg)
 
 
@@ -76,7 +76,9 @@ try:
     else:
         avatar_invalid = True
 
-    if True in (locale_invalid, try_soft_invalid, autoexit_invalid, mode_invalid, avatar_invalid):
+    steam_path_invalid = 'steam_path' not in set(test_dict)
+
+    if True in (locale_invalid, try_soft_invalid, autoexit_invalid, mode_invalid, avatar_invalid, steam_path_invalid):
         cfg_write = {}
         if no_locale or locale_invalid:
             locale_write = 'en_US'
@@ -102,6 +104,14 @@ try:
             cfg_write['show_avatar'] = 'true'
         else:
             cfg_write['show_avatar'] = test_dict['show_avatar']
+        if steam_path_invalid:
+            if os.path.isfile('steam_path.txt'):
+                with open('steam_path.txt', 'r') as f:
+                    cfg_write['steam_path'] = f.read().strip()
+            else:
+                cfg_write['steam_path'] = 'reg'
+        else:
+            cfg_write['steam_path'] = test_dict['steam_path']
         with open('config.yml', 'w') as cfg:
             yaml.dump(cfg_write, cfg)
         del cfg_write
@@ -144,3 +154,22 @@ def get_config(key):
     except FileNotFoundError:
         reset_config()
         error_msg(_('Error'), _('Could not load config file.'))
+
+
+def config_write_dict(config_dict):
+    with open('config.yml', 'w') as cfg:
+        yaml.dump(config_dict, cfg)
+
+
+def config_write_value(key, value):
+    config_dict = {'locale': get_config('locale'),
+                   'try_soft_shutdown': get_config('locale'),
+                   'autoexit': get_config('locale'),
+                   'mode': get_config('locale'),
+                   'show_avatar': get_config('locale'),
+                   'steam_path': get_config('steam_path')}
+
+    config_dict[key] = value
+
+    with open('config.yml', 'w') as cfg:
+        yaml.dump(config_dict, cfg)

@@ -1,13 +1,15 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.font as tkfont
+from tkinter import messagebox as msgbox
+from tkinter import filedialog
 import os
 import sys
 import gettext
 from PIL import Image, ImageTk
-from modules.config import get_config
+from modules.config import get_config, config_write_value
 from ruamel.yaml import YAML
-from modules.util import steam64_to_3, steam64_to_32, steam64_to_2
+from modules.util import steam64_to_3, steam64_to_32, steam64_to_2, check_steam_dir
 
 COLOR_DISABLED = '#cfcfcf'
 COLOR_CLICKED = '#363636'
@@ -368,6 +370,24 @@ class WelcomeWindow(tk.Toplevel):
 
         with open('config.yml', 'w') as cfg:
             yaml.dump(dump_dict, cfg)
+
+
+def ask_steam_dir():
+    if not check_steam_dir:
+        msgbox.showwarning(_('Steam directory invalid'), _('Could not locate Steam directory.') + '\n' +
+                           _('Please select Steam directory manually.'))
+
+        while True:
+            input_dir = filedialog.askdirectory()
+
+            if os.path.isfile(input_dir + '\\Steam.exe') and os.path.isfile(input_dir + '\\config\\loginusers.vdf'):
+                config_write_value('steam_path', input_dir)
+                break
+            else:
+                msgbox.showwarning(_('Warning'),
+                                   _('Steam directory is invalid.') + '\n' +
+                                   _('Try again.'))
+                continue
 
 
 def steamid_window(master, username, steamid64):
