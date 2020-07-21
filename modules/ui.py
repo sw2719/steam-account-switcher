@@ -367,7 +367,7 @@ class WelcomeWindow(tk.Toplevel):
 def steamid_window(master, username, steamid64):
     steamid_window = tk.Toplevel(master)
     steamid_window.geometry()
-    steamid_window.title('SteamID Info')
+    steamid_window.title(_('SteamID Info'))
     steamid_window.geometry("240x180+650+320")
     steamid_window.resizable(False, False)
     steamid_window.focus()
