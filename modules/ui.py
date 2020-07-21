@@ -66,7 +66,7 @@ class AccountButton:
         self.enabled = True
         self.avatar = None
 
-        username_font = tkfont.Font(weight=tkfont.BOLD, size=13)
+        username_font = tkfont.Font(weight=tkfont.BOLD, size=12, family='Arial')
 
         if get_config('show_avatar') == 'true':
             self.avatar = tk.Canvas(self.frame, width=40, height=40, bd=0, highlightthickness=0)
