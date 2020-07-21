@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-21 20:22+0900\n"
-"PO-Revision-Date: 2020-07-21 20:23+0900\n"
+"POT-Creation-Date: 2020-07-21 21:14+0900\n"
+"PO-Revision-Date: 2020-07-21 21:14+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -28,11 +28,11 @@ msgstr ""
 "X-Poedit-SearchPath-6: modules/main.py\n"
 "X-Poedit-SearchPath-7: modules/util.py\n"
 
-#: modules/config.py:141 modules/update.py:185 modules/update.py:279
+#: modules/config.py:146 modules/update.py:185 modules/update.py:279
 msgid "Error"
 msgstr "오류"
 
-#: modules/config.py:141
+#: modules/config.py:146
 msgid "Could not load config file."
 msgstr "설정 파일을 불러올 수 없습니다."
 
@@ -122,7 +122,7 @@ msgid "Current Auto-login user:"
 msgstr "현재 자동로그인 계정:"
 
 #: modules/main.py:257 modules/main.py:1041 modules/main.py:1232
-#: modules/ui.py:229
+#: modules/ui.py:230
 msgid "OK"
 msgstr "확인"
 
@@ -211,7 +211,7 @@ msgstr "어떠한 사고나 문제에 대해서 제작자는 책임을 지지 �
 msgid "STEAM is a registered trademark of Valve Corporation."
 msgstr "STEAM은 Valve Corporation의 등록 상표입니다."
 
-#: modules/main.py:577 modules/ui.py:376
+#: modules/main.py:577 modules/ui.py:381
 msgid "Close"
 msgstr "닫기"
 
@@ -348,15 +348,15 @@ msgstr "일반 모드 (수동 Steam 재시작)"
 msgid "Express Mode (Auto-restart Steam)"
 msgstr "익스프레스 모드 (자동 Steam 재시작)"
 
-#: modules/main.py:1140 modules/ui.py:317
+#: modules/main.py:1140 modules/ui.py:322
 msgid "Try to soft shutdown Steam client"
 msgstr "스팀 클라이언트 안전 종료"
 
-#: modules/main.py:1155 modules/ui.py:329
+#: modules/main.py:1155 modules/ui.py:334
 msgid "Exit app after Steam is restarted"
 msgstr "스팀 재시작시 앱 종료"
 
-#: modules/main.py:1169 modules/ui.py:341
+#: modules/main.py:1169 modules/ui.py:346
 msgid "Show avatar images"
 msgstr "프로필 사진 표시"
 
@@ -400,11 +400,11 @@ msgstr "Steam이 설치되어 있는지 확인하세요."
 msgid "Failed to change registry value."
 msgstr "레지스트리 값을 바꿀 수 없습니다."
 
-#: modules/ui.py:217
+#: modules/ui.py:218
 msgid "Welcome"
 msgstr "환영합니다"
 
-#: modules/ui.py:232
+#: modules/ui.py:233
 msgid ""
 "Thank you for downloading this app.\n"
 "Click OK to continue."
@@ -412,15 +412,19 @@ msgstr ""
 "이 앱을 다운로드해주셔서 감사합니다.\n"
 "확인을 눌러 계속하세요."
 
-#: modules/ui.py:244
+#: modules/ui.py:245
 msgid "Customize your settings."
 msgstr "원하는 설정을 선택하세요."
 
-#: modules/ui.py:290
+#: modules/ui.py:282
+msgid "Please wait..."
+msgstr "잠시 기다려 주십시오..."
+
+#: modules/ui.py:295
 msgid "Normal Mode"
 msgstr "일반 모드"
 
-#: modules/ui.py:296
+#: modules/ui.py:301
 msgid ""
 "In normal mode, you restart Steam\n"
 "by clicking 'Restart Steam' button."
@@ -428,11 +432,11 @@ msgstr ""
 "일반 모드에서는, 재시작 버튼을 클릭하여\n"
 "Steam을 재시작합니다."
 
-#: modules/ui.py:302
+#: modules/ui.py:307
 msgid "Express Mode"
 msgstr "익스프레스 모드"
 
-#: modules/ui.py:308
+#: modules/ui.py:313
 msgid ""
 "In express mode, Steam will be automatically\n"
 "restarted when you change account."
@@ -440,23 +444,23 @@ msgstr ""
 "익스프레스 모드에서는, 계정을 변경할 시\n"
 "Steam이 자동으로 재시작됩니다."
 
-#: modules/ui.py:323
+#: modules/ui.py:328
 msgid "Shutdown Steam instead of killing Steam process"
 msgstr "Steam 프로세스를 끝내는 대신 안전 종료"
 
-#: modules/ui.py:335
+#: modules/ui.py:340
 msgid "Exit app automatically after restarting Steam"
 msgstr "Steam 재시작후 자동으로 앱 종료"
 
-#: modules/ui.py:347
+#: modules/ui.py:352
 msgid "Show avatars in account list"
 msgstr "계정 목록에서 프로필 사진 표시"
 
-#: modules/ui.py:351
+#: modules/ui.py:356
 msgid "Good to go!"
 msgstr "완료되었습니다!"
 
-#: modules/ui.py:354
+#: modules/ui.py:359
 msgid ""
 "Add or import accounts via Menu.\n"
 "Right click on accounts to see more options.\n"
@@ -480,11 +484,11 @@ msgstr ""
 "\n"
 "메뉴 > 정보로 GitHub 저장소를 열 수 있습니다."
 
-#: modules/ui.py:379
+#: modules/ui.py:384
 msgid "Username"
 msgstr "계정이름"
 
-#: modules/ui.py:380
+#: modules/ui.py:385
 msgid "Friend code"
 msgstr "친구 코드"
 

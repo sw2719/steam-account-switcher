@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-21 20:23+0900\n"
-"PO-Revision-Date: 2020-07-21 20:23+0900\n"
+"POT-Creation-Date: 2020-07-21 21:13+0900\n"
+"PO-Revision-Date: 2020-07-21 21:16+0900\n"
 "Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -25,11 +25,11 @@ msgstr ""
 "X-Poedit-SearchPath-6: modules/main.py\n"
 "X-Poedit-SearchPath-7: modules/util.py\n"
 
-#: modules/config.py:141 modules/update.py:185 modules/update.py:279
+#: modules/config.py:146 modules/update.py:185 modules/update.py:279
 msgid "Error"
 msgstr "Erruer"
 
-#: modules/config.py:141
+#: modules/config.py:146
 msgid "Could not load config file."
 msgstr "Impossible de charger le fichier de configuration."
 
@@ -121,7 +121,7 @@ msgid "Current Auto-login user:"
 msgstr "Utilisateur actuel de connexion automatique :"
 
 #: modules/main.py:257 modules/main.py:1041 modules/main.py:1232
-#: modules/ui.py:229
+#: modules/ui.py:230
 msgid "OK"
 msgstr "OK"
 
@@ -213,7 +213,7 @@ msgstr ""
 msgid "STEAM is a registered trademark of Valve Corporation."
 msgstr "STEAM est une marque déposée de Valve Corporation."
 
-#: modules/main.py:577 modules/ui.py:376
+#: modules/main.py:577 modules/ui.py:381
 msgid "Close"
 msgstr "Fermer"
 
@@ -353,15 +353,15 @@ msgstr "Mode normal (redémarrer Steam manuellement)"
 msgid "Express Mode (Auto-restart Steam)"
 msgstr "Mode Express (redémarrage automatique de Steam)"
 
-#: modules/main.py:1140 modules/ui.py:317
+#: modules/main.py:1140 modules/ui.py:322
 msgid "Try to soft shutdown Steam client"
 msgstr "Essayez d'arrêter en douceur le client Steam"
 
-#: modules/main.py:1155 modules/ui.py:329
+#: modules/main.py:1155 modules/ui.py:334
 msgid "Exit app after Steam is restarted"
 msgstr "Quitter l'app au redémarrage de Steam"
 
-#: modules/main.py:1169 modules/ui.py:341
+#: modules/main.py:1169 modules/ui.py:346
 msgid "Show avatar images"
 msgstr ""
 
@@ -405,25 +405,29 @@ msgstr "Assurez-vous que Steam est installé."
 msgid "Failed to change registry value."
 msgstr "Impossible de modifier la valeur de registre."
 
-#: modules/ui.py:217
+#: modules/ui.py:218
 msgid "Welcome"
 msgstr "Bienvenue"
 
-#: modules/ui.py:232
+#: modules/ui.py:233
 msgid ""
 "Thank you for downloading this app.\n"
 "Click OK to continue."
 msgstr ""
 
-#: modules/ui.py:244
+#: modules/ui.py:245
 msgid "Customize your settings."
 msgstr ""
 
-#: modules/ui.py:290
+#: modules/ui.py:282
+msgid "Please wait..."
+msgstr ""
+
+#: modules/ui.py:295
 msgid "Normal Mode"
 msgstr "Mode normal"
 
-#: modules/ui.py:296
+#: modules/ui.py:301
 msgid ""
 "In normal mode, you restart Steam\n"
 "by clicking 'Restart Steam' button."
@@ -431,33 +435,35 @@ msgstr ""
 "En mode normal, vous redémarrez Steam\n"
 "en cliquant sur le bouton «Redémarrer Steam»."
 
-#: modules/ui.py:302
+#: modules/ui.py:307
 msgid "Express Mode"
 msgstr "Mode express"
 
-#: modules/ui.py:308
+#: modules/ui.py:313
 msgid ""
 "In express mode, Steam will be automatically\n"
 "restarted when you change account."
 msgstr ""
 
-#: modules/ui.py:323
+#: modules/ui.py:328
 msgid "Shutdown Steam instead of killing Steam process"
 msgstr ""
 
-#: modules/ui.py:335
+#: modules/ui.py:340
 msgid "Exit app automatically after restarting Steam"
 msgstr ""
 
-#: modules/ui.py:347
+#: modules/ui.py:352
 msgid "Show avatars in account list"
 msgstr ""
 
-#: modules/ui.py:351
+#: modules/ui.py:356
 msgid "Good to go!"
 msgstr ""
 
-#: modules/ui.py:354
+# Due to UI size, line length is limited.
+# UI test is required after translation.
+#: modules/ui.py:359
 msgid ""
 "Add or import accounts via Menu.\n"
 "Right click on accounts to see more options.\n"
@@ -471,11 +477,11 @@ msgid ""
 "You can open GitHub repo via Menu > About."
 msgstr ""
 
-#: modules/ui.py:379
+#: modules/ui.py:384
 msgid "Username"
 msgstr "Utiliser un nom personnalisé"
 
-#: modules/ui.py:380
+#: modules/ui.py:385
 msgid "Friend code"
 msgstr ""
 

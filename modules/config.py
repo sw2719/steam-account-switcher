@@ -34,7 +34,12 @@ if not os.path.isfile('config.yml'):
     reset_config()
     first_run = True
 else:
-    first_run = False
+    with open('config.yml') as f:
+        if not f.read().strip():
+            reset_config()
+            first_run = True
+        else:
+            first_run = False
 
 # TODO: Simplify config file test code
 try:
@@ -101,7 +106,7 @@ try:
             yaml.dump(cfg_write, cfg)
         del cfg_write
         del test_dict
-except FileNotFoundError:
+except (FileNotFoundError, TypeError):
     reset_config()
     sys.exit(1)
 

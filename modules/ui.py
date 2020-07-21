@@ -212,8 +212,9 @@ class ReadonlyEntryWithLabel:
 
 
 class WelcomeWindow(tk.Toplevel):
-    def __init__(self):
-        tk.Toplevel.__init__(self)
+    def __init__(self, master):
+        self.master = master
+        tk.Toplevel.__init__(self, self.master)
         self.title(_('Welcome'))
         self.geometry("300x230+650+320")
         self.resizable(False, False)
@@ -226,8 +227,8 @@ class WelcomeWindow(tk.Toplevel):
         self.upper_frame = tk.Frame(self)
         self.upper_frame.pack(side='top')
 
-        ok_button = ttk.Button(self, text=_('OK'), command=self.ok)
-        ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
+        self.ok_button = ttk.Button(self, text=_('OK'), command=self.ok)
+        self.ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
 
         self.welcome_label = tk.Label(self, text=_('Thank you for downloading this app.\nClick OK to continue.'))
         self.welcome_label.pack(expand=True, fill='both')
@@ -278,6 +279,10 @@ class WelcomeWindow(tk.Toplevel):
             self.save()
             self.page_3()
         elif self.active_page == 3:
+            self.ok_button['text'] = _('Please wait...')
+            self.ok_button['state'] = 'disabled'
+            self.focus()
+            self.master.update()
             self.destroy()
 
     def page_1(self):
