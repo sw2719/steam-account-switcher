@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-21 09:51+0900\n"
-"PO-Revision-Date: 2020-07-21 09:51+0900\n"
+"POT-Creation-Date: 2020-07-21 09:52+0900\n"
+"PO-Revision-Date: 2020-07-21 09:52+0900\n"
 "Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -471,7 +471,7 @@ msgstr ""
 msgid "Username"
 msgstr "Utiliser un nom personnalisé"
 
-#: modules/ui.py:382
+#: modules/ui.py:379
 msgid "Friend code"
 msgstr ""
 

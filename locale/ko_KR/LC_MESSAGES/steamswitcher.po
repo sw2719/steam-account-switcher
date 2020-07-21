@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-21 09:50+0900\n"
-"PO-Revision-Date: 2020-07-21 09:51+0900\n"
+"POT-Creation-Date: 2020-07-21 09:52+0900\n"
+"PO-Revision-Date: 2020-07-21 09:52+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -477,7 +477,7 @@ msgstr ""
 msgid "Username"
 msgstr "계정이름"
 
-#: modules/ui.py:382
+#: modules/ui.py:379
 msgid "Friend code"
 msgstr "친구 코드"
 
