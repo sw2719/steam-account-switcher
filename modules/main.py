@@ -98,7 +98,7 @@ class MainApp(tk.Tk):
         self.geometry("300x472+600+250")
         self.resizable(False, False)
 
-        self.iconbitmap('icon.ico')
+        self.iconbitmap('asset/icon.ico')
         menubar = tk.Menu(self, bg='white')
         menu = tk.Menu(menubar, tearoff=0)
         menu.add_command(label=_('Import accounts from Steam'),
