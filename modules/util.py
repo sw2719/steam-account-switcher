@@ -42,8 +42,15 @@ def steam_running():
 
 
 def steam64_to_3(steamid64):
-    steamid_3 = SteamID(steamid64).as_steam3  # [U:1:xxxxxxxxxx]
-    return steamid_3.split(':')[2].replace(']', '')
+    return SteamID(steamid64).as_steam3
+
+
+def steam64_to_32(steamid64):
+    return SteamID(steamid64).as_32
+
+
+def steam64_to_2(steamid64):
+    return SteamID(steamid64).as_steam2
 
 
 def open_screenshot(steamid64, steam_path=fetch_reg('steampath')):
@@ -54,4 +61,4 @@ def open_screenshot(steamid64, steam_path=fetch_reg('steampath')):
     if '/' in steam_path:
         steam_path = steam_path.replace('/', '\\')
 
-    os.startfile(f'{steam_path}\\userdata\\{steam64_to_3(steamid64)}\\760\\remote')
+    os.startfile(f'{steam_path}\\userdata\\{steam64_to_32(steamid64)}\\760\\remote')

@@ -15,7 +15,7 @@ from modules.reg import fetch_reg, setkey
 from modules.config import get_config
 from modules.util import check_running, steam_running, StoppableThread, open_screenshot
 from modules.update import start_checkupdate, hide_update, show_update
-from modules.ui import DragDropListbox, AccountButton, WelcomeWindow
+from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window
 from modules.avatar import download_avatar
 
 yaml = YAML()
@@ -408,6 +408,8 @@ class MainApp(tk.Tk):
                                                     command=lambda steamid64=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steamid64}'))
                     menu_dict[username].add_command(label=_('Open screenshots folder'),
                                                     command=lambda steamid64=steam64: open_screenshot(steamid64))
+                    menu_dict[username].add_command(label=_('View SteamID'),
+                                                    command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64))
                     menu_dict[username].add_command(label=_('Update avatar'),
                                                     command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
                     menu_dict[username].add_separator()

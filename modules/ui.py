@@ -7,6 +7,7 @@ import gettext
 from PIL import Image, ImageTk
 from modules.config import get_config
 from ruamel.yaml import YAML
+from modules.util import steam64_to_3, steam64_to_32, steam64_to_2
 
 COLOR_DISABLED = '#cfcfcf'
 COLOR_CLICKED = '#363636'
@@ -194,6 +195,21 @@ class AccountButton:
         self.frame.pack(**kw)
 
 
+class ReadonlyEntryWithLabel:
+    def __init__(self, master, label, text):
+        self.frame = tk.Frame(master)
+        label = tk.Label(self.frame, text=label)
+        entry = ttk.Entry(self.frame, width=21)
+        entry.insert(0, text)
+        entry['state'] = 'readonly'
+
+        self.frame.pack(pady=(6, 0), fill='x')
+        label.pack(side='left', padx=(6, 0))
+        entry.pack(side='right', padx=(0, 6))
+
+    def pack(self, **kw):
+        self.frame.pack(**kw)
+
 class WelcomeWindow(tk.Toplevel):
     def __init__(self):
         tk.Toplevel.__init__(self)
@@ -346,3 +362,22 @@ class WelcomeWindow(tk.Toplevel):
 
         with open('config.yml', 'w') as cfg:
             yaml.dump(dump_dict, cfg)
+
+
+def steamid_window(master, username, steamid64):
+    steamid_window = tk.Toplevel(master)
+    steamid_window.geometry()
+    steamid_window.title('SteamID Info')
+    steamid_window.geometry("240x180+650+320")
+    steamid_window.resizable(False, False)
+    steamid_window.focus()
+
+    close_button = ttk.Button(steamid_window, text=_('Close'), command=steamid_window.destroy)
+    close_button.pack(side='bottom', pady=(0, 3))
+
+    ReadonlyEntryWithLabel(steamid_window, 'Username', username).pack(pady=(6, 0), fill='x')
+    ReadonlyEntryWithLabel(steamid_window, 'SteamID64', steamid64).pack(pady=(6, 0), fill='x')
+    ReadonlyEntryWithLabel(steamid_window, 'SteamID2', steam64_to_2(steamid64)).pack(pady=(6, 0), fill='x')
+    ReadonlyEntryWithLabel(steamid_window, 'SteamID3', steam64_to_3(steamid64)).pack(pady=(6, 0), fill='x')
+    ReadonlyEntryWithLabel(steamid_window, 'Friend code', steam64_to_32(steamid64)).pack(pady=(6, 0), fill='x')
+
