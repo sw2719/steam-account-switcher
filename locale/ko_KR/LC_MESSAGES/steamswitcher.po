@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-21 09:46+0900\n"
-"PO-Revision-Date: 2020-07-21 09:46+0900\n"
+"POT-Creation-Date: 2020-07-21 09:48+0900\n"
+"PO-Revision-Date: 2020-07-21 09:48+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -473,10 +473,6 @@ msgstr ""
 "\n"
 "메뉴 > 정보로 GitHub 저장소를 열 수 있습니다."
 
-#: modules/ui.py:370
-msgid "SteamID Info"
-msgstr "SteamID 정보"
-
 #: modules/update.py:64
 msgid "Update"
 msgstr "업데이트"
@@ -534,6 +530,9 @@ msgstr "개발 버전"
 #: modules/update.py:441
 msgid "Failed checking for updates. Click here to try again."
 msgstr "업데이트 확인 실패. 여기를 클릭하여 재시도하세요."
+
+#~ msgid "SteamID Info"
+#~ msgstr "SteamID 정보"
 
 #~ msgid "Update avatar images"
 #~ msgstr "모든 프로필 사진 업데이트"
