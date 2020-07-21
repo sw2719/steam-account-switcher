@@ -351,7 +351,7 @@ class WelcomeWindow(tk.Toplevel):
         self.top_label['text'] = _('Good to go!')
 
         # tkinter doesn't like three quotes string, so... yeah.
-        self.finish_label = tk.Label(self, text=_("You can change settings in Menu > Settings\nif you don't like the settings you just set.\n\nPlease read GitHub README's How to use-4\nif you are using this app for first time.\n\nYou can open GitHub repo via Menu > About."))
+        self.finish_label = tk.Label(self, text=_("Add or import accounts via Menu.\nRight click on accounts to see more options.\n\nYou can change settings in Menu > Settings\nif you don't like the settings you just set.\n\nPlease read GitHub README's How to use-4\nif you are using this app for first time.\n\nYou can open GitHub repo via Menu > About."))
         self.finish_label.pack(expand=True, fill='both')
 
     def save(self):
