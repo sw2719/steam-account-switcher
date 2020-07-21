@@ -1,5 +1,6 @@
 import os
 import re
+from modules.config import get_config
 from modules.reg import fetch_reg
 from ruamel.yaml import YAML
 
@@ -34,15 +35,16 @@ def acc_getdict():
     return acc_dict
 
 
-def loginusers(steam_path=fetch_reg('steampath')):
+def loginusers():
     '''
     Fetch loginusers.vdf and return SteamID64, AccountName,
     PersonaName values as lists.
     :param steam_path: Steam installation path override
     '''
-    if os.path.isfile('steam_path.txt'):
-        with open('steam_path.txt', 'r') as path:
-            steam_path = path.read()
+    if get_config('steam_path') == 'reg':
+        steam_path = fetch_reg('steam_path')
+    else:
+        steam_path = get_config('steam_path')
 
     if '/' in steam_path:
         steam_path = steam_path.replace('/', '\\')

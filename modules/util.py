@@ -18,6 +18,15 @@ class StoppableThread(threading.Thread):
         return self._stop.isSet()
 
 
+def check_steam_dir():
+    if get_config('steam_path') == 'reg' and os.path.isfile(fetch_reg('SteamPath') + '\\Steam.exe'):
+        return True
+    elif os.path.isfile(get_config('steam_path') + '\\Steam.exe'):
+        return True
+    else:
+        return False
+
+
 def test():
     print('Listing current config...')
     print('locale:', get_config('locale'))
@@ -32,10 +41,10 @@ def test():
         print(f'{key}:', fetch_reg(key))
 
     print('Checking Steam.exe location...')
-    if check_steam_dir and get_config('steam_path') == 'reg':
+    if check_steam_dir() and get_config('steam_path') == 'reg':
         print('Steam located at', fetch_reg('steampath'))
-    elif check_steam_dir:
-        print('Steam located at', get_config('steam_path'))
+    elif check_steam_dir():
+        print('Steam located at', get_config('steam_path'), '(Manually set)')
     else:
         print('Steam directory invalid')
         return False
@@ -44,15 +53,6 @@ def test():
 
 def raise_exception():
     raise Exception
-
-
-def check_steam_dir():
-    if get_config('steam_path') == 'reg' and os.path.isfile(fetch_reg('SteamPath') + '\\Steam.exe'):
-        return True
-    elif os.path.isfile(get_config('steam_path') + '\\Steam.exe'):
-        return True
-    else:
-        return False
 
 
 def check_running(process_name):

@@ -34,7 +34,10 @@ def legacy_restart(silent=True):
     New restarter with threading doesn't seem to work well with refreshing.'''
     try:
         if steam_running():
-            raw_path = fetch_reg('SteamExe')
+            if get_config('steam_path') == 'reg':
+                raw_path = fetch_reg('steampath')
+            else:
+                raw_path = get_config('steam_path').replace('\\', '/')
             raw_path_items = raw_path.split('/')
             path_items = []
             for item in raw_path_items:

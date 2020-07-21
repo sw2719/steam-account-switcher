@@ -373,7 +373,7 @@ class WelcomeWindow(tk.Toplevel):
 
 
 def ask_steam_dir():
-    if not check_steam_dir:
+    if not check_steam_dir():
         msgbox.showwarning(_('Steam directory invalid'), _('Could not locate Steam directory.') + '\n' +
                            _('Please select Steam directory manually.'))
 
