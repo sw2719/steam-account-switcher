@@ -1,7 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox as msgbox
-from tkinter import filedialog
 import gettext
 import winreg
 import subprocess
@@ -854,31 +853,7 @@ class MainApp(tk.Tk):
         '''Open import accounts window'''
         accounts = acc_getlist()
         acc_dict = acc_getdict()
-        if loginusers():
-            steamid_list, account_name, persona_name = loginusers()
-        else:
-            try_manually = msgbox.askyesno(_('Alert'), _('Could not load loginusers.vdf.') + '\n' +
-                                           _('This may be because Steam directory defined') + '\n' +
-                                           _('in registry is invalid.') + '\n\n' +
-                                           _('Do you want to select Steam directory manually?'))
-            if try_manually:
-                while True:
-                    input_dir = filedialog.askdirectory()
-                    if loginusers(steam_path=input_dir):
-                        steamid_list, account_name, persona_name = loginusers(steam_path=input_dir)
-                        with open('steam_path.txt', 'w') as path:
-                            path.write(input_dir)
-                        break
-                    else:
-                        try_again = msgbox.askyesno(_('Warning'),
-                                                    _('Steam directory is invalid.') + '\n' +
-                                                    _('Try again?'))
-                        if try_again:
-                            continue
-                        else:
-                            return
-            else:
-                return
+        steamid_list, account_name, persona_name = loginusers()
 
         if set(account_name).issubset(set(acc_getlist())):
             msgbox.showinfo(_('Info'), _("There's no account left to add."))

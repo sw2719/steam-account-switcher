@@ -91,10 +91,9 @@ def steam64_to_2(steamid64):
     return SteamID(steamid64).as_steam2
 
 
-def open_screenshot(steamid64, steam_path=fetch_reg('steampath')):
-    if os.path.isfile('steam_path.txt'):
-        with open('steam_path.txt', 'r') as path:
-            steam_path = path.read()
+def open_screenshot(steamid64, steam_path=get_config('steam_path')):
+    if steam_path == 'reg':
+        steam_path = fetch_reg('steampath')
 
     if '/' in steam_path:
         steam_path = steam_path.replace('/', '\\')
