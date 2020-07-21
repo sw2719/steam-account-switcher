@@ -42,7 +42,7 @@ def loginusers():
     :param steam_path: Steam installation path override
     '''
     if get_config('steam_path') == 'reg':
-        steam_path = fetch_reg('steam_path')
+        steam_path = fetch_reg('steampath')
     else:
         steam_path = get_config('steam_path')
 
