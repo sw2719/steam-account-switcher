@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-21 21:14+0900\n"
-"PO-Revision-Date: 2020-07-21 21:14+0900\n"
+"POT-Creation-Date: 2020-07-21 22:50+0900\n"
+"PO-Revision-Date: 2020-07-21 22:51+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -36,7 +36,7 @@ msgstr "오류"
 msgid "Could not load config file."
 msgstr "설정 파일을 불러올 수 없습니다."
 
-#: modules/main.py:61 modules/main.py:823
+#: modules/main.py:61 modules/main.py:846
 msgid "Alert"
 msgstr "경고"
 
@@ -76,11 +76,11 @@ msgstr "자동로그인 새로고침"
 msgid "Update all avatars"
 msgstr "모든 프로필 사진 업데이트"
 
-#: modules/main.py:116 modules/main.py:1075
+#: modules/main.py:116 modules/main.py:1109
 msgid "Settings"
 msgstr "설정"
 
-#: modules/main.py:118 modules/main.py:559
+#: modules/main.py:118 modules/main.py:571
 msgid "About"
 msgstr "정보"
 
@@ -121,20 +121,20 @@ msgstr "스팀 재시작"
 msgid "Current Auto-login user:"
 msgstr "현재 자동로그인 계정:"
 
-#: modules/main.py:257 modules/main.py:1041 modules/main.py:1232
+#: modules/main.py:257 modules/main.py:1075 modules/main.py:1266
 #: modules/ui.py:230
 msgid "OK"
 msgstr "확인"
 
-#: modules/main.py:261 modules/main.py:725 modules/main.py:808
-#: modules/main.py:925 modules/main.py:1044 modules/main.py:1237
-#: modules/main.py:1269 modules/update.py:72 modules/update.py:114
+#: modules/main.py:261 modules/main.py:737 modules/main.py:831
+#: modules/main.py:959 modules/main.py:1078 modules/main.py:1271
+#: modules/main.py:1303 modules/update.py:72 modules/update.py:114
 msgid "Cancel"
 msgstr "취소"
 
 #: modules/main.py:265
 #, python-format
-msgid "Select name settings for %s."
+msgid "Select name settings for %s"
 msgstr "%s의 이름 설정 편집"
 
 #: modules/main.py:280
@@ -145,7 +145,7 @@ msgstr "가능한 경우 프로필 이름 사용"
 msgid "Use custom name"
 msgstr "사용자 지정 이름 사용"
 
-#: modules/main.py:322 modules/main.py:847 modules/update.py:315
+#: modules/main.py:322 modules/main.py:870 modules/update.py:315
 #: modules/update.py:318
 msgid "Info"
 msgstr "정보"
@@ -199,188 +199,192 @@ msgstr "삭제"
 msgid "No accounts added"
 msgstr "추가된 계정 없음"
 
-#: modules/main.py:565
+#: modules/main.py:552 modules/main.py:814 modules/main.py:951
+msgid "Please wait while downloading avatars..."
+msgstr "프로필 사진을 내려받는 동안 기다려주세요..."
+
+#: modules/main.py:577
 msgid "Warning: The developer of this application is not responsible for"
 msgstr "경고: 본 앱의 사용으로 인한 데이터 손실 및 기타 손해 등"
 
-#: modules/main.py:566
+#: modules/main.py:578
 msgid "data loss or any other damage from the use of this app."
 msgstr "어떠한 사고나 문제에 대해서 제작자는 책임을 지지 않습니다."
 
-#: modules/main.py:567
+#: modules/main.py:579
 msgid "STEAM is a registered trademark of Valve Corporation."
 msgstr "STEAM은 Valve Corporation의 등록 상표입니다."
 
-#: modules/main.py:577 modules/ui.py:381
+#: modules/main.py:589 modules/ui.py:381
 msgid "Close"
 msgstr "닫기"
 
-#: modules/main.py:581
+#: modules/main.py:593
 msgid "GitHub page"
 msgstr "GitHub 페이지"
 
-#: modules/main.py:595 modules/main.py:941
+#: modules/main.py:607 modules/main.py:975
 msgid "No Accounts"
 msgstr "계정 없음"
 
-#: modules/main.py:596 modules/main.py:942
+#: modules/main.py:608 modules/main.py:976
 msgid "There's no account added."
 msgstr "추가된 계정이 없습니다."
 
-#: modules/main.py:599 modules/main.py:729
+#: modules/main.py:611 modules/main.py:741
 msgid "Refresh"
 msgstr "새로고침"
 
-#: modules/main.py:606
+#: modules/main.py:618
 msgid "Select accounts to refresh."
 msgstr "새로고침할 계정을 선택하세요."
 
-#: modules/main.py:662
+#: modules/main.py:674
 msgid "Accounts with expired autologin token will show login prompt."
 msgstr "이미 만료된 자동로그인 계정인 경우 로그인 창이 표시됩니다."
 
-#: modules/main.py:663
+#: modules/main.py:675
 msgid "Close the prompt or login to continue the process."
 msgstr "그럴 경우 로그인 창을 닫거나 로그인하면 됩니다."
 
-#: modules/main.py:671
+#: modules/main.py:683
 msgid "Initializing..."
 msgstr "시작 중..."
 
-#: modules/main.py:690
+#: modules/main.py:702
 msgid "Switching account..."
 msgstr "계정 변경 중..."
 
-#: modules/main.py:702
+#: modules/main.py:714
 msgid "Waiting for Steam..."
 msgstr "Steam을 기다리는 중..."
 
-#: modules/main.py:715
+#: modules/main.py:727
 msgid "Do you want to start Steam with previous autologin account?"
 msgstr "이전 자동로그인 계정으로 Steam을 실행하시겠습니까?"
 
-#: modules/main.py:743 modules/main.py:805
+#: modules/main.py:755 modules/main.py:828
 msgid "Add"
 msgstr "추가"
 
-#: modules/main.py:754
+#: modules/main.py:766
 msgid "Enter account(s) to add."
 msgstr "추가할 계정을 입력하세요."
 
-#: modules/main.py:756
+#: modules/main.py:768
 msgid "In case of adding multiple accounts,"
 msgstr "다수의 계정을 입력할 경우에는,"
 
-#: modules/main.py:757
+#: modules/main.py:769
 msgid "seperate each account with '/' (slash)."
 msgstr "'/'(슬래시)로 구분합니다."
 
-#: modules/main.py:785
+#: modules/main.py:800
 msgid "Duplicate Alert"
 msgstr "중복 경고"
 
-#: modules/main.py:786
+#: modules/main.py:801
 #, python-format
 msgid "Account %s already exists."
 msgstr "계정 %s은 이미 추가되어 있습니다."
 
-#: modules/main.py:823
+#: modules/main.py:846
 msgid "Could not load loginusers.vdf."
 msgstr "파일 loginusers.vdf를 불러오지 못했습니다."
 
-#: modules/main.py:824
+#: modules/main.py:847
 msgid "This may be because Steam directory defined"
 msgstr "레지스트리에 설정된 스팀 경로가 올바르지"
 
-#: modules/main.py:825
+#: modules/main.py:848
 msgid "in registry is invalid."
 msgstr "않을 수 있습니다."
 
-#: modules/main.py:826
+#: modules/main.py:849
 msgid "Do you want to select Steam directory manually?"
 msgstr "수동으로 스팀 경로를 설정하시겠습니까?"
 
-#: modules/main.py:836
+#: modules/main.py:859
 msgid "Warning"
 msgstr "경고"
 
-#: modules/main.py:837
+#: modules/main.py:860
 msgid "Steam directory is invalid."
 msgstr "스팀 경로가 올바르지 않습니다."
 
-#: modules/main.py:838
+#: modules/main.py:861
 msgid "Try again?"
 msgstr "다시 시도할까요?"
 
-#: modules/main.py:847
+#: modules/main.py:870
 msgid "There's no account left to add."
 msgstr "추가할 계정이 없습니다."
 
-#: modules/main.py:851 modules/main.py:929
+#: modules/main.py:874 modules/main.py:963
 msgid "Import"
 msgstr "가져오기"
 
-#: modules/main.py:860
+#: modules/main.py:883
 msgid "Select accounts to import."
 msgstr "가져올 계정들을 선택하세요."
 
-#: modules/main.py:861
+#: modules/main.py:884
 msgid "Added accounts don't show up."
 msgstr "이미 추가된 계정은 나타나지 않습니다."
 
-#: modules/main.py:1048 modules/main.py:1242
+#: modules/main.py:1082 modules/main.py:1276
 msgid "Apply"
 msgstr "적용"
 
-#: modules/main.py:1092
+#: modules/main.py:1126
 msgid "Language"
 msgstr "언어"
 
-#: modules/main.py:1112
+#: modules/main.py:1146
 msgid "Restart app to apply language settings."
 msgstr "언어 설정을 적용하려면 앱을 재시작하세요."
 
-#: modules/main.py:1125
+#: modules/main.py:1159
 msgid "Normal Mode (Manually restart Steam)"
 msgstr "일반 모드 (수동 Steam 재시작)"
 
-#: modules/main.py:1131
+#: modules/main.py:1165
 msgid "Express Mode (Auto-restart Steam)"
 msgstr "익스프레스 모드 (자동 Steam 재시작)"
 
-#: modules/main.py:1140 modules/ui.py:322
+#: modules/main.py:1174 modules/ui.py:322
 msgid "Try to soft shutdown Steam client"
 msgstr "스팀 클라이언트 안전 종료"
 
-#: modules/main.py:1155 modules/ui.py:334
+#: modules/main.py:1189 modules/ui.py:334
 msgid "Exit app after Steam is restarted"
 msgstr "스팀 재시작시 앱 종료"
 
-#: modules/main.py:1169 modules/ui.py:346
+#: modules/main.py:1203 modules/ui.py:346
 msgid "Show avatar images"
 msgstr "프로필 사진 표시"
 
-#: modules/main.py:1219
+#: modules/main.py:1253
 msgid "Do you want to download avatar images now?"
 msgstr "지금 프로필 사진을 다운로드하시겠습니까?"
 
-#: modules/main.py:1224
+#: modules/main.py:1258
 msgid "Locale has been changed"
 msgstr "언어가 변경됨"
 
-#: modules/main.py:1225
+#: modules/main.py:1259
 msgid "Restart app to apply new locale settings."
 msgstr "새 언어 설정을 적용하려면 앱을 재시작하세요."
 
-#: modules/main.py:1272
+#: modules/main.py:1306
 msgid "Force quit Steam"
 msgstr "Steam 강제종료"
 
-#: modules/main.py:1284
+#: modules/main.py:1318
 msgid "Waiting for Steam to exit..."
 msgstr "Steam이 종료되기를 기다리는 중..."
 
-#: modules/main.py:1350
+#: modules/main.py:1384
 msgid "Launching Steam..."
 msgstr "Steam을 시작하는 중..."
 
@@ -418,7 +422,7 @@ msgstr "원하는 설정을 선택하세요."
 
 #: modules/ui.py:282
 msgid "Please wait..."
-msgstr "잠시 기다려 주십시오..."
+msgstr "잠시 기다려 주세요..."
 
 #: modules/ui.py:295
 msgid "Normal Mode"

@@ -262,7 +262,7 @@ class MainApp(tk.Tk):
                                    command=configwindow.destroy)
         cancel_button.pack(side='left', padx=1.5)
 
-        top_label = tk.Label(configwindow, text=_('Select name settings for %s.') % username)
+        top_label = tk.Label(configwindow, text=_('Select name settings for %s') % username)
         top_label.pack(side='top', pady=(4, 3))
 
         radio_frame1 = tk.Frame(configwindow)
@@ -544,8 +544,20 @@ class MainApp(tk.Tk):
         print('Menu refreshed with %s account(s)' % len(self.accounts))
 
     def update_avatar(self, steamid_list=loginusers()[0]):
+        self.no_user_frame.destroy()
+        self.button_frame.destroy()
+        hide_update()
+        self.bottomframe.pack_forget()
+
+        label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
+        label.pack(expand=True)
+        self.update()
         download_avatar(steamid_list)
-        self.refresh()
+
+        label.destroy()
+        self.refresh(no_frame=True)
+        self.bottomframe.pack(side='bottom')
+        show_update()
 
     def about(self, version):
         '''Open about window'''
@@ -762,6 +774,9 @@ class MainApp(tk.Tk):
         addwindow.focus()
         account_entry.focus()
 
+        def disable_close():
+            pass
+
         def adduser(userinput):
             '''Write accounts from user's input to accounts.yml
             :param userinput: Account names to add
@@ -789,7 +804,15 @@ class MainApp(tk.Tk):
                     yaml = YAML()
                     yaml.dump(acc_dict, acc)
 
-                if dl_list:
+                if dl_list and get_config('show_avatar') == 'true':
+                    button_addcancel.destroy()
+                    bottomframe_add.destroy()
+                    topframe_add.destroy()
+                    addwindow.protocol("WM_DELETE_WINDOW", disable_close)
+                    addwindow.focus()
+
+                    tk.Label(addwindow, text=_('Please wait while downloading avatars...')).pack(fill='both', expand=True)
+                    self.update()
                     download_avatar(dl_list)
 
                 self.refresh()
@@ -857,14 +880,15 @@ class MainApp(tk.Tk):
         bottomframe_imp = tk.Frame(importwindow)
         bottomframe_imp.pack(side='bottom')
 
-        importlabel = tk.Label(importwindow, text=_('Select accounts to import.') + '\n' +
-                               _("Added accounts don't show up."))
-        importlabel.pack(side='top',
-                         padx=5,
-                         pady=5)
+        import_label = tk.Label(importwindow, text=_('Select accounts to import.') + '\n' +
+                                _("Added accounts don't show up."))
+        import_label.pack(side='top', padx=5, pady=5)
 
         def close():
             importwindow.destroy()
+
+        def disable_close():
+            pass
 
         def onFrameConfigure(canvas):
             '''Reset the scroll region to encompass the inner frame'''
@@ -872,9 +896,7 @@ class MainApp(tk.Tk):
 
         canvas = tk.Canvas(importwindow, borderwidth=0, highlightthickness=0)
         check_frame = tk.Frame(canvas)
-        scroll_bar = ttk.Scrollbar(importwindow,
-                                   orient="vertical",
-                                   command=canvas.yview)
+        scroll_bar = ttk.Scrollbar(importwindow, orient="vertical", command=canvas.yview)
 
         canvas.configure(yscrollcommand=scroll_bar.set)
 
@@ -917,7 +939,19 @@ class MainApp(tk.Tk):
                 yaml = YAML()
                 yaml.dump(acc_dict, acc)
 
-            download_avatar(dl_list)
+            if get_config('show_avatar') == 'true':
+                canvas.destroy()
+                import_label.destroy()
+                scroll_bar.destroy()
+                import_cancel['state'] = 'disabled'
+                import_ok['state'] = 'disabled'
+                importwindow.protocol("WM_DELETE_WINDOW", disable_close)
+                importwindow.focus()
+
+                tk.Label(importwindow, text=_('Please wait while downloading avatars...')).pack(fill='both', expand=True)
+                self.update()
+                download_avatar(dl_list)
+
             self.refresh()
             close()
 
