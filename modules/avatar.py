@@ -17,15 +17,15 @@ def download_avatar(steamid_list=loginusers()[0]):
         os.mkdir('avatar')
 
     for steamid in steamid_list:
-        with req.get(f'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={API_KEY}&steamids={steamid}') as r:
-            try:
+        try:
+            with req.get(f'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={API_KEY}&steamids={steamid}') as r:
                 r.raise_for_status()
                 data = json.loads(r.text)
                 dl_list.append(data['response']['players'][0]['avatarmedium'])
                 print(f'Found image URL for {steamid}')
 
-            except req.RequestException:
-                continue
+        except req.RequestException:
+            continue
 
     for index, url in enumerate(dl_list):
         try:

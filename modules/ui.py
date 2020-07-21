@@ -210,6 +210,7 @@ class ReadonlyEntryWithLabel:
     def pack(self, **kw):
         self.frame.pack(**kw)
 
+
 class WelcomeWindow(tk.Toplevel):
     def __init__(self):
         tk.Toplevel.__init__(self)
@@ -380,4 +381,3 @@ def steamid_window(master, username, steamid64):
     ReadonlyEntryWithLabel(steamid_window, 'SteamID64', steamid64).pack(pady=(6, 0), fill='x')
     ReadonlyEntryWithLabel(steamid_window, 'SteamID2', steam64_to_2(steamid64)).pack(pady=(6, 0), fill='x')
     ReadonlyEntryWithLabel(steamid_window, 'SteamID3', steam64_to_3(steamid64)).pack(pady=(6, 0), fill='x')
-

@@ -91,6 +91,7 @@ class MainApp(tk.Tk):
     def __init__(self, version, url, bundle):
         self.accounts = acc_getlist()
         self.acc_dict = acc_getdict()
+        self.demo_mode = False
         tk.Tk.__init__(self)
         self['bg'] = 'white'
         self.title(_("Account Switcher"))
@@ -130,6 +131,10 @@ class MainApp(tk.Tk):
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True, exception=True)))
             debug_menu.add_command(label="Download avatar images",
                                    command=download_avatar)
+            debug_menu.add_command(label="Open initial setup",
+                                   command=self.welcomewindow)
+            debug_menu.add_command(label="Toggle demo mode",
+                                   command=self.toggle_demo)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         self.bottomframe = tk.Frame(self, bg='white')
@@ -215,11 +220,21 @@ class MainApp(tk.Tk):
 
         self.draw_button()
 
+    def toggle_demo(self):
+        if self.demo_mode:
+            self.demo_mode = False
+        else:
+            self.demo_mode = True
+
+        self.refresh()
+
     def welcomewindow(self):
         window = WelcomeWindow()
 
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':
+                if self.accounts:
+                    download_avatar()
                 self.refresh()
 
         window.bind('<Destroy>', event_function)
@@ -362,7 +377,44 @@ class MainApp(tk.Tk):
         def onFrameConfigure(canvas):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
-        if self.accounts:
+        if self.demo_mode:
+            canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
+            canvas.config(bg='white')
+            buttonframe = tk.Frame(canvas)
+            scroll_bar = ttk.Scrollbar(self.button_frame,
+                                       orient="vertical",
+                                       command=canvas.yview)
+
+            for x in range(0, 8):
+                self.button_dict[x] = AccountButton(buttonframe,
+                                                    username='username' + str(x),
+                                                    profilename='profilename' + str(x),
+                                                    image='default')
+
+                if x == 0:
+                    self.button_dict[x].disable()
+
+                self.button_dict[x].pack(fill='x')
+                ttk.Separator(buttonframe, orient='horizontal').pack(fill='x')
+
+            scroll_bar.pack(side="right", fill="y")
+            canvas.pack(side="left", fill='both', expand=True)
+            h = 50 * 8
+            canvas.create_window((0, 0), height=h, width=285, window=buttonframe, anchor="nw")
+            canvas.configure(yscrollcommand=scroll_bar.set)
+            canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
+
+            def _on_mousewheel(event):
+                '''Scroll window on mousewheel input'''
+                widget = event.widget.winfo_containing(event.x_root, event.y_root)
+
+                if 'disabled' not in scroll_bar.state() and '!canvas' in str(widget):
+                    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+            buttonframe.bind("<Configure>", lambda event,
+                             canvas=canvas: onFrameConfigure(canvas))
+            self.bind("<MouseWheel>", _on_mousewheel)
+        elif self.accounts:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
             canvas.config(bg='white')
             buttonframe = tk.Frame(canvas)
@@ -470,9 +522,14 @@ class MainApp(tk.Tk):
         self.button_frame = tk.Frame(self)
         self.button_frame.pack(side='top', fill='both', expand=True)
 
-        self.user_var.set(fetch_reg('AutoLoginUser'))
+        if self.demo_mode:
+            self.user_var.set('username1')
+        else:
+            self.user_var.set(fetch_reg('AutoLoginUser'))
 
-        if fetch_reg('RememberPassword') == 1:
+        if self.demo_mode:
+            self.auto_var.set(_('Auto-login Enabled'))
+        elif fetch_reg('RememberPassword') == 1:
             self.auto_var.set(_('Auto-login Enabled'))
         else:
             self.auto_var.set(_('Auto-login Disabled'))
