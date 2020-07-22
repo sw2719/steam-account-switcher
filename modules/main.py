@@ -105,7 +105,7 @@ class MainApp(tk.Tk):
 
         try:
             self.iconbitmap('asset/icon.ico')
-        except FileNotFoundError:
+        except tk.TclError:
             pass
 
         if not test():
