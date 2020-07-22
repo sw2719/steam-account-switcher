@@ -4,3 +4,4 @@ requests
 ruamel.yaml
 Pillow
 steam
+pget
