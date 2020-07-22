@@ -7,7 +7,7 @@ import os
 import sys
 import gettext
 from PIL import Image, ImageTk
-from modules.config import get_config, config_write_value
+from modules.config import get_config, config_write_value, config_write_dict
 from ruamel.yaml import YAML
 from modules.util import steam64_to_3, steam64_to_32, steam64_to_2, check_steam_dir
 
@@ -366,10 +366,10 @@ class WelcomeWindow(tk.Toplevel):
                      'try_soft_shutdown': self.soft_shutdown,
                      'autoexit': self.autoexit,
                      'mode': self.mode,
-                     'show_avatar': self.avatar}
+                     'show_avatar': self.avatar,
+                     'steam_path': get_config('steam_path')}
 
-        with open('config.yml', 'w') as cfg:
-            yaml.dump(dump_dict, cfg)
+        config_write_dict(dump_dict)
 
 
 def ask_steam_dir():
