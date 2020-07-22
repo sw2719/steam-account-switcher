@@ -6,14 +6,13 @@ import gettext
 import os
 import queue as q
 import requests as req
-import shutil
 import zipfile as zf
 import subprocess
 import sys
 import threading
-from time import sleep
 from packaging import version
 from ruamel.yaml import YAML
+from pget.down import Downloader
 from modules.config import get_config
 from modules.errormsg import error_msg
 
@@ -138,8 +137,6 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
             dl_speed.pack(side='right', padx=5)
             master.update()
 
-            download_q = q.Queue()
-
             try:  # Check if mirror is available and should we use it
                 if mirror_url:
                     mirror = req.get(mirror_url + 'mirror.yml', timeout=4)
@@ -173,11 +170,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 print('Reverting to GitHub for downloading update...')
                 dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
 
-            def download(URL):
-                nonlocal download_q
-
                 try:
-                    r = req.get(URL, stream=True)
+                    r = req.get(dl_url, stream=True)
                     r.raise_for_status()
                     total_size = int(r.headers.get('content-length'))
                     total_in_MB = round(total_size / 1048576, 1)
@@ -189,84 +183,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 if round(total_in_MB, 1).is_integer():
                     total_in_MB = int(total_in_MB)
 
-                def save():
-                    nonlocal r
-                    with open('update.zip', 'wb') as f:
-                        shutil.copyfileobj(r.raw, f)
-
-                dl_thread = threading.Thread(target=save)
-                dl_thread.start()
-
-                last_size = 0
-
-                # This download speed calculation is not really accurate.
-                # This is my best effort to make real-time one instad of average one.
-                while True:
-                    try:
-                        current_size = os.path.getsize('update.zip')
-                        current_in_MB = round(current_size / 1048576, 1)
-
-                        if round(current_in_MB, 1).is_integer():
-                            current_in_MB = int(current_in_MB)
-
-                        size_delta = current_size - last_size
-                        bps = size_delta * 2  # Multiply size delta by 2 since we calculate speed every 0.5s
-
-                        if bps >= 1048576:  # Above 1MiB/s
-                            dl_spd = bps / 1048576
-                            if round(dl_spd, 1).is_integer():
-                                dl_spd = int(dl_spd)
-                            else:
-                                dl_spd = round(dl_spd, 1)
-                            dl_spd_str = f'{dl_spd}MB/s'
-                        elif bps >= 1024:  # Above 1KiB/s
-                            dl_spd = bps / 1024
-                            if round(dl_spd, 1).is_integer():
-                                dl_spd = int(dl_spd)
-                            else:
-                                dl_spd = round(dl_spd, 1)
-                            dl_spd_str = f'{dl_spd}KB/s'
-                        else:
-                            dl_spd = bps
-                            dl_spd_str = f'{dl_spd}B/s'
-
-                        perc = int(current_size / total_size * 100)
-
-                        prog = f'{current_in_MB}MB / {total_in_MB}MB'
-
-                        download_q.put((perc, prog, dl_spd_str))
-                        if perc == 100:
-                            break
-                        else:
-                            last_size = current_size
-                            sleep(0.5)
-                    except OSError:
-                        sleep(0.5)
-                        continue
-
-            def update_pbar():
-                nonlocal download_q
-                nonlocal dl_p
-                nonlocal dl_speed_var
-                nonlocal dl_prog_var
-                while True:
-                    try:  # Update tk variables
-                        q_tuple = download_q.get_nowait()
-                        p = q_tuple[0]
-                        dl_p.set(p)
-                        dl_prog_var.set(q_tuple[1])
-                        dl_speed_var.set(q_tuple[2])
-                        master.update()
-                        if p == 100:
-                            return
-                    except q.Empty:
-                        master.update()
-
-            dl_thread = threading.Thread(target=lambda url=dl_url: download(url))
-            dl_thread.start()
-
-            update_pbar()
-            if install:
+            def launch_updater():
                 try:
                     archive = os.path.join(os.getcwd(), 'update.zip')
 
@@ -278,6 +195,50 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 except (FileNotFoundError, zf.BadZipfile, OSError):
                     error_msg(_('Error'), _("Couldn't perform automatic update.") + '\n' +
                               _('Update manually by extracting update.zip file.'))
+
+            def dl_callback(downloader):
+                nonlocal total_in_MB
+
+                bps = downloader.speed
+                current_size = downloader.total_downloaded
+                current_in_MB = round(current_size / 1048576, 1)
+
+                if round(current_in_MB, 1).is_integer():
+                    current_in_MB = int(current_in_MB)
+
+                if bps >= 1048576:  # Above 1MiB/s
+                    dl_spd = bps / 1048576
+                    if round(dl_spd, 1).is_integer():
+                        dl_spd = int(dl_spd)
+                    else:
+                        dl_spd = round(dl_spd, 1)
+                    dl_spd_str = f'{dl_spd}MB/s'
+                elif bps >= 1024:  # Above 1KiB/s
+                    dl_spd = bps / 1024
+                    if round(dl_spd, 1).is_integer():
+                        dl_spd = int(dl_spd)
+                    else:
+                        dl_spd = round(dl_spd, 1)
+                    dl_spd_str = f'{dl_spd}KB/s'
+                else:
+                    dl_spd = bps
+                    dl_spd_str = f'{dl_spd}B/s'
+
+                perc = int(current_size / total_size * 100)
+
+                prog = f'{current_in_MB}MB / {total_in_MB}MB'
+
+                dl_p.set(perc)
+                dl_prog_var.set(prog)
+                dl_speed_var.set(dl_spd_str)
+                master.update()
+
+                if perc == 100 and install:
+                    launch_updater()
+
+            downloader = Downloader(dl_url, 'update.zip', 8)
+            downloader.subscribe(dl_callback)
+            downloader.start()
 
         update_button['command'] = lambda: start_update(mirror_url)
         if LOCALE == 'fr_FR':
