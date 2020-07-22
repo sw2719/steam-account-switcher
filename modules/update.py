@@ -7,7 +7,6 @@ import os
 import queue as q
 import requests as req
 import zipfile as zf
-import subprocess
 import sys
 import threading
 from time import sleep
