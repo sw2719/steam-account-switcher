@@ -10,6 +10,7 @@ import zipfile as zf
 import subprocess
 import sys
 import threading
+from time import sleep
 from packaging import version
 from ruamel.yaml import YAML
 from pget.down import Downloader
@@ -153,14 +154,19 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 total_in_MB = int(total_in_MB)
 
             def launch_updater():
+                if not install:
+                    return
+
+                while not os.path.isfile('update.zip'):
+                    sleep(1)
+
                 try:
                     archive = os.path.join(os.getcwd(), 'update.zip')
 
                     f = zf.ZipFile(archive, mode='r')
                     f.extractall(members=(member for member in f.namelist() if 'updater' in member))
 
-                    subprocess.run('start updater/updater.exe', shell=True)
-                    sys.exit(0)
+                    os.execv('updater/updater.exe', sys.argv)
                 except (FileNotFoundError, zf.BadZipfile, OSError):
                     error_msg(_('Error'), _("Couldn't perform automatic update.") + '\n' +
                               _('Update manually by extracting update.zip file.'))
@@ -168,41 +174,21 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
             def dl_callback(downloader):
                 nonlocal total_in_MB
 
-                bps = downloader.speed
                 current_size = downloader.total_downloaded
                 current_in_MB = round(current_size / 1048576, 1)
 
                 if round(current_in_MB, 1).is_integer():
                     current_in_MB = int(current_in_MB)
 
-                if bps >= 1048576:  # Above 1MiB/s
-                    dl_spd = bps / 1048576
-                    if round(dl_spd, 1).is_integer():
-                        dl_spd = int(dl_spd)
-                    else:
-                        dl_spd = round(dl_spd, 1)
-                    dl_spd_str = f'{dl_spd}MB/s'
-                elif bps >= 1024:  # Above 1KiB/s
-                    dl_spd = bps / 1024
-                    if round(dl_spd, 1).is_integer():
-                        dl_spd = int(dl_spd)
-                    else:
-                        dl_spd = round(dl_spd, 1)
-                    dl_spd_str = f'{dl_spd}KB/s'
-                else:
-                    dl_spd = bps
-                    dl_spd_str = f'{dl_spd}B/s'
-
                 perc = int(current_size / total_size * 100)
-
                 prog = f'{current_in_MB}MB / {total_in_MB}MB'
 
                 dl_p.set(perc)
                 dl_prog_var.set(prog)
-                dl_speed_var.set(dl_spd_str)
+                dl_speed_var.set(downloader.readable_speed + '/s')
                 master.update()
 
-                if perc == 100 and install:
+                if perc == 100 and downloader.total_merged == downloader.total_length:
                     launch_updater()
 
             downloader = Downloader(dl_url, 'update.zip', 8)
