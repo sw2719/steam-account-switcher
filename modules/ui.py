@@ -218,7 +218,7 @@ class WelcomeWindow(tk.Toplevel):
         self.master = master
         tk.Toplevel.__init__(self, self.master, bg='white')
         self.title(_('Welcome'))
-        self.geometry("300x230+650+320")
+        self.geometry("320x230+650+320")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.on_window_close)
         self.focus()
