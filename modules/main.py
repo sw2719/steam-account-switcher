@@ -138,7 +138,9 @@ class MainApp(tk.Tk):
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, bundle, debug=True)))
             debug_menu.add_command(label='Check for updates without debug mode',
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True)))
-            debug_menu.add_command(label='Check for updates (with exception)',
+            debug_menu.add_command(label='Check for updates (Force update available)',
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, '1.0', url, True)))
+            debug_menu.add_command(label='Check for updates (Raise error)',
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True, exception=True)))
             debug_menu.add_command(label="Download avatar images",
                                    command=download_avatar)
