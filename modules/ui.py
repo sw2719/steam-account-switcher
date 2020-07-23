@@ -216,23 +216,27 @@ class ReadonlyEntryWithLabel:
 class WelcomeWindow(tk.Toplevel):
     def __init__(self, master):
         self.master = master
-        tk.Toplevel.__init__(self, self.master)
+        tk.Toplevel.__init__(self, self.master, bg='white')
         self.title(_('Welcome'))
         self.geometry("300x230+650+320")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.on_window_close)
         self.focus()
 
+        self.style = ttk.Style()
+        self.style.configure('welcome.TCheckbutton', background='white')
+        self.style.configure('welcome.TRadiobutton', background='white')
+
         self.radio_var = tk.IntVar()
         self.active_page = 0
 
-        self.upper_frame = tk.Frame(self)
+        self.upper_frame = tk.Frame(self, bg='white')
         self.upper_frame.pack(side='top')
 
         self.ok_button = ttk.Button(self, text=_('OK'), command=self.ok)
         self.ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
 
-        self.welcome_label = tk.Label(self, text=_('Thank you for downloading this app.\nClick OK to continue.'))
+        self.welcome_label = tk.Label(self, text=_('Thank you for downloading this app.\nClick OK to continue.'), bg='white')
         self.welcome_label.pack(expand=True, fill='both')
 
         self.grab_set()
@@ -244,7 +248,7 @@ class WelcomeWindow(tk.Toplevel):
     def ok(self):
         if self.active_page == 0:
             self.welcome_label.destroy()
-            self.top_label = tk.Label(self.upper_frame, text=_('Customize your settings.'))
+            self.top_label = tk.Label(self.upper_frame, text=_('Customize your settings.'), bg='white')
             self.top_label.pack(pady=(4, 3))
             self.page_1()
 
@@ -290,75 +294,81 @@ class WelcomeWindow(tk.Toplevel):
     def page_1(self):
         self.active_page = 1
 
-        self.radio_frame1 = tk.Frame(self)
+        self.radio_frame1 = tk.Frame(self, bg='white')
         self.radio_frame1.pack(side='top', padx=20, pady=(4, 10), fill='x')
 
         radio_normal = ttk.Radiobutton(self.radio_frame1,
                                        text=_('Normal Mode'),
                                        variable=self.radio_var,
-                                       value=0)
+                                       value=0,
+                                       style='welcome.TRadiobutton')
         radio_normal.pack(side='top', anchor='w', pady=2)
 
-        tk.Label(self.radio_frame1, justify='left',
+        tk.Label(self.radio_frame1, justify='left', bg='white',
                  text=_("In normal mode, you restart Steam\nby clicking 'Restart Steam' button.")).pack(side='left', pady=5)
 
-        self.radio_frame2 = tk.Frame(self)
+        self.radio_frame2 = tk.Frame(self, bg='white')
         self.radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
 
         radio_express = ttk.Radiobutton(self.radio_frame2,
                                         text=_('Express Mode'),
                                         variable=self.radio_var,
-                                        value=1)
+                                        value=1,
+                                        style='welcome.TRadiobutton')
         radio_express.pack(side='top', anchor='w', pady=2)
 
-        tk.Label(self.radio_frame2, justify='left',
+        tk.Label(self.radio_frame2, justify='left', bg='white',
                  text=_('In express mode, Steam will be automatically\nrestarted when you change account.')).pack(side='left', pady=5)
 
     def page_2(self):
         self.active_page = 2
 
-        self.softshutdown_frame = tk.Frame(self)
+        self.softshutdown_frame = tk.Frame(self, bg='white')
         self.softshutdown_frame.pack(fill='x', side='top', padx=(14, 0), pady=(4, 0))
 
         self.soft_chkb = ttk.Checkbutton(self.softshutdown_frame,
-                                         text=_('Try to soft shutdown Steam client'))
+                                         text=_('Try to soft shutdown Steam client'),
+                                         style='welcome.TCheckbutton')
 
         self.soft_chkb.state(['!alternate'])
         self.soft_chkb.state(['selected'])
 
         self.soft_chkb.pack(side='top', anchor='w')
-        tk.Label(self.softshutdown_frame, text=_('Shutdown Steam instead of killing Steam process')).pack(side='top', anchor='w')
+        tk.Label(self.softshutdown_frame, text=_('Shutdown Steam instead of killing Steam process'), bg='white').pack(side='top', anchor='w')
 
-        self.autoexit_frame = tk.Frame(self)
+        self.autoexit_frame = tk.Frame(self, bg='white')
         self.autoexit_frame.pack(fill='x', side='top', padx=(14, 0), pady=15)
 
         self.autoexit_chkb = ttk.Checkbutton(self.autoexit_frame,
-                                             text=_('Exit app after Steam is restarted'))
+                                             text=_('Exit app after Steam is restarted'),
+                                             style='welcome.TCheckbutton')
 
         self.autoexit_chkb.state(['!alternate'])
         self.autoexit_chkb.state(['selected'])
 
         self.autoexit_chkb.pack(side='top', anchor='w')
-        tk.Label(self.autoexit_frame, text=_('Exit app automatically after restarting Steam')).pack(side='top', anchor='w')
+        tk.Label(self.autoexit_frame, text=_('Exit app automatically after restarting Steam'), bg='white').pack(side='top', anchor='w')
 
-        self.avatar_frame = tk.Frame(self)
+        self.avatar_frame = tk.Frame(self, bg='white')
         self.avatar_frame.pack(fill='x', side='top', padx=(14, 0))
 
         self.avatar_chkb = ttk.Checkbutton(self.avatar_frame,
-                                           text=_('Show avatar images'))
+                                           text=_('Show avatar images'),
+                                           style='welcome.TCheckbutton')
 
         self.avatar_chkb.state(['!alternate'])
         self.avatar_chkb.state(['selected'])
 
         self.avatar_chkb.pack(side='top', anchor='w')
-        tk.Label(self.avatar_frame, text=_('Show avatars in account list')).pack(side='top', anchor='w')
+        tk.Label(self.avatar_frame, text=_('Show avatars in account list'), bg='white').pack(side='top', anchor='w')
 
     def page_3(self):
         self.active_page = 3
         self.top_label['text'] = _('Good to go!')
 
         # tkinter doesn't like three quotes string, so... yeah.
-        self.finish_label = tk.Label(self, text=_("Add or import accounts via Menu.\nRight click on accounts to see more options.\n\nYou can change settings in Menu > Settings\nif you don't like the settings you just set.\n\nPlease read GitHub README's How to use-4\nif you are using this app for first time.\n\nYou can open GitHub repo via Menu > About."))
+        self.finish_label = tk.Label(self, bg='white',
+                                     text=_("Add or import accounts via Menu.\nRight click on accounts to see more options.\n\nYou can change settings in Menu > Settings\nif you don't like the settings you just set.\n\nPlease read GitHub README's How to use-4\nif you are using this app for first time.\n\nYou can open GitHub repo via Menu > About."))
         self.finish_label.pack(expand=True, fill='both')
 
     def save(self):
