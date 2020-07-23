@@ -984,7 +984,7 @@ class MainApp(tk.Tk):
         orderwindow.resizable(False, False)
 
         bottomframe_windowctrl = tk.Frame(orderwindow, bg='white')
-        bottomframe_windowctrl.pack(side='bottom', padx=3, pady=3)
+        bottomframe_windowctrl.pack(side='bottom', padx=3, pady=3, fill='x')
 
         bottomframe_orderctrl = tk.Frame(orderwindow, bg='white')
         bottomframe_orderctrl.pack(side='bottom', padx=3, pady=3)
