@@ -151,7 +151,7 @@ class MainApp(tk.Tk):
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         self.bottomframe = tk.Frame(self, bg='white')
-        self.bottomframe.pack(side='bottom')
+        self.bottomframe.pack(side='bottom', fill='x')
 
         def toggleAutologin():
             '''Toggle autologin registry value between 0 and 1'''
@@ -541,7 +541,7 @@ class MainApp(tk.Tk):
         self.button_frame.pack(side='top', fill='both', expand=True)
 
         if self.demo_mode:
-            self.user_var.set('username1')
+            self.user_var.set('username0')
         else:
             self.user_var.set(fetch_reg('AutoLoginUser'))
 
