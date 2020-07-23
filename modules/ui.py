@@ -223,6 +223,11 @@ class WelcomeWindow(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_window_close)
         self.focus()
 
+        try:
+            self.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
+
         self.style = ttk.Style()
         self.style.configure('welcome.TCheckbutton', background='white')
         self.style.configure('welcome.TRadiobutton', background='white')
@@ -405,8 +410,14 @@ def steamid_window(master, username, steamid64):
     steamid_window.geometry()
     steamid_window.title('SteamID')
     steamid_window.geometry("240x180+650+320")
+    steamid_window.bind('<Escape>', lambda event: steamid_window.destroy())
     steamid_window.resizable(False, False)
     steamid_window.focus()
+
+    try:
+        steamid_window.iconbitmap('asset/icon.ico')
+    except tk.TclError:
+        pass
 
     close_button = ttk.Button(steamid_window, text=_('Close'), command=steamid_window.destroy)
     close_button.pack(side='bottom', pady=(0, 3))

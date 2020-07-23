@@ -257,6 +257,12 @@ class MainApp(tk.Tk):
         configwindow.title('')
         configwindow.geometry("240x150+650+320")
         configwindow.resizable(False, False)
+        configwindow.bind('<Escape>', lambda event: configwindow.destroy())
+
+        try:
+            configwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
 
         i = self.accounts.index(username)
         try:
@@ -590,6 +596,12 @@ class MainApp(tk.Tk):
         aboutwindow.geometry("%sx180+650+300" % width)
         aboutwindow.resizable(False, False)
         aboutwindow.focus()
+        aboutwindow.bind('<Escape>', lambda event: aboutwindow.destroy())
+
+        try:
+            aboutwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
 
         about_disclaimer = tk.Label(aboutwindow, bg='white',
                                     text=_('Warning: The developer of this application is not responsible for')
@@ -630,10 +642,18 @@ class MainApp(tk.Tk):
         refreshwindow.title(_("Refresh"))
         refreshwindow.geometry("230x320+650+300")
         refreshwindow.resizable(False, False)
-        bottomframe_rm = tk.Frame(refreshwindow, bg='white')
-        bottomframe_rm.pack(side='bottom')
+        refreshwindow.bind('<Escape>', lambda event: refreshwindow.destroy())
         refreshwindow.grab_set()
         refreshwindow.focus()
+
+        try:
+            refreshwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
+
+        bottomframe_rm = tk.Frame(refreshwindow, bg='white')
+        bottomframe_rm.pack(side='bottom')
+
         removelabel = tk.Label(refreshwindow, text=_('Select accounts to refresh.'), bg='white')
         removelabel.pack(side='top', padx=5, pady=5)
 
@@ -776,6 +796,12 @@ class MainApp(tk.Tk):
         addwindow.title(_("Add"))
         addwindow.geometry("300x150+650+300")
         addwindow.resizable(False, False)
+        addwindow.bind('<Escape>', lambda event: addwindow.destroy())
+
+        try:
+            addwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
 
         topframe_add = tk.Frame(addwindow, bg='white')
         topframe_add.pack(side='top', anchor='center')
@@ -876,6 +902,12 @@ class MainApp(tk.Tk):
         importwindow.resizable(False, False)
         importwindow.grab_set()
         importwindow.focus()
+        importwindow.bind('<Escape>', lambda event: importwindow.destroy())
+
+        try:
+            importwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
 
         bottomframe_imp = tk.Frame(importwindow, bg='white')
         bottomframe_imp.pack(side='bottom')
@@ -982,6 +1014,12 @@ class MainApp(tk.Tk):
         orderwindow.title("")
         orderwindow.geometry("210x270+650+300")
         orderwindow.resizable(False, False)
+        orderwindow.bind('<Escape>', lambda event: orderwindow.destroy())
+
+        try:
+            orderwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
 
         bottomframe_windowctrl = tk.Frame(orderwindow, bg='white')
         bottomframe_windowctrl.pack(side='bottom', padx=3, pady=3, fill='x')
@@ -1113,6 +1151,13 @@ class MainApp(tk.Tk):
         settingswindow.title(_("Settings"))
         settingswindow.geometry("%sx300+650+300" % width)  # 260 is original
         settingswindow.resizable(False, False)
+        settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
+
+        try:
+            settingswindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
+
         bottomframe_set = tk.Frame(settingswindow, bg='white')
         bottomframe_set.pack(side='bottom')
         settingswindow.grab_set()

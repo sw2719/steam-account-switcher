@@ -65,6 +65,11 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
         updatewindow.resizable(False, False)
         updatewindow.focus()
 
+        try:
+            updatewindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
+
         button_frame = tk.Frame(updatewindow)
         button_frame.pack(side=tk.BOTTOM, pady=3, fill='x')
 
