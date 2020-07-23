@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-23 14:25+0200\n"
-"PO-Revision-Date: 2020-07-23 14:29+0200\n"
+"PO-Revision-Date: 2020-07-23 22:35+0200\n"
 "Last-Translator: QuentiumYT\n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -108,7 +108,7 @@ msgstr "Quitter"
 
 #: modules/main.py:191 modules/main.py:558
 msgid "Restart Steam & Exit"
-msgstr "Redémarrer Steam et quitter"
+msgstr "Redémarrer Steam"
 
 #: modules/main.py:193 modules/main.py:560
 msgid "Restart Steam"
@@ -427,7 +427,7 @@ msgstr "Arrêtez Steam au lieu de terminer le processus Steam"
 
 #: modules/ui.py:350
 msgid "Exit app automatically after restarting Steam"
-msgstr "Quittez l'application automatiquement après le redémarrage de Steam"
+msgstr "Quittez l'app automatiquement après le redémarrage"
 
 #: modules/ui.py:363
 msgid "Show avatars in account list"
@@ -453,12 +453,12 @@ msgid ""
 "You can open GitHub repo via Menu > About."
 msgstr ""
 "Ajouter ou importer des comptes via le menu.\n"
-"Faites un clic droit sur les comptes pour voir plus d'options.\n"
+"Faites un clic droit sur les comptes pour plus d'options.\n"
 "\n"
-"Vous pouvez modifier les paramètres dans Menu > Paramètres\n"
-"si vous n'aimez pas les paramètres que vous venez de définir.\n"
+"Modifiez les paramètres dans Menu > Paramètres\n"
+"si vous n'aimez pas les options que vous avez définis.\n"
 "\n"
-"Veuillez lire le guide d'utilisation de GitHub README\n"
+"Veuillez lire le guide d'utilisation README de GitHub\n"
 "si vous utilisez cette application pour la première fois.\n"
 "\n"
 "Vous pouvez ouvrir le repo GitHub via Menu > À propos."
