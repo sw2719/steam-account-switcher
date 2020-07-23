@@ -2,6 +2,7 @@ import sys
 import os
 import zipfile as zf
 import locale
+import shutil
 
 locale_buf = locale.getdefaultlocale()
 LOCALE = locale_buf[0]
@@ -61,6 +62,18 @@ if LOCALE == 'ko_KR':
     pprint('업데이트 설치 중...')
 else:
     pprint('Installing update...')
+
+for name in os.listdir(os.getcwd()):
+    if name in ('.vs', 'tcl', 'tk'):
+        try:
+            shutil.rmtree(name)
+        except OSError:
+            pass
+    elif name in ('libcrypto-1_1.dll', 'libssl-1_1.dll', 'tcl86t.dll', 'tk86t.dll'):
+        try:
+            os.remove(name)
+        except OSError:
+            pass
 
 try:
     f.extractall(members=(member for member in f.namelist() if 'updater' not in member))  # NOQA

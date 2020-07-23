@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox as msgbox
 import gettext
 import os
@@ -14,7 +15,7 @@ from time import sleep
 from packaging import version
 from ruamel.yaml import YAML
 from modules.config import get_config
-from modules.misc import error_msg
+from modules.errormsg import error_msg
 
 yaml = YAML()
 
@@ -26,33 +27,48 @@ t = gettext.translation('steamswitcher',
                         fallback=True)
 _ = t.gettext
 
+update_frame = None
+
+#  Update code is a real mess right now. You have been warned.
+
 
 def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     '''Check if application has update'''
+    global update_frame
+
+    if update_frame is not None:
+        update_frame.destroy()
+
     update_frame = tk.Frame(master)
-    update_frame.pack(side='bottom')
+    update_frame.config(bg='white')
 
     if not bundle and not debug:
+        ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 0), fill='x')
+        update_frame.pack(side='bottom', fill='x')
         return
+    else:
+        update_frame.pack(side='bottom', fill='x')
 
-    checking_label = tk.Label(update_frame, text=_('Checking for updates...'))
+    ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+    checking_label = tk.Label(update_frame, text=_('Checking for updates...'), bg='white')
     checking_label.pack()
     master.update()
 
-    def update(sv_version, changelog):
+    def update(sv_version, changelog, mirror_url):
         nonlocal debug
 
         updatewindow = tk.Toplevel(master)
         updatewindow.title(_('Update'))
         updatewindow.geometry("400x300+650+300")
         updatewindow.resizable(False, False)
+        updatewindow.focus()
 
         button_frame = tk.Frame(updatewindow)
         button_frame.pack(side=tk.BOTTOM, pady=3, fill='x')
 
         cancel_button = ttk.Button(button_frame, text=_('Cancel'),
                                    command=updatewindow.destroy)
-        update_button = ttk.Button(button_frame, text=_('Update now'))
+        update_button = ttk.Button(button_frame, width=28, text=_('Update now'))
 
         text_frame = tk.Frame(updatewindow)
         text_frame.pack(side=tk.TOP, pady=3)
@@ -60,21 +76,20 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                         text=_('New version %s is available.') % sv_version)
         text.pack()
 
-        changelog_box = tk.Text(updatewindow, width=57)
-        scrollbar = ttk.Scrollbar(updatewindow, orient=tk.VERTICAL,
-                                  command=changelog_box.yview)
-        changelog_box.config(yscrollcommand=scrollbar.set)
+        changelog_box = ScrolledText(updatewindow, width=57)
         changelog_box.insert(tk.CURRENT, changelog)
         changelog_box.configure(state=tk.DISABLED)
         changelog_box.pack(padx=5)
 
         updatewindow.grab_set()
 
-        def start_update():
+        def start_update(mirror_url):
+            '''Withdraw main window and start update download'''
             nonlocal button_frame
             nonlocal cancel_button
             nonlocal update_button
             nonlocal debug
+            nonlocal sv_version
 
             master.withdraw()
             try:
@@ -84,6 +99,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
 
             install = True
 
+            # For development purposes
             if not bundle and debug:
                 if not msgbox.askyesno('', 'Install update?'):
                     install = False
@@ -91,6 +107,14 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             cancel_button.destroy()
             update_button.destroy()
 
+            def cancel():
+                if msgbox.askokcancel(_('Cancel'), _('Are you sure to cancel?')):
+                    os._exit(0)
+
+            # There's no cancel button so we use close button as one instead
+            updatewindow.protocol("WM_DELETE_WINDOW", cancel)
+
+            # Define progress variables
             dl_p = tk.IntVar()
             dl_p.set(0)
             dl_pbar = ttk.Progressbar(button_frame,
@@ -112,17 +136,54 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             master.update()
 
             download_q = q.Queue()
-            dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
+
+            try:  # Check if mirror is available and should we use it
+                if mirror_url:
+                    mirror = req.get(mirror_url + 'mirror.yml', timeout=4)
+                    mirror.raise_for_status()
+
+                    r_time = mirror.elapsed.total_seconds()
+                    print(f'Mirror server took {str(r_time)} seconds to respond.')
+
+                    if r_time >= 0.5:
+                        print('Mirror is too slow.')
+                        raise req.RequestException
+
+                    mirror_yml = yaml.load(mirror.text)
+
+                    if mirror_yml['mirror_available'] == 'true' and mirror_yml['mirror_version'] == sv_version:
+                        if msgbox.askyesno(_('Mirror available'), _('Do you want to download from Mirror?') + '\n' +
+                                           _("If you live outside South East Asia, it is advised not to use it.") + '\n' +
+                                           _('(Note that mirror is located in South Korea.)')):
+                            print('Using mirror for downloading update...')
+                            dl_url = f'{mirror_url}mirror/{mirror_yml["mirror_filename"]}'
+                        else:
+                            print('User abort')
+                            raise req.RequestException
+                    else:
+                        print('Mirror validation error.')
+                        raise req.RequestException
+                else:
+                    print('Cannot reach mirror or mirror is not online.')
+                    raise req.RequestException
+            except (req.RequestException, KeyError):
+                print('Reverting to GitHub for downloading update...')
+                dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
 
             def download(URL):
                 nonlocal download_q
+
+                # This download speed calculation is not really accurate.
+                # This is my best effort to make real-time one instad of average one.
                 try:
                     r = req.get(URL, stream=True)
+                    r.raise_for_status()
                     total_size = int(r.headers.get('content-length'))
                     total_in_MB = round(total_size / 1048576, 1)
                 except req.RequestException:
                     msgbox.showerror(_('Error'),
                                      _('Error occured while downloading update.'))
+                    os._exit(1)
 
                 if round(total_in_MB, 1).is_integer():
                     total_in_MB = int(total_in_MB)
@@ -146,16 +207,16 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                             current_in_MB = int(current_in_MB)
 
                         size_delta = current_size - last_size
-                        bps = size_delta * 2
+                        bps = size_delta * 2  # Multiply size delta by 2 since we calculate speed every 0.5s
 
-                        if bps >= 1048576:
+                        if bps >= 1048576:  # Above 1MiB/s
                             dl_spd = bps / 1048576
                             if round(dl_spd, 1).is_integer():
                                 dl_spd = int(dl_spd)
                             else:
                                 dl_spd = round(dl_spd, 1)
                             dl_spd_str = f'{dl_spd}MB/s'
-                        elif bps >= 1024:
+                        elif bps >= 1024:  # Above 1KiB/s
                             dl_spd = bps / 1024
                             if round(dl_spd, 1).is_integer():
                                 dl_spd = int(dl_spd)
@@ -186,14 +247,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                 nonlocal dl_speed_var
                 nonlocal dl_prog_var
                 while True:
-                    try:
+                    try:  # Update tk variables
                         q_tuple = download_q.get_nowait()
                         p = q_tuple[0]
                         dl_p.set(p)
-                        dl_prog = q_tuple[1]
-                        dl_prog_var.set(dl_prog)
-                        dl_spd = q_tuple[2]
-                        dl_speed_var.set(dl_spd)
+                        dl_prog_var.set(q_tuple[1])
+                        dl_speed_var.set(q_tuple[2])
                         master.update()
                         if p == 100:
                             return
@@ -217,15 +276,13 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                     error_msg(_('Error'), _("Couldn't perform automatic update.") + '\n' +
                               _('Update manually by extracting update.zip file.'))
 
-        update_button['command'] = start_update
-        cancel_button.pack(side='left', padx=(110, 0))
-        update_button.pack(side='right', padx=(0, 110))
-
-        def cancel():
-            if msgbox.askokcancel(_('Cancel'), _('Are you sure to cancel?')):
-                sys.exit(0)
-
-        updatewindow.protocol("WM_DELETE_WINDOW", cancel)
+        update_button['command'] = lambda: start_update(mirror_url)
+        if LOCALE == 'fr_FR':
+            padx_int = 80
+        else:
+            padx_int = 110
+        cancel_button.pack(side='left', padx=(padx_int, 0))
+        update_button.pack(side='right', padx=(0, padx_int))
 
     queue = q.Queue()
 
@@ -240,10 +297,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             text = response.text
             version_data = yaml.load(text)
             sv_version_str = str(version_data['version'])
+
             if LOCALE == 'ko_KR':
                 changelog = version_data['changelog_ko']
             else:
                 changelog = version_data['changelog_en']
+
             try:
                 critical_msg = version_data['msg'][str(cl_ver_str)]
                 if critical_msg:
@@ -255,6 +314,13 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
                                         critical_msg['en'])
             except (KeyError, TypeError):
                 pass
+
+            try:
+                mirror_url = version_data['mirror_baseurl']
+            except KeyError:
+                print('No mirror data')
+                mirror_url = None
+
             print('Server version is', sv_version_str)
             print('Client version is', cl_ver_str)
 
@@ -273,17 +339,19 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             update = 'error'
             sv_version_str = '0'
             changelog = None
-        queue.put((update, sv_version_str, changelog))
+        queue.put((update, sv_version_str, changelog, mirror_url))
 
     update_code = None
     sv_version = None
     changelog = None
+    mirror_url = None
 
     def get_output():
         '''Get version info from checkupdate() and draw UI accordingly.'''
         nonlocal update_code
         nonlocal sv_version
         nonlocal changelog
+        nonlocal mirror_url
         nonlocal checking_label
         nonlocal debug
         try:
@@ -291,45 +359,48 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
             update_code = v[0]
             sv_version = v[1]
             changelog = v[2]
+            mirror_url = v[3]
             checking_label.destroy()
 
             if debug:
                 print('Update debug mode')
                 update_label = tk.Label(update_frame,
-                                        text=f'sv: {sv_version} cl: {str(cl_ver_str)} output: {update_code}')  # NOQA
-                update_label.pack(side='left', padx=5)
+                                        text=f'Client: {cl_ver_str} / Server: {sv_version} / {update_code} / Click to open UI',
+                                        bg='white')
+                update_label.pack(side='bottom')
 
-                update_button = ttk.Button(update_frame,
-                                            text='Open UI',
-                                            width=10,
-                                            command=lambda: update(sv_version=sv_version, changelog=changelog))  # NOQA
-                update_button.pack(side='right', padx=5)
+                update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version,
+                                                                            changelog=changelog,
+                                                                            mirror_url=mirror_url))
+
+                update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version,
+                                                                            changelog=changelog,
+                                                                            mirror_url=mirror_url))
                 return
 
             if update_code == 'avail':
                 print('Update Available')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('New update available'))  # NOQA
-                update_label.pack(side='left', padx=5)
-
-                update_button = ttk.Button(update_frame,
-                                            text=_('Update'),
-                                            width=10,
-                                            command=lambda: update(sv_version=sv_version, changelog=changelog))  # NOQA
-
-                update_button.pack(side='right', padx=5)
+                                        text=_('Version %s is available. Click here to update!') % sv_version,
+                                        bg='white',
+                                        fg='green')  # NOQA
+                update_label.pack(side='bottom')
+                update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
+                update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog, mirror_url=mirror_url))
             elif update_code == 'latest':
                 print('On latest version')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('Using the latest version'))
+                                        text=_('Using the latest version'),
+                                        bg='white')
                 update_label.pack(side='bottom')
             elif update_code == 'dev':
                 print('Development version')
 
                 update_label = tk.Label(update_frame,
-                                        text=_('Development version'))
+                                        text=_('Development version'),
+                                        bg='white')
                 update_label.pack(side='bottom')
             else:
                 print('Exception while getting server version')
@@ -343,3 +414,13 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False):
     t = threading.Thread(target=checkupdate)
     t.start()
     master.after(300, get_output)
+
+
+def hide_update():
+    global update_frame
+    update_frame.pack_forget()
+
+
+def show_update():
+    global update_frame
+    update_frame.pack(side='bottom', fill='x')
