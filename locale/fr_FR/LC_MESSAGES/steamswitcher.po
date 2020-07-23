@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-23 14:25+0200\n"
-"PO-Revision-Date: 2020-07-23 22:35+0200\n"
+"PO-Revision-Date: 2020-07-24 07:47+0900\n"
 "Last-Translator: QuentiumYT\n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -198,7 +198,9 @@ msgstr "Aucun compte ajouté"
 
 #: modules/main.py:570 modules/main.py:835 modules/main.py:953
 msgid "Please wait while downloading avatars..."
-msgstr "Veuillez patienter pendant le téléchargement des avatars ..."
+msgstr ""
+"Veuillez patienter pendant\n"
+" le téléchargement des avatars..."
 
 #: modules/main.py:595
 msgid "Warning: The developer of this application is not responsible for"
