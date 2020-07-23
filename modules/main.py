@@ -580,28 +580,29 @@ class MainApp(tk.Tk):
         else:
             width = '360'
 
-        aboutwindow = tk.Toplevel(self)
+        aboutwindow = tk.Toplevel(self, bg='white')
         aboutwindow.title(_('About'))
         aboutwindow.geometry("%sx180+650+300" % width)
         aboutwindow.resizable(False, False)
         aboutwindow.focus()
 
-        about_disclaimer = tk.Label(aboutwindow,
+        about_disclaimer = tk.Label(aboutwindow, bg='white',
                                     text=_('Warning: The developer of this application is not responsible for')
                                     + '\n' + _('data loss or any other damage from the use of this app.'))
-        about_steam_trademark = tk.Label(aboutwindow, text=_('STEAM is a registered trademark of Valve Corporation.'))
+        about_steam_trademark = tk.Label(aboutwindow, bg='white',
+                                         text=_('STEAM is a registered trademark of Valve Corporation.'))
         copyright_label = tk.Label(aboutwindow, text='Copyright (c) sw2719 | All Rights Reserved\n' +
-                                   'Licensed under the MIT License.')
-        ver = tk.Label(aboutwindow,
+                                   'Licensed under the MIT License.', bg='white')
+        ver = tk.Label(aboutwindow, bg='white',
                        text='Steam Account Switcher | Version ' + version)
 
-        button_frame = tk.Frame(aboutwindow)
+        button_frame = tk.Frame(aboutwindow, bg='white')
         button_frame.pack(side='bottom', pady=5)
 
         button_exit = ttk.Button(button_frame,
                                  text=_('Close'),
                                  width=8,
-                                 command=aboutwindow.destroy)
+                                 command=aboutwindow.destroy,)
         button_github = ttk.Button(button_frame,
                                    text=_('GitHub page'),
                                    command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher'))
@@ -620,18 +621,16 @@ class MainApp(tk.Tk):
             msgbox.showinfo(_('No Accounts'),
                             _("There's no account added."))
             return
-        refreshwindow = tk.Toplevel(self)
+        refreshwindow = tk.Toplevel(self, bg='white')
         refreshwindow.title(_("Refresh"))
         refreshwindow.geometry("230x320+650+300")
         refreshwindow.resizable(False, False)
-        bottomframe_rm = tk.Frame(refreshwindow)
+        bottomframe_rm = tk.Frame(refreshwindow, bg='white')
         bottomframe_rm.pack(side='bottom')
         refreshwindow.grab_set()
         refreshwindow.focus()
-        removelabel = tk.Label(refreshwindow, text=_('Select accounts to refresh.'))
-        removelabel.pack(side='top',
-                         padx=5,
-                         pady=5)
+        removelabel = tk.Label(refreshwindow, text=_('Select accounts to refresh.'), bg='white')
+        removelabel.pack(side='top', padx=5, pady=5)
 
         def close():
             refreshwindow.destroy()
@@ -639,8 +638,8 @@ class MainApp(tk.Tk):
         def onFrameConfigure(canvas):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
-        canvas = tk.Canvas(refreshwindow, borderwidth=0, highlightthickness=0)
-        check_frame = tk.Frame(canvas)
+        canvas = tk.Canvas(refreshwindow, borderwidth=0, highlightthickness=0, bg='white')
+        check_frame = tk.Frame(canvas, bg='white')
         scroll_bar = ttk.Scrollbar(refreshwindow,
                                    orient="vertical",
                                    command=canvas.yview)
@@ -662,11 +661,15 @@ class MainApp(tk.Tk):
 
         check_dict = {}
 
+        s = ttk.Style()
+        s.configure('check.TCheckbutton', background='white')
+
         for v in accounts:
             tk_var = tk.IntVar()
             checkbutton = ttk.Checkbutton(check_frame,
                                           text=v,
-                                          variable=tk_var)
+                                          variable=tk_var,
+                                          style='check.TCheckbutton')
             checkbutton.bind("<MouseWheel>", _on_mousewheel)
             checkbutton.pack(side='top', padx=2, anchor='w')
             check_dict[v] = tk_var
@@ -687,7 +690,7 @@ class MainApp(tk.Tk):
             msgbox.showinfo('', _('Accounts with expired autologin token will show login prompt.') + '\n\n' +
                                 _('Close the prompt or login to continue the process.'))  # NOQA
 
-            popup = tk.Toplevel()
+            popup = tk.Toplevel(self, bg='white')
             popup.title('')
             popup.geometry("180x100+650+300")
             popup.resizable(False, False)
@@ -698,8 +701,8 @@ class MainApp(tk.Tk):
             popup_uservar = tk.StringVar()
             popup_uservar.set('---------')
 
-            popup_label = tk.Label(popup, textvariable=popup_var)
-            popup_user = tk.Label(popup, textvariable=popup_uservar)
+            popup_label = tk.Label(popup, textvariable=popup_var, bg='white')
+            popup_user = tk.Label(popup, textvariable=popup_uservar, bg='white')
 
             popup_label.pack(pady=17)
             popup_user.pack()
@@ -764,20 +767,20 @@ class MainApp(tk.Tk):
         acc_dict = acc_getdict()
         steamid_list, account_name, persona_name = loginusers()
 
-        addwindow = tk.Toplevel(self)
+        addwindow = tk.Toplevel(self, bg='white')
         addwindow.title(_("Add"))
         addwindow.geometry("300x150+650+300")
         addwindow.resizable(False, False)
 
-        topframe_add = tk.Frame(addwindow)
+        topframe_add = tk.Frame(addwindow, bg='white')
         topframe_add.pack(side='top', anchor='center')
 
-        bottomframe_add = tk.Frame(addwindow)
+        bottomframe_add = tk.Frame(addwindow, bg='white')
         bottomframe_add.pack(side='bottom', anchor='e')
 
-        addlabel_row1 = tk.Label(topframe_add,
+        addlabel_row1 = tk.Label(topframe_add, bg='white',
                                  text=_('Enter account(s) to add.'))
-        addlabel_row2 = tk.Label(topframe_add,
+        addlabel_row2 = tk.Label(topframe_add, bg='white',
                                  text=_("In case of adding multiple accounts,") + '\n' +
                                  _("seperate each account with '/' (slash)."))
 
@@ -824,7 +827,7 @@ class MainApp(tk.Tk):
                     addwindow.protocol("WM_DELETE_WINDOW", disable_close)
                     addwindow.focus()
 
-                    tk.Label(addwindow, text=_('Please wait while downloading avatars...')).pack(fill='both', expand=True)
+                    tk.Label(addwindow, text=_('Please wait while downloading avatars...'), bg='white').pack(fill='both', expand=True)
                     self.update()
                     download_avatar(dl_list)
 
@@ -859,18 +862,22 @@ class MainApp(tk.Tk):
             msgbox.showinfo(_('Info'), _("There's no account left to add."))
             return
 
-        importwindow = tk.Toplevel(self)
+        s = ttk.Style()
+        s.configure('Import.TCheckbutton', background='white')
+
+        importwindow = tk.Toplevel(self, bg='white')
         importwindow.title(_("Import"))
         importwindow.geometry("280x300+650+300")
         importwindow.resizable(False, False)
         importwindow.grab_set()
         importwindow.focus()
 
-        bottomframe_imp = tk.Frame(importwindow)
+        bottomframe_imp = tk.Frame(importwindow, bg='white')
         bottomframe_imp.pack(side='bottom')
 
         import_label = tk.Label(importwindow, text=_('Select accounts to import.') + '\n' +
-                                _("Added accounts don't show up."))
+                                _("Added accounts don't show up."),
+                                bg='white')
         import_label.pack(side='top', padx=5, pady=5)
 
         def close():
@@ -883,9 +890,9 @@ class MainApp(tk.Tk):
             '''Reset the scroll region to encompass the inner frame'''
             canvas.configure(scrollregion=canvas.bbox("all"))
 
-        canvas = tk.Canvas(importwindow, borderwidth=0, highlightthickness=0)
-        check_frame = tk.Frame(canvas)
-        scroll_bar = ttk.Scrollbar(importwindow, orient="vertical", command=canvas.yview)
+        canvas = tk.Canvas(importwindow, borderwidth=0, highlightthickness=0, background='white')
+        check_frame = tk.Frame(canvas, bg='white')
+        scroll_bar = ttk.Scrollbar(importwindow, orient="vertical", command=canvas.yview,)
 
         canvas.configure(yscrollcommand=scroll_bar.set)
 
@@ -910,7 +917,8 @@ class MainApp(tk.Tk):
                 int_var = tk.IntVar()
                 checkbutton = ttk.Checkbutton(check_frame,
                                               text=username + f' ({persona_name[index]})',
-                                              variable=int_var)
+                                              variable=int_var,
+                                              style='Import.TCheckbutton')
                 checkbutton.bind("<MouseWheel>", _on_mousewheel)
                 checkbutton.pack(side='top', padx=2, anchor='w')
                 checkbox_dict[username] = int_var
@@ -937,7 +945,7 @@ class MainApp(tk.Tk):
                 importwindow.protocol("WM_DELETE_WINDOW", disable_close)
                 importwindow.focus()
 
-                tk.Label(importwindow, text=_('Please wait while downloading avatars...')).pack(fill='both', expand=True)
+                tk.Label(importwindow, text=_('Please wait while downloading avatars...'), bg='white').pack(fill='both', expand=True)
                 self.update()
                 download_avatar(dl_list)
 
@@ -965,31 +973,33 @@ class MainApp(tk.Tk):
                             _("There's no account added."))
             return
 
-        orderwindow = tk.Toplevel(self)
+        orderwindow = tk.Toplevel(self, bg='white')
         orderwindow.title("")
         orderwindow.geometry("210x270+650+300")
         orderwindow.resizable(False, False)
 
-        bottomframe_windowctrl = tk.Frame(orderwindow)
+        bottomframe_windowctrl = tk.Frame(orderwindow, bg='white')
         bottomframe_windowctrl.pack(side='bottom', padx=3, pady=3)
 
-        bottomframe_orderctrl = tk.Frame(orderwindow)
+        bottomframe_orderctrl = tk.Frame(orderwindow, bg='white')
         bottomframe_orderctrl.pack(side='bottom', padx=3, pady=3)
 
-        labelframe = tk.Frame(orderwindow)
+        labelframe = tk.Frame(orderwindow, bg='white')
         labelframe.pack(side='bottom', padx=3)
 
         orderwindow.grab_set()
         orderwindow.focus()
 
-        lbframe = tk.Frame(orderwindow)
+        lbframe = tk.Frame(orderwindow, bg='white')
 
         scrollbar = ttk.Scrollbar(lbframe)
         scrollbar.pack(side='right', fill='y')
 
         lb = DragDropListbox(lbframe, height=12, width=26,
                              highlightthickness=0,
-                             yscrollcommand=scrollbar.set)
+                             yscrollcommand=scrollbar.set,
+                             bd=1,
+                             relief='solid')
 
         scrollbar["command"] = lb.yview
 
@@ -1094,11 +1104,11 @@ class MainApp(tk.Tk):
         else:
             width = '260'
 
-        settingswindow = tk.Toplevel(self)
+        settingswindow = tk.Toplevel(self, bg='white')
         settingswindow.title(_("Settings"))
         settingswindow.geometry("%sx300+650+300" % width)  # 260 is original
         settingswindow.resizable(False, False)
-        bottomframe_set = tk.Frame(settingswindow)
+        bottomframe_set = tk.Frame(settingswindow, bg='white')
         bottomframe_set.pack(side='bottom')
         settingswindow.grab_set()
         settingswindow.focus()
@@ -1110,9 +1120,9 @@ class MainApp(tk.Tk):
         else:
             padx_int = 24
 
-        localeframe = tk.Frame(settingswindow)
+        localeframe = tk.Frame(settingswindow, bg='white')
         localeframe.pack(side='top', pady=14, fill='x')
-        locale_label = tk.Label(localeframe, text=_('Language'))
+        locale_label = tk.Label(localeframe, text=_('Language'), bg='white')
         locale_label.pack(side='left', padx=(padx_int, 13))
         locale_cb = ttk.Combobox(localeframe,
                                  state="readonly",
@@ -1128,38 +1138,44 @@ class MainApp(tk.Tk):
 
         locale_cb.pack(side='left')
 
-        restart_frame = tk.Frame(settingswindow)
+        restart_frame = tk.Frame(settingswindow, bg='white')
         restart_frame.pack(side='top')
 
-        restart_label = tk.Label(restart_frame,
+        restart_label = tk.Label(restart_frame, bg='white',
                                  text=_('Restart app to apply language settings.'))
         restart_label.pack(pady=(1, 0))
 
-        radio_frame1 = tk.Frame(settingswindow)
+        radio_frame1 = tk.Frame(settingswindow, bg='white')
         radio_frame1.pack(side='top', padx=12, pady=(13, 3), fill='x')
-        radio_frame2 = tk.Frame(settingswindow)
+        radio_frame2 = tk.Frame(settingswindow, bg='white')
         radio_frame2.pack(side='top', padx=12, pady=(3, 12), fill='x')
         radio_var = tk.IntVar()
 
         if get_config('mode') == 'express':
             radio_var.set(1)
 
+        s = ttk.Style()
+        s.configure('Settings.TRadiobutton', background='white')
+        s.configure('Settings.TCheckbutton', background='white')
+
         radio_normal = ttk.Radiobutton(radio_frame1,
                                        text=_('Normal Mode (Manually restart Steam)'),
                                        variable=radio_var,
-                                       value=0)
+                                       value=0,
+                                       style='Settings.TRadiobutton')
         radio_normal.pack(side='left', pady=2)
 
         radio_express = ttk.Radiobutton(radio_frame2,
                                         text=_('Express Mode (Auto-restart Steam)'),
                                         variable=radio_var,
-                                        value=1)
+                                        value=1,
+                                        style='Settings.TRadiobutton')
         radio_express.pack(side='left', pady=2)
 
-        softshutdwn_frame = tk.Frame(settingswindow)
+        softshutdwn_frame = tk.Frame(settingswindow, bg='white')
         softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=(1, 0))
 
-        soft_chkb = ttk.Checkbutton(softshutdwn_frame,
+        soft_chkb = ttk.Checkbutton(softshutdwn_frame, style='Settings.TCheckbutton',
                                     text=_('Try to soft shutdown Steam client'))
 
         soft_chkb.state(['!alternate'])
@@ -1171,10 +1187,10 @@ class MainApp(tk.Tk):
 
         soft_chkb.pack(side='left')
 
-        autoexit_frame = tk.Frame(settingswindow)
+        autoexit_frame = tk.Frame(settingswindow, bg='white')
         autoexit_frame.pack(fill='x', side='top', padx=12, pady=17)
 
-        autoexit_chkb = ttk.Checkbutton(autoexit_frame,
+        autoexit_chkb = ttk.Checkbutton(autoexit_frame, style='Settings.TCheckbutton',
                                         text=_('Exit app after Steam is restarted'))
 
         autoexit_chkb.state(['!alternate'])
@@ -1185,10 +1201,10 @@ class MainApp(tk.Tk):
 
         autoexit_chkb.pack(side='left')
 
-        avatar_frame = tk.Frame(settingswindow)
+        avatar_frame = tk.Frame(settingswindow, bg='white')
         avatar_frame.pack(fill='x', side='top', padx=12)
 
-        avatar_chkb = ttk.Checkbutton(avatar_frame,
+        avatar_chkb = ttk.Checkbutton(avatar_frame, style='Settings.TCheckbutton',
                                       text=_('Show avatar images'))
 
         avatar_chkb.state(['!alternate'])
