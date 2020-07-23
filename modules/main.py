@@ -44,7 +44,7 @@ def legacy_restart(silent=True):
                     path_items.append(f'"{item}"')
                 else:
                     path_items.append(item)
-            steam_exe = "\\".join(path_items)
+            steam_exe = "\\".join(path_items) + '\\steam.exe'
             print('Steam.exe path:', steam_exe)
             subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                            creationflags=0x08000000, check=True)
