@@ -1,5 +1,5 @@
 # Steam Account Switcher
-Steam Account Switching made easy (on Windows)
+Lightweight, fast account switcher for Steam.
 
 Written in Python
 
@@ -55,6 +55,9 @@ This app has no affiliation with Steam and Valve.
 
 * I have a request! / I found a bug!
   - Bug reports and requests are always welcome. Please submit a issue.
+
+* Some of the elements in settings are missing!
+  - Delete config.yml and launch application again.
 
 # Source code information
 * All other branches except master are considered as acitve-development branch and might have issues, bugs, WIP features, or might not just work at all.
