@@ -1,13 +1,15 @@
 # Steam Account Switcher
-Steam Account Switching made easy (on Windows)
+Lightweight, fast account switcher for Steam.
 
 Written in Python
+
+Note that I manage this project to get experience with Python. This is my first Python project.
 
 [이 문서는 한국어로도 읽을 수 있습니다.](https://github.com/sw2719/steam-account-switcher/blob/master/README_ko.md)
 
 [Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
 
-[See this program in action](https://youtu.be/WFtv10RZ_UA)
+[See this program in action (Doesn't represent the latest version.)](https://youtu.be/WFtv10RZ_UA)
 
 STEAM is a trademark of Valve Corporation.
 
@@ -26,6 +28,11 @@ This app has no affiliation with Steam and Valve.
 
 * Auto-updating is built-in, and it's fast. (Unless GitHub's server is having a hard time..)
 
+# Requirements
+* 64-bit Windows
+* Steam installed correctly
+* And that's pretty much it.
+
 # How to use
 1. Unpack the archive to desired folder
 2. Run the exe
@@ -35,11 +42,26 @@ This app has no affiliation with Steam and Valve.
 * Your account names are saved in accounts.yml located in the same folder where exe file is.
 
 4. Click one of the buttons to change to desired account.
-* IMPORTANT: If it's your first time using account switcher with selected account or login prompt appears, Make sure that the 'Remember my Password' is checked. Then enter your password and login as you normally would. You will need to enter your Steam Guard code if Mobile Authenticator is enabled. Next time you switch to that account, it will login automatically without entering Username / Password and Steam Guard code. **You need to do this EVERY TIME you add new accounts. And if you don't login for certain amount of time, you will have to do this again due to Steam revoking your autologin access.**
+* Steam login prompt might appear if you are using this program for the first time. Just check 'Remember password' and login. It will work next time. 
+  - You need to do this for every account except the one you have been using as autologin account prior to using this program.
+  - **If you ever add more accounts, you have to do this for them as well. And if you don't login to certain account for a while, you will have to do this again for that account due to Steam revoking autologin access.**
+
+# FAQ
+* Login prompt appears! Fake program!
+  - See How to use-4. Right above.
+
+* Windows SmartScreen says this program is potentially harmful!
+  - That's because I didn't sign my executable with EV certificate which is expensive as f#@!. Great job, M$.
+
+* I have a request! / I found a bug!
+  - Bug reports and requests are always welcome. Please submit a issue.
+
+* Some of the elements in settings are missing!
+  - Delete config.yml and launch application again.
 
 # Source code information
 * All other branches except master are considered as acitve-development branch and might have issues, bugs, WIP features, or might not just work at all.
-* Written in Python 3.7
+* Written in Python 3.7 64-bit
 * Do not run updater.py in python interpreter. It's designed to run only in frozen environment.
 * Requests, packaging, psutil, ruamel.yaml and gettext module are required.
 * threading module needs to be installed if you are using Python version under 3.7.

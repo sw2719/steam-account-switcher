@@ -136,7 +136,8 @@ setup_updater.py
 *.bat
 messages.po
 *.yml
-*.py
 *.ico
 updater/python37.dll
 updater/updater.exe
+setup_c.py
+*.png
