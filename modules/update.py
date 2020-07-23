@@ -78,7 +78,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                         text=_('New version %s is available.') % sv_version)
         text.pack()
 
-        changelog_box = ScrolledText(updatewindow, width=57)
+        changelog_box = ScrolledText(updatewindow, width=57, relief='solid', bd=0)
         changelog_box.insert(tk.CURRENT, changelog)
         changelog_box.configure(state=tk.DISABLED)
         changelog_box.pack(padx=5)
