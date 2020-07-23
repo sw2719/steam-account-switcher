@@ -253,7 +253,7 @@ class MainApp(tk.Tk):
         window.bind('<Destroy>', event_function)
 
     def configwindow(self, username, profilename):
-        configwindow = tk.Toplevel(self)
+        configwindow = tk.Toplevel(self, bg='white')
         configwindow.title('')
         configwindow.geometry("240x150+650+320")
         configwindow.resizable(False, False)
@@ -264,7 +264,7 @@ class MainApp(tk.Tk):
         except KeyError:
             custom_name = ''
 
-        button_frame = tk.Frame(configwindow)
+        button_frame = tk.Frame(configwindow, bg='white')
         button_frame.pack(side='bottom', pady=3)
 
         ok_button = ttk.Button(button_frame, text=_('OK'))
@@ -275,12 +275,12 @@ class MainApp(tk.Tk):
                                    command=configwindow.destroy)
         cancel_button.pack(side='left', padx=1.5)
 
-        top_label = tk.Label(configwindow, text=_('Select name settings for %s') % username)
+        top_label = tk.Label(configwindow, text=_('Select name settings for %s') % username, bg='white')
         top_label.pack(side='top', pady=(4, 3))
 
-        radio_frame1 = tk.Frame(configwindow)
+        radio_frame1 = tk.Frame(configwindow, bg='white')
         radio_frame1.pack(side='top', padx=20, pady=(4, 2), fill='x')
-        radio_frame2 = tk.Frame(configwindow)
+        radio_frame2 = tk.Frame(configwindow, bg='white')
         radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
         radio_var = tk.IntVar()
 
@@ -289,22 +289,27 @@ class MainApp(tk.Tk):
         else:
             radio_var.set(0)
 
+        s = ttk.Style()
+        s.configure('config.TRadiobutton', background='white')
+
         radio_default = ttk.Radiobutton(radio_frame1,
                                         text=_('Use profile name if available'),
                                         variable=radio_var,
-                                        value=0)
+                                        value=0,
+                                        style='config.TRadiobutton')
         radio_custom = ttk.Radiobutton(radio_frame2,
                                        text=_('Use custom name'),
                                        variable=radio_var,
-                                       value=1)
+                                       value=1,
+                                       style='config.TRadiobutton')
 
         radio_default.pack(side='left', pady=2)
         radio_custom.pack(side='left', pady=2)
 
-        entry_frame = tk.Frame(configwindow)
+        entry_frame = tk.Frame(configwindow, bg='white')
         entry_frame.pack(side='bottom', pady=(1, 4))
 
-        name_entry = ttk.Entry(entry_frame, width=26)
+        name_entry = tk.Entry(entry_frame, width=26, disabledbackground='#C6C6C6', relief='solid')
         name_entry.insert(0, custom_name)
         name_entry.pack()
 

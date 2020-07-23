@@ -198,10 +198,10 @@ class AccountButton:
 
 
 class ReadonlyEntryWithLabel:
-    def __init__(self, master, label, text):
-        self.frame = tk.Frame(master)
-        label = tk.Label(self.frame, text=label)
-        entry = ttk.Entry(self.frame, width=21)
+    def __init__(self, master, label, text, bg='white'):
+        self.frame = tk.Frame(master, bg=bg)
+        label = tk.Label(self.frame, text=label, bg=bg)
+        entry = tk.Entry(self.frame, width=21, readonlybackground='white', relief='solid')
         entry.insert(0, text)
         entry['state'] = 'readonly'
 
@@ -401,7 +401,7 @@ def ask_steam_dir():
 
 
 def steamid_window(master, username, steamid64):
-    steamid_window = tk.Toplevel(master)
+    steamid_window = tk.Toplevel(master, bg='white')
     steamid_window.geometry()
     steamid_window.title('SteamID')
     steamid_window.geometry("240x180+650+320")
