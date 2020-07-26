@@ -194,7 +194,7 @@ class MainApp(tk.Tk):
 
         button_toggle.pack(side='left', padx=3, pady=3)
         button_quit.pack(side='left', pady=3)
-        button_restart.pack(side='right', padx=3, pady=3)
+        button_restart.pack(side='right', padx=3, pady=3, fill='x')
 
         self.button_dict = {}
 
