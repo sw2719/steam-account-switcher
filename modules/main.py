@@ -170,20 +170,13 @@ class MainApp(tk.Tk):
                 self.auto_var.set(_('Auto-login Disabled'))
                 self.autolabel['fg'] = 'red'
 
-        if LOCALE == 'fr_FR':
-            toggle_width = 13
-            quit_width = 7
-        else:
-            toggle_width = 15
-            quit_width = 5
-
         button_toggle = ttk.Button(self.bottomframe,
-                                   width=toggle_width,
+                                   width=14,
                                    text=_('Toggle auto-login'),
                                    command=toggleAutologin)
 
         button_quit = ttk.Button(self.bottomframe,
-                                 width=quit_width,
+                                 width=6,
                                  text=_('Exit'),
                                  command=self.quit)
 
@@ -195,7 +188,7 @@ class MainApp(tk.Tk):
             self.restartbutton_text.set(_('Restart Steam'))
 
         button_restart = ttk.Button(self.bottomframe,
-                                    width=20,
+                                    width=22,
                                     textvariable=self.restartbutton_text,
                                     command=self.exit_after_restart)
 
