@@ -170,8 +170,15 @@ class MainApp(tk.Tk):
                 self.auto_var.set(_('Auto-login Disabled'))
                 self.autolabel['fg'] = 'red'
 
+        self.restartbutton_text = tk.StringVar()
+
+        if get_config('autoexit') == 'true':
+            self.restartbutton_text.set(_('Restart Steam & Exit'))
+        else:
+            self.restartbutton_text.set(_('Restart Steam'))
+
         button_toggle = ttk.Button(self.bottomframe,
-                                   width=14,
+                                   width=15,
                                    text=_('Toggle auto-login'),
                                    command=toggleAutologin)
 
@@ -180,21 +187,14 @@ class MainApp(tk.Tk):
                                  text=_('Exit'),
                                  command=self.quit)
 
-        self.restartbutton_text = tk.StringVar()
-
-        if get_config('autoexit') == 'true':
-            self.restartbutton_text.set(_('Restart Steam & Exit'))
-        else:
-            self.restartbutton_text.set(_('Restart Steam'))
-
         button_restart = ttk.Button(self.bottomframe,
-                                    width=22,
+                                    width=23,
                                     textvariable=self.restartbutton_text,
                                     command=self.exit_after_restart)
 
         button_toggle.pack(side='left', padx=3, pady=3)
         button_quit.pack(side='left', pady=3)
-        button_restart.pack(side='right', padx=3, pady=3, fill='x')
+        button_restart.pack(side='right', padx=3, pady=3)
 
         self.button_dict = {}
 
