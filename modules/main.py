@@ -1409,7 +1409,7 @@ class MainApp(tk.Tk):
                 while True:
                     if t.stopped():
                         break
-                    if check_running('steam.exe'):
+                    if steam_running():
                         sleep(1)
                         continue
                     else:
