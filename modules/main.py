@@ -103,14 +103,16 @@ class MainApp(tk.Tk):
         window_width = 310
         window_height = 472
 
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+
+        self.center_x = int((screen_width/2) - (window_width/2))
+        self.center_y = int((screen_height/2) - (window_height/2))
+
         if get_config('last_pos') != '0/0':
             pos_x, pos_y = get_config('last_pos').split('/')
         else:
-            screen_width = self.winfo_screenwidth()
-            screen_height = self.winfo_screenheight()
-
-            pos_x = int((screen_width/2) - (window_width/2))
-            pos_y = int((screen_height/2) - (window_height/2))
+            pos_x, pos_y = self.center_x, self.center_y
 
         self.geometry(f'{str(window_width)}x{str(window_height)}+{str(pos_x)}+{str(pos_y)}')
         self.resizable(False, False)
@@ -239,9 +241,13 @@ class MainApp(tk.Tk):
 
         self.draw_button()
 
-    def exit_app(self):
+    def get_window_pos(self):
         geo = self.geometry().split('+')
-        last_pos = f'{geo[1]}/{geo[2]}'
+        return geo[1], geo[2]
+
+    def exit_app(self):
+        x, y = self.get_window_pos()
+        last_pos = f'{x}/{y}'
         config_write_value('last_pos', last_pos)
         sys.exit(0)
 
@@ -267,7 +273,9 @@ class MainApp(tk.Tk):
     def configwindow(self, username, profilename):
         configwindow = tk.Toplevel(self, bg='white')
         configwindow.title('')
-        configwindow.geometry("250x165+650+320")
+
+        x, y = self.get_window_pos()
+        configwindow.geometry(f"250x165+{x}+{y}")
         configwindow.resizable(False, False)
         configwindow.bind('<Escape>', lambda event: configwindow.destroy())
 
@@ -599,13 +607,15 @@ class MainApp(tk.Tk):
         '''Open about window'''
 
         if LOCALE == 'fr_FR':
-            width = '480'
+            h = '200'
         else:
-            width = '360'
+            h = '180'
+
+        x, y = self.get_window_pos()
 
         aboutwindow = tk.Toplevel(self, bg='white')
         aboutwindow.title(_('About'))
-        aboutwindow.geometry("%sx180+650+300" % width)
+        aboutwindow.geometry(f"360x{h}+{x}+{y}")
         aboutwindow.resizable(False, False)
         aboutwindow.focus()
         aboutwindow.bind('<Escape>', lambda event: aboutwindow.destroy())
@@ -616,8 +626,7 @@ class MainApp(tk.Tk):
             pass
 
         about_disclaimer = tk.Label(aboutwindow, bg='white',
-                                    text=_('Warning: The developer of this application is not responsible for')
-                                    + '\n' + _('data loss or any other damage from the use of this app.'))
+                                    text=_('Warning: The developer of this application is not responsible for\ndata loss or any other damage from the use of this app.'))
         about_steam_trademark = tk.Label(aboutwindow, bg='white',
                                          text=_('STEAM is a registered trademark of Valve Corporation.'))
         copyright_label = tk.Label(aboutwindow, text='Copyright (c) sw2719 | All Rights Reserved\n' +
@@ -652,7 +661,8 @@ class MainApp(tk.Tk):
             return
         refreshwindow = tk.Toplevel(self, bg='white')
         refreshwindow.title(_("Refresh"))
-        refreshwindow.geometry("230x320+650+300")
+        x, y = self.get_window_pos()
+        refreshwindow.geometry(f"230x320+{x}+{y}")
         refreshwindow.resizable(False, False)
         refreshwindow.bind('<Escape>', lambda event: refreshwindow.destroy())
         refreshwindow.grab_set()
@@ -729,7 +739,7 @@ class MainApp(tk.Tk):
 
             popup = tk.Toplevel(self, bg='white')
             popup.title('')
-            popup.geometry("180x100+650+300")
+            popup.geometry(f"180x100+{str(self.center_x)}+{str(self.center_y)}")
             popup.resizable(False, False)
 
             popup_var = tk.StringVar()
@@ -803,10 +813,11 @@ class MainApp(tk.Tk):
         accounts = acc_getlist()
         acc_dict = acc_getdict()
         steamid_list, account_name, persona_name = loginusers()
+        x, y = self.get_window_pos()
 
         addwindow = tk.Toplevel(self, bg='white')
         addwindow.title(_("Add"))
-        addwindow.geometry("300x150+650+300")
+        addwindow.geometry(f"300x150+{x}+{y}")
         addwindow.resizable(False, False)
         addwindow.bind('<Escape>', lambda event: addwindow.destroy())
 
@@ -908,9 +919,11 @@ class MainApp(tk.Tk):
         s = ttk.Style()
         s.configure('Import.TCheckbutton', background='white')
 
+        x, y = self.get_window_pos()
+
         importwindow = tk.Toplevel(self, bg='white')
         importwindow.title(_("Import"))
-        importwindow.geometry("280x300+650+300")
+        importwindow.geometry(f"280x300+{x}+{y}")
         importwindow.resizable(False, False)
         importwindow.grab_set()
         importwindow.focus()
@@ -1022,9 +1035,11 @@ class MainApp(tk.Tk):
                             _("There's no account added."))
             return
 
+        x, y = self.get_window_pos()
+
         orderwindow = tk.Toplevel(self, bg='white')
         orderwindow.title("")
-        orderwindow.geometry("220x270+650+300")
+        orderwindow.geometry(f"220x270+{x}+{y}")
         orderwindow.resizable(False, False)
         orderwindow.bind('<Escape>', lambda event: orderwindow.destroy())
 
@@ -1139,9 +1154,11 @@ class MainApp(tk.Tk):
         else:
             width = '260'
 
+        x, y = self.get_window_pos()
+
         settingswindow = tk.Toplevel(self, bg='white')
         settingswindow.title(_("Settings"))
-        settingswindow.geometry("%sx300+650+300" % width)  # 260 is original
+        settingswindow.geometry(f"{width}x300+{x}+{y}")  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
