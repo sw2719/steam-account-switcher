@@ -100,7 +100,7 @@ class MainApp(tk.Tk):
         self['bg'] = 'white'
         self.title(_("Account Switcher"))
 
-        self.geometry("300x472+600+250")
+        self.geometry("310x472+600+250")
         self.resizable(False, False)
 
         try:
@@ -418,7 +418,7 @@ class MainApp(tk.Tk):
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
             h = 50 * 8
-            canvas.create_window((0, 0), height=h, width=285, window=buttonframe, anchor="nw")
+            canvas.create_window((0, 0), height=h, width=310, window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
 
@@ -508,7 +508,7 @@ class MainApp(tk.Tk):
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
             h = 50 * len(self.accounts)
-            canvas.create_window((0, 0), height=h, width=285, window=buttonframe, anchor="nw")
+            canvas.create_window((0, 0), height=h, width=295, window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
 
