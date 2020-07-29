@@ -70,13 +70,12 @@ def check_running(process_name):
 
 
 def steam_running():
-    """Check if Steam is running using registry key 'pid'.
-    Since Steam does not change pid value to 0 when you force quit,
-    previous psutil method is currently used."""
-    if fetch_reg('pid') == 0:
+    """Check if Steam is running"""
+    steam_pid = fetch_reg('pid')
+    if steam_pid == 0:
         return False
     else:
-        return True
+        return psutil.pid_exists(steam_pid)
 
 
 def steam64_to_3(steamid64):

@@ -1375,7 +1375,7 @@ class MainApp(tk.Tk):
         self.update()
         queue = q.Queue()
 
-        if check_running('Steam.exe'):
+        if steam_running():
             label_var.set(_('Waiting for Steam to exit...'))
 
             if get_config('try_soft_shutdown') == 'false':
