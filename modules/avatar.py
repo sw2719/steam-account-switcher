@@ -1,4 +1,3 @@
-import requests as req
 import aiohttp
 import json
 import shutil
