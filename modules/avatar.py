@@ -1,7 +1,9 @@
 import requests as req
+import aiohttp
 import json
 import shutil
 import os
+import asyncio
 from io import BytesIO
 from modules.account import loginusers
 
@@ -12,28 +14,27 @@ def download_avatar(steamid_list=loginusers()[0]):
     '''Downloads avatar images through Steam API.
     param steamid_list: A list containing steamid64'''
 
-    dl_list = []
     if not os.path.isdir('avatar'):
         os.mkdir('avatar')
 
-    for steamid in steamid_list:
+    async def download_image(steamid64):
         try:
-            with req.get(f'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={API_KEY}&steamids={steamid}', timeout=5) as r:
-                r.raise_for_status()
-                data = json.loads(r.text)
-                dl_list.append(data['response']['players'][0]['avatarmedium'])
-                print(f'Found image URL for {steamid}')
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={API_KEY}&steamids={steamid64}', timeout=5) as r:
+                    data = json.loads(await r.text())
+                    image_url = data['response']['players'][0]['avatarmedium']
+                    print(f'Found image URL for {steamid64}')
 
-        except req.RequestException:
-            continue
+                async with session.get(image_url) as r:
+                    print(f'Downloading {image_url} for {steamid64}...')
 
-    for index, url in enumerate(dl_list):
-        try:
-            with req.get(url, timeout=5) as r:
-                r.raise_for_status()
-                print(f'Downloading {url}...')
-                with open(f'avatar/{steamid_list[index]}.jpg', 'wb') as f:
-                    shutil.copyfileobj(BytesIO(r.content), f)
+                    with open(f'avatar/{steamid64}.jpg', 'wb') as f:
+                        shutil.copyfileobj(BytesIO(await r.read()), f)
+        except (aiohttp.ClientError, OSError):
+            print(f'Exception while downloading image for {steamid64}')
 
-        except req.RequestException:
-            continue
+    async def main():
+        tasks = [asyncio.create_task(download_image(steamid)) for steamid in steamid_list]
+        await asyncio.gather(*tasks)
+
+    asyncio.run(main())
