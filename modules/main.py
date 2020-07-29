@@ -1014,11 +1014,8 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
-        bottomframe_windowctrl = tk.Frame(orderwindow, bg='white')
-        bottomframe_windowctrl.pack(side='bottom', padx=3, pady=3)
-
-        bottomframe_orderctrl = tk.Frame(orderwindow, bg='white')
-        bottomframe_orderctrl.pack(side='bottom', padx=3, pady=3)
+        bottomframe = tk.Frame(orderwindow, bg='white')
+        bottomframe.pack(side='bottom', padx=3, pady=3)
 
         labelframe = tk.Frame(orderwindow, bg='white')
         labelframe.pack(side='bottom', padx=3)
@@ -1098,20 +1095,20 @@ class MainApp(tk.Tk):
             apply()
             close()
 
-        button_up = ttk.Button(bottomframe_orderctrl, width=5,
-                               text='↑', command=up)
-        button_up.pack(side='left', padx=(0, 1.5))
-
-        button_down = ttk.Button(bottomframe_orderctrl, width=5,
-                                 text='↓', command=down)
-        button_down.pack(side='right', padx=(1.5, 0))
-
-        button_ok = ttk.Button(bottomframe_windowctrl,
+        button_ok = ttk.Button(bottomframe,
                                width=9, text=_('OK'), command=ok)
-        button_ok.pack(side='left', padx=(0, 1.5))
-        button_cancel = ttk.Button(bottomframe_windowctrl,
+        button_ok.pack(side='left', padx=(0, 1))
+        button_cancel = ttk.Button(bottomframe,
                                    width=9, text=_('Cancel'), command=close)
-        button_cancel.pack(side='left', padx=(1.5, 0))
+        button_cancel.pack(side='left', padx=(1, 1.5))
+
+        button_up = ttk.Button(bottomframe, width=3,
+                               text='↑', command=up)
+        button_up.pack(side='right', padx=(1.5, 1))
+
+        button_down = ttk.Button(bottomframe, width=3,
+                                 text='↓', command=down)
+        button_down.pack(side='right', padx=(1, 0))
 
     def settingswindow(self):
         '''Open settings window'''
