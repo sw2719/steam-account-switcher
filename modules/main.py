@@ -249,7 +249,7 @@ class MainApp(tk.Tk):
     def configwindow(self, username, profilename):
         configwindow = tk.Toplevel(self, bg='white')
         configwindow.title('')
-        configwindow.geometry("240x150+650+320")
+        configwindow.geometry("250x165+650+320")
         configwindow.resizable(False, False)
         configwindow.bind('<Escape>', lambda event: configwindow.destroy())
 
@@ -275,7 +275,7 @@ class MainApp(tk.Tk):
                                    command=configwindow.destroy)
         cancel_button.pack(side='left', padx=1.5)
 
-        top_label = tk.Label(configwindow, text=_('Select name settings for %s') % username, bg='white')
+        top_label = tk.Label(configwindow, text=_('Select name settings\nfor %s') % username, bg='white')
         top_label.pack(side='top', pady=(4, 3))
 
         radio_frame1 = tk.Frame(configwindow, bg='white')
@@ -309,7 +309,7 @@ class MainApp(tk.Tk):
         entry_frame = tk.Frame(configwindow, bg='white')
         entry_frame.pack(side='bottom', pady=(1, 4))
 
-        name_entry = tk.Entry(entry_frame, width=26, disabledbackground='#C6C6C6', relief='solid')
+        name_entry = tk.Entry(entry_frame, width=27, disabledbackground='#C6C6C6', relief='solid')
         name_entry.insert(0, custom_name)
         name_entry.pack()
 
