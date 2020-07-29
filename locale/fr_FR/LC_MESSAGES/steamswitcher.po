@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-23 14:25+0200\n"
-"PO-Revision-Date: 2020-07-26 12:29+0900\n"
+"POT-Creation-Date: 2020-07-29 09:26+0900\n"
+"PO-Revision-Date: 2020-07-29 09:26+0900\n"
 "Last-Translator: QuentiumYT\n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -23,7 +23,7 @@ msgstr ""
 "X-Poedit-SearchPath-6: modules/main.py\n"
 "X-Poedit-SearchPath-7: modules/util.py\n"
 
-#: modules/config.py:156 modules/update.py:148 modules/update.py:170
+#: modules/config.py:156 modules/update.py:153 modules/update.py:175
 msgid "Error"
 msgstr "Erreur de registre"
 
@@ -73,7 +73,7 @@ msgstr "Actualiser connexion auto"
 msgid "Update all avatars"
 msgstr "Mettre à jour tous les avatars"
 
-#: modules/main.py:127 modules/main.py:1113
+#: modules/main.py:127 modules/main.py:1128
 msgid "Settings"
 msgstr "Réglages"
 
@@ -85,54 +85,58 @@ msgstr "À propos"
 msgid "Menu"
 msgstr "Menu"
 
-#: modules/main.py:151
+#: modules/main.py:153
 msgid "Debug"
 msgstr "Déboguer"
 
-#: modules/main.py:165 modules/main.py:224 modules/main.py:549
+#: modules/main.py:167 modules/main.py:218 modules/main.py:549
 #: modules/main.py:551
 msgid "Auto-login Enabled"
 msgstr "Connexion automatique activée"
 
-#: modules/main.py:168 modules/main.py:227 modules/main.py:553
+#: modules/main.py:170 modules/main.py:221 modules/main.py:553
 msgid "Auto-login Disabled"
 msgstr "Connexion automatique désactivée"
 
-#: modules/main.py:180
-msgid "Toggle auto-login"
-msgstr "Connexion auto"
-
-#: modules/main.py:185
-msgid "Exit"
-msgstr "Quitter"
-
-#: modules/main.py:191 modules/main.py:558
+#: modules/main.py:176 modules/main.py:558
 msgid "Restart Steam & Exit"
 msgstr "Redémarrer Steam"
 
-#: modules/main.py:193 modules/main.py:560
+#: modules/main.py:178 modules/main.py:560
 msgid "Restart Steam"
 msgstr "Redémarrer Steam"
 
-#: modules/main.py:212
+#: modules/main.py:182
+msgid "Toggle auto-login"
+msgstr "Connexion auto"
+
+#: modules/main.py:187
+msgid "Exit"
+msgstr "Quitter"
+
+#: modules/main.py:206
 msgid "Current Auto-login user:"
 msgstr "Utilisateur actuel de connexion automatique :"
 
-#: modules/main.py:270 modules/main.py:1079 modules/main.py:1275
-#: modules/ui.py:236
+#: modules/main.py:270 modules/main.py:1111 modules/main.py:1297
+#: modules/ui.py:241
 msgid "OK"
 msgstr "OK"
 
-#: modules/main.py:274 modules/main.py:758 modules/main.py:852
-#: modules/main.py:961 modules/main.py:1082 modules/main.py:1280
-#: modules/main.py:1312 modules/update.py:71 modules/update.py:113
+#: modules/main.py:274 modules/main.py:772 modules/main.py:872
+#: modules/main.py:987 modules/main.py:1114 modules/main.py:1302
+#: modules/main.py:1334 modules/update.py:76 modules/update.py:118
 msgid "Cancel"
 msgstr "Annuler"
 
 #: modules/main.py:278
 #, python-format
-msgid "Select name settings for %s"
-msgstr "Sélectionnez les paramètres de nom pour %s"
+msgid ""
+"Select name settings\n"
+"for %s"
+msgstr ""
+"Sélectionnez les paramètres\n"
+"de nom pour %s"
 
 #: modules/main.py:296
 msgid "Use profile name if available"
@@ -142,8 +146,8 @@ msgstr "Utiliser le nom du profil si disponible"
 msgid "Use custom name"
 msgstr "Utiliser un nom personnalisé"
 
-#: modules/main.py:340 modules/main.py:867 modules/update.py:230
-#: modules/update.py:233
+#: modules/main.py:340 modules/main.py:887 modules/update.py:235
+#: modules/update.py:238
 msgid "Info"
 msgstr "Informations"
 
@@ -196,170 +200,170 @@ msgstr "Supprimer"
 msgid "No accounts added"
 msgstr "Aucun compte ajouté"
 
-#: modules/main.py:570 modules/main.py:835 modules/main.py:953
+#: modules/main.py:570 modules/main.py:855 modules/main.py:979
 msgid "Please wait while downloading avatars..."
 msgstr ""
 "Veuillez patienter pendant\n"
 " le téléchargement des avatars..."
 
-#: modules/main.py:595
+#: modules/main.py:601
 msgid "Warning: The developer of this application is not responsible for"
 msgstr ""
 "Avertissement: le développeur de cette application n'est pas responsable de"
 
-#: modules/main.py:596
+#: modules/main.py:602
 msgid "data loss or any other damage from the use of this app."
 msgstr ""
 "perte de données ou tout autre dommage résultant de l'utilisation de cette "
 "application."
 
-#: modules/main.py:598
+#: modules/main.py:604
 msgid "STEAM is a registered trademark of Valve Corporation."
 msgstr "STEAM est une marque déposée de Valve Corporation."
 
-#: modules/main.py:608 modules/ui.py:411
+#: modules/main.py:614 modules/ui.py:422
 msgid "Close"
 msgstr "Fermer"
 
-#: modules/main.py:612
+#: modules/main.py:618
 msgid "GitHub page"
 msgstr "Page GitHub"
 
-#: modules/main.py:626 modules/main.py:977
+#: modules/main.py:632 modules/main.py:1003
 msgid "No Accounts"
 msgstr "Aucun compte"
 
-#: modules/main.py:627 modules/main.py:978
+#: modules/main.py:633 modules/main.py:1004
 msgid "There's no account added."
 msgstr "Aucun compte n'a été ajouté."
 
-#: modules/main.py:630 modules/main.py:762
+#: modules/main.py:636 modules/main.py:776
 msgid "Refresh"
 msgstr "Actualiser"
 
-#: modules/main.py:637
+#: modules/main.py:651
 msgid "Select accounts to refresh."
 msgstr "Sélectionnez les comptes à actualiser."
 
-#: modules/main.py:695
+#: modules/main.py:709
 msgid "Accounts with expired autologin token will show login prompt."
 msgstr "Les comptes expirés afficheront une fenêtre de connexion."
 
-#: modules/main.py:696
+#: modules/main.py:710
 msgid "Close the prompt or login to continue the process."
 msgstr "Fermez l'invite ou connectez-vous pour continuer le processus."
 
-#: modules/main.py:704
+#: modules/main.py:718
 msgid "Initializing..."
 msgstr "Initialisation..."
 
-#: modules/main.py:723
+#: modules/main.py:737
 msgid "Switching account..."
 msgstr "Changer de compte..."
 
-#: modules/main.py:735
+#: modules/main.py:749
 msgid "Waiting for Steam..."
 msgstr "Attendre Steam..."
 
-#: modules/main.py:748
+#: modules/main.py:762
 msgid "Do you want to start Steam with previous autologin account?"
 msgstr ""
 "Voulez-vous démarrer Steam avec le précédent compte de connexion automatique?"
 
-#: modules/main.py:776 modules/main.py:849
+#: modules/main.py:790 modules/main.py:869
 msgid "Add"
 msgstr "Ajouter"
 
-#: modules/main.py:787
+#: modules/main.py:807
 msgid "Enter account(s) to add."
 msgstr "Entrez le ou les comptes à ajouter."
 
-#: modules/main.py:789
+#: modules/main.py:809
 msgid "In case of adding multiple accounts,"
 msgstr "En cas d'ajout de plusieurs comptes,"
 
-#: modules/main.py:790
+#: modules/main.py:810
 msgid "seperate each account with '/' (slash)."
 msgstr "séparez chaque compte avec un '/' (slash)."
 
-#: modules/main.py:821
+#: modules/main.py:841
 msgid "Duplicate Alert"
 msgstr "Alerte en double"
 
-#: modules/main.py:822
+#: modules/main.py:842
 #, python-format
 msgid "Account %s already exists."
 msgstr "Le compte %s existe déjà."
 
-#: modules/main.py:867
+#: modules/main.py:887
 msgid "There's no account left to add."
 msgstr "Il n'y a plus de compte à ajouter."
 
-#: modules/main.py:874 modules/main.py:965
+#: modules/main.py:894 modules/main.py:991
 msgid "Import"
 msgstr "Importer"
 
-#: modules/main.py:883
+#: modules/main.py:909
 msgid "Select accounts to import."
 msgstr "Sélectionnez les comptes à importer."
 
-#: modules/main.py:884
+#: modules/main.py:910
 msgid "Added accounts don't show up."
 msgstr "Les comptes ajoutés n'apparaissent pas."
 
-#: modules/main.py:1086 modules/main.py:1285
-msgid "Apply"
-msgstr "Appliquer"
-
-#: modules/main.py:1130
+#: modules/main.py:1152
 msgid "Language"
 msgstr "Langage"
 
-#: modules/main.py:1150
+#: modules/main.py:1172
 msgid "Restart app to apply language settings."
 msgstr "Redémarrez l'app pour appliquer les paramètres."
 
-#: modules/main.py:1167
+#: modules/main.py:1189
 msgid "Normal Mode (Manually restart Steam)"
 msgstr "Mode normal (redémarrer Steam manuellement)"
 
-#: modules/main.py:1174
+#: modules/main.py:1196
 msgid "Express Mode (Auto-restart Steam)"
 msgstr "Mode Express (redémarrage automatique de Steam)"
 
-#: modules/main.py:1184 modules/ui.py:330
+#: modules/main.py:1206 modules/ui.py:335
 msgid "Try to soft shutdown Steam client"
 msgstr "Essayez d'arrêter en douceur le client Steam"
 
-#: modules/main.py:1199 modules/ui.py:343
+#: modules/main.py:1221 modules/ui.py:348
 msgid "Exit app after Steam is restarted"
 msgstr "Quitter l'app au redémarrage de Steam"
 
-#: modules/main.py:1213 modules/ui.py:356
+#: modules/main.py:1235 modules/ui.py:361
 msgid "Show avatar images"
 msgstr "Afficher les images d'avatar"
 
-#: modules/main.py:1262
+#: modules/main.py:1284
 msgid "Do you want to download avatar images now?"
 msgstr "Voulez-vous télécharger les images d'avatar maintenant?"
 
-#: modules/main.py:1267
+#: modules/main.py:1289
 msgid "Locale has been changed"
 msgstr "Le paramètre de langue a été modifié"
 
-#: modules/main.py:1268
+#: modules/main.py:1290
 msgid "Restart app to apply new locale settings."
 msgstr "Redémarrez l'app pour appliquer les paramètres."
 
-#: modules/main.py:1315
+#: modules/main.py:1307
+msgid "Apply"
+msgstr "Appliquer"
+
+#: modules/main.py:1337
 msgid "Force quit Steam"
 msgstr "Forcer à quitter Steam"
 
-#: modules/main.py:1327
+#: modules/main.py:1349
 msgid "Waiting for Steam to exit..."
 msgstr "Attendre que Steam s'arrête..."
 
-#: modules/main.py:1393
+#: modules/main.py:1415
 msgid "Launching Steam..."
 msgstr "Démarrage de Steam..."
 
@@ -383,7 +387,7 @@ msgstr "Impossible de modifier la valeur de registre."
 msgid "Welcome"
 msgstr "Bienvenue"
 
-#: modules/ui.py:239
+#: modules/ui.py:244
 msgid ""
 "Thank you for downloading this app.\n"
 "Click OK to continue."
@@ -391,19 +395,19 @@ msgstr ""
 "Merci d'avoir téléchargé cette application.\n"
 "Cliquez sur OK pour continuer."
 
-#: modules/ui.py:251
+#: modules/ui.py:256
 msgid "Customize your settings."
 msgstr "Personnalisez vos paramètres."
 
-#: modules/ui.py:288
+#: modules/ui.py:293
 msgid "Please wait..."
 msgstr "Veuillez patienter..."
 
-#: modules/ui.py:301
+#: modules/ui.py:306
 msgid "Normal Mode"
 msgstr "Mode normal"
 
-#: modules/ui.py:308
+#: modules/ui.py:313
 msgid ""
 "In normal mode, you restart Steam\n"
 "by clicking 'Restart Steam' button."
@@ -411,11 +415,11 @@ msgstr ""
 "En mode normal, vous redémarrez Steam\n"
 "en cliquant sur le bouton «Redémarrer Steam»."
 
-#: modules/ui.py:314
+#: modules/ui.py:319
 msgid "Express Mode"
 msgstr "Mode express"
 
-#: modules/ui.py:321
+#: modules/ui.py:326
 msgid ""
 "In express mode, Steam will be automatically\n"
 "restarted when you change account."
@@ -423,25 +427,25 @@ msgstr ""
 "En mode express, Steam sera automatiquement\n"
 "redémarré lorsque vous changez de compte."
 
-#: modules/ui.py:337
+#: modules/ui.py:342
 msgid "Shutdown Steam instead of killing Steam process"
 msgstr "Arrêtez Steam au lieu de terminer le processus Steam"
 
-#: modules/ui.py:350
+#: modules/ui.py:355
 msgid "Exit app automatically after restarting Steam"
 msgstr "Quittez l'app automatiquement après le redémarrage"
 
-#: modules/ui.py:363
+#: modules/ui.py:368
 msgid "Show avatars in account list"
 msgstr "Afficher les avatars dans la liste des comptes"
 
-#: modules/ui.py:367
+#: modules/ui.py:372
 msgid "Good to go!"
 msgstr "Tout est bon !"
 
 # Due to UI size, line length is limited.
 # UI test is required after translation.
-#: modules/ui.py:371
+#: modules/ui.py:376
 msgid ""
 "Add or import accounts via Menu.\n"
 "Right click on accounts to see more options.\n"
@@ -465,35 +469,35 @@ msgstr ""
 "\n"
 "Vous pouvez ouvrir le repo GitHub via Menu > À propos."
 
-#: modules/ui.py:387
+#: modules/ui.py:392
 msgid "Steam directory invalid"
 msgstr "Répertoire Steam invalide"
 
-#: modules/ui.py:387
+#: modules/ui.py:392
 msgid "Could not locate Steam directory."
 msgstr "Impossible de localiser le répertoire Steam."
 
-#: modules/ui.py:388
+#: modules/ui.py:393
 msgid "Please select Steam directory manually."
 msgstr "Veuillez sélectionner le répertoire Steam manuellement."
 
-#: modules/ui.py:397
+#: modules/ui.py:402
 msgid "Warning"
 msgstr "Avertissement"
 
-#: modules/ui.py:398
+#: modules/ui.py:403
 msgid "Steam directory is invalid."
 msgstr "Le répertoire Steam n'est pas valide."
 
-#: modules/ui.py:399
+#: modules/ui.py:404
 msgid "Try again."
 msgstr "Veuillez réessayer."
 
-#: modules/ui.py:414
+#: modules/ui.py:425
 msgid "Username"
 msgstr "Nom personnalisé"
 
-#: modules/ui.py:415
+#: modules/ui.py:426
 msgid "Friend code"
 msgstr "Code ami"
 
@@ -501,41 +505,41 @@ msgstr "Code ami"
 msgid "Update"
 msgstr "Mise à jour"
 
-#: modules/update.py:73
+#: modules/update.py:78
 msgid "Update now"
 msgstr "Mettez à jour maintenant"
 
-#: modules/update.py:78
+#: modules/update.py:83
 #, python-format
 msgid "New version %s is available."
 msgstr "La nouvelle version %s est disponible."
 
-#: modules/update.py:113
+#: modules/update.py:118
 msgid "Are you sure to cancel?"
 msgstr "Voulez-vous vraiment annuler ?"
 
-#: modules/update.py:149
+#: modules/update.py:154
 msgid "Error occured while downloading update."
 msgstr "Une erreur s'est produite lors du téléchargement de la mise à jour."
 
-#: modules/update.py:170
+#: modules/update.py:175
 msgid "Couldn't perform automatic update."
 msgstr "Impossible d'effectuer une mise à jour automatique."
 
-#: modules/update.py:171
+#: modules/update.py:176
 msgid "Update manually by extracting update.zip file."
 msgstr "Mettez à jour manuellement en extrayant le fichier update.zip."
 
-#: modules/update.py:307
+#: modules/update.py:312
 #, python-format
 msgid "Version %s is available. Click here to update!"
 msgstr "Cliquez ici pour passer à la version %s !"
 
-#: modules/update.py:331
+#: modules/update.py:336
 msgid "Development version"
 msgstr "Version de développement"
 
-#: modules/update.py:344
+#: modules/update.py:349
 msgid "Failed checking for updates. Click here to try again."
 msgstr ""
 "Échec de la vérification des mises à jour.\n"
