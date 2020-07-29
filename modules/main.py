@@ -183,18 +183,17 @@ class MainApp(tk.Tk):
                                    command=toggleAutologin)
 
         button_quit = ttk.Button(self.bottomframe,
-                                 width=6,
+                                 width=7,
                                  text=_('Exit'),
                                  command=self.quit)
 
         button_restart = ttk.Button(self.bottomframe,
-                                    width=23,
                                     textvariable=self.restartbutton_text,
                                     command=self.exit_after_restart)
 
         button_toggle.pack(side='left', padx=3, pady=3)
         button_quit.pack(side='left', pady=3)
-        button_restart.pack(side='right', padx=3, pady=3)
+        button_restart.pack(side='right', padx=3, pady=3, fill='x', expand=True)
 
         self.button_dict = {}
 
@@ -802,7 +801,7 @@ class MainApp(tk.Tk):
         topframe_add.pack(side='top', anchor='center')
 
         bottomframe_add = tk.Frame(addwindow, bg='white')
-        bottomframe_add.pack(side='bottom', anchor='e')
+        bottomframe_add.pack(side='bottom', anchor='e', fill='x')
 
         addlabel_row1 = tk.Label(topframe_add, bg='white',
                                  text=_('Enter account(s) to add.'))
@@ -867,15 +866,15 @@ class MainApp(tk.Tk):
             adduser(account_entry.get())
 
         addwindow.bind('<Return>', enterkey)
-        button_add = ttk.Button(bottomframe_add, width=9, text=_('Add'),
+        button_add = ttk.Button(bottomframe_add, width=10, text=_('Add'),
                                 command=lambda: adduser(account_entry.get()))
-        button_addcancel = ttk.Button(addwindow, width=9,
+        button_addcancel = ttk.Button(addwindow, width=10,
                                       text=_('Cancel'), command=close)
         addlabel_row1.pack(pady=10)
         addlabel_row2.pack()
 
-        account_entry.pack(side='left', padx=3, pady=3)
-        button_add.pack(side='left', anchor='e', padx=3, pady=3)
+        account_entry.pack(side='left', padx=(3, 0), pady=3, fill='x', expand=True)
+        button_add.pack(side='right', anchor='e', padx=3, pady=3)
         button_addcancel.pack(side='bottom', anchor='e', padx=3)
 
     def importwindow(self):
@@ -1007,7 +1006,7 @@ class MainApp(tk.Tk):
 
         orderwindow = tk.Toplevel(self, bg='white')
         orderwindow.title("")
-        orderwindow.geometry("210x270+650+300")
+        orderwindow.geometry("220x270+650+300")
         orderwindow.resizable(False, False)
         orderwindow.bind('<Escape>', lambda event: orderwindow.destroy())
 
@@ -1017,7 +1016,7 @@ class MainApp(tk.Tk):
             pass
 
         bottomframe_windowctrl = tk.Frame(orderwindow, bg='white')
-        bottomframe_windowctrl.pack(side='bottom', padx=3, pady=3, fill='x')
+        bottomframe_windowctrl.pack(side='bottom', padx=3, pady=3, fill='x', expand=True)
 
         bottomframe_orderctrl = tk.Frame(orderwindow, bg='white')
         bottomframe_orderctrl.pack(side='bottom', padx=3, pady=3)
@@ -1033,7 +1032,7 @@ class MainApp(tk.Tk):
         scrollbar = ttk.Scrollbar(lbframe)
         scrollbar.pack(side='right', fill='y')
 
-        lb = DragDropListbox(lbframe, height=12, width=26,
+        lb = DragDropListbox(lbframe, width=35, height=20,
                              highlightthickness=0,
                              yscrollcommand=scrollbar.set,
                              bd=1,
@@ -1052,7 +1051,7 @@ class MainApp(tk.Tk):
             lb.insert(i, v)
 
         lb.select_set(0)
-        lbframe.pack(side='top', pady=5)
+        lbframe.pack(side='top', padx=3, pady=(3, 5), expand=True)
 
         def down():
             i = lb.curselection()[0]
@@ -1109,14 +1108,14 @@ class MainApp(tk.Tk):
         button_down.pack(side='right', padx=2)
 
         button_ok = ttk.Button(bottomframe_windowctrl,
-                               width=8, text=_('OK'), command=ok)
-        button_ok.pack(side='left')
+                               width=10, text=_('OK'), command=ok)
+        button_ok.pack(side='left', fill='x')
         button_cancel = ttk.Button(bottomframe_windowctrl,
-                                   width=8, text=_('Cancel'), command=close)
-        button_cancel.pack(side='left', padx=3)
+                                   width=10, text=_('Cancel'), command=close)
+        button_cancel.pack(side='left', padx=3, fill='x')
 
         button_apply = ttk.Button(bottomframe_windowctrl,
-                                  width=8, text=_('Apply'))
+                                  width=10, text=_('Apply'))
 
         def applybutton():
             nonlocal button_apply
@@ -1130,7 +1129,7 @@ class MainApp(tk.Tk):
 
         button_apply['command'] = applybutton
 
-        button_apply.pack(side='left')
+        button_apply.pack(side='left', fill='x')
 
     def settingswindow(self):
         '''Open settings window'''
