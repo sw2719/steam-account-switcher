@@ -573,7 +573,7 @@ class MainApp(tk.Tk):
 
         label.destroy()
         self.refresh(no_frame=True)
-        self.bottomframe.pack(side='bottom')
+        self.bottomframe.pack(side='bottom', fill='x')
         show_update()
 
     def about(self, version):
@@ -1350,7 +1350,7 @@ class MainApp(tk.Tk):
                 label.destroy()
                 button_frame.destroy()
                 self.refresh(no_frame=True)
-                self.bottomframe.pack(side='bottom')
+                self.bottomframe.pack(side='bottom', fill='x')
                 show_update()
             self.update()
 
