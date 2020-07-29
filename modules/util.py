@@ -72,10 +72,20 @@ def check_running(process_name):
 def steam_running():
     """Check if Steam is running"""
     steam_pid = fetch_reg('pid')
+
     if steam_pid == 0:
         return False
-    else:
-        return psutil.pid_exists(steam_pid)
+
+    try:
+        process = psutil.Process(pid=steam_pid)
+        name = process.name()
+
+        if name.lower() == 'steam.exe':
+            return True
+        else:
+            return False
+    except psutil.NoSuchProcess:
+        return False
 
 
 def steam64_to_3(steamid64):
