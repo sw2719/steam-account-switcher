@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-29 14:39+0900\n"
-"PO-Revision-Date: 2020-07-29 14:39+0900\n"
+"POT-Creation-Date: 2020-07-29 19:14+0900\n"
+"PO-Revision-Date: 2020-07-29 19:15+0900\n"
 "Last-Translator: QuentiumYT\n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -73,7 +73,7 @@ msgstr "Actualiser connexion auto"
 msgid "Update all avatars"
 msgstr "Mettre à jour tous les avatars"
 
-#: modules/main.py:140 modules/main.py:1143
+#: modules/main.py:140 modules/main.py:1142
 msgid "Settings"
 msgstr "Réglages"
 
@@ -118,14 +118,14 @@ msgstr "Quitter"
 msgid "Current Auto-login user:"
 msgstr "Utilisateur actuel de connexion automatique :"
 
-#: modules/main.py:288 modules/main.py:1118 modules/main.py:1313
+#: modules/main.py:288 modules/main.py:1117 modules/main.py:1312
 #: modules/ui.py:241
 msgid "OK"
 msgstr "OK"
 
-#: modules/main.py:292 modules/main.py:790 modules/main.py:890
-#: modules/main.py:1005 modules/main.py:1121 modules/main.py:1318
-#: modules/main.py:1349 modules/update.py:76 modules/update.py:118
+#: modules/main.py:292 modules/main.py:789 modules/main.py:889
+#: modules/main.py:1004 modules/main.py:1120 modules/main.py:1317
+#: modules/main.py:1348 modules/update.py:76 modules/update.py:118
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -146,7 +146,7 @@ msgstr "Utiliser le nom du profil si disponible"
 msgid "Use custom name"
 msgstr "Utiliser un nom personnalisé"
 
-#: modules/main.py:358 modules/main.py:905 modules/update.py:235
+#: modules/main.py:358 modules/main.py:904 modules/update.py:235
 #: modules/update.py:238
 msgid "Info"
 msgstr "Informations"
@@ -200,170 +200,168 @@ msgstr "Supprimer"
 msgid "No accounts added"
 msgstr "Aucun compte ajouté"
 
-#: modules/main.py:588 modules/main.py:873 modules/main.py:997
+#: modules/main.py:588 modules/main.py:872 modules/main.py:996
 msgid "Please wait while downloading avatars..."
 msgstr ""
 "Veuillez patienter pendant\n"
 " le téléchargement des avatars..."
 
 #: modules/main.py:619
-msgid "Warning: The developer of this application is not responsible for"
+msgid ""
+"Warning: The developer of this application is not responsible for\n"
+"data loss or any other damage from the use of this app."
 msgstr ""
-"Avertissement: le développeur de cette application n'est pas responsable de"
+"Avertissement: le développeur de cette application n'est\n"
+"pas responsable de perte de données ou tout autre dommage\n"
+"résultant de l'utilisation de cette application."
 
-#: modules/main.py:620
-msgid "data loss or any other damage from the use of this app."
-msgstr ""
-"perte de données ou tout autre dommage résultant de l'utilisation de cette "
-"application."
-
-#: modules/main.py:622
+#: modules/main.py:621
 msgid "STEAM is a registered trademark of Valve Corporation."
 msgstr "STEAM est une marque déposée de Valve Corporation."
 
-#: modules/main.py:632 modules/ui.py:422
+#: modules/main.py:631 modules/ui.py:422
 msgid "Close"
 msgstr "Fermer"
 
-#: modules/main.py:636
+#: modules/main.py:635
 msgid "GitHub page"
 msgstr "Page GitHub"
 
-#: modules/main.py:650 modules/main.py:1021
+#: modules/main.py:649 modules/main.py:1020
 msgid "No Accounts"
 msgstr "Aucun compte"
 
-#: modules/main.py:651 modules/main.py:1022
+#: modules/main.py:650 modules/main.py:1021
 msgid "There's no account added."
 msgstr "Aucun compte n'a été ajouté."
 
-#: modules/main.py:654 modules/main.py:794
+#: modules/main.py:653 modules/main.py:793
 msgid "Refresh"
 msgstr "Actualiser"
 
-#: modules/main.py:669
+#: modules/main.py:668
 msgid "Select accounts to refresh."
 msgstr "Sélectionnez les comptes à actualiser."
 
-#: modules/main.py:727
+#: modules/main.py:726
 msgid "Accounts with expired autologin token will show login prompt."
 msgstr "Les comptes expirés afficheront une fenêtre de connexion."
 
-#: modules/main.py:728
+#: modules/main.py:727
 msgid "Close the prompt or login to continue the process."
 msgstr "Fermez l'invite ou connectez-vous pour continuer le processus."
 
-#: modules/main.py:736 modules/main.py:1364
+#: modules/main.py:735 modules/main.py:1363
 msgid "Initializing..."
 msgstr "Initialisation..."
 
-#: modules/main.py:755
+#: modules/main.py:754
 msgid "Switching account..."
 msgstr "Changer de compte..."
 
-#: modules/main.py:767
+#: modules/main.py:766
 msgid "Waiting for Steam..."
 msgstr "Attendre Steam..."
 
-#: modules/main.py:780
+#: modules/main.py:779
 msgid "Do you want to start Steam with previous autologin account?"
 msgstr ""
 "Voulez-vous démarrer Steam avec le précédent compte de connexion automatique?"
 
-#: modules/main.py:808 modules/main.py:887
+#: modules/main.py:807 modules/main.py:886
 msgid "Add"
 msgstr "Ajouter"
 
-#: modules/main.py:825
+#: modules/main.py:824
 msgid "Enter account(s) to add."
 msgstr "Entrez le ou les comptes à ajouter."
 
-#: modules/main.py:827
+#: modules/main.py:826
 msgid "In case of adding multiple accounts,"
 msgstr "En cas d'ajout de plusieurs comptes,"
 
-#: modules/main.py:828
+#: modules/main.py:827
 msgid "seperate each account with '/' (slash)."
 msgstr "séparez chaque compte avec un '/' (slash)."
 
-#: modules/main.py:859
+#: modules/main.py:858
 msgid "Duplicate Alert"
 msgstr "Alerte en double"
 
-#: modules/main.py:860
+#: modules/main.py:859
 #, python-format
 msgid "Account %s already exists."
 msgstr "Le compte %s existe déjà."
 
-#: modules/main.py:905
+#: modules/main.py:904
 msgid "There's no account left to add."
 msgstr "Il n'y a plus de compte à ajouter."
 
-#: modules/main.py:912 modules/main.py:1009
+#: modules/main.py:911 modules/main.py:1008
 msgid "Import"
 msgstr "Importer"
 
-#: modules/main.py:927
+#: modules/main.py:926
 msgid "Select accounts to import."
 msgstr "Sélectionnez les comptes à importer."
 
-#: modules/main.py:928
+#: modules/main.py:927
 msgid "Added accounts don't show up."
 msgstr "Les comptes ajoutés n'apparaissent pas."
 
-#: modules/main.py:1167
+#: modules/main.py:1166
 msgid "Language"
 msgstr "Langage"
 
-#: modules/main.py:1187
+#: modules/main.py:1186
 msgid "Restart app to apply language settings."
 msgstr "Redémarrez l'app pour appliquer les paramètres."
 
-#: modules/main.py:1204
+#: modules/main.py:1203
 msgid "Normal Mode (Manually restart Steam)"
 msgstr "Mode normal (redémarrer Steam manuellement)"
 
-#: modules/main.py:1211
+#: modules/main.py:1210
 msgid "Express Mode (Auto-restart Steam)"
 msgstr "Mode Express (redémarrage automatique de Steam)"
 
-#: modules/main.py:1221 modules/ui.py:335
+#: modules/main.py:1220 modules/ui.py:335
 msgid "Try to soft shutdown Steam client"
 msgstr "Essayez d'arrêter en douceur le client Steam"
 
-#: modules/main.py:1236 modules/ui.py:348
+#: modules/main.py:1235 modules/ui.py:348
 msgid "Exit app after Steam is restarted"
 msgstr "Quitter l'app au redémarrage de Steam"
 
-#: modules/main.py:1250 modules/ui.py:361
+#: modules/main.py:1249 modules/ui.py:361
 msgid "Show avatar images"
 msgstr "Afficher les images d'avatar"
 
-#: modules/main.py:1300
+#: modules/main.py:1299
 msgid "Do you want to download avatar images now?"
 msgstr "Voulez-vous télécharger les images d'avatar maintenant?"
 
-#: modules/main.py:1305
+#: modules/main.py:1304
 msgid "Locale has been changed"
 msgstr "Le paramètre de langue a été modifié"
 
-#: modules/main.py:1306
+#: modules/main.py:1305
 msgid "Restart app to apply new locale settings."
 msgstr "Redémarrez l'app pour appliquer les paramètres."
 
-#: modules/main.py:1323
+#: modules/main.py:1322
 msgid "Apply"
 msgstr "Appliquer"
 
-#: modules/main.py:1352
+#: modules/main.py:1351
 msgid "Force quit Steam"
 msgstr "Forcer à quitter Steam"
 
-#: modules/main.py:1379
+#: modules/main.py:1378
 msgid "Waiting for Steam to exit..."
 msgstr "Attendre que Steam s'arrête..."
 
-#: modules/main.py:1438
+#: modules/main.py:1437
 msgid "Launching Steam..."
 msgstr "Démarrage de Steam..."
 
@@ -544,3 +542,8 @@ msgid "Failed checking for updates. Click here to try again."
 msgstr ""
 "Échec de la vérification des mises à jour.\n"
 "Cliquez ici pour essayer à nouveau."
+
+#~ msgid "data loss or any other damage from the use of this app."
+#~ msgstr ""
+#~ "perte de données ou tout autre dommage résultant de l'utilisation de "
+#~ "cette application."
