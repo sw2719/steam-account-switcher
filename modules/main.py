@@ -178,7 +178,7 @@ class MainApp(tk.Tk):
             self.restartbutton_text.set(_('Restart Steam'))
 
         button_toggle = ttk.Button(self.bottomframe,
-                                   width=15,
+                                   width=17,
                                    text=_('Toggle auto-login'),
                                    command=toggleAutologin)
 
