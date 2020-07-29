@@ -26,7 +26,8 @@ def reset_config():
                    'autoexit': 'true',
                    'mode': 'normal',
                    'show_avatar': 'true',
-                   'steam_path': 'reg'}
+                   'steam_path': 'reg',
+                   'last_pos': '0/0'}
         yaml.dump(default, cfg)
 
 
@@ -76,9 +77,13 @@ try:
     else:
         avatar_invalid = True
 
+    pos_invalid = 'last_pos' not in set(test_dict)
+
     steam_path_invalid = 'steam_path' not in set(test_dict)
 
-    if True in (locale_invalid, try_soft_invalid, autoexit_invalid, mode_invalid, avatar_invalid, steam_path_invalid):
+    if True in (locale_invalid, try_soft_invalid, autoexit_invalid,
+                mode_invalid, avatar_invalid, pos_invalid, steam_path_invalid):
+
         cfg_write = {}
         if no_locale or locale_invalid:
             locale_write = 'en_US'
@@ -104,6 +109,12 @@ try:
             cfg_write['show_avatar'] = 'true'
         else:
             cfg_write['show_avatar'] = test_dict['show_avatar']
+
+        if pos_invalid:
+            cfg_write['last_pos'] = '0/0'
+        else:
+            cfg_write['last_pos'] = test_dict['last_pos']
+
         if steam_path_invalid:
             if os.path.isfile('steam_path.txt'):
                 with open('steam_path.txt', 'r') as f:
@@ -112,6 +123,7 @@ try:
                 cfg_write['steam_path'] = 'reg'
         else:
             cfg_write['steam_path'] = test_dict['steam_path']
+
         with open('config.yml', 'w') as cfg:
             yaml.dump(cfg_write, cfg)
         del cfg_write
@@ -120,25 +132,19 @@ except (FileNotFoundError, TypeError):
     reset_config()
     sys.exit(1)
 
-try:
-    with open('config.yml', 'r') as cfg:
-        config_dict = yaml.load(cfg)
+with open('config.yml', 'r') as cfg:
+    config_dict = yaml.load(cfg)
+
     if config_dict['locale'] in ('ko_KR', 'en_US'):
         LOCALE = config_dict['locale']
     else:
         LOCALE = 'en_US'
-except Exception:
-    LOCALE = 'en_US'
 
 t = gettext.translation('steamswitcher',
                         localedir='locale',
                         languages=[LOCALE],
                         fallback=True)
 _ = t.gettext
-
-
-if not os.path.isfile('config.yml'):
-    reset_config()
 
 
 def get_config(key):
@@ -163,10 +169,11 @@ def config_write_dict(config_dict):
 
 def config_write_value(key, value):
     config_dict = {'locale': get_config('locale'),
-                   'try_soft_shutdown': get_config('locale'),
-                   'autoexit': get_config('locale'),
-                   'mode': get_config('locale'),
-                   'show_avatar': get_config('locale'),
+                   'autoexit': get_config('autoexit'),
+                   'mode': get_config('mode'),
+                   'try_soft_shutdown': get_config('try_soft_shutdown'),
+                   'show_avatar': get_config('show_avatar'),
+                   'last_pos': get_config('last_pos'),
                    'steam_path': get_config('steam_path')}
 
     config_dict[key] = value

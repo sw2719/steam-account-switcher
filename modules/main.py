@@ -11,7 +11,7 @@ from time import sleep
 from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
-from modules.config import get_config, config_write_dict
+from modules.config import get_config, config_write_dict, config_write_value
 from modules.util import check_running, steam_running, StoppableThread, open_screenshot, raise_exception, test
 from modules.update import start_checkupdate, hide_update, show_update
 from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, ask_steam_dir
@@ -100,8 +100,21 @@ class MainApp(tk.Tk):
         self['bg'] = 'white'
         self.title(_("Account Switcher"))
 
-        self.geometry("310x472+600+250")
+        window_width = 310
+        window_height = 472
+
+        if get_config('last_pos') != '0/0':
+            pos_x, pos_y = get_config('last_pos').split('/')
+        else:
+            screen_width = self.winfo_screenwidth()
+            screen_height = self.winfo_screenheight()
+
+            pos_x = int((screen_width/2) - (window_width/2))
+            pos_y = int((screen_height/2) - (window_height/2))
+
+        self.geometry(f'{str(window_width)}x{str(window_height)}+{str(pos_x)}+{str(pos_y)}')
         self.resizable(False, False)
+        self.protocol('WM_DELETE_WINDOW', self.exit_app)
 
         try:
             self.iconbitmap('asset/icon.ico')
@@ -181,17 +194,17 @@ class MainApp(tk.Tk):
                                    text=_('Toggle auto-login'),
                                    command=toggleAutologin)
 
-        button_quit = ttk.Button(self.bottomframe,
+        button_exit = ttk.Button(self.bottomframe,
                                  width=7,
                                  text=_('Exit'),
-                                 command=self.quit)
+                                 command=self.exit_app)
 
         button_restart = ttk.Button(self.bottomframe,
                                     textvariable=self.restartbutton_text,
                                     command=self.exit_after_restart)
 
         button_toggle.pack(side='left', padx=3, pady=3)
-        button_quit.pack(side='left', pady=3)
+        button_exit.pack(side='left', pady=3)
         button_restart.pack(side='right', padx=3, pady=3, fill='x', expand=True)
 
         self.button_dict = {}
@@ -225,6 +238,12 @@ class MainApp(tk.Tk):
         ttk.Separator(upper_frame, orient='horizontal').pack(fill='x')
 
         self.draw_button()
+
+    def exit_app(self):
+        geo = self.geometry().split('+')
+        last_pos = f'{geo[1]}/{geo[2]}'
+        config_write_value('last_pos', last_pos)
+        sys.exit(0)
 
     def toggle_demo(self):
         if self.demo_mode:
@@ -609,10 +628,10 @@ class MainApp(tk.Tk):
         button_frame = tk.Frame(aboutwindow, bg='white')
         button_frame.pack(side='bottom', pady=5)
 
-        button_exit = ttk.Button(button_frame,
-                                 text=_('Close'),
-                                 width=8,
-                                 command=aboutwindow.destroy,)
+        button_close = ttk.Button(button_frame,
+                                  text=_('Close'),
+                                  width=8,
+                                  command=aboutwindow.destroy)
         button_github = ttk.Button(button_frame,
                                    text=_('GitHub page'),
                                    command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher'))
@@ -621,7 +640,7 @@ class MainApp(tk.Tk):
         copyright_label.pack(pady=5)
         ver.pack()
 
-        button_exit.pack(side='left', padx=2)
+        button_close.pack(side='left', padx=2)
         button_github.pack(side='right', padx=2)
 
     def refreshwindow(self):
@@ -1268,10 +1287,11 @@ class MainApp(tk.Tk):
                 avatar = 'false'
 
             config_dict = {'locale': locale[locale_cb.current()],
-                           'try_soft_shutdown': soft_shutdown,
                            'autoexit': autoexit,
                            'mode': mode,
+                           'try_soft_shutdown': soft_shutdown,
                            'show_avatar': avatar,
+                           'last_pos': get_config('last_pos'),
                            'steam_path': get_config('steam_path')}
 
             config_write_dict(config_dict)
@@ -1319,56 +1339,64 @@ class MainApp(tk.Tk):
                            creationflags=0x08000000, check=True)
             print('TASKKILL command sent.')
 
-        if not refresh_override:
-            self.no_user_frame.destroy()
-            self.button_frame.destroy()
-            hide_update()
-            self.bottomframe.pack_forget()
-            button_frame = tk.Frame(self, bg='white')
-            button_frame.pack(side='bottom', fill='x')
-            cancel_button = ttk.Button(button_frame,
-                                       text=_('Cancel'))
-            cancel_button['state'] = 'disabled'
-            force_button = ttk.Button(button_frame,
-                                      text=_('Force quit Steam'),
-                                      command=forcequit)
-            force_button['state'] = 'disabled'
+        self.no_user_frame.destroy()
+        self.button_frame.destroy()
+        hide_update()
+        self.bottomframe.pack_forget()
+        button_frame = tk.Frame(self, bg='white')
+        button_frame.pack(side='bottom', fill='x')
+        cancel_button = ttk.Button(button_frame,
+                                   text=_('Cancel'))
+        cancel_button['state'] = 'disabled'
+        force_button = ttk.Button(button_frame,
+                                  text=_('Force quit Steam'),
+                                  command=forcequit)
+        force_button['state'] = 'disabled'
 
-            def enable_button():
-                cancel_button['state'] = 'normal'
-                force_button['state'] = 'normal'
+        def enable_button():
+            cancel_button['state'] = 'normal'
+            force_button['state'] = 'normal'
 
-            cancel_button.pack(side='bottom', padx=3, pady=3, fill='x')
-            force_button.pack(side='bottom', padx=3, fill='x')
+        cancel_button.pack(side='bottom', padx=3, pady=3, fill='x')
+        force_button.pack(side='bottom', padx=3, fill='x')
 
-            label_var = tk.StringVar()
-            label_var.set(_('Waiting for Steam to exit...'))
-            label = tk.Label(self, textvariable=label_var, bg='white')
-            label.pack(pady=(150, 0))
+        label_var = tk.StringVar()
+        label_var.set(_('Initializing...'))
+        label = tk.Label(self, textvariable=label_var, bg='white')
+        label.pack(pady=(150, 0))
 
-            def cleanup():
-                label.destroy()
-                button_frame.destroy()
-                self.refresh(no_frame=True)
-                self.bottomframe.pack(side='bottom', fill='x')
-                show_update()
-            self.update()
+        def cleanup():
+            label.destroy()
+            button_frame.destroy()
+            self.refresh(no_frame=True)
+            self.bottomframe.pack(side='bottom', fill='x')
+            show_update()
 
+        self.update()
         queue = q.Queue()
 
         if check_running('Steam.exe'):
+            label_var.set(_('Waiting for Steam to exit...'))
+
             if get_config('try_soft_shutdown') == 'false':
                 forcequit()
             elif get_config('try_soft_shutdown') == 'true':
                 print('Soft shutdown mode')
-                r_path = fetch_reg('SteamExe')
-                r_path_items = r_path.split('/')
+
+                if get_config('steam_path') == 'reg':
+                    r_path = fetch_reg('SteamExe')
+                    r_path_items = r_path.split('/')
+                else:
+                    r_path = get_config('steam_path') + '\\Steam.exe'
+                    r_path_items = r_path.split('\\')
+
                 path_items = []
                 for item in r_path_items:
                     if ' ' in item:
                         path_items.append(f'"{item}"')
                     else:
                         path_items.append(item)
+
                 steam_exe = "\\".join(path_items)
                 print('Steam.exe path:', steam_exe)
                 subprocess.run(f"start {steam_exe} -shutdown", shell=True,
@@ -1395,8 +1423,7 @@ class MainApp(tk.Tk):
 
             t = StoppableThread(target=steam_checker)
             t.start()
-            if not refresh_override:
-                cancel_button['command'] = cancel
+            cancel_button['command'] = cancel
         else:
             queue.put(1)
 
@@ -1411,22 +1438,17 @@ class MainApp(tk.Tk):
                 label_var.set(_('Launching Steam...'))
                 self.update()
 
-                if refresh_override and silent:
-                    print('Launching Steam silently...')
-                    subprocess.run("start steam://open",
-                                   shell=True, check=True)
-                else:
-                    print('Launching Steam...')
-                    subprocess.run("start steam://open/main",
-                                   shell=True, check=True)
+                print('Launching Steam...')
+                subprocess.run("start steam://open/main",
+                               shell=True, check=True)
 
-                if get_config('autoexit') == 'true' and not refresh_override:
-                    sys.exit(0)
+                if get_config('autoexit') == 'true':
+                    self.exit_app()
                 elif not refresh_override:
                     cleanup()
             except q.Empty:
                 counter += 1
-                if counter == 5 and not refresh_override:
+                if counter == 10:
                     enable_button()
                 self.after(1000, launch_steam)
 
