@@ -2,6 +2,40 @@ version: '2.3.3'
 changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
 
+  ----------2.4----------
+
+  • Now user can open an account's steam profile in browser via right click menu.
+
+  • Now user can attempt to check for updates again when error has occured.
+
+  • Now uses system font for profile names / custom names.
+
+  • Now update status message is shown only when error has occured or update is available for cleaner menu.
+
+  • Added SteamID conversion.
+
+  • Added opening screenshots directory.
+
+  • Shows avatars in account list.
+
+  • Added totally new initial setup experience.
+
+  • Added capability to save log (stdout, stderr) to file with -logfile argument..
+
+  • Implemented chunked downloading to download update faster.
+
+  • Removed mirror downloading as chunked downloading is introduced.
+
+  • Fixed UI issues with Segoe UI.
+
+  • Updated French translation.
+
+  • Now Steam restart is much faster.
+
+  • Now saves windows position on exit and use that position on startup.
+
+  • Now all windows show up right on the main window.
+
   ----------2.3.3----------
 
   • Fixed drag and drop in accounts order editing not working
@@ -132,6 +166,40 @@ changelog_en: |
 
 changelog_ko: |
   알림: 미러를 사용하지 않을 때 다운로드가 너무 오래 걸릴 경우, GitHub에서 수동으로 다운로드하세요 - https://github.com/sw2719/steam-account-switcher/releases
+
+  ----------2.4----------
+
+  • 우클릭 메뉴로 스팀 프로필을 열 수 있습니다.
+
+  • 업데이트 확인 중 오류가 발생할경우 재시도가 가능합니다.
+
+  • 프로필 이름/사용자 이름 표시에 시스템 글꼴을 사용합니다.
+
+  • 이제 업데이트 확인 중 오류가 발생했거나 업데이트가 있는 경우에만 업데이트 UI가 하단에 표시됩니다.
+
+  • SteamID 변환 기능을 추가했습니다.
+
+  • 해당 계정의 스크린샷 폴더를 여는 기능을 추가했습니다.
+
+  • 이제 계정 목록에 프로필 사진을 표시할 수 있습니다.
+
+  • 완전히 새로운 초기 설정 경험을 추가했습니다.
+
+  • -logfile 실행 인자로 로그를 기록할 수 있습니다.
+
+  • 업데이트를 빠르게 내려받기 위해 분할 다운로드를 추가했습니다.
+
+  • 미러 다운로드가 삭제되었습니다.
+
+  • Segoe UI를 사용하는 언어에서 발생하는 UI 문제를 수정하였습니다.
+
+  • 프랑스어 번역을 업데이트했습니다.
+
+  • Steam 재시작 속도를 크게 개선했습니다.
+
+  • 프로그램 종료시 창 위치가 저장되어 다음 실행시 위치가 유지됩니다.
+
+  • 이제 모든 창이 메인 창과 같은 위치에 나타납니다.
 
   ----------2.3.3----------
 

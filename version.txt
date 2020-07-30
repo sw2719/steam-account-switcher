@@ -1,4 +1,0 @@
-# used for checking for update
-# ignore this file
-true
-1.8
