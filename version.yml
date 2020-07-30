@@ -1,4 +1,4 @@
-version: '2.3.3'
+version: '2.4'
 changelog_en: |
   PSA: If download takes too long, download manually from GitHub - https://github.com/sw2719/steam-account-switcher/releases
 
