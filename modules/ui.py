@@ -382,6 +382,7 @@ class WelcomeWindow(tk.Toplevel):
                      'autoexit': self.autoexit,
                      'mode': self.mode,
                      'show_avatar': self.avatar,
+                     'last_pos': get_config('last_pos'),
                      'steam_path': get_config('steam_path')}
 
         config_write_dict(dump_dict)
