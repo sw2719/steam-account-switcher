@@ -1,5 +1,6 @@
 import os
 import re
+from modules.config import get_config
 from modules.reg import fetch_reg
 from ruamel.yaml import YAML
 
@@ -34,15 +35,16 @@ def acc_getdict():
     return acc_dict
 
 
-def loginusers(steam_path=fetch_reg('steampath')):
+def loginusers():
     '''
-    Fetch loginusers.vdf and return AccountName and
+    Fetch loginusers.vdf and return SteamID64, AccountName,
     PersonaName values as lists.
     :param steam_path: Steam installation path override
     '''
-    if os.path.isfile('steam_path.txt'):
-        with open('steam_path.txt', 'r') as path:
-            steam_path = path.read()
+    if get_config('steam_path') == 'reg':
+        steam_path = fetch_reg('steampath')
+    else:
+        steam_path = get_config('steam_path')
 
     if '/' in steam_path:
         steam_path = steam_path.replace('/', '\\')
@@ -53,11 +55,11 @@ def loginusers(steam_path=fetch_reg('steampath')):
         with open(vdf_file, 'r', encoding='utf-8') as vdf_file:
             vdf = vdf_file.read().splitlines()
     except FileNotFoundError:
-        return False
+        return [], [], []
 
-    #  Right, I used CamelCasing here because that's the one used in the vdf file.
-    AccountName = []
-    PersonaName = []
+    steam64_list = []
+    account_name = []
+    persona_name = []
 
     rep = {"\t": "", '"': ""}
     rep = dict((re.escape(k), v) for k, v in rep.items())
@@ -65,8 +67,10 @@ def loginusers(steam_path=fetch_reg('steampath')):
 
     for i, v in enumerate(vdf):
         if v == "\t{":
-            account = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+1])  # NOQA
-            persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])  # NOQA
-            AccountName.append(account.replace("AccountName", ""))
-            PersonaName.append(persona.replace("PersonaName", ""))
-    return AccountName, PersonaName
+            steam64 = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i-1])
+            account = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+1])
+            persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])
+            steam64_list.append(steam64)
+            account_name.append(account.replace("AccountName", ""))
+            persona_name.append(persona.replace("PersonaName", ""))
+    return steam64_list, account_name, persona_name

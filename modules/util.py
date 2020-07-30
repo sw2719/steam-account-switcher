@@ -1,9 +1,9 @@
-import winreg
 import threading
 import psutil
+import os
+from steam.steamid import SteamID
 from modules.reg import fetch_reg
-
-HKCU = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
+from modules.config import get_config
 
 
 class StoppableThread(threading.Thread):
@@ -16,6 +16,43 @@ class StoppableThread(threading.Thread):
 
     def stopped(self):
         return self._stop.isSet()
+
+
+def check_steam_dir():
+    if get_config('steam_path') == 'reg' and os.path.isfile(fetch_reg('SteamPath') + '\\Steam.exe'):
+        return True
+    elif os.path.isfile(get_config('steam_path') + '\\Steam.exe'):
+        return True
+    else:
+        return False
+
+
+def test():
+    print('Listing current config...')
+    print('locale:', get_config('locale'))
+    print('autoexit:', get_config('autoexit'))
+    print('mode:', get_config('mode'))
+    print('try_soft_shutdown:', get_config('try_soft_shutdown'))
+    print('show_avatar:', get_config('show_avatar'))
+    print('steam_path:', get_config('steam_path'))
+
+    print('Checking registry...')
+    for key in ('AutoLoginUser', 'RememberPassword', 'SteamExe', 'SteamPath', 'pid', 'ActiveUser'):
+        print(f'{key}:', fetch_reg(key))
+
+    print('Checking Steam.exe location...')
+    if check_steam_dir() and get_config('steam_path') == 'reg':
+        print('Steam located at', fetch_reg('steampath'))
+    elif check_steam_dir():
+        print('Steam located at', get_config('steam_path'), '(Manually set)')
+    else:
+        print('Steam directory invalid')
+        return False
+    return True
+
+
+def raise_exception():
+    raise Exception
 
 
 def check_running(process_name):
@@ -33,10 +70,41 @@ def check_running(process_name):
 
 
 def steam_running():
-    """Check if Steam is running using registry key 'pid'.
-    Since Steam does not change pid value to 0 when you force quit,
-    previous psutil method is currently used."""
-    if fetch_reg('pid') == 0:
+    """Check if Steam is running"""
+    steam_pid = fetch_reg('pid')
+
+    if steam_pid == 0:
         return False
-    else:
-        return True
+
+    try:
+        process = psutil.Process(pid=steam_pid)
+        name = process.name()
+
+        if name.lower() == 'steam.exe':
+            return True
+        else:
+            return False
+    except psutil.NoSuchProcess:
+        return False
+
+
+def steam64_to_3(steamid64):
+    return SteamID(steamid64).as_steam3
+
+
+def steam64_to_32(steamid64):
+    return SteamID(steamid64).as_32
+
+
+def steam64_to_2(steamid64):
+    return SteamID(steamid64).as_steam2
+
+
+def open_screenshot(steamid64, steam_path=get_config('steam_path')):
+    if steam_path == 'reg':
+        steam_path = fetch_reg('steampath')
+
+    if '/' in steam_path:
+        steam_path = steam_path.replace('/', '\\')
+
+    os.startfile(f'{steam_path}\\userdata\\{steam64_to_32(steamid64)}\\760\\remote')

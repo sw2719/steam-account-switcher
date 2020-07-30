@@ -1,7 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox as msgbox
-from tkinter import filedialog
 import gettext
 import winreg
 import subprocess
@@ -12,15 +11,11 @@ from time import sleep
 from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
-from modules.config import get_config
-from modules.util import check_running
-from modules.util import steam_running
-from modules.util import StoppableThread
-from modules.update import start_checkupdate
-from modules.update import hide_update
-from modules.update import show_update
-from modules.ui import DragDropListbox
-from modules.ui import ButtonwithLabels
+from modules.config import get_config, config_write_dict, config_write_value
+from modules.util import check_running, steam_running, StoppableThread, open_screenshot, raise_exception, test
+from modules.update import start_checkupdate, hide_update, show_update
+from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, ask_steam_dir
+from modules.avatar import download_avatar
 
 yaml = YAML()
 
@@ -38,7 +33,10 @@ def legacy_restart(silent=True):
     New restarter with threading doesn't seem to work well with refreshing.'''
     try:
         if steam_running():
-            raw_path = fetch_reg('SteamExe')
+            if get_config('steam_path') == 'reg':
+                raw_path = fetch_reg('steampath')
+            else:
+                raw_path = get_config('steam_path').replace('\\', '/')
             raw_path_items = raw_path.split('/')
             path_items = []
             for item in raw_path_items:
@@ -46,7 +44,7 @@ def legacy_restart(silent=True):
                     path_items.append(f'"{item}"')
                 else:
                     path_items.append(item)
-            steam_exe = "\\".join(path_items)
+            steam_exe = "\\".join(path_items) + '\\steam.exe'
             print('Steam.exe path:', steam_exe)
             subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                            creationflags=0x08000000, check=True)
@@ -92,15 +90,41 @@ def legacy_restart(silent=True):
 
 class MainApp(tk.Tk):
     '''Main application'''
-    def __init__(self, version, url, bundle):
+    def __init__(self, version, url, bundle, std_out, std_err):
+        sys.stdout = std_out
+        sys.stderr = std_err
         self.accounts = acc_getlist()
         self.acc_dict = acc_getdict()
+        self.demo_mode = False
         tk.Tk.__init__(self)
         self['bg'] = 'white'
         self.title(_("Account Switcher"))
 
-        self.geometry("300x438+600+250")
+        window_width = 310
+        window_height = 472
+
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+
+        self.center_x = int((screen_width/2) - (window_width/2))
+        self.center_y = int((screen_height/2) - (window_height/2))
+
+        if get_config('last_pos') != '0/0':
+            pos_x, pos_y = get_config('last_pos').split('/')
+        else:
+            pos_x, pos_y = self.center_x, self.center_y
+
+        self.geometry(f'{str(window_width)}x{str(window_height)}+{str(pos_x)}+{str(pos_y)}')
         self.resizable(False, False)
+        self.protocol('WM_DELETE_WINDOW', self.exit_app)
+
+        try:
+            self.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
+
+        if not test():
+            ask_steam_dir()
 
         menubar = tk.Menu(self, bg='white')
         menu = tk.Menu(menubar, tearoff=0)
@@ -108,10 +132,12 @@ class MainApp(tk.Tk):
                          command=self.importwindow)
         menu.add_command(label=_("Add accounts"),
                          command=self.addwindow)
-        menu.add_command(label=_("Edit account order"),
+        menu.add_command(label=_("Edit account list"),
                          command=self.orderwindow)
         menu.add_command(label=_("Refresh autologin"),
                          command=self.refreshwindow)
+        menu.add_command(label=_("Update all avatars"),
+                         command=self.update_avatar)
         menu.add_separator()
         menu.add_command(label=_("Settings"),
                          command=self.settingswindow)
@@ -123,12 +149,26 @@ class MainApp(tk.Tk):
 
         if not bundle:
             debug_menu = tk.Menu(menubar, tearoff=0)
-            debug_menu.add_command(label='Update Debug',
+            debug_menu.add_command(label='Check for updates with debug mode',
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, bundle, debug=True)))
+            debug_menu.add_command(label='Check for updates without debug mode',
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True)))
+            debug_menu.add_command(label='Check for updates (Force update available)',
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, '1.0', url, True)))
+            debug_menu.add_command(label='Check for updates (Raise error)',
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True, exception=True)))
+            debug_menu.add_command(label="Download avatar images",
+                                   command=download_avatar)
+            debug_menu.add_command(label="Open initial setup",
+                                   command=self.welcomewindow)
+            debug_menu.add_command(label="Toggle demo mode",
+                                   command=self.toggle_demo)
+            debug_menu.add_command(label="Raise exception",
+                                   command=raise_exception)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         self.bottomframe = tk.Frame(self, bg='white')
-        self.bottomframe.pack(side='bottom')
+        self.bottomframe.pack(side='bottom', fill='x')
 
         def toggleAutologin():
             '''Toggle autologin registry value between 0 and 1'''
@@ -145,23 +185,6 @@ class MainApp(tk.Tk):
                 self.auto_var.set(_('Auto-login Disabled'))
                 self.autolabel['fg'] = 'red'
 
-        if LOCALE == 'fr_FR':
-            toggle_width = 13
-            quit_width = 7
-        else:
-            toggle_width = 15
-            quit_width = 5
-
-        button_toggle = ttk.Button(self.bottomframe,
-                                   width=toggle_width,
-                                   text=_('Toggle auto-login'),
-                                   command=toggleAutologin)
-
-        button_quit = ttk.Button(self.bottomframe,
-                                 width=quit_width,
-                                 text=_('Exit'),
-                                 command=self.quit)
-
         self.restartbutton_text = tk.StringVar()
 
         if get_config('autoexit') == 'true':
@@ -169,14 +192,22 @@ class MainApp(tk.Tk):
         else:
             self.restartbutton_text.set(_('Restart Steam'))
 
+        button_toggle = ttk.Button(self.bottomframe,
+                                   text=_('Toggle auto-login'),
+                                   command=toggleAutologin)
+
+        button_exit = ttk.Button(self.bottomframe,
+                                 width=7,
+                                 text=_('Exit'),
+                                 command=self.exit_app)
+
         button_restart = ttk.Button(self.bottomframe,
-                                    width=20,
                                     textvariable=self.restartbutton_text,
                                     command=self.exit_after_restart)
 
         button_toggle.pack(side='left', padx=3, pady=3)
-        button_quit.pack(side='left', pady=3)
-        button_restart.pack(side='right', padx=3, pady=3)
+        button_exit.pack(side='left', pady=3)
+        button_restart.pack(side='right', padx=3, pady=3, fill='x', expand=True)
 
         self.button_dict = {}
 
@@ -210,87 +241,48 @@ class MainApp(tk.Tk):
 
         self.draw_button()
 
-    def welcomewindow(self):
-        def close_function():
-            os.remove('config.yml')
-            sys.exit(0)
+    def get_window_pos(self):
+        geo = self.geometry().split('+')
+        return geo[1], geo[2]
 
-        if LOCALE == 'fr_FR':
-            width = '300'
+    def exit_app(self):
+        x, y = self.get_window_pos()
+        last_pos = f'{x}/{y}'
+        config_write_value('last_pos', last_pos)
+        sys.exit(0)
+
+    def toggle_demo(self):
+        if self.demo_mode:
+            self.demo_mode = False
         else:
-            width = '270'
+            self.demo_mode = True
 
-        welcomewindow = tk.Toplevel(self)
-        welcomewindow.title('Welcome')
-        welcomewindow.geometry("%sx230+650+320" % width)
-        welcomewindow.resizable(False, False)
-        welcomewindow.protocol("WM_DELETE_WINDOW", close_function)
-        welcomewindow.focus()
+        self.refresh()
 
-        upper_frame = tk.Frame(welcomewindow)
-        upper_frame.pack(side='top')
+    def welcomewindow(self):
+        window = WelcomeWindow(self)
 
-        tk.Label(upper_frame, text=_('Select mode you desire.')).pack(pady=(4, 3))
+        def event_function(event):
+            if str(event.widget) == '.!welcomewindow':
+                if self.accounts:
+                    download_avatar()
+                self.refresh()
 
-        radio_frame1 = tk.Frame(welcomewindow)
-        radio_frame1.pack(side='top', padx=20, pady=(4, 10), fill='x')
-        radio_var = tk.IntVar()
-
-        radio_normal = ttk.Radiobutton(radio_frame1,
-                                       text=_('Normal Mode'),
-                                       variable=radio_var,
-                                       value=0)
-        radio_normal.pack(side='top', anchor='w', pady=2)
-
-        tk.Label(radio_frame1, justify='left',
-                 text=_("In normal mode, you restart Steam\nby clicking 'Restart Steam' button.")).pack(side='left', pady=5)
-
-        radio_frame2 = tk.Frame(welcomewindow)
-        radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
-
-        radio_express = ttk.Radiobutton(radio_frame2,
-                                        text=_('Express Mode'),
-                                        variable=radio_var,
-                                        value=1)
-        radio_express.pack(side='top', anchor='w', pady=2)
-
-        tk.Label(radio_frame2, justify='left',
-                 text=_('In express mode, you change account\nand Steam will be automatically restarted.')).pack(side='left', pady=5)
-
-        def ok():
-            if radio_var.get() == 0:
-                mode = 'normal'
-            elif radio_var.get() == 1:
-                mode = 'express'
-
-            dump_dict = {'locale': get_config('locale'),
-                         'try_soft_shutdown': get_config('try_soft_shutdown'),
-                         'show_profilename': get_config('show_profilename'),
-                         'autoexit': get_config('autoexit'),
-                         'mode': mode}
-
-            with open('config.yml', 'w') as cfg:
-                yaml.dump(dump_dict, cfg)
-
-            welcomewindow.destroy()
-
-            if mode == 'normal':
-                msgbox.showinfo('', _('You have chosen Normal Mode. You can always change this in settings.'))
-            elif mode == 'express':
-                msgbox.showinfo('', _('You have chosen Express Mode. You can always change this in settings.'))
-            msgbox.showwarning(_('Important'), _('You need to setup autologin for EVERY account you add.') + '\n' +
-                               _("See GitHub README's How to use for more details. (Menu->About->GitHub Page)"))
-
-        ok_button = ttk.Button(welcomewindow, text=_('OK'), command=ok)
-        ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
-
-        welcomewindow.grab_set()
+        window.bind('<Destroy>', event_function)
 
     def configwindow(self, username, profilename):
-        configwindow = tk.Toplevel(self)
+        configwindow = tk.Toplevel(self, bg='white')
         configwindow.title('')
-        configwindow.geometry("240x150+650+320")
+
+        x, y = self.get_window_pos()
+        configwindow.geometry(f"250x165+{x}+{y}")
         configwindow.resizable(False, False)
+        configwindow.bind('<Escape>', lambda event: configwindow.destroy())
+
+        try:
+            configwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
 
         i = self.accounts.index(username)
         try:
@@ -298,7 +290,7 @@ class MainApp(tk.Tk):
         except KeyError:
             custom_name = ''
 
-        button_frame = tk.Frame(configwindow)
+        button_frame = tk.Frame(configwindow, bg='white')
         button_frame.pack(side='bottom', pady=3)
 
         ok_button = ttk.Button(button_frame, text=_('OK'))
@@ -309,12 +301,12 @@ class MainApp(tk.Tk):
                                    command=configwindow.destroy)
         cancel_button.pack(side='left', padx=1.5)
 
-        top_label = tk.Label(configwindow, text=_('Select name settings for %s.') % username)
+        top_label = tk.Label(configwindow, text=_('Select name settings\nfor %s') % username, bg='white')
         top_label.pack(side='top', pady=(4, 3))
 
-        radio_frame1 = tk.Frame(configwindow)
+        radio_frame1 = tk.Frame(configwindow, bg='white')
         radio_frame1.pack(side='top', padx=20, pady=(4, 2), fill='x')
-        radio_frame2 = tk.Frame(configwindow)
+        radio_frame2 = tk.Frame(configwindow, bg='white')
         radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
         radio_var = tk.IntVar()
 
@@ -323,22 +315,27 @@ class MainApp(tk.Tk):
         else:
             radio_var.set(0)
 
+        s = ttk.Style()
+        s.configure('config.TRadiobutton', background='white')
+
         radio_default = ttk.Radiobutton(radio_frame1,
                                         text=_('Use profile name if available'),
                                         variable=radio_var,
-                                        value=0)
+                                        value=0,
+                                        style='config.TRadiobutton')
         radio_custom = ttk.Radiobutton(radio_frame2,
                                        text=_('Use custom name'),
                                        variable=radio_var,
-                                       value=1)
+                                       value=1,
+                                       style='config.TRadiobutton')
 
         radio_default.pack(side='left', pady=2)
         radio_custom.pack(side='left', pady=2)
 
-        entry_frame = tk.Frame(configwindow)
+        entry_frame = tk.Frame(configwindow, bg='white')
         entry_frame.pack(side='bottom', pady=(1, 4))
 
-        name_entry = ttk.Entry(entry_frame, width=26)
+        name_entry = tk.Entry(entry_frame, width=27, disabledbackground='#C6C6C6', relief='solid')
         name_entry.insert(0, custom_name)
         name_entry.pack()
 
@@ -424,31 +421,75 @@ class MainApp(tk.Tk):
         def onFrameConfigure(canvas):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
-        if self.accounts:
+        if self.demo_mode:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
             canvas.config(bg='white')
             buttonframe = tk.Frame(canvas)
             scroll_bar = ttk.Scrollbar(self.button_frame,
                                        orient="vertical",
                                        command=canvas.yview)
+
+            for x in range(0, 8):
+                self.button_dict[x] = AccountButton(buttonframe,
+                                                    username='username' + str(x),
+                                                    profilename='profilename' + str(x),
+                                                    image='default')
+
+                if x == 0:
+                    self.button_dict[x].disable()
+
+                self.button_dict[x].pack(fill='x')
+                ttk.Separator(buttonframe, orient='horizontal').pack(fill='x')
+
+            scroll_bar.pack(side="right", fill="y")
+            canvas.pack(side="left", fill='both', expand=True)
+            h = 50 * 8
+            canvas.create_window((0, 0), height=h, width=310, window=buttonframe, anchor="nw")
+            canvas.configure(yscrollcommand=scroll_bar.set)
+            canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
+
+            def _on_mousewheel(event):
+                '''Scroll window on mousewheel input'''
+                widget = event.widget.winfo_containing(event.x_root, event.y_root)
+
+                if 'disabled' not in scroll_bar.state() and '!canvas' in str(widget):
+                    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+            buttonframe.bind("<Configure>", lambda event,
+                             canvas=canvas: onFrameConfigure(canvas))
+            self.bind("<MouseWheel>", _on_mousewheel)
+        elif self.accounts:
+            canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
+            canvas.config(bg='white')
+            buttonframe = tk.Frame(canvas)
+            scroll_bar = ttk.Scrollbar(self.button_frame,
+                                       orient="vertical",
+                                       command=canvas.yview)
+
             for username in self.accounts:
-                if loginusers():
-                    AccountName, PersonaName = loginusers()
+                steam64_list, account_name, persona_name = loginusers()
+
+                if username in account_name:
+                    i = account_name.index(username)
                 else:
-                    AccountName, PersonaName = [], []
+                    i = None
 
                 try:
                     acc_index = self.accounts.index(username)
                     profilename = self.acc_dict[acc_index]['customname']
-                except KeyError:  # No custon name set
-                    if username in AccountName:
-                        try:
-                            i = AccountName.index(username)
-                            profilename = PersonaName[i]
-                        except ValueError:
-                            profilename = _('Profile name not available')
+
+                except KeyError:  # No custom name set
+                    if i is not None:  # i could be 0 so we can't use if i:
+                        profilename = persona_name[i]
                     else:
                         profilename = _('Profile name not available')
+
+                finally:
+                    if i is not None:  # i could be 0 so we can't use if i:
+                        steam64 = steam64_list[i]
+                        image = steam64
+                    else:
+                        image = 'default'
 
                     profilename = profilename[:30]
 
@@ -457,6 +498,18 @@ class MainApp(tk.Tk):
                 menu_dict[username].add_command(label=_("Set as auto-login account"),
                                                 command=lambda name=username: self.button_func(name))
                 menu_dict[username].add_separator()
+
+                if i is not None:  # i could be 0 so we can't use if i:
+                    menu_dict[username].add_command(label=_('Open profile in browser'),
+                                                    command=lambda steamid64=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steamid64}'))
+                    menu_dict[username].add_command(label=_('Open screenshots folder'),
+                                                    command=lambda steamid64=steam64: open_screenshot(steamid64))
+                    menu_dict[username].add_command(label=_('View SteamID'),
+                                                    command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64))
+                    menu_dict[username].add_command(label=_('Update avatar'),
+                                                    command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
+                    menu_dict[username].add_separator()
+
                 menu_dict[username].add_command(label=_("Name settings"),
                                                 command=lambda name=username, pname=profilename: self.configwindow(name, pname))
                 menu_dict[username].add_command(label=_("Delete"),
@@ -465,11 +518,12 @@ class MainApp(tk.Tk):
                 def popup(username, event):
                     menu_dict[username].tk_popup(event.x_root + 86, event.y_root + 13, 0)
 
-                self.button_dict[username] = ButtonwithLabels(buttonframe,
-                                                              username=username,
-                                                              profilename=profilename,
-                                                              command=lambda name=username: self.button_func(name),
-                                                              rightcommand=lambda event, username=username: popup(username, event))
+                self.button_dict[username] = AccountButton(buttonframe,
+                                                           username=username,
+                                                           profilename=profilename,
+                                                           command=lambda name=username: self.button_func(name),
+                                                           rightcommand=lambda event, username=username: popup(username, event),
+                                                           image=image)
 
                 if username == fetch_reg('AutoLoginUser'):
                     self.button_dict[username].disable()
@@ -479,16 +533,16 @@ class MainApp(tk.Tk):
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
-            h = 52 * len(self.accounts)
-            canvas.create_window((0, 0), height=h, width=285, window=buttonframe, anchor="nw")
+            h = 50 * len(self.accounts)
+            canvas.create_window((0, 0), height=h, width=295, window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
 
             def _on_mousewheel(event):
                 '''Scroll window on mousewheel input'''
-                if 'disabled' in scroll_bar.state():
-                    return
-                else:
+                widget = event.widget.winfo_containing(event.x_root, event.y_root)
+
+                if 'disabled' not in scroll_bar.state() and '!canvas' in str(widget):
                     canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
             buttonframe.bind("<Configure>", lambda event,
@@ -512,9 +566,14 @@ class MainApp(tk.Tk):
         self.button_frame = tk.Frame(self)
         self.button_frame.pack(side='top', fill='both', expand=True)
 
-        self.user_var.set(fetch_reg('AutoLoginUser'))
+        if self.demo_mode:
+            self.user_var.set('username0')
+        else:
+            self.user_var.set(fetch_reg('AutoLoginUser'))
 
-        if fetch_reg('RememberPassword') == 1:
+        if self.demo_mode:
+            self.auto_var.set(_('Auto-login Enabled'))
+        elif fetch_reg('RememberPassword') == 1:
             self.auto_var.set(_('Auto-login Enabled'))
         else:
             self.auto_var.set(_('Auto-login Disabled'))
@@ -528,36 +587,60 @@ class MainApp(tk.Tk):
 
         print('Menu refreshed with %s account(s)' % len(self.accounts))
 
+    def update_avatar(self, steamid_list=loginusers()[0]):
+        self.no_user_frame.destroy()
+        self.button_frame.destroy()
+        hide_update()
+        self.bottomframe.pack_forget()
+
+        label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
+        label.pack(expand=True)
+        self.update()
+        download_avatar(steamid_list)
+
+        label.destroy()
+        self.refresh(no_frame=True)
+        self.bottomframe.pack(side='bottom', fill='x')
+        show_update()
+
     def about(self, version):
         '''Open about window'''
 
         if LOCALE == 'fr_FR':
-            width = '480'
+            h = '200'
         else:
-            width = '360'
+            h = '180'
 
-        aboutwindow = tk.Toplevel(self)
+        x, y = self.get_window_pos()
+
+        aboutwindow = tk.Toplevel(self, bg='white')
         aboutwindow.title(_('About'))
-        aboutwindow.geometry("%sx180+650+300" % width)
+        aboutwindow.geometry(f"360x{h}+{x}+{y}")
         aboutwindow.resizable(False, False)
         aboutwindow.focus()
+        aboutwindow.bind('<Escape>', lambda event: aboutwindow.destroy())
 
-        about_disclaimer = tk.Label(aboutwindow,
-                                    text=_('Warning: The developer of this application is not responsible for')
-                                    + '\n' + _('data loss or any other damage from the use of this app.'))
-        about_steam_trademark = tk.Label(aboutwindow, text=_('STEAM is a registered trademark of Valve Corporation.'))
+        try:
+            aboutwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
+
+        about_disclaimer = tk.Label(aboutwindow, bg='white',
+                                    text=_('Warning: The developer of this application is not responsible for\ndata loss or any other damage from the use of this app.'))
+        about_steam_trademark = tk.Label(aboutwindow, bg='white',
+                                         text=_('STEAM is a registered trademark of Valve Corporation.'))
         copyright_label = tk.Label(aboutwindow, text='Copyright (c) sw2719 | All Rights Reserved\n' +
-                                   'Licensed under the MIT License.')
-        ver = tk.Label(aboutwindow,
+                                   'Licensed under the MIT License.', bg='white')
+        ver = tk.Label(aboutwindow, bg='white',
                        text='Steam Account Switcher | Version ' + version)
 
-        button_frame = tk.Frame(aboutwindow)
+        button_frame = tk.Frame(aboutwindow, bg='white')
         button_frame.pack(side='bottom', pady=5)
 
-        button_exit = ttk.Button(button_frame,
-                                 text=_('Close'),
-                                 width=8,
-                                 command=aboutwindow.destroy)
+        button_close = ttk.Button(button_frame,
+                                  text=_('Close'),
+                                  width=8,
+                                  command=aboutwindow.destroy)
         button_github = ttk.Button(button_frame,
                                    text=_('GitHub page'),
                                    command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher'))
@@ -566,7 +649,7 @@ class MainApp(tk.Tk):
         copyright_label.pack(pady=5)
         ver.pack()
 
-        button_exit.pack(side='left', padx=2)
+        button_close.pack(side='left', padx=2)
         button_github.pack(side='right', padx=2)
 
     def refreshwindow(self):
@@ -576,18 +659,25 @@ class MainApp(tk.Tk):
             msgbox.showinfo(_('No Accounts'),
                             _("There's no account added."))
             return
-        refreshwindow = tk.Toplevel(self)
+        refreshwindow = tk.Toplevel(self, bg='white')
         refreshwindow.title(_("Refresh"))
-        refreshwindow.geometry("230x320+650+300")
+        x, y = self.get_window_pos()
+        refreshwindow.geometry(f"230x320+{x}+{y}")
         refreshwindow.resizable(False, False)
-        bottomframe_rm = tk.Frame(refreshwindow)
-        bottomframe_rm.pack(side='bottom')
+        refreshwindow.bind('<Escape>', lambda event: refreshwindow.destroy())
         refreshwindow.grab_set()
         refreshwindow.focus()
-        removelabel = tk.Label(refreshwindow, text=_('Select accounts to refresh.'))
-        removelabel.pack(side='top',
-                         padx=5,
-                         pady=5)
+
+        try:
+            refreshwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
+
+        bottomframe_rm = tk.Frame(refreshwindow, bg='white')
+        bottomframe_rm.pack(side='bottom')
+
+        removelabel = tk.Label(refreshwindow, text=_('Select accounts to refresh.'), bg='white')
+        removelabel.pack(side='top', padx=5, pady=5)
 
         def close():
             refreshwindow.destroy()
@@ -595,8 +685,8 @@ class MainApp(tk.Tk):
         def onFrameConfigure(canvas):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
-        canvas = tk.Canvas(refreshwindow, borderwidth=0, highlightthickness=0)
-        check_frame = tk.Frame(canvas)
+        canvas = tk.Canvas(refreshwindow, borderwidth=0, highlightthickness=0, bg='white')
+        check_frame = tk.Frame(canvas, bg='white')
         scroll_bar = ttk.Scrollbar(refreshwindow,
                                    orient="vertical",
                                    command=canvas.yview)
@@ -618,11 +708,15 @@ class MainApp(tk.Tk):
 
         check_dict = {}
 
+        s = ttk.Style()
+        s.configure('check.TCheckbutton', background='white')
+
         for v in accounts:
             tk_var = tk.IntVar()
             checkbutton = ttk.Checkbutton(check_frame,
                                           text=v,
-                                          variable=tk_var)
+                                          variable=tk_var,
+                                          style='check.TCheckbutton')
             checkbutton.bind("<MouseWheel>", _on_mousewheel)
             checkbutton.pack(side='top', padx=2, anchor='w')
             check_dict[v] = tk_var
@@ -643,9 +737,9 @@ class MainApp(tk.Tk):
             msgbox.showinfo('', _('Accounts with expired autologin token will show login prompt.') + '\n\n' +
                                 _('Close the prompt or login to continue the process.'))  # NOQA
 
-            popup = tk.Toplevel()
+            popup = tk.Toplevel(self, bg='white')
             popup.title('')
-            popup.geometry("180x100+650+300")
+            popup.geometry(f"180x100+{str(self.center_x)}+{str(self.center_y)}")
             popup.resizable(False, False)
 
             popup_var = tk.StringVar()
@@ -654,8 +748,8 @@ class MainApp(tk.Tk):
             popup_uservar = tk.StringVar()
             popup_uservar.set('---------')
 
-            popup_label = tk.Label(popup, textvariable=popup_var)
-            popup_user = tk.Label(popup, textvariable=popup_uservar)
+            popup_label = tk.Label(popup, textvariable=popup_var, bg='white')
+            popup_user = tk.Label(popup, textvariable=popup_uservar, bg='white')
 
             popup_label.pack(pady=17)
             popup_user.pack()
@@ -718,21 +812,29 @@ class MainApp(tk.Tk):
         '''Open add accounts window'''
         accounts = acc_getlist()
         acc_dict = acc_getdict()
+        steamid_list, account_name, persona_name = loginusers()
+        x, y = self.get_window_pos()
 
-        addwindow = tk.Toplevel(self)
+        addwindow = tk.Toplevel(self, bg='white')
         addwindow.title(_("Add"))
-        addwindow.geometry("300x150+650+300")
+        addwindow.geometry(f"300x150+{x}+{y}")
         addwindow.resizable(False, False)
+        addwindow.bind('<Escape>', lambda event: addwindow.destroy())
 
-        topframe_add = tk.Frame(addwindow)
+        try:
+            addwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
+
+        topframe_add = tk.Frame(addwindow, bg='white')
         topframe_add.pack(side='top', anchor='center')
 
-        bottomframe_add = tk.Frame(addwindow)
-        bottomframe_add.pack(side='bottom', anchor='e')
+        bottomframe_add = tk.Frame(addwindow, bg='white')
+        bottomframe_add.pack(side='bottom', anchor='e', fill='x')
 
-        addlabel_row1 = tk.Label(topframe_add,
+        addlabel_row1 = tk.Label(topframe_add, bg='white',
                                  text=_('Enter account(s) to add.'))
-        addlabel_row2 = tk.Label(topframe_add,
+        addlabel_row2 = tk.Label(topframe_add, bg='white',
                                  text=_("In case of adding multiple accounts,") + '\n' +
                                  _("seperate each account with '/' (slash)."))
 
@@ -742,19 +844,27 @@ class MainApp(tk.Tk):
         addwindow.focus()
         account_entry.focus()
 
+        def disable_close():
+            pass
+
         def adduser(userinput):
-            nonlocal acc_dict
             '''Write accounts from user's input to accounts.yml
             :param userinput: Account names to add
             '''
+            nonlocal acc_dict
+            dl_list = []
+
             if userinput.strip():
-                cfg = open('accounts.yml', 'w')
                 name_buffer = userinput.split("/")
                 accounts_to_add = [name.strip() for name in name_buffer if name.strip()]
 
                 for name_to_write in accounts_to_add:
                     if name_to_write not in accounts:
                         acc_dict[len(acc_dict)] = {'accountname': name_to_write}
+
+                        if name_to_write in account_name:
+                            dl_list.append(steamid_list[account_name.index(name_to_write)])
+
                     else:
                         print(f'Account {name_to_write} already exists!')
                         msgbox.showinfo(_('Duplicate Alert'),
@@ -764,7 +874,17 @@ class MainApp(tk.Tk):
                     yaml = YAML()
                     yaml.dump(acc_dict, acc)
 
-                cfg.close()
+                if dl_list and get_config('show_avatar') == 'true':
+                    button_addcancel.destroy()
+                    bottomframe_add.destroy()
+                    topframe_add.destroy()
+                    addwindow.protocol("WM_DELETE_WINDOW", disable_close)
+                    addwindow.focus()
+
+                    tk.Label(addwindow, text=_('Please wait while downloading avatars...'), bg='white').pack(fill='both', expand=True)
+                    self.update()
+                    download_avatar(dl_list)
+
                 self.refresh()
             addwindow.destroy()
 
@@ -775,79 +895,66 @@ class MainApp(tk.Tk):
             adduser(account_entry.get())
 
         addwindow.bind('<Return>', enterkey)
-        button_add = ttk.Button(bottomframe_add, width=9, text=_('Add'),
+        button_add = ttk.Button(bottomframe_add, width=10, text=_('Add'),
                                 command=lambda: adduser(account_entry.get()))
-        button_addcancel = ttk.Button(addwindow, width=9,
+        button_addcancel = ttk.Button(addwindow, width=10,
                                       text=_('Cancel'), command=close)
         addlabel_row1.pack(pady=10)
         addlabel_row2.pack()
 
-        account_entry.pack(side='left', padx=3, pady=3)
-        button_add.pack(side='left', anchor='e', padx=3, pady=3)
+        account_entry.pack(side='left', padx=(3, 0), pady=3, fill='x', expand=True)
+        button_add.pack(side='right', anchor='e', padx=3, pady=3)
         button_addcancel.pack(side='bottom', anchor='e', padx=3)
 
     def importwindow(self):
         '''Open import accounts window'''
         accounts = acc_getlist()
         acc_dict = acc_getdict()
-        if loginusers():
-            AccountName, PersonaName = loginusers()
-        else:
-            try_manually = msgbox.askyesno(_('Alert'), _('Could not load loginusers.vdf.') + '\n' +
-                                           _('This may be because Steam directory defined') + '\n' +
-                                           _('in registry is invalid.') + '\n\n' +
-                                           _('Do you want to select Steam directory manually?'))
-            if try_manually:
-                while True:
-                    input_dir = filedialog.askdirectory()
-                    if loginusers(steam_path=input_dir):
-                        AccountName, PersonaName = loginusers(steam_path=input_dir)
-                        with open('steam_path.txt', 'w') as path:
-                            path.write(input_dir)
-                        break
-                    else:
-                        try_again = msgbox.askyesno(_('Warning'),
-                                                    _('Steam directory is invalid.') + '\n' +
-                                                    _('Try again?'))
-                        if try_again:
-                            continue
-                        else:
-                            return
-            else:
-                return
+        steamid_list, account_name, persona_name = loginusers()
 
-        if set(AccountName).issubset(set(acc_getlist())):
+        if set(account_name).issubset(set(acc_getlist())):
             msgbox.showinfo(_('Info'), _("There's no account left to add."))
             return
 
-        importwindow = tk.Toplevel(self)
+        s = ttk.Style()
+        s.configure('Import.TCheckbutton', background='white')
+
+        x, y = self.get_window_pos()
+
+        importwindow = tk.Toplevel(self, bg='white')
         importwindow.title(_("Import"))
-        importwindow.geometry("280x300+650+300")
+        importwindow.geometry(f"280x300+{x}+{y}")
         importwindow.resizable(False, False)
         importwindow.grab_set()
         importwindow.focus()
+        importwindow.bind('<Escape>', lambda event: importwindow.destroy())
 
-        bottomframe_imp = tk.Frame(importwindow)
+        try:
+            importwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
+
+        bottomframe_imp = tk.Frame(importwindow, bg='white')
         bottomframe_imp.pack(side='bottom')
 
-        importlabel = tk.Label(importwindow, text=_('Select accounts to import.') + '\n' +
-                               _("Added accounts don't show up."))
-        importlabel.pack(side='top',
-                         padx=5,
-                         pady=5)
+        import_label = tk.Label(importwindow, text=_('Select accounts to import.') + '\n' +
+                                _("Added accounts don't show up."),
+                                bg='white')
+        import_label.pack(side='top', padx=5, pady=5)
 
         def close():
             importwindow.destroy()
+
+        def disable_close():
+            pass
 
         def onFrameConfigure(canvas):
             '''Reset the scroll region to encompass the inner frame'''
             canvas.configure(scrollregion=canvas.bbox("all"))
 
-        canvas = tk.Canvas(importwindow, borderwidth=0, highlightthickness=0)
-        check_frame = tk.Frame(canvas)
-        scroll_bar = ttk.Scrollbar(importwindow,
-                                   orient="vertical",
-                                   command=canvas.yview)
+        canvas = tk.Canvas(importwindow, borderwidth=0, highlightthickness=0, background='white')
+        check_frame = tk.Frame(canvas, bg='white')
+        scroll_bar = ttk.Scrollbar(importwindow, orient="vertical", command=canvas.yview,)
 
         canvas.configure(yscrollcommand=scroll_bar.set)
 
@@ -867,24 +974,43 @@ class MainApp(tk.Tk):
 
         checkbox_dict = {}
 
-        for index, username in enumerate(AccountName):
+        for index, username in enumerate(account_name):
             if username not in accounts:
                 int_var = tk.IntVar()
                 checkbutton = ttk.Checkbutton(check_frame,
-                                              text=username + f' ({PersonaName[index]})',
-                                              variable=int_var)
+                                              text=username + f' ({persona_name[index]})',
+                                              variable=int_var,
+                                              style='Import.TCheckbutton')
                 checkbutton.bind("<MouseWheel>", _on_mousewheel)
                 checkbutton.pack(side='top', padx=2, anchor='w')
                 checkbox_dict[username] = int_var
 
         def import_user():
             nonlocal acc_dict
+            dl_list = []
+
             for key, value in checkbox_dict.items():
                 if value.get() == 1:
                     acc_dict[len(acc_dict)] = {'accountname': key}
+                    dl_list.append(steamid_list[account_name.index(key)])
+
             with open('accounts.yml', 'w') as acc:
                 yaml = YAML()
                 yaml.dump(acc_dict, acc)
+
+            if get_config('show_avatar') == 'true':
+                canvas.destroy()
+                import_label.destroy()
+                scroll_bar.destroy()
+                import_cancel['state'] = 'disabled'
+                import_ok['state'] = 'disabled'
+                importwindow.protocol("WM_DELETE_WINDOW", disable_close)
+                importwindow.focus()
+
+                tk.Label(importwindow, text=_('Please wait while downloading avatars...'), bg='white').pack(fill='both', expand=True)
+                self.update()
+                download_avatar(dl_list)
+
             self.refresh()
             close()
 
@@ -909,31 +1035,38 @@ class MainApp(tk.Tk):
                             _("There's no account added."))
             return
 
-        orderwindow = tk.Toplevel(self)
+        x, y = self.get_window_pos()
+
+        orderwindow = tk.Toplevel(self, bg='white')
         orderwindow.title("")
-        orderwindow.geometry("210x270+650+300")
+        orderwindow.geometry(f"220x270+{x}+{y}")
         orderwindow.resizable(False, False)
+        orderwindow.bind('<Escape>', lambda event: orderwindow.destroy())
 
-        bottomframe_windowctrl = tk.Frame(orderwindow)
-        bottomframe_windowctrl.pack(side='bottom', padx=3, pady=3)
+        try:
+            orderwindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
 
-        bottomframe_orderctrl = tk.Frame(orderwindow)
-        bottomframe_orderctrl.pack(side='bottom', padx=3, pady=3)
+        bottomframe = tk.Frame(orderwindow, bg='white')
+        bottomframe.pack(side='bottom', padx=3, pady=3)
 
-        labelframe = tk.Frame(orderwindow)
+        labelframe = tk.Frame(orderwindow, bg='white')
         labelframe.pack(side='bottom', padx=3)
 
         orderwindow.grab_set()
         orderwindow.focus()
 
-        lbframe = tk.Frame(orderwindow)
+        lbframe = tk.Frame(orderwindow, bg='white')
 
         scrollbar = ttk.Scrollbar(lbframe)
         scrollbar.pack(side='right', fill='y')
 
-        lb = DragDropListbox(lbframe, height=12, width=26,
+        lb = DragDropListbox(lbframe, width=35, height=20,
                              highlightthickness=0,
-                             yscrollcommand=scrollbar.set)
+                             yscrollcommand=scrollbar.set,
+                             bd=1,
+                             relief='solid')
 
         scrollbar["command"] = lb.yview
 
@@ -948,7 +1081,7 @@ class MainApp(tk.Tk):
             lb.insert(i, v)
 
         lb.select_set(0)
-        lbframe.pack(side='top', pady=5)
+        lbframe.pack(side='top', padx=3, pady=(3, 5), expand=True)
 
         def down():
             i = lb.curselection()[0]
@@ -996,53 +1129,45 @@ class MainApp(tk.Tk):
             apply()
             close()
 
-        button_up = ttk.Button(bottomframe_orderctrl,
+        button_ok = ttk.Button(bottomframe,
+                               width=9, text=_('OK'), command=ok)
+        button_ok.pack(side='left', padx=(0, 1))
+        button_cancel = ttk.Button(bottomframe,
+                                   width=9, text=_('Cancel'), command=close)
+        button_cancel.pack(side='left', padx=(1, 1.5))
+
+        button_up = ttk.Button(bottomframe, width=3,
                                text='↑', command=up)
-        button_up.pack(side='left', padx=2)
+        button_up.pack(side='right', padx=(1.5, 1))
 
-        button_down = ttk.Button(bottomframe_orderctrl,
+        button_down = ttk.Button(bottomframe, width=3,
                                  text='↓', command=down)
-        button_down.pack(side='right', padx=2)
-
-        button_ok = ttk.Button(bottomframe_windowctrl,
-                               width=8, text=_('OK'), command=ok)
-        button_ok.pack(side='left')
-        button_cancel = ttk.Button(bottomframe_windowctrl,
-                                   width=8, text=_('Cancel'), command=close)
-        button_cancel.pack(side='left', padx=3)
-
-        button_apply = ttk.Button(bottomframe_windowctrl,
-                                  width=8, text=_('Apply'))
-
-        def applybutton():
-            nonlocal button_apply
-
-            def enable():
-                button_apply['state'] = 'normal'
-
-            apply()
-            button_apply['state'] = 'disabled'
-            orderwindow.after(500, enable)
-
-        button_apply['command'] = applybutton
-
-        button_apply.pack(side='left')
+        button_down.pack(side='right', padx=(1, 0))
 
     def settingswindow(self):
         '''Open settings window'''
         config_dict = get_config('all')
-        last_locale = config_dict['locale']
+        last_config = config_dict
 
         if LOCALE == 'fr_FR':
             width = '330'
         else:
             width = '260'
 
-        settingswindow = tk.Toplevel(self)
+        x, y = self.get_window_pos()
+
+        settingswindow = tk.Toplevel(self, bg='white')
         settingswindow.title(_("Settings"))
-        settingswindow.geometry("%sx260+650+300" % width)  # 260 is original
+        settingswindow.geometry(f"{width}x300+{x}+{y}")  # 260 is original
         settingswindow.resizable(False, False)
-        bottomframe_set = tk.Frame(settingswindow)
+        settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
+
+        try:
+            settingswindow.iconbitmap('asset/icon.ico')
+        except tk.TclError:
+            pass
+
+        bottomframe_set = tk.Frame(settingswindow, bg='white')
         bottomframe_set.pack(side='bottom')
         settingswindow.grab_set()
         settingswindow.focus()
@@ -1054,9 +1179,9 @@ class MainApp(tk.Tk):
         else:
             padx_int = 24
 
-        localeframe = tk.Frame(settingswindow)
+        localeframe = tk.Frame(settingswindow, bg='white')
         localeframe.pack(side='top', pady=14, fill='x')
-        locale_label = tk.Label(localeframe, text=_('Language'))
+        locale_label = tk.Label(localeframe, text=_('Language'), bg='white')
         locale_label.pack(side='left', padx=(padx_int, 13))
         locale_cb = ttk.Combobox(localeframe,
                                  state="readonly",
@@ -1072,38 +1197,44 @@ class MainApp(tk.Tk):
 
         locale_cb.pack(side='left')
 
-        restart_frame = tk.Frame(settingswindow)
+        restart_frame = tk.Frame(settingswindow, bg='white')
         restart_frame.pack(side='top')
 
-        restart_label = tk.Label(restart_frame,
+        restart_label = tk.Label(restart_frame, bg='white',
                                  text=_('Restart app to apply language settings.'))
         restart_label.pack(pady=(1, 0))
 
-        radio_frame1 = tk.Frame(settingswindow)
+        radio_frame1 = tk.Frame(settingswindow, bg='white')
         radio_frame1.pack(side='top', padx=12, pady=(13, 3), fill='x')
-        radio_frame2 = tk.Frame(settingswindow)
+        radio_frame2 = tk.Frame(settingswindow, bg='white')
         radio_frame2.pack(side='top', padx=12, pady=(3, 12), fill='x')
         radio_var = tk.IntVar()
 
         if get_config('mode') == 'express':
             radio_var.set(1)
 
+        s = ttk.Style()
+        s.configure('Settings.TRadiobutton', background='white')
+        s.configure('Settings.TCheckbutton', background='white')
+
         radio_normal = ttk.Radiobutton(radio_frame1,
                                        text=_('Normal Mode (Manually restart Steam)'),
                                        variable=radio_var,
-                                       value=0)
+                                       value=0,
+                                       style='Settings.TRadiobutton')
         radio_normal.pack(side='left', pady=2)
 
         radio_express = ttk.Radiobutton(radio_frame2,
                                         text=_('Express Mode (Auto-restart Steam)'),
                                         variable=radio_var,
-                                        value=1)
+                                        value=1,
+                                        style='Settings.TRadiobutton')
         radio_express.pack(side='left', pady=2)
 
-        softshutdwn_frame = tk.Frame(settingswindow)
-        softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=1)
+        softshutdwn_frame = tk.Frame(settingswindow, bg='white')
+        softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=(1, 0))
 
-        soft_chkb = ttk.Checkbutton(softshutdwn_frame,
+        soft_chkb = ttk.Checkbutton(softshutdwn_frame, style='Settings.TCheckbutton',
                                     text=_('Try to soft shutdown Steam client'))
 
         soft_chkb.state(['!alternate'])
@@ -1115,10 +1246,10 @@ class MainApp(tk.Tk):
 
         soft_chkb.pack(side='left')
 
-        autoexit_frame = tk.Frame(settingswindow)
+        autoexit_frame = tk.Frame(settingswindow, bg='white')
         autoexit_frame.pack(fill='x', side='top', padx=12, pady=17)
 
-        autoexit_chkb = ttk.Checkbutton(autoexit_frame,
+        autoexit_chkb = ttk.Checkbutton(autoexit_frame, style='Settings.TCheckbutton',
                                         text=_('Exit app after Steam is restarted'))
 
         autoexit_chkb.state(['!alternate'])
@@ -1129,40 +1260,65 @@ class MainApp(tk.Tk):
 
         autoexit_chkb.pack(side='left')
 
+        avatar_frame = tk.Frame(settingswindow, bg='white')
+        avatar_frame.pack(fill='x', side='top', padx=12)
+
+        avatar_chkb = ttk.Checkbutton(avatar_frame, style='Settings.TCheckbutton',
+                                      text=_('Show avatar images'))
+
+        avatar_chkb.state(['!alternate'])
+
+        if config_dict['show_avatar'] == 'true':
+            avatar_chkb.state(['selected'])
+        else:
+            avatar_chkb.state(['!selected'])
+
+        avatar_chkb.pack(side='left')
+
         def close():
             settingswindow.destroy()
 
         def apply():
             nonlocal config_dict
             '''Write new config values to config.txt'''
-            with open('config.yml', 'w') as cfg:
-                locale = ('en_US', 'ko_KR', 'fr_FR')
+            locale = ('en_US', 'ko_KR', 'fr_FR')
 
-                if radio_var.get() == 1:
-                    mode = 'express'
-                elif radio_var.get() == 0:
-                    mode = 'normal'
+            if radio_var.get() == 1:
+                mode = 'express'
+            elif radio_var.get() == 0:
+                mode = 'normal'
 
-                if 'selected' in soft_chkb.state():
-                    soft_shutdown = 'true'
-                else:
-                    soft_shutdown = 'false'
+            if 'selected' in soft_chkb.state():
+                soft_shutdown = 'true'
+            else:
+                soft_shutdown = 'false'
 
-                if 'selected' in autoexit_chkb.state():
-                    autoexit = 'true'
-                else:
-                    autoexit = 'false'
+            if 'selected' in autoexit_chkb.state():
+                autoexit = 'true'
+            else:
+                autoexit = 'false'
 
-                config_dict = {'locale': locale[locale_cb.current()],
-                               'try_soft_shutdown': soft_shutdown,
-                               'autoexit': autoexit,
-                               'mode': mode}
+            if 'selected' in avatar_chkb.state():
+                avatar = 'true'
+            else:
+                avatar = 'false'
 
-                yaml = YAML()
-                yaml.dump(config_dict, cfg)
+            config_dict = {'locale': locale[locale_cb.current()],
+                           'autoexit': autoexit,
+                           'mode': mode,
+                           'try_soft_shutdown': soft_shutdown,
+                           'show_avatar': avatar,
+                           'last_pos': get_config('last_pos'),
+                           'steam_path': get_config('steam_path')}
+
+            config_write_dict(config_dict)
+
+            if last_config['show_avatar'] == 'false' and 'selected' in avatar_chkb.state():
+                if msgbox.askyesno('', _('Do you want to download avatar images now?'), parent=settingswindow):
+                    download_avatar(loginusers()[0])
 
             self.refresh()
-            if last_locale != locale[locale_cb.current()]:
+            if last_config['locale'] != locale[locale_cb.current()]:
                 self.after(100, lambda: msgbox.showinfo(_('Locale has been changed'),
                                                         _('Restart app to apply new locale settings.')))
 
@@ -1200,56 +1356,64 @@ class MainApp(tk.Tk):
                            creationflags=0x08000000, check=True)
             print('TASKKILL command sent.')
 
-        if not refresh_override:
-            self.no_user_frame.destroy()
-            self.button_frame.destroy()
-            hide_update()
-            self.bottomframe.pack_forget()
-            button_frame = tk.Frame(self, bg='white')
-            button_frame.pack(side='bottom', fill='x')
-            cancel_button = ttk.Button(button_frame,
-                                       text=_('Cancel'))
-            cancel_button['state'] = 'disabled'
-            force_button = ttk.Button(button_frame,
-                                      text=_('Force quit Steam'),
-                                      command=forcequit)
-            force_button['state'] = 'disabled'
+        self.no_user_frame.destroy()
+        self.button_frame.destroy()
+        hide_update()
+        self.bottomframe.pack_forget()
+        button_frame = tk.Frame(self, bg='white')
+        button_frame.pack(side='bottom', fill='x')
+        cancel_button = ttk.Button(button_frame,
+                                   text=_('Cancel'))
+        cancel_button['state'] = 'disabled'
+        force_button = ttk.Button(button_frame,
+                                  text=_('Force quit Steam'),
+                                  command=forcequit)
+        force_button['state'] = 'disabled'
 
-            def enable_button():
-                cancel_button['state'] = 'normal'
-                force_button['state'] = 'normal'
+        def enable_button():
+            cancel_button['state'] = 'normal'
+            force_button['state'] = 'normal'
 
-            cancel_button.pack(side='bottom', padx=3, pady=3, fill='x')
-            force_button.pack(side='bottom', padx=3, fill='x')
+        cancel_button.pack(side='bottom', padx=3, pady=3, fill='x')
+        force_button.pack(side='bottom', padx=3, fill='x')
 
-            label_var = tk.StringVar()
-            label_var.set(_('Waiting for Steam to exit...'))
-            label = tk.Label(self, textvariable=label_var, bg='white')
-            label.pack(pady=(150, 0))
+        label_var = tk.StringVar()
+        label_var.set(_('Initializing...'))
+        label = tk.Label(self, textvariable=label_var, bg='white')
+        label.pack(pady=(150, 0))
 
-            def cleanup():
-                label.destroy()
-                button_frame.destroy()
-                self.refresh(no_frame=True)
-                self.bottomframe.pack(side='bottom')
-                show_update()
-            self.update()
+        def cleanup():
+            label.destroy()
+            button_frame.destroy()
+            self.refresh(no_frame=True)
+            self.bottomframe.pack(side='bottom', fill='x')
+            show_update()
 
+        self.update()
         queue = q.Queue()
 
-        if check_running('Steam.exe'):
+        if steam_running():
+            label_var.set(_('Waiting for Steam to exit...'))
+
             if get_config('try_soft_shutdown') == 'false':
                 forcequit()
             elif get_config('try_soft_shutdown') == 'true':
                 print('Soft shutdown mode')
-                r_path = fetch_reg('SteamExe')
-                r_path_items = r_path.split('/')
+
+                if get_config('steam_path') == 'reg':
+                    r_path = fetch_reg('SteamExe')
+                    r_path_items = r_path.split('/')
+                else:
+                    r_path = get_config('steam_path') + '\\Steam.exe'
+                    r_path_items = r_path.split('\\')
+
                 path_items = []
                 for item in r_path_items:
                     if ' ' in item:
                         path_items.append(f'"{item}"')
                     else:
                         path_items.append(item)
+
                 steam_exe = "\\".join(path_items)
                 print('Steam.exe path:', steam_exe)
                 subprocess.run(f"start {steam_exe} -shutdown", shell=True,
@@ -1262,7 +1426,7 @@ class MainApp(tk.Tk):
                 while True:
                     if t.stopped():
                         break
-                    if check_running('steam.exe'):
+                    if steam_running():
                         sleep(1)
                         continue
                     else:
@@ -1276,8 +1440,7 @@ class MainApp(tk.Tk):
 
             t = StoppableThread(target=steam_checker)
             t.start()
-            if not refresh_override:
-                cancel_button['command'] = cancel
+            cancel_button['command'] = cancel
         else:
             queue.put(1)
 
@@ -1292,22 +1455,17 @@ class MainApp(tk.Tk):
                 label_var.set(_('Launching Steam...'))
                 self.update()
 
-                if refresh_override and silent:
-                    print('Launching Steam silently...')
-                    subprocess.run("start steam://open",
-                                   shell=True, check=True)
-                else:
-                    print('Launching Steam...')
-                    subprocess.run("start steam://open/main",
-                                   shell=True, check=True)
+                print('Launching Steam...')
+                subprocess.run("start steam://open/main",
+                               shell=True, check=True)
 
-                if get_config('autoexit') == 'true' and not refresh_override:
-                    sys.exit(0)
+                if get_config('autoexit') == 'true':
+                    self.exit_app()
                 elif not refresh_override:
                     cleanup()
             except q.Empty:
                 counter += 1
-                if counter == 5 and not refresh_override:
+                if counter == 10:
                     enable_button()
                 self.after(1000, launch_steam)
 
