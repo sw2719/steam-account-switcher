@@ -505,7 +505,7 @@ class MainApp(tk.Tk):
                     menu_dict[username].add_command(label=_('Open screenshots folder'),
                                                     command=lambda steamid64=steam64: open_screenshot(steamid64))
                     menu_dict[username].add_command(label=_('View SteamID'),
-                                                    command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64))
+                                                    command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.get_window_pos()[0], self.get_window_pos()[1]))
                     menu_dict[username].add_command(label=_('Update avatar'),
                                                     command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
                     menu_dict[username].add_separator()

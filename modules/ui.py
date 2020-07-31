@@ -406,11 +406,11 @@ def ask_steam_dir():
                 continue
 
 
-def steamid_window(master, username, steamid64):
+def steamid_window(master, username, steamid64, x, y):
     steamid_window = tk.Toplevel(master, bg='white')
     steamid_window.geometry()
     steamid_window.title('SteamID')
-    steamid_window.geometry("270x180+650+320")
+    steamid_window.geometry(f"270x180+{x}+{y}")
     steamid_window.bind('<Escape>', lambda event: steamid_window.destroy())
     steamid_window.resizable(False, False)
     steamid_window.focus()
