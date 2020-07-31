@@ -260,7 +260,7 @@ class MainApp(tk.Tk):
         self.refresh()
 
     def welcomewindow(self):
-        window = WelcomeWindow(self)
+        window = WelcomeWindow(self, str(self.center_x - 5), (self.center_y + 100))
 
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':

@@ -214,11 +214,11 @@ class ReadonlyEntryWithLabel:
 
 
 class WelcomeWindow(tk.Toplevel):
-    def __init__(self, master):
+    def __init__(self, master, x, y):
         self.master = master
         tk.Toplevel.__init__(self, self.master, bg='white')
         self.title(_('Welcome'))
-        self.geometry("320x230+650+320")
+        self.geometry(f"320x230+{x}+{y}")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.on_window_close)
         self.focus()
