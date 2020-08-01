@@ -57,7 +57,7 @@ STEAM은 Valve Corporation 의 등록상표입니다.
 
 # 소스 코드 정보
 * master를 제외한 모든 branch 는 개발 branch이며 작동을 보장하지 않습니다.
-* Python 3.8 64-bit 으로 작성되었습니다.
+* Python 3.8 64-bit 으로 작성되었습니다. 최소 Python 3.7이 필요합니다.
 * updater.py 는 cx_freeze 로 번들된 배포용 프로그램에서 작동하게 설계되었으므로 Python 인터프리터로 실행하지 마십시오.
 * requirements.txt로 의존성을 설치하세요.
 * 소스코드 원문은 영어이며 gettext 로 한글로 번역됩니다.
