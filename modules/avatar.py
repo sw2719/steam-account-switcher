@@ -2,11 +2,15 @@ import aiohttp
 import json
 import shutil
 import os
+import sys
 import asyncio
 from io import BytesIO
 from modules.account import loginusers
 
 API_KEY = '88CA6F49C590BF8B498AF4FCFB9964F1'
+
+if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 def download_avatar(steamid_list=loginusers()[0]):
