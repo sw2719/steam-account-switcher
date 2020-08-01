@@ -1,3 +1,5 @@
+<img align="right" src="https://user-images.githubusercontent.com/22590718/89107236-861eaa80-d46a-11ea-8d1e-0a126823e01a.PNG">
+
 # Steam Account Switcher
 Lightweight, fast account switcher for Steam.
 
@@ -8,8 +10,6 @@ Note that I manage this project to get experience with Python. This is my first 
 [이 문서는 한국어로도 읽을 수 있습니다.](https://github.com/sw2719/steam-account-switcher/blob/master/README_ko.md)
 
 [Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
-
-[See this program in action (Doesn't represent the latest version.)](https://youtu.be/WFtv10RZ_UA)
 
 STEAM is a trademark of Valve Corporation.
 
@@ -61,7 +61,7 @@ This app has no affiliation with Steam and Valve.
 
 # Source code information
 * All other branches except master are considered as acitve-development branch and might have issues, bugs, WIP features, or might not just work at all.
-* Written in Python 3.8 64-bit, At least Python 3.7 is required.
+* Written in Python 3.8
 * Do not run updater.py in python interpreter. It's designed to run only in frozen environment.
 * Use requirements.txt to install dependencies.
 * Source code is written in English. Translation to other languages is done with gettext.
