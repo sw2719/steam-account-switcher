@@ -6,6 +6,8 @@ import shutil
 
 locale_buf = locale.getdefaultlocale()
 LOCALE = locale_buf[0]
+DIRS_TO_DELETE = ('.vs', 'tcl', 'tk')
+FILES_TO_DELETE = ('libcrypto-1_1.dll', 'libssl-1_1.dll', 'tcl86t.dll', 'tk86t.dll', 'python37.dll')
 
 
 def pprint(content):
@@ -40,7 +42,14 @@ def invalidzip():
 
 
 cwd = os.getcwd()
-pprint('Current working directory: ' + cwd)
+
+if LOCALE == 'ko_KR':
+    pprint('Current working directory: ' + cwd)
+    pprint('Verifying update archive...')
+else:
+    pprint('현재 작업 디렉토리: ' + cwd)
+    pprint('업데이트 압축 파일 확인 중...')
+
 print()
 archive = os.path.join(cwd, 'update.zip')
 
@@ -64,12 +73,12 @@ else:
     pprint('Installing update...')
 
 for name in os.listdir(os.getcwd()):
-    if name in ('.vs', 'tcl', 'tk'):
+    if name in DIRS_TO_DELETE:
         try:
             shutil.rmtree(name)
         except OSError:
             pass
-    elif name in ('libcrypto-1_1.dll', 'libssl-1_1.dll', 'tcl86t.dll', 'tk86t.dll'):
+    elif name in FILES_TO_DELETE:
         try:
             os.remove(name)
         except OSError:
