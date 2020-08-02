@@ -34,7 +34,7 @@ This app has no affiliation with Steam and Valve.
 # How to use
 1. Unpack the archive to desired folder
 2. Run the exe
-**(Because this program alters your registry values AND is not code-signed, Windows SmartScreen or your Anti-virus might detect it as harmful software. You can just ignore it.)**
+**(Because this program is not code-signed, Windows SmartScreen might pop up. Click 'More info' and then 'Run anyway'.)**
 
 3. Import accounts from Steam or add them manually via Menu > Add accounts
 * Your account names are saved in accounts.yml located in the same folder where exe file is.
