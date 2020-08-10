@@ -61,7 +61,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
 
         updatewindow = tk.Toplevel(master)
         updatewindow.title(_('Update'))
-        updatewindow.geometry("400x300+650+300")
+        updatewindow.geometry(master.popup_geometry(400, 300))
         updatewindow.resizable(False, False)
         updatewindow.focus()
 
