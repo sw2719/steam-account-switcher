@@ -80,7 +80,7 @@ class AccountButton:
                     raise FileNotFoundError
 
             except FileNotFoundError:
-                img = Image.open(f"asset/default.jpg").resize((40, 40))
+                img = Image.open("asset/default.jpg").resize((40, 40))
 
             self.imgtk = ImageTk.PhotoImage(img)
             self.avatar.create_image(20, 20, image=self.imgtk)
