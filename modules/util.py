@@ -107,7 +107,7 @@ def steam64_to_2(steamid64):
     else:
         steamid_modulo = '1'
 
-    steamid2 = f'STEAM_0:{steamid_modulo}:{(int(steamid64) - STEAM64_IDENTIFIER) // 2}'
+    steamid2 = f'STEAM_0:{steamid_modulo}:{steamid_n // 2}'
 
     return steamid2
 
