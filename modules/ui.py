@@ -9,7 +9,7 @@ import gettext
 from PIL import Image, ImageTk
 from modules.config import get_config, config_write_value, config_write_dict
 from ruamel.yaml import YAML
-from modules.util import steam64_to_3, steam64_to_32, steam64_to_2, check_steam_dir
+from modules.util import steam64_to_3, steam64_to_32, steam64_to_2, check_steam_dir, get_center_pos
 
 COLOR_DISABLED = '#cfcfcf'
 COLOR_CLICKED = '#363636'
@@ -214,10 +214,12 @@ class ReadonlyEntryWithLabel:
 
 
 class WelcomeWindow(tk.Toplevel):
-    def __init__(self, master, x, y):
+    def __init__(self, master):
         self.master = master
         tk.Toplevel.__init__(self, self.master, bg='white')
         self.title(_('Welcome'))
+
+        x, y = get_center_pos(self.master, 320, 230)
         self.geometry(f"320x230+{x}+{y}")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.on_window_close)

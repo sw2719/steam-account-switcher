@@ -56,6 +56,16 @@ def raise_exception():
     raise Exception
 
 
+def get_center_pos(window, width, height):
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+
+    center_x = int((screen_width/2) - (width/2))
+    center_y = int((screen_height/2) - (height/2))
+
+    return center_x, center_y
+
+
 def check_running(process_name):
     '''Check if given process is running and return boolean value.
     :param process_name: Name of process to check

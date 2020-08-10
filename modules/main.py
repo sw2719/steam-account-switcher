@@ -12,7 +12,7 @@ from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value
-from modules.util import check_running, steam_running, StoppableThread, open_screenshot, raise_exception, test
+from modules.util import check_running, steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos
 from modules.update import start_checkupdate, hide_update, show_update
 from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, ask_steam_dir
 from modules.avatar import download_avatar
@@ -100,21 +100,17 @@ class MainApp(tk.Tk):
         self['bg'] = 'white'
         self.title(_("Account Switcher"))
 
-        window_width = 310
-        window_height = 472
+        self.window_width = 310
+        self.window_height = 472
 
-        screen_width = self.winfo_screenwidth()
-        screen_height = self.winfo_screenheight()
-
-        self.center_x = int((screen_width/2) - (window_width/2))
-        self.center_y = int((screen_height/2) - (window_height/2))
+        center_x, center_y = get_center_pos(self, self.window_width, self.window_height)
 
         if get_config('last_pos') != '0/0':
             pos_x, pos_y = get_config('last_pos').split('/')
         else:
-            pos_x, pos_y = self.center_x, self.center_y
+            pos_x, pos_y = center_x, center_y
 
-        self.geometry(f'{str(window_width)}x{str(window_height)}+{str(pos_x)}+{str(pos_y)}')
+        self.geometry(f'{str(self.window_width)}x{str(self.window_height)}+{str(pos_x)}+{str(pos_y)}')
         self.resizable(False, False)
         self.protocol('WM_DELETE_WINDOW', self.exit_app)
 
@@ -245,6 +241,15 @@ class MainApp(tk.Tk):
         geo = self.geometry().split('+')
         return geo[1], geo[2]
 
+    def popup_geometry(self, width, height):
+        width_delta = (self.window_width - width) // 2
+
+        main_x, main_y = self.get_window_pos()
+        x = int(main_x) + width_delta
+        y = int(main_y) + 25
+
+        return f'{str(width)}x{str(height)}+{str(x)}+{str(y)}'
+
     def exit_app(self):
         x, y = self.get_window_pos()
         last_pos = f'{x}/{y}'
@@ -260,7 +265,7 @@ class MainApp(tk.Tk):
         self.refresh()
 
     def welcomewindow(self):
-        window = WelcomeWindow(self, str(self.center_x - 5), (self.center_y + 100))
+        window = WelcomeWindow(self)
 
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':
@@ -275,7 +280,7 @@ class MainApp(tk.Tk):
         configwindow.title('')
 
         x, y = self.get_window_pos()
-        configwindow.geometry(f"250x165+{x}+{y}")
+        configwindow.geometry(self.popup_geometry(250, 165))
         configwindow.resizable(False, False)
         configwindow.bind('<Escape>', lambda event: configwindow.destroy())
 
@@ -607,15 +612,13 @@ class MainApp(tk.Tk):
         '''Open about window'''
 
         if LOCALE == 'fr_FR':
-            h = '200'
+            height = 200
         else:
-            h = '180'
-
-        x, y = self.get_window_pos()
+            height = 180
 
         aboutwindow = tk.Toplevel(self, bg='white')
         aboutwindow.title(_('About'))
-        aboutwindow.geometry(f"360x{h}+{x}+{y}")
+        aboutwindow.geometry(self.popup_geometry(360, height))
         aboutwindow.resizable(False, False)
         aboutwindow.focus()
         aboutwindow.bind('<Escape>', lambda event: aboutwindow.destroy())
@@ -662,7 +665,7 @@ class MainApp(tk.Tk):
         refreshwindow = tk.Toplevel(self, bg='white')
         refreshwindow.title(_("Refresh"))
         x, y = self.get_window_pos()
-        refreshwindow.geometry(f"230x320+{x}+{y}")
+        refreshwindow.geometry(self.popup_geometry(230, 320))
         refreshwindow.resizable(False, False)
         refreshwindow.bind('<Escape>', lambda event: refreshwindow.destroy())
         refreshwindow.grab_set()
@@ -817,7 +820,7 @@ class MainApp(tk.Tk):
 
         addwindow = tk.Toplevel(self, bg='white')
         addwindow.title(_("Add"))
-        addwindow.geometry(f"300x150+{x}+{y}")
+        addwindow.geometry(self.popup_geometry(300, 150))
         addwindow.resizable(False, False)
         addwindow.bind('<Escape>', lambda event: addwindow.destroy())
 
@@ -923,7 +926,7 @@ class MainApp(tk.Tk):
 
         importwindow = tk.Toplevel(self, bg='white')
         importwindow.title(_("Import"))
-        importwindow.geometry(f"280x300+{x}+{y}")
+        importwindow.geometry(self.popup_geometry(280, 300))
         importwindow.resizable(False, False)
         importwindow.grab_set()
         importwindow.focus()
@@ -1039,7 +1042,7 @@ class MainApp(tk.Tk):
 
         orderwindow = tk.Toplevel(self, bg='white')
         orderwindow.title("")
-        orderwindow.geometry(f"220x270+{x}+{y}")
+        orderwindow.geometry(self.popup_geometry(220, 270))
         orderwindow.resizable(False, False)
         orderwindow.bind('<Escape>', lambda event: orderwindow.destroy())
 
@@ -1150,15 +1153,15 @@ class MainApp(tk.Tk):
         last_config = config_dict
 
         if LOCALE == 'fr_FR':
-            width = '330'
+            width = 330
         else:
-            width = '260'
+            width = 260
 
         x, y = self.get_window_pos()
 
         settingswindow = tk.Toplevel(self, bg='white')
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(f"{width}x300+{x}+{y}")  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 300))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
