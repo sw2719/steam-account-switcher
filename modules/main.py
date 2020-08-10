@@ -1050,7 +1050,7 @@ class MainApp(tk.Tk):
 
         orderwindow = tk.Toplevel(self, bg='white')
         orderwindow.title("")
-        orderwindow.geometry(self.popup_geometry(220, 270))
+        orderwindow.geometry(self.popup_geometry(224, 270))
         orderwindow.resizable(False, False)
         orderwindow.bind('<Escape>', lambda event: orderwindow.destroy())
 
