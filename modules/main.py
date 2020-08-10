@@ -592,7 +592,7 @@ class MainApp(tk.Tk):
 
         print('Menu refreshed with %s account(s)' % len(self.accounts))
 
-    def update_avatar(self, steamid_list=loginusers()[0]):
+    def update_avatar(self):
         self.no_user_frame.destroy()
         self.button_frame.destroy()
         hide_update()
@@ -601,7 +601,15 @@ class MainApp(tk.Tk):
         label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
         label.pack(expand=True)
         self.update()
-        download_avatar(steamid_list)
+
+        dl_list = []
+        steamid_list, accountname, __ = loginusers()
+
+        for index, steamid in enumerate(steamid_list):
+            if accountname[index] in self.accounts:
+                dl_list.append(steamid)
+
+        download_avatar(dl_list)
 
         label.destroy()
         self.refresh(no_frame=True)
