@@ -9,7 +9,8 @@ import gettext
 from PIL import Image, ImageTk
 from modules.config import get_config, config_write_value, config_write_dict
 from ruamel.yaml import YAML
-from modules.util import steam64_to_3, steam64_to_32, steam64_to_2, check_steam_dir, get_center_pos
+from modules.util import check_steam_dir, get_center_pos
+from modules.steamid import steam64_to_3, steam64_to_32, steam64_to_2
 
 COLOR_DISABLED = '#cfcfcf'
 COLOR_CLICKED = '#363636'
