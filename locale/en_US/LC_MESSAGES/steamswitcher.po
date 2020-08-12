@@ -1,247 +1,226 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: steamswitcher\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-12 22:41+0900\n"
-"PO-Revision-Date: 2020-08-12 22:43+0900\n"
-"Last-Translator: QuentiumYT\n"
-"Language-Team: French (France)\n"
-"Language: fr_FR\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2020-08-12 22:37+0900\n"
+"PO-Revision-Date: 2020-08-12 22:40+0900\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n > 1;\n"
 "X-Generator: Poedit 2.4.1\n"
-"X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-Basepath: ../../..\n"
-"X-Poedit-SearchPath-0: steamswitcher.py\n"
-"X-Poedit-SearchPath-1: modules/account.py\n"
-"X-Poedit-SearchPath-2: modules/config.py\n"
-"X-Poedit-SearchPath-3: modules/reg.py\n"
-"X-Poedit-SearchPath-4: modules/ui.py\n"
-"X-Poedit-SearchPath-5: modules/update.py\n"
-"X-Poedit-SearchPath-6: modules/main.py\n"
-"X-Poedit-SearchPath-7: modules/util.py\n"
+"X-Poedit-Basepath: ../../../modules\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SearchPath-0: .\n"
 
-#: modules/config.py:162 modules/update.py:153 modules/update.py:175
+#: config.py:162 update.py:153 update.py:175
 msgid "Error"
-msgstr "Erreur de registre"
+msgstr "Error"
 
-#: modules/config.py:162
+#: config.py:162
 msgid "Could not load config file."
-msgstr "Impossible de charger le fichier de configuration."
+msgstr "Could not load config file."
 
-#: modules/main.py:64
+#: main.py:64
 msgid "Alert"
-msgstr "Alerte"
+msgstr "Alert"
 
-#: modules/main.py:65
+#: main.py:65
 msgid "After soft shutdown attempt,"
-msgstr "Après une tentative d'arrêt simple,"
+msgstr "After soft shutdown attempt,"
 
-#: modules/main.py:66
+#: main.py:66
 msgid "Steam appears to be still running."
-msgstr "Steam semble toujours fonctionner."
+msgstr "Steam appears to be still running."
 
-#: modules/main.py:67
+#: main.py:67
 msgid "Click yes to wait more for 10 seconds or no to force-exit Steam."
-msgstr ""
-"Cliquez sur oui pour attendre 10 secondes ou sur non pour quitter de force "
-"Steam."
+msgstr "Click yes to wait more for 10 seconds or no to force-exit Steam."
 
-#: modules/main.py:102
+#: main.py:102
 msgid "Account Switcher"
-msgstr "Changement de compte"
+msgstr "Account Switcher"
 
-#: modules/main.py:128
+#: main.py:128
 msgid "Import accounts from Steam"
-msgstr "Importer des comptes depuis Steam"
+msgstr "Import accounts from Steam"
 
-#: modules/main.py:130
+#: main.py:130
 msgid "Add accounts"
-msgstr "Ajouter des comptes"
+msgstr "Add accounts"
 
-#: modules/main.py:132
+#: main.py:132
 msgid "Edit account list"
-msgstr "Modifier l'ordre des comptes"
+msgstr "Edit account list"
 
-#: modules/main.py:134
+#: main.py:134
 msgid "Refresh autologin"
-msgstr "Actualiser connexion auto"
+msgstr "Refresh autologin"
 
-#: modules/main.py:136
+#: main.py:136
 msgid "Update all avatars"
-msgstr "Mettre à jour tous les avatars"
+msgstr "Update all avatars"
 
-#: modules/main.py:139 modules/main.py:1196
+#: main.py:139 main.py:1196
 msgid "Settings"
-msgstr "Réglages"
+msgstr "Settings"
 
-#: modules/main.py:141 modules/main.py:632
+#: main.py:141 main.py:632
 msgid "About"
-msgstr "À propos"
+msgstr "About"
 
-#: modules/main.py:144
+#: main.py:144
 msgid "Menu"
 msgstr "Menu"
 
-#: modules/main.py:165
+#: main.py:165
 msgid "Debug"
-msgstr "Déboguer"
+msgstr "Debug"
 
-#: modules/main.py:179 modules/main.py:229 modules/main.py:581
-#: modules/main.py:583
+#: main.py:179 main.py:229 main.py:581 main.py:583
 msgid "Auto-login Enabled"
-msgstr "Connexion automatique activée"
+msgstr "Auto-login Enabled"
 
-#: modules/main.py:182 modules/main.py:232 modules/main.py:585
+#: main.py:182 main.py:232 main.py:585
 msgid "Auto-login Disabled"
-msgstr "Connexion automatique désactivée"
+msgstr "Auto-login Disabled"
 
-#: modules/main.py:188 modules/main.py:590
+#: main.py:188 main.py:590
 msgid "Restart Steam & Exit"
-msgstr "Redémarrer Steam"
+msgstr "Restart Steam & Exit"
 
-#: modules/main.py:190 modules/main.py:592
+#: main.py:190 main.py:592
 msgid "Restart Steam"
-msgstr "Redémarrer Steam"
+msgstr "Restart Steam"
 
-#: modules/main.py:193
+#: main.py:193
 msgid "Toggle auto-login"
-msgstr "Connexion auto"
+msgstr "Toggle auto-login"
 
-#: modules/main.py:198
+#: main.py:198
 msgid "Exit"
-msgstr "Quitter"
+msgstr "Exit"
 
-#: modules/main.py:217
+#: main.py:217
 msgid "Current Auto-login user:"
-msgstr "Utilisateur actuel de connexion automatique :"
+msgstr "Current Auto-login user:"
 
-#: modules/main.py:302 modules/main.py:1169 modules/main.py:1366
-#: modules/ui.py:244
+#: main.py:302 main.py:1169 main.py:1366 ui.py:244
 msgid "OK"
 msgstr "OK"
 
-#: modules/main.py:306 modules/main.py:836 modules/main.py:937
-#: modules/main.py:1054 modules/main.py:1172 modules/main.py:1371
-#: modules/main.py:1402 modules/update.py:76 modules/update.py:118
+#: main.py:306 main.py:836 main.py:937 main.py:1054 main.py:1172 main.py:1371
+#: main.py:1402 update.py:76 update.py:118
 msgid "Cancel"
-msgstr "Annuler"
+msgstr "Cancel"
 
-#: modules/main.py:310
+#: main.py:310
 #, python-format
 msgid ""
 "Select name settings\n"
 "for %s"
 msgstr ""
-"Sélectionnez les paramètres\n"
-"de nom pour %s"
+"Select name settings\n"
+"for %s"
 
-#: modules/main.py:328
+#: main.py:328
 msgid "Use profile name if available"
-msgstr "Utiliser le nom du profil si disponible"
+msgstr "Use profile name if available"
 
-#: modules/main.py:333
+#: main.py:333
 msgid "Use custom name"
-msgstr "Utiliser un nom personnalisé"
+msgstr "Use custom name"
 
-#: modules/main.py:372 modules/main.py:952 modules/update.py:235
-#: modules/update.py:238
+#: main.py:372 main.py:952 update.py:235 update.py:238
 msgid "Info"
-msgstr "Informations"
+msgstr "Info"
 
-#: modules/main.py:372
+#: main.py:372
 msgid "Enter a custom name to use."
-msgstr "Saisissez un nom personnalisé à utiliser."
+msgstr "Enter a custom name to use."
 
-#: modules/main.py:409
+#: main.py:409
 msgid "Confirm"
-msgstr "Confirmer"
+msgstr "Confirm"
 
-#: modules/main.py:409
+#: main.py:409
 #, python-format
 msgid "Are you sure want to remove account %s?"
-msgstr "Voulez-vous vraiment supprimer le compte %s ?"
+msgstr "Are you sure want to remove account %s?"
 
-#: modules/main.py:491
+#: main.py:491
 msgid "Profile name not available"
-msgstr "Nom de profil non disponible"
+msgstr "Profile name not available"
 
-#: modules/main.py:504
+#: main.py:504
 msgid "Set as auto-login account"
-msgstr "Définir comme compte de connexion automatique"
+msgstr "Set as auto-login account"
 
-#: modules/main.py:509
+#: main.py:509
 msgid "Open profile in browser"
-msgstr "Ouvrir le profil dans le navigateur"
+msgstr "Open profile in browser"
 
-#: modules/main.py:511
+#: main.py:511
 msgid "Open screenshots folder"
-msgstr "Ouvrir le dossier des captures d'écran"
+msgstr "Open screenshots folder"
 
-#: modules/main.py:513
+#: main.py:513
 msgid "View SteamID"
-msgstr "Voir le SteamID"
+msgstr "View SteamID"
 
-#: modules/main.py:515
+#: main.py:515
 msgid "Update avatar"
-msgstr "Mettre à jour l'avatar"
+msgstr "Update avatar"
 
-#: modules/main.py:519
+#: main.py:519
 msgid "Name settings"
-msgstr "Paramètres de nom"
+msgstr "Name settings"
 
-#: modules/main.py:521
+#: main.py:521
 msgid "Delete"
-msgstr "Supprimer"
+msgstr "Delete"
 
-#: modules/main.py:559
+#: main.py:559
 msgid "No accounts added"
-msgstr "Aucun compte ajouté"
+msgstr "No accounts added"
 
-#: modules/main.py:602 modules/main.py:920 modules/main.py:1046
+#: main.py:602 main.py:920 main.py:1046
 msgid "Please wait while downloading avatars..."
-msgstr ""
-"Veuillez patienter pendant\n"
-" le téléchargement des avatars..."
+msgstr "Please wait while downloading avatars..."
 
-#: modules/main.py:644
+#: main.py:644
 msgid ""
 "Warning: The developer of this application is not responsible for\n"
 "data loss or any other damage from the use of this app."
 msgstr ""
-"Avertissement: le développeur de cette application n'est\n"
-"pas responsable de perte de données ou tout autre dommage\n"
-"résultant de l'utilisation de cette application."
+"Warning: The developer of this application is not responsible for\n"
+"data loss or any other damage from the use of this app."
 
-#: modules/main.py:646
+#: main.py:646
 msgid "STEAM is a registered trademark of Valve Corporation."
-msgstr "STEAM est une marque déposée de Valve Corporation."
+msgstr "STEAM is a registered trademark of Valve Corporation."
 
-#: modules/main.py:654 modules/main.py:679
+#: main.py:654 main.py:679
 msgid "Copyright notice"
-msgstr "Avis de droit d'auteur"
+msgstr "Copyright notice"
 
-#: modules/main.py:660 modules/main.py:672 modules/ui.py:426
+#: main.py:660 main.py:672 ui.py:426
 msgid "Close"
-msgstr "Fermer"
+msgstr "Close"
 
-#: modules/main.py:664
+#: main.py:664
 msgid "Copyright placeholder."
 msgstr ""
-"--Avis de droit d'auteur pour les dépendances--\n"
+"--Copyright notice for dependencies--\n"
 "\n"
 "aiodns:\n"
 "\n"
 "Copyright (C) 2014 by Saúl Ibarra Corretgé\n"
 "\n"
-"Permission is hereby granted, free of charge, to any person obtaining a "
-"copy\n"
-"of this software and associated documentation files (the \"Software\"), to "
-"deal\n"
-"in the Software without restriction, including without limitation the "
-"rights\n"
+"Permission is hereby granted, free of charge, to any person obtaining a copy\n"
+"of this software and associated documentation files (the \"Software\"), to deal\n"
+"in the Software without restriction, including without limitation the rights\n"
 "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n"
 "copies of the Software, and to permit persons to whom the Software is\n"
 "furnished to do so, subject to the following conditions:\n"
@@ -249,13 +228,11 @@ msgstr ""
 "The above copyright notice and this permission notice shall be included in\n"
 "all copies or substantial portions of the Software.\n"
 "\n"
-"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS "
-"OR\n"
+"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n"
 "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n"
 "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n"
 "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n"
-"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING "
-"FROM,\n"
+"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n"
 "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n"
 "THE SOFTWARE.\n"
 "\n"
@@ -576,8 +553,7 @@ msgstr ""
 "     only do in order to apply it to code which is not already Covered Code\n"
 "     governed by this License), You must (a) rename Your license so that\n"
 "     the phrases \"Mozilla\", \"MOZILLAPL\", \"MOZPL\", \"Netscape\",\n"
-"     \"MPL\", \"NPL\" or any confusingly similar phrase do not appear in "
-"your\n"
+"     \"MPL\", \"NPL\" or any confusingly similar phrase do not appear in your\n"
 "     license (except to note that your license differs from this License)\n"
 "     and (b) otherwise make it clear that Your version of the license\n"
 "     contains terms which differ from the Mozilla Public License and\n"
@@ -612,8 +588,7 @@ msgstr ""
 "     8.2.  If You initiate litigation by asserting a patent infringement\n"
 "     claim (excluding declatory judgment actions) against Initial Developer\n"
 "     or a Contributor (the Initial Developer or Contributor against whom\n"
-"     You file such action is referred to as \"Participant\")  alleging "
-"that:\n"
+"     You file such action is referred to as \"Participant\")  alleging that:\n"
 "\n"
 "     (a)  such Participant's Contributor Version directly or indirectly\n"
 "     infringes any patent, then any and all rights granted by such\n"
@@ -724,15 +699,13 @@ msgstr ""
 "     http://www.mozilla.org/MPL/\n"
 "\n"
 "     Software distributed under the License is distributed on an \"AS IS\"\n"
-"     basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See "
-"the\n"
+"     basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the\n"
 "     License for the specific language governing rights and limitations\n"
 "     under the License.\n"
 "\n"
 "     The Original Code is ______________________________________.\n"
 "\n"
-"     The Initial Developer of the Original Code is "
-"________________________.\n"
+"     The Initial Developer of the Original Code is ________________________.\n"
 "     Portions created by ______________________ are Copyright (C) ______\n"
 "     _______________________. All Rights Reserved.\n"
 "\n"
@@ -895,8 +868,7 @@ msgstr ""
 "\n"
 "    a) Accompany it with the complete corresponding machine-readable\n"
 "    source code, which must be distributed under the terms of Sections\n"
-"    1 and 2 above on a medium customarily used for software interchange; "
-"or,\n"
+"    1 and 2 above on a medium customarily used for software interchange; or,\n"
 "\n"
 "    b) Accompany it with a written offer, valid for at least three\n"
 "    years, to give any third party, for a charge no more than your\n"
@@ -1003,8 +975,7 @@ msgstr ""
 "later version\", you have the option of following the terms and conditions\n"
 "either of that version or of any later version published by the Free\n"
 "Software Foundation.  If the Program does not specify a version number of\n"
-"this License, you may choose any version ever published by the Free "
-"Software\n"
+"this License, you may choose any version ever published by the Free Software\n"
 "Foundation.\n"
 "\n"
 "  10. If you wish to incorporate parts of the Program into other free\n"
@@ -1020,8 +991,7 @@ msgstr ""
 "  11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY\n"
 "FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN\n"
 "OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES\n"
-"PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY OF ANY KIND, EITHER "
-"EXPRESSED\n"
+"PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED\n"
 "OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF\n"
 "MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS\n"
 "TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE\n"
@@ -1074,8 +1044,7 @@ msgstr ""
 "when it starts in an interactive mode:\n"
 "\n"
 "    Gnomovision version 69, Copyright (C) year name of author\n"
-"    Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show "
-"w'.\n"
+"    Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show w'.\n"
 "    This is free software, and you are welcome to redistribute it\n"
 "    under certain conditions; type `show c' for details.\n"
 "\n"
@@ -1568,28 +1537,22 @@ msgstr ""
 "Redistribution and use in source and binary forms, with or without\n"
 "modification, are permitted provided that the following conditions are met:\n"
 "\n"
-"    1. Redistributions of source code must retain the above copyright "
-"notice,\n"
+"    1. Redistributions of source code must retain the above copyright notice,\n"
 "       this list of conditions and the following disclaimer.\n"
 "\n"
 "    2. Redistributions in binary form must reproduce the above copyright\n"
 "       notice, this list of conditions and the following disclaimer in the\n"
 "       documentation and/or other materials provided with the distribution.\n"
 "\n"
-"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS"
-"\" AND\n"
-"ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE "
-"IMPLIED\n"
+"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND\n"
+"ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\n"
 "WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n"
-"DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE "
-"LIABLE\n"
+"DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE\n"
 "FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL\n"
 "DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\n"
 "SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER\n"
-"CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT "
-"LIABILITY,\n"
-"OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE "
-"USE\n"
+"CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,\n"
+"OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
 "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n"
 "\n"
 "\n"
@@ -1855,12 +1818,9 @@ msgstr ""
 "\n"
 " Copyright (c) 2014-2020 Anthon van der Neut, Ruamel bvba\n"
 "\n"
-" Permission is hereby granted, free of charge, to any person obtaining a "
-"copy\n"
-" of this software and associated documentation files (the \"Software\"), to "
-"deal\n"
-" in the Software without restriction, including without limitation the "
-"rights\n"
+" Permission is hereby granted, free of charge, to any person obtaining a copy\n"
+" of this software and associated documentation files (the \"Software\"), to deal\n"
+" in the Software without restriction, including without limitation the rights\n"
 " to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n"
 " copies of the Software, and to permit persons to whom the Software is\n"
 " furnished to do so, subject to the following conditions:\n"
@@ -1868,239 +1828,232 @@ msgstr ""
 " The above copyright notice and this permission notice shall be included in\n"
 " all copies or substantial portions of the Software.\n"
 "\n"
-" THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS "
-"OR\n"
+" THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n"
 " IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n"
-" FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL "
-"THE\n"
+" FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n"
 " AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n"
-" LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING "
-"FROM,\n"
-" OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN "
-"THE\n"
+" LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n"
+" OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n"
 " SOFTWARE."
 
-#: modules/main.py:676
+#: main.py:676
 msgid "GitHub page"
-msgstr "Page GitHub"
+msgstr "GitHub page"
 
-#: modules/main.py:695 modules/main.py:1070
+#: main.py:695 main.py:1070
 msgid "No Accounts"
-msgstr "Aucun compte"
+msgstr "No Accounts"
 
-#: modules/main.py:696 modules/main.py:1071
+#: main.py:696 main.py:1071
 msgid "There's no account added."
-msgstr "Aucun compte n'a été ajouté."
+msgstr "There's no account added."
 
-#: modules/main.py:699 modules/main.py:840
+#: main.py:699 main.py:840
 msgid "Refresh"
-msgstr "Actualiser"
+msgstr "Refresh"
 
-#: modules/main.py:715
+#: main.py:715
 msgid "Select accounts to refresh."
-msgstr "Sélectionnez les comptes à actualiser."
+msgstr "Select accounts to refresh."
 
-#: modules/main.py:773
+#: main.py:773
 msgid "Accounts with expired autologin token will show login prompt."
-msgstr "Les comptes expirés afficheront une fenêtre de connexion."
+msgstr "Accounts with expired autologin token will show login prompt."
 
-#: modules/main.py:774
+#: main.py:774
 msgid "Close the prompt or login to continue the process."
-msgstr "Fermez l'invite ou connectez-vous pour continuer le processus."
+msgstr "Close the prompt or login to continue the process."
 
-#: modules/main.py:782 modules/main.py:1417
+#: main.py:782 main.py:1417
 msgid "Initializing..."
-msgstr "Initialisation..."
+msgstr "Initializing..."
 
-#: modules/main.py:801
+#: main.py:801
 msgid "Switching account..."
-msgstr "Changer de compte..."
+msgstr "Switching account..."
 
-#: modules/main.py:813
+#: main.py:813
 msgid "Waiting for Steam..."
-msgstr "Attendre Steam..."
+msgstr "Waiting for Steam..."
 
-#: modules/main.py:826
+#: main.py:826
 msgid "Do you want to start Steam with previous autologin account?"
-msgstr ""
-"Voulez-vous démarrer Steam avec le précédent compte de connexion automatique?"
+msgstr "Do you want to start Steam with previous autologin account?"
 
-#: modules/main.py:855 modules/main.py:934
+#: main.py:855 main.py:934
 msgid "Add"
-msgstr "Ajouter"
+msgstr "Add"
 
-#: modules/main.py:872
+#: main.py:872
 msgid "Enter account(s) to add."
-msgstr "Entrez le ou les comptes à ajouter."
+msgstr "Enter account(s) to add."
 
-#: modules/main.py:874
+#: main.py:874
 msgid "In case of adding multiple accounts,"
-msgstr "En cas d'ajout de plusieurs comptes,"
+msgstr "In case of adding multiple accounts,"
 
-#: modules/main.py:875
+#: main.py:875
 msgid "seperate each account with '/' (slash)."
-msgstr "séparez chaque compte avec un '/' (slash)."
+msgstr "seperate each account with '/' (slash)."
 
-#: modules/main.py:906
+#: main.py:906
 msgid "Duplicate Alert"
-msgstr "Alerte en double"
+msgstr "Duplicate Alert"
 
-#: modules/main.py:907
+#: main.py:907
 #, python-format
 msgid "Account %s already exists."
-msgstr "Le compte %s existe déjà."
+msgstr "Account %s already exists."
 
-#: modules/main.py:952
+#: main.py:952
 msgid "There's no account left to add."
-msgstr "Il n'y a plus de compte à ajouter."
+msgstr "There's no account left to add."
 
-#: modules/main.py:961 modules/main.py:1058
+#: main.py:961 main.py:1058
 msgid "Import"
-msgstr "Importer"
+msgstr "Import"
 
-#: modules/main.py:976
+#: main.py:976
 msgid "Select accounts to import."
-msgstr "Sélectionnez les comptes à importer."
+msgstr "Select accounts to import."
 
-#: modules/main.py:977
+#: main.py:977
 msgid "Added accounts don't show up."
-msgstr "Les comptes ajoutés n'apparaissent pas."
+msgstr "Added accounts don't show up."
 
-#: modules/main.py:1220
+#: main.py:1220
 msgid "Language"
-msgstr "Langage"
+msgstr "Language"
 
-#: modules/main.py:1240
+#: main.py:1240
 msgid "Restart app to apply language settings."
-msgstr "Redémarrez l'app pour appliquer les paramètres."
+msgstr "Restart app to apply language settings."
 
-#: modules/main.py:1257
+#: main.py:1257
 msgid "Normal Mode (Manually restart Steam)"
-msgstr "Mode normal (redémarrer Steam manuellement)"
+msgstr "Normal Mode (Manually restart Steam)"
 
-#: modules/main.py:1264
+#: main.py:1264
 msgid "Express Mode (Auto-restart Steam)"
-msgstr "Mode Express (redémarrage automatique de Steam)"
+msgstr "Express Mode (Auto-restart Steam)"
 
-#: modules/main.py:1274 modules/ui.py:338
+#: main.py:1274 ui.py:338
 msgid "Try to soft shutdown Steam client"
-msgstr "Essayez d'arrêter en douceur le client Steam"
+msgstr "Try to soft shutdown Steam client"
 
-#: modules/main.py:1289 modules/ui.py:351
+#: main.py:1289 ui.py:351
 msgid "Exit app after Steam is restarted"
-msgstr "Quitter l'app au redémarrage de Steam"
+msgstr "Exit app after Steam is restarted"
 
-#: modules/main.py:1303 modules/ui.py:364
+#: main.py:1303 ui.py:364
 msgid "Show avatar images"
-msgstr "Afficher les images d'avatar"
+msgstr "Show avatar images"
 
-#: modules/main.py:1353
+#: main.py:1353
 msgid "Do you want to download avatar images now?"
-msgstr "Voulez-vous télécharger les images d'avatar maintenant?"
+msgstr "Do you want to download avatar images now?"
 
-#: modules/main.py:1358
+#: main.py:1358
 msgid "Locale has been changed"
-msgstr "Le paramètre de langue a été modifié"
+msgstr "Locale has been changed"
 
-#: modules/main.py:1359
+#: main.py:1359
 msgid "Restart app to apply new locale settings."
-msgstr "Redémarrez l'app pour appliquer les paramètres."
+msgstr "Restart app to apply new locale settings."
 
-#: modules/main.py:1376
+#: main.py:1376
 msgid "Apply"
-msgstr "Appliquer"
+msgstr "Apply"
 
-#: modules/main.py:1405
+#: main.py:1405
 msgid "Force quit Steam"
-msgstr "Forcer à quitter Steam"
+msgstr "Force quit Steam"
 
-#: modules/main.py:1432
+#: main.py:1432
 msgid "Waiting for Steam to exit..."
-msgstr "Attendre que Steam s'arrête..."
+msgstr "Waiting for Steam to exit..."
 
-#: modules/main.py:1491
+#: main.py:1491
 msgid "Launching Steam..."
-msgstr "Démarrage de Steam..."
+msgstr "Launching Steam..."
 
-#: modules/reg.py:32 modules/reg.py:52
+#: reg.py:32 reg.py:52
 msgid "Registry Error"
-msgstr "Erreur de registre"
+msgstr "Registry Error"
 
-#: modules/reg.py:33
+#: reg.py:33
 msgid "Failed to read registry value."
-msgstr "Impossible de lire la valeur de registre."
+msgstr "Failed to read registry value."
 
-#: modules/reg.py:34
+#: reg.py:34
 msgid "Make sure that Steam is installed."
-msgstr "Assurez-vous que Steam est installé."
+msgstr "Make sure that Steam is installed."
 
-#: modules/reg.py:52
+#: reg.py:52
 msgid "Failed to change registry value."
-msgstr "Impossible de modifier la valeur de registre."
+msgstr "Failed to change registry value."
 
-#: modules/ui.py:221
+#: ui.py:221
 msgid "Welcome"
-msgstr "Bienvenue"
+msgstr "Welcome"
 
-#: modules/ui.py:247
+#: ui.py:247
 msgid ""
 "Thank you for downloading this app.\n"
 "Click OK to continue."
 msgstr ""
-"Merci d'avoir téléchargé cette application.\n"
-"Cliquez sur OK pour continuer."
+"Thank you for downloading this app.\n"
+"Click OK to continue."
 
-#: modules/ui.py:259
+#: ui.py:259
 msgid "Customize your settings."
-msgstr "Personnalisez vos paramètres."
+msgstr "Customize your settings."
 
-#: modules/ui.py:296
+#: ui.py:296
 msgid "Please wait..."
-msgstr "Veuillez patienter..."
+msgstr "Please wait..."
 
-#: modules/ui.py:309
+#: ui.py:309
 msgid "Normal Mode"
-msgstr "Mode normal"
+msgstr "Normal Mode"
 
-#: modules/ui.py:316
+#: ui.py:316
 msgid ""
 "In normal mode, you restart Steam\n"
 "by clicking 'Restart Steam' button."
 msgstr ""
-"En mode normal, vous redémarrez Steam\n"
-"en cliquant sur le bouton «Redémarrer Steam»."
+"In normal mode, you restart Steam\n"
+"by clicking 'Restart Steam' button."
 
-#: modules/ui.py:322
+#: ui.py:322
 msgid "Express Mode"
-msgstr "Mode express"
+msgstr "Express Mode"
 
-#: modules/ui.py:329
+#: ui.py:329
 msgid ""
 "In express mode, Steam will be automatically\n"
 "restarted when you change account."
 msgstr ""
-"En mode express, Steam sera automatiquement\n"
-"redémarré lorsque vous changez de compte."
+"In express mode, Steam will be automatically\n"
+"restarted when you change account."
 
-#: modules/ui.py:345
+#: ui.py:345
 msgid "Shutdown Steam instead of killing Steam process"
-msgstr "Arrêtez Steam au lieu de terminer le processus Steam"
+msgstr "Shutdown Steam instead of killing Steam process"
 
-#: modules/ui.py:358
+#: ui.py:358
 msgid "Exit app automatically after restarting Steam"
-msgstr "Quittez l'app automatiquement après le redémarrage"
+msgstr "Exit app automatically after restarting Steam"
 
-#: modules/ui.py:371
+#: ui.py:371
 msgid "Show avatars in account list"
-msgstr "Afficher les avatars dans la liste des comptes"
+msgstr "Show avatars in account list"
 
-#: modules/ui.py:375
+#: ui.py:375
 msgid "Good to go!"
-msgstr "Tout est bon !"
+msgstr "Good to go!"
 
-# Due to UI size, line length is limited.
-# UI test is required after translation.
-#: modules/ui.py:379
+#: ui.py:379
 msgid ""
 "Add or import accounts via Menu.\n"
 "Right click on accounts to see more options.\n"
@@ -2113,94 +2066,87 @@ msgid ""
 "\n"
 "You can open GitHub repo via Menu > About."
 msgstr ""
-"Ajouter ou importer des comptes via le menu.\n"
-"Faites un clic droit sur les comptes pour plus d'options.\n"
+"Add or import accounts via Menu.\n"
+"Right click on accounts to see more options.\n"
 "\n"
-"Modifiez les paramètres dans Menu > Paramètres\n"
-"si vous n'aimez pas les options que vous avez définis.\n"
+"You can change settings in Menu > Settings\n"
+"if you don't like the settings you just set.\n"
 "\n"
-"Veuillez lire le guide d'utilisation README de GitHub\n"
-"si vous utilisez cette application pour la première fois.\n"
+"Please read GitHub README's How to use-4\n"
+"if you are using this app for first time.\n"
 "\n"
-"Vous pouvez ouvrir le repo GitHub via Menu > À propos."
+"You can open GitHub repo via Menu > About."
 
-#: modules/ui.py:396
+#: ui.py:396
 msgid "Steam directory invalid"
-msgstr "Répertoire Steam invalide"
+msgstr "Steam directory invalid"
 
-#: modules/ui.py:396
+#: ui.py:396
 msgid "Could not locate Steam directory."
-msgstr "Impossible de localiser le répertoire Steam."
+msgstr "Could not locate Steam directory."
 
-#: modules/ui.py:397
+#: ui.py:397
 msgid "Please select Steam directory manually."
-msgstr "Veuillez sélectionner le répertoire Steam manuellement."
+msgstr "Please select Steam directory manually."
 
-#: modules/ui.py:406
+#: ui.py:406
 msgid "Warning"
-msgstr "Avertissement"
+msgstr "Warning"
 
-#: modules/ui.py:407
+#: ui.py:407
 msgid "Steam directory is invalid."
-msgstr "Le répertoire Steam n'est pas valide."
+msgstr "Steam directory is invalid."
 
-#: modules/ui.py:408
+#: ui.py:408
 msgid "Try again."
-msgstr "Veuillez réessayer."
+msgstr "Try again."
 
-#: modules/ui.py:429
+#: ui.py:429
 msgid "Username"
-msgstr "Nom personnalisé"
+msgstr "Username"
 
-#: modules/ui.py:430
+#: ui.py:430
 msgid "Friend code"
-msgstr "Code ami"
+msgstr "Friend code"
 
-#: modules/update.py:63
+#: update.py:63
 msgid "Update"
-msgstr "Mise à jour"
+msgstr "Update"
 
-#: modules/update.py:78
+#: update.py:78
 msgid "Update now"
-msgstr "Mettez à jour maintenant"
+msgstr "Update now"
 
-#: modules/update.py:83
+#: update.py:83
 #, python-format
 msgid "New version %s is available."
-msgstr "La nouvelle version %s est disponible."
+msgstr "New version %s is available."
 
-#: modules/update.py:118
+#: update.py:118
 msgid "Are you sure to cancel?"
-msgstr "Voulez-vous vraiment annuler ?"
+msgstr "Are you sure to cancel?"
 
-#: modules/update.py:154
+#: update.py:154
 msgid "Error occured while downloading update."
-msgstr "Une erreur s'est produite lors du téléchargement de la mise à jour."
+msgstr "Error occured while downloading update."
 
-#: modules/update.py:175
+#: update.py:175
 msgid "Couldn't perform automatic update."
-msgstr "Impossible d'effectuer une mise à jour automatique."
+msgstr "Couldn't perform automatic update."
 
-#: modules/update.py:176
+#: update.py:176
 msgid "Update manually by extracting update.zip file."
-msgstr "Mettez à jour manuellement en extrayant le fichier update.zip."
+msgstr "Update manually by extracting update.zip file."
 
-#: modules/update.py:312
+#: update.py:312
 #, python-format
 msgid "Version %s is available. Click here to update!"
-msgstr "Cliquez ici pour passer à la version %s !"
+msgstr "Version %s is available. Click here to update!"
 
-#: modules/update.py:336
+#: update.py:336
 msgid "Development version"
-msgstr "Version de développement"
+msgstr "Development version"
 
-#: modules/update.py:349
+#: update.py:349
 msgid "Failed checking for updates. Click here to try again."
-msgstr ""
-"Échec de la vérification des mises à jour.\n"
-"Cliquez ici pour essayer à nouveau."
-
-#~ msgid "data loss or any other damage from the use of this app."
-#~ msgstr ""
-#~ "perte de données ou tout autre dommage résultant de l'utilisation de "
-#~ "cette application."
+msgstr "Failed checking for updates. Click here to try again."

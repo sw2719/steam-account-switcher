@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox as msgbox
 import gettext
 import winreg
@@ -96,6 +97,8 @@ class MainApp(tk.Tk):
         self.accounts = acc_getlist()
         self.acc_dict = acc_getdict()
         self.demo_mode = False
+        self.BUNDLE = bundle
+
         tk.Tk.__init__(self)
         self['bg'] = 'white'
         self.title(_("Account Switcher"))
@@ -143,10 +146,10 @@ class MainApp(tk.Tk):
         menubar.add_cascade(label=_("Menu"), menu=menu)
         self.config(menu=menubar)
 
-        if not bundle:
+        if not self.BUNDLE:
             debug_menu = tk.Menu(menubar, tearoff=0)
             debug_menu.add_command(label='Check for updates with debug mode',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, bundle, debug=True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, self.BUNDLE, debug=True)))
             debug_menu.add_command(label='Check for updates without debug mode',
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True)))
             debug_menu.add_command(label='Check for updates (Force update available)',
@@ -161,6 +164,8 @@ class MainApp(tk.Tk):
                                    command=self.toggle_demo)
             debug_menu.add_command(label="Raise exception",
                                    command=raise_exception)
+            debug_menu.add_command(label="Open about window with copyright notice",
+                                   command=lambda: self.about(version, force_copyright=True))
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         self.bottomframe = tk.Frame(self, bg='white')
@@ -619,7 +624,7 @@ class MainApp(tk.Tk):
         self.bottomframe.pack(side='bottom', fill='x')
         show_update()
 
-    def about(self, version):
+    def about(self, version, force_copyright=False):
         '''Open about window'''
 
         if LOCALE == 'fr_FR':
@@ -648,6 +653,22 @@ class MainApp(tk.Tk):
         ver = tk.Label(aboutwindow, bg='white',
                        text='Steam Account Switcher | Version ' + version)
 
+        def copyright_notice():
+            cprightwindow = tk.Toplevel(aboutwindow, bg='white')
+            cprightwindow.title(_('Copyright notice'))
+            cprightwindow.geometry(self.popup_geometry(580, 350))
+            cprightwindow.resizable(False, False)
+            cprightwindow.focus()
+            cprightwindow.bind('<Escape>', lambda event: cprightwindow.destroy())
+
+            ttk.Button(cprightwindow, text=_('Close'), command=cprightwindow.destroy).pack(side='bottom', pady=(0, 3))
+            ttk.Separator(cprightwindow, orient=tk.HORIZONTAL).pack(side='bottom', fill='x')
+
+            cpright_text = ScrolledText(cprightwindow, bd=1, relief='flat')
+            cpright_text.insert(tk.CURRENT, _('Copyright placeholder.'))
+            cpright_text.configure(state=tk.DISABLED)
+            cpright_text.pack(side='top', pady=3, expand=True)
+
         button_frame = tk.Frame(aboutwindow, bg='white')
         button_frame.pack(side='bottom', pady=5)
 
@@ -658,13 +679,20 @@ class MainApp(tk.Tk):
         button_github = ttk.Button(button_frame,
                                    text=_('GitHub page'),
                                    command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher'))
+        button_copyright = ttk.Button(button_frame,
+                                      text=_('Copyright notice'),
+                                      command=copyright_notice)
+
         about_disclaimer.pack(pady=8)
         about_steam_trademark.pack()
         copyright_label.pack(pady=5)
         ver.pack()
 
         button_close.pack(side='left', padx=2)
-        button_github.pack(side='right', padx=2)
+        button_github.pack(side='left', padx=2)
+
+        if self.BUNDLE or force_copyright:
+            button_copyright.pack(side='left', padx=2)
 
     def refreshwindow(self):
         '''Open remove accounts window'''
