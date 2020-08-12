@@ -656,18 +656,18 @@ class MainApp(tk.Tk):
         def copyright_notice():
             cprightwindow = tk.Toplevel(aboutwindow, bg='white')
             cprightwindow.title(_('Copyright notice'))
-            cprightwindow.geometry(self.popup_geometry(580, 350))
+            cprightwindow.geometry(self.popup_geometry(590, 350))
             cprightwindow.resizable(False, False)
             cprightwindow.focus()
             cprightwindow.bind('<Escape>', lambda event: cprightwindow.destroy())
 
-            ttk.Button(cprightwindow, text=_('Close'), command=cprightwindow.destroy).pack(side='bottom', pady=(0, 3))
+            ttk.Button(cprightwindow, text=_('Close'), command=cprightwindow.destroy).pack(side='bottom', pady=3)
             ttk.Separator(cprightwindow, orient=tk.HORIZONTAL).pack(side='bottom', fill='x')
 
             cpright_text = ScrolledText(cprightwindow, bd=1, relief='flat')
             cpright_text.insert(tk.CURRENT, _('Copyright placeholder.'))
             cpright_text.configure(state=tk.DISABLED)
-            cpright_text.pack(side='top', pady=3, expand=True)
+            cpright_text.pack(side='top', expand=True)
 
         button_frame = tk.Frame(aboutwindow, bg='white')
         button_frame.pack(side='bottom', pady=5)
