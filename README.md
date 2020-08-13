@@ -26,16 +26,17 @@ This app has no affiliation with Steam and Valve.
 
 * Auto-updating is built-in, and it's fast. (Unless GitHub's server is having a hard time..)
 
-# Requirements
+# Requirements (for executable release)
 * 64-bit Windows
 * Steam installed correctly
-* And that's pretty much it.
+* Visual C++ Redistributable for Visual Studio 2015 or 2017
+  - [Download here](https://aka.ms/vs/16/release/vc_redist.x64.exe)
 
 # How to use
 1. Unpack the archive to desired folder
 2. Run the exe
 **(Because this program is not code-signed, Windows SmartScreen might pop up. Click 'More info' and then 'Run anyway'.)**
-
+ 
 3. Import accounts from Steam or add them manually via Menu > Add accounts
 * Your account names are saved in accounts.yml located in the same folder where exe file is.
 
