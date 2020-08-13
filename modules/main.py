@@ -91,13 +91,14 @@ def legacy_restart(silent=True):
 
 class MainApp(tk.Tk):
     '''Main application'''
-    def __init__(self, version, url, bundle, std_out, std_err):
+    def __init__(self, version, url, bundle, std_out, std_err, after_update):
         sys.stdout = std_out
         sys.stderr = std_err
         self.accounts = acc_getlist()
         self.acc_dict = acc_getdict()
         self.demo_mode = False
         self.BUNDLE = bundle
+        self.after_update = after_update
 
         tk.Tk.__init__(self)
         self['bg'] = 'white'
@@ -270,7 +271,7 @@ class MainApp(tk.Tk):
         self.refresh()
 
     def welcomewindow(self):
-        window = WelcomeWindow(self)
+        window = WelcomeWindow(self, self.after_update)
 
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':

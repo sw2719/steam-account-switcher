@@ -42,7 +42,7 @@ else:
     std_out = sys.__stdout__
     std_err = sys.__stderr__
 
-root = MainApp(VERSION, URL, BUNDLE, std_out, std_err)
+root = MainApp(VERSION, URL, BUNDLE, std_out, std_err, after_update)
 root.after(100, lambda: start_checkupdate(root, VERSION, URL, BUNDLE))
 
 if first_run or after_update:

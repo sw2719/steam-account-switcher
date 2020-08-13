@@ -215,7 +215,7 @@ class ReadonlyEntryWithLabel:
 
 
 class WelcomeWindow(tk.Toplevel):
-    def __init__(self, master):
+    def __init__(self, master, after_update):
         self.master = master
         tk.Toplevel.__init__(self, self.master, bg='white')
         self.title(_('Welcome'))
@@ -244,7 +244,11 @@ class WelcomeWindow(tk.Toplevel):
         self.ok_button = ttk.Button(self, text=_('OK'), command=self.ok)
         self.ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
 
-        self.welcome_label = tk.Label(self, text=_('Thank you for downloading this app.\nClick OK to continue.'), bg='white')
+        if after_update:
+            self.welcome_label = tk.Label(self, text=_('Update completed successfully.\nClick OK to continue.'), bg='white')
+        else:
+            self.welcome_label = tk.Label(self, text=_('Thank you for downloading this app.\nClick OK to continue.'), bg='white')
+
         self.welcome_label.pack(expand=True, fill='both')
 
         self.grab_set()
