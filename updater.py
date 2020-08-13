@@ -18,11 +18,19 @@ def clear():
     os.system('cls')
 
 
+pprint(f'Launch arguments: {" ".join(sys.argv)}')
+
 if '--force-update' in sys.argv and not getattr(sys, 'frozen', False):
     force = True
 elif not getattr(sys, 'frozen', False):
     print()
     pprint("Running on Python interpreter not supported")
+    print()
+    input('    Press Enter to exit...')
+    sys.exit(0)
+elif 'Steam Account Switcher.exe' not in ' '.join(sys.argv):
+    print()
+    pprint("Running updater without main app not supported")
     print()
     input('    Press Enter to exit...')
     sys.exit(0)
@@ -74,8 +82,6 @@ else:
 if 'Steam Account Switcher.exe' not in f.namelist():
     pprint(f.namelist())
     invalidzip()
-
-parent_dir = os.path.dirname(os.getcwd())
 
 print()
 if LOCALE == 'ko_KR':
