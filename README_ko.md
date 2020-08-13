@@ -27,7 +27,7 @@ STEAM은 Valve Corporation 의 등록상표입니다.
 # 요구사항
 * 64비트 Windows
 * Steam 설치됨
-* Visual Studio 2015 or 2017용 Visual C++ 용 재배포 패키지
+* Visual Studio 2015 또는 2017용 Visual C++ 용 재배포 패키지
   - [다운로드](https://aka.ms/vs/16/release/vc_redist.x64.exe)
 
 # 사용 방법
