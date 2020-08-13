@@ -9,7 +9,8 @@ import gettext
 from PIL import Image, ImageTk
 from modules.config import get_config, config_write_value, config_write_dict
 from ruamel.yaml import YAML
-from modules.util import steam64_to_3, steam64_to_32, steam64_to_2, check_steam_dir
+from modules.util import check_steam_dir, get_center_pos
+from modules.steamid import steam64_to_3, steam64_to_32, steam64_to_2
 
 COLOR_DISABLED = '#cfcfcf'
 COLOR_CLICKED = '#363636'
@@ -80,7 +81,7 @@ class AccountButton:
                     raise FileNotFoundError
 
             except FileNotFoundError:
-                img = Image.open(f"asset/default.jpg").resize((40, 40))
+                img = Image.open("asset/default.jpg").resize((40, 40))
 
             self.imgtk = ImageTk.PhotoImage(img)
             self.avatar.create_image(20, 20, image=self.imgtk)
@@ -214,10 +215,12 @@ class ReadonlyEntryWithLabel:
 
 
 class WelcomeWindow(tk.Toplevel):
-    def __init__(self, master, x, y):
+    def __init__(self, master, after_update):
         self.master = master
         tk.Toplevel.__init__(self, self.master, bg='white')
         self.title(_('Welcome'))
+
+        x, y = get_center_pos(self.master, 320, 230)
         self.geometry(f"320x230+{x}+{y}")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.on_window_close)
@@ -241,7 +244,11 @@ class WelcomeWindow(tk.Toplevel):
         self.ok_button = ttk.Button(self, text=_('OK'), command=self.ok)
         self.ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
 
-        self.welcome_label = tk.Label(self, text=_('Thank you for downloading this app.\nClick OK to continue.'), bg='white')
+        if after_update:
+            self.welcome_label = tk.Label(self, text=_('Update completed successfully.\nClick OK to continue.'), bg='white')
+        else:
+            self.welcome_label = tk.Label(self, text=_('Thank you for downloading this app.\nClick OK to continue.'), bg='white')
+
         self.welcome_label.pack(expand=True, fill='both')
 
         self.grab_set()
@@ -406,11 +413,11 @@ def ask_steam_dir():
                 continue
 
 
-def steamid_window(master, username, steamid64, x, y):
+def steamid_window(master, username, steamid64, geometry):
     steamid_window = tk.Toplevel(master, bg='white')
     steamid_window.geometry()
     steamid_window.title('SteamID')
-    steamid_window.geometry(f"270x180+{x}+{y}")
+    steamid_window.geometry(geometry)
     steamid_window.bind('<Escape>', lambda event: steamid_window.destroy())
     steamid_window.resizable(False, False)
     steamid_window.focus()

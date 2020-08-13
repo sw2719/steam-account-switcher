@@ -1,9 +1,9 @@
 import threading
 import psutil
 import os
-from steam.steamid import SteamID
 from modules.reg import fetch_reg
 from modules.config import get_config
+from modules.steamid import steam64_to_32
 
 
 class StoppableThread(threading.Thread):
@@ -55,6 +55,16 @@ def raise_exception():
     raise Exception
 
 
+def get_center_pos(window, width, height):
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+
+    center_x = int((screen_width/2) - (width/2))
+    center_y = int((screen_height/2) - (height/2))
+
+    return center_x, center_y
+
+
 def check_running(process_name):
     '''Check if given process is running and return boolean value.
     :param process_name: Name of process to check
@@ -86,18 +96,6 @@ def steam_running():
             return False
     except psutil.NoSuchProcess:
         return False
-
-
-def steam64_to_3(steamid64):
-    return SteamID(steamid64).as_steam3
-
-
-def steam64_to_32(steamid64):
-    return SteamID(steamid64).as_32
-
-
-def steam64_to_2(steamid64):
-    return SteamID(steamid64).as_steam2
 
 
 def open_screenshot(steamid64, steam_path=get_config('steam_path')):

@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox as msgbox
 import gettext
 import winreg
@@ -12,7 +13,7 @@ from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value
-from modules.util import check_running, steam_running, StoppableThread, open_screenshot, raise_exception, test
+from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos
 from modules.update import start_checkupdate, hide_update, show_update
 from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, ask_steam_dir
 from modules.avatar import download_avatar
@@ -90,31 +91,30 @@ def legacy_restart(silent=True):
 
 class MainApp(tk.Tk):
     '''Main application'''
-    def __init__(self, version, url, bundle, std_out, std_err):
+    def __init__(self, version, url, bundle, std_out, std_err, after_update):
         sys.stdout = std_out
         sys.stderr = std_err
         self.accounts = acc_getlist()
         self.acc_dict = acc_getdict()
         self.demo_mode = False
+        self.BUNDLE = bundle
+        self.after_update = after_update
+
         tk.Tk.__init__(self)
         self['bg'] = 'white'
         self.title(_("Account Switcher"))
 
-        window_width = 310
-        window_height = 472
+        self.window_width = 310
+        self.window_height = 472
 
-        screen_width = self.winfo_screenwidth()
-        screen_height = self.winfo_screenheight()
-
-        self.center_x = int((screen_width/2) - (window_width/2))
-        self.center_y = int((screen_height/2) - (window_height/2))
+        center_x, center_y = get_center_pos(self, self.window_width, self.window_height)
 
         if get_config('last_pos') != '0/0':
             pos_x, pos_y = get_config('last_pos').split('/')
         else:
-            pos_x, pos_y = self.center_x, self.center_y
+            pos_x, pos_y = center_x, center_y
 
-        self.geometry(f'{str(window_width)}x{str(window_height)}+{str(pos_x)}+{str(pos_y)}')
+        self.geometry(f'{str(self.window_width)}x{str(self.window_height)}+{str(pos_x)}+{str(pos_y)}')
         self.resizable(False, False)
         self.protocol('WM_DELETE_WINDOW', self.exit_app)
 
@@ -147,10 +147,10 @@ class MainApp(tk.Tk):
         menubar.add_cascade(label=_("Menu"), menu=menu)
         self.config(menu=menubar)
 
-        if not bundle:
+        if not self.BUNDLE:
             debug_menu = tk.Menu(menubar, tearoff=0)
             debug_menu.add_command(label='Check for updates with debug mode',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, bundle, debug=True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, self.BUNDLE, debug=True)))
             debug_menu.add_command(label='Check for updates without debug mode',
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True)))
             debug_menu.add_command(label='Check for updates (Force update available)',
@@ -165,6 +165,8 @@ class MainApp(tk.Tk):
                                    command=self.toggle_demo)
             debug_menu.add_command(label="Raise exception",
                                    command=raise_exception)
+            debug_menu.add_command(label="Open about window with copyright notice",
+                                   command=lambda: self.about(version, force_copyright=True))
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         self.bottomframe = tk.Frame(self, bg='white')
@@ -245,6 +247,15 @@ class MainApp(tk.Tk):
         geo = self.geometry().split('+')
         return geo[1], geo[2]
 
+    def popup_geometry(self, width, height, multiplier=1):
+        width_delta = (self.window_width - width) // 2
+
+        main_x, main_y = self.get_window_pos()
+        x = int(main_x) + width_delta
+        y = int(main_y) + (25 * multiplier)
+
+        return f'{str(width)}x{str(height)}+{str(x)}+{str(y)}'
+
     def exit_app(self):
         x, y = self.get_window_pos()
         last_pos = f'{x}/{y}'
@@ -260,7 +271,7 @@ class MainApp(tk.Tk):
         self.refresh()
 
     def welcomewindow(self):
-        window = WelcomeWindow(self, str(self.center_x - 5), (self.center_y + 100))
+        window = WelcomeWindow(self, self.after_update)
 
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':
@@ -275,7 +286,7 @@ class MainApp(tk.Tk):
         configwindow.title('')
 
         x, y = self.get_window_pos()
-        configwindow.geometry(f"250x165+{x}+{y}")
+        configwindow.geometry(self.popup_geometry(250, 165))
         configwindow.resizable(False, False)
         configwindow.bind('<Escape>', lambda event: configwindow.destroy())
 
@@ -505,7 +516,7 @@ class MainApp(tk.Tk):
                     menu_dict[username].add_command(label=_('Open screenshots folder'),
                                                     command=lambda steamid64=steam64: open_screenshot(steamid64))
                     menu_dict[username].add_command(label=_('View SteamID'),
-                                                    command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.get_window_pos()[0], self.get_window_pos()[1]))
+                                                    command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.popup_geometry(270, 180)))
                     menu_dict[username].add_command(label=_('Update avatar'),
                                                     command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
                     menu_dict[username].add_separator()
@@ -587,7 +598,7 @@ class MainApp(tk.Tk):
 
         print('Menu refreshed with %s account(s)' % len(self.accounts))
 
-    def update_avatar(self, steamid_list=loginusers()[0]):
+    def update_avatar(self, steamid_list=None):
         self.no_user_frame.destroy()
         self.button_frame.destroy()
         hide_update()
@@ -596,26 +607,35 @@ class MainApp(tk.Tk):
         label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
         label.pack(expand=True)
         self.update()
-        download_avatar(steamid_list)
+
+        if steamid_list:
+            dl_list = steamid_list
+        else:
+            dl_list = []
+            steamid_list, accountname, __ = loginusers()
+
+            for index, steamid in enumerate(steamid_list):
+                if accountname[index] in self.accounts:
+                    dl_list.append(steamid)
+
+        download_avatar(dl_list)
 
         label.destroy()
         self.refresh(no_frame=True)
         self.bottomframe.pack(side='bottom', fill='x')
         show_update()
 
-    def about(self, version):
+    def about(self, version, force_copyright=False):
         '''Open about window'''
 
         if LOCALE == 'fr_FR':
-            h = '200'
+            height = 200
         else:
-            h = '180'
-
-        x, y = self.get_window_pos()
+            height = 180
 
         aboutwindow = tk.Toplevel(self, bg='white')
         aboutwindow.title(_('About'))
-        aboutwindow.geometry(f"360x{h}+{x}+{y}")
+        aboutwindow.geometry(self.popup_geometry(360, height))
         aboutwindow.resizable(False, False)
         aboutwindow.focus()
         aboutwindow.bind('<Escape>', lambda event: aboutwindow.destroy())
@@ -626,13 +646,37 @@ class MainApp(tk.Tk):
             pass
 
         about_disclaimer = tk.Label(aboutwindow, bg='white',
-                                    text=_('Warning: The developer of this application is not responsible for\ndata loss or any other damage from the use of this app.'))
+                                    text=_('Warning: The developer of this application is not responsible for\n' +
+                                           'data loss or any other damage from the use of this app.'))
         about_steam_trademark = tk.Label(aboutwindow, bg='white',
                                          text=_('STEAM is a registered trademark of Valve Corporation.'))
-        copyright_label = tk.Label(aboutwindow, text='Copyright (c) sw2719 | All Rights Reserved\n' +
-                                   'Licensed under the MIT License.', bg='white')
+        if self.BUNDLE or force_copyright:
+            copyright_label = tk.Label(aboutwindow, text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
+                                       'View copyright notice for details', bg='white')
+        else:
+            copyright_label = tk.Label(aboutwindow, text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
+                                       'View LICENSE file for details', bg='white')
         ver = tk.Label(aboutwindow, bg='white',
                        text='Steam Account Switcher | Version ' + version)
+
+        def copyright_notice():
+            cprightwindow = tk.Toplevel(aboutwindow, bg='white')
+            cprightwindow.title(_('Copyright notice'))
+            cprightwindow.geometry(self.popup_geometry(590, 350, multiplier=2))
+            cprightwindow.resizable(False, False)
+            cprightwindow.focus()
+            cprightwindow.bind('<Escape>', lambda event: cprightwindow.destroy())
+
+            ttk.Button(cprightwindow, text=_('Close'), command=cprightwindow.destroy).pack(side='bottom', pady=3)
+            ttk.Separator(cprightwindow, orient=tk.HORIZONTAL).pack(side='bottom', fill='x')
+
+            cpright_text = ScrolledText(cprightwindow, bd=1, relief='flat')
+
+            with open('asset/COPYRIGHT_NOTICE', encoding='utf-8') as txt:
+                cpright_text.insert(tk.CURRENT, txt.read())
+
+            cpright_text.configure(state=tk.DISABLED)
+            cpright_text.pack(side='top', expand=True)
 
         button_frame = tk.Frame(aboutwindow, bg='white')
         button_frame.pack(side='bottom', pady=5)
@@ -644,13 +688,20 @@ class MainApp(tk.Tk):
         button_github = ttk.Button(button_frame,
                                    text=_('GitHub page'),
                                    command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher'))
+        button_copyright = ttk.Button(button_frame,
+                                      text=_('Copyright notice'),
+                                      command=copyright_notice)
+
         about_disclaimer.pack(pady=8)
         about_steam_trademark.pack()
         copyright_label.pack(pady=5)
         ver.pack()
 
         button_close.pack(side='left', padx=2)
-        button_github.pack(side='right', padx=2)
+        button_github.pack(side='left', padx=2)
+
+        if self.BUNDLE or force_copyright:
+            button_copyright.pack(side='left', padx=2)
 
     def refreshwindow(self):
         '''Open remove accounts window'''
@@ -661,8 +712,7 @@ class MainApp(tk.Tk):
             return
         refreshwindow = tk.Toplevel(self, bg='white')
         refreshwindow.title(_("Refresh"))
-        x, y = self.get_window_pos()
-        refreshwindow.geometry(f"230x320+{x}+{y}")
+        refreshwindow.geometry(self.popup_geometry(230, 320))
         refreshwindow.resizable(False, False)
         refreshwindow.bind('<Escape>', lambda event: refreshwindow.destroy())
         refreshwindow.grab_set()
@@ -739,7 +789,7 @@ class MainApp(tk.Tk):
 
             popup = tk.Toplevel(self, bg='white')
             popup.title('')
-            popup.geometry(f"180x100+{str(self.center_x)}+{str(self.center_y)}")
+            popup.geometry(self.popup_geometry(180, 100))
             popup.resizable(False, False)
 
             popup_var = tk.StringVar()
@@ -755,9 +805,6 @@ class MainApp(tk.Tk):
             popup_user.pack()
 
             self.update()
-
-            if steam_running() and not check_running('steam.exe'):
-                setkey('pid', 0, winreg.REG_DWORD, path=r"Software\Valve\Steam\ActiveProcess")
 
             for username in accounts:
                 if username in to_refresh:
@@ -817,7 +864,7 @@ class MainApp(tk.Tk):
 
         addwindow = tk.Toplevel(self, bg='white')
         addwindow.title(_("Add"))
-        addwindow.geometry(f"300x150+{x}+{y}")
+        addwindow.geometry(self.popup_geometry(300, 150))
         addwindow.resizable(False, False)
         addwindow.bind('<Escape>', lambda event: addwindow.destroy())
 
@@ -923,7 +970,7 @@ class MainApp(tk.Tk):
 
         importwindow = tk.Toplevel(self, bg='white')
         importwindow.title(_("Import"))
-        importwindow.geometry(f"280x300+{x}+{y}")
+        importwindow.geometry(self.popup_geometry(280, 300))
         importwindow.resizable(False, False)
         importwindow.grab_set()
         importwindow.focus()
@@ -1039,7 +1086,7 @@ class MainApp(tk.Tk):
 
         orderwindow = tk.Toplevel(self, bg='white')
         orderwindow.title("")
-        orderwindow.geometry(f"220x270+{x}+{y}")
+        orderwindow.geometry(self.popup_geometry(224, 270))
         orderwindow.resizable(False, False)
         orderwindow.bind('<Escape>', lambda event: orderwindow.destroy())
 
@@ -1150,15 +1197,15 @@ class MainApp(tk.Tk):
         last_config = config_dict
 
         if LOCALE == 'fr_FR':
-            width = '330'
+            width = 330
         else:
-            width = '260'
+            width = 260
 
         x, y = self.get_window_pos()
 
         settingswindow = tk.Toplevel(self, bg='white')
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(f"{width}x300+{x}+{y}")  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 300))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 

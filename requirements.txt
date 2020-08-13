@@ -3,7 +3,6 @@ psutil
 requests
 ruamel.yaml
 Pillow
-steam
 pget
 aiohttp
 aiodns
