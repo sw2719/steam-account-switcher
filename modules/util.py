@@ -3,6 +3,7 @@ import psutil
 import os
 from modules.reg import fetch_reg
 from modules.config import get_config
+from modules.steamid import steam64_to_32
 
 
 class StoppableThread(threading.Thread):
