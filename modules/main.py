@@ -648,8 +648,12 @@ class MainApp(tk.Tk):
                                     text=_('Warning: The developer of this application is not responsible for\ndata loss or any other damage from the use of this app.'))
         about_steam_trademark = tk.Label(aboutwindow, bg='white',
                                          text=_('STEAM is a registered trademark of Valve Corporation.'))
-        copyright_label = tk.Label(aboutwindow, text='Copyright (c) sw2719 | All Rights Reserved\n' +
-                                   'Licensed under the MIT License.', bg='white')
+        if self.BUNDLE or force_copyright:
+            copyright_label = tk.Label(aboutwindow, text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
+                                    'View copyright notice for details', bg='white')
+        else:
+            copyright_label = tk.Label(aboutwindow, text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
+                                    'View LICENSE file for details', bg='white')
         ver = tk.Label(aboutwindow, bg='white',
                        text='Steam Account Switcher | Version ' + version)
 
