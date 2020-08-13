@@ -13,7 +13,7 @@ from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value
-from modules.util import check_running, steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos
+from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos
 from modules.update import start_checkupdate, hide_update, show_update
 from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, ask_steam_dir
 from modules.avatar import download_avatar
@@ -246,12 +246,12 @@ class MainApp(tk.Tk):
         geo = self.geometry().split('+')
         return geo[1], geo[2]
 
-    def popup_geometry(self, width, height):
+    def popup_geometry(self, width, height, multiplier=1):
         width_delta = (self.window_width - width) // 2
 
         main_x, main_y = self.get_window_pos()
         x = int(main_x) + width_delta
-        y = int(main_y) + 25
+        y = int(main_y) + (25 * multiplier)
 
         return f'{str(width)}x{str(height)}+{str(x)}+{str(y)}'
 
@@ -656,7 +656,7 @@ class MainApp(tk.Tk):
         def copyright_notice():
             cprightwindow = tk.Toplevel(aboutwindow, bg='white')
             cprightwindow.title(_('Copyright notice'))
-            cprightwindow.geometry(self.popup_geometry(590, 350))
+            cprightwindow.geometry(self.popup_geometry(590, 350, multiplier=2))
             cprightwindow.resizable(False, False)
             cprightwindow.focus()
             cprightwindow.bind('<Escape>', lambda event: cprightwindow.destroy())
@@ -665,7 +665,10 @@ class MainApp(tk.Tk):
             ttk.Separator(cprightwindow, orient=tk.HORIZONTAL).pack(side='bottom', fill='x')
 
             cpright_text = ScrolledText(cprightwindow, bd=1, relief='flat')
-            cpright_text.insert(tk.CURRENT, _('Copyright placeholder.'))
+
+            with open('asset/COPYRIGHT_NOTICE', encoding='utf-8') as txt:
+                cpright_text.insert(tk.CURRENT, txt.read())
+
             cpright_text.configure(state=tk.DISABLED)
             cpright_text.pack(side='top', expand=True)
 
@@ -703,7 +706,6 @@ class MainApp(tk.Tk):
             return
         refreshwindow = tk.Toplevel(self, bg='white')
         refreshwindow.title(_("Refresh"))
-        x, y = self.get_window_pos()
         refreshwindow.geometry(self.popup_geometry(230, 320))
         refreshwindow.resizable(False, False)
         refreshwindow.bind('<Escape>', lambda event: refreshwindow.destroy())
@@ -781,7 +783,7 @@ class MainApp(tk.Tk):
 
             popup = tk.Toplevel(self, bg='white')
             popup.title('')
-            popup.geometry(f"180x100+{str(self.center_x)}+{str(self.center_y)}")
+            popup.geometry(self.popup_geometry(180, 100))
             popup.resizable(False, False)
 
             popup_var = tk.StringVar()
@@ -797,9 +799,6 @@ class MainApp(tk.Tk):
             popup_user.pack()
 
             self.update()
-
-            if steam_running() and not check_running('steam.exe'):
-                setkey('pid', 0, winreg.REG_DWORD, path=r"Software\Valve\Steam\ActiveProcess")
 
             for username in accounts:
                 if username in to_refresh:
