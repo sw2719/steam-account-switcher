@@ -11,15 +11,23 @@ FILES_TO_DELETE = ('libcrypto-1_1.dll', 'libssl-1_1.dll', 'tcl86t.dll', 'tk86t.d
 
 
 def pprint(content):
-    print('    ' + content)
+    print('   ', content)
 
 
-if not getattr(sys, 'frozen', False):
+def clear():
+    os.system('cls')
+
+
+if '--force-update' in sys.argv and not getattr(sys, 'frozen', False):
+    force = True
+elif not getattr(sys, 'frozen', False):
     print()
     pprint("Running on Python interpreter not supported")
     print()
     input('    Press Enter to exit...')
     sys.exit(0)
+else:
+    force = False
 
 
 def invalidzip():
@@ -44,24 +52,27 @@ def invalidzip():
 cwd = os.getcwd()
 
 if LOCALE == 'ko_KR':
-    pprint('Current working directory: ' + cwd)
-    pprint('Verifying update archive...')
-else:
     pprint('현재 작업 디렉토리: ' + cwd)
     pprint('업데이트 압축 파일 확인 중...')
+else:
+    pprint('Current working directory: ' + cwd)
+    pprint('Verifying update archive...')
 
 print()
 archive = os.path.join(cwd, 'update.zip')
 
 if not os.path.isfile(archive) or not zf.is_zipfile(archive):
+    pprint("Error: Archive file doesn't exist or is not a zip file")
     invalidzip()
 else:
     try:
         f = zf.ZipFile(archive, mode='r')
     except zf.BadZipFile:
+        pprint('Error: Bad zip file')
         invalidzip()
 
 if 'Steam Account Switcher.exe' not in f.namelist():
+    pprint(f.namelist())
     invalidzip()
 
 parent_dir = os.path.dirname(os.getcwd())
@@ -84,26 +95,31 @@ for name in os.listdir(os.getcwd()):
         except OSError:
             pass
 
-try:
-    f.extractall(members=(member for member in f.namelist() if 'updater' not in member))  # NOQA
-except Exception:
-    print()
-    if LOCALE == 'ko_KR':
-        pprint('업데이트 도중 오류가 발생하였습니다.')
-        pprint('수동으로 update.zip을 연다음 압축해제 하십시오.')
+while True:
+    try:
+        f.extractall(members=(member for member in f.namelist() if 'updater' not in member))
+        break
+    except OSError:
         print()
-        pprint('----------------------------------------------------------')
-        print()
-        input('    Enter 키를 눌러서 나가기...')
-    else:
-        pprint('Error occured during update process.')
-        pprint('Manually update by extracting update.zip.')
-        print()
-        pprint('----------------------------------------------------------')
-        print()
-        input('    Press Enter to exit...')
-    sys.exit(1)
+        if LOCALE == 'ko_KR':
+            pprint('업데이트 도중 오류가 발생하였습니다.')
+            pprint('다른 앱이 파일을 사용 중이지 않은지 확인하세요.')
+            print()
+            pprint('----------------------------------------------------------')
+            print()
+            input('    다시 시도하려면 Enter키를 누르세요...')
+        else:
+            pprint('Error occured during update process.')
+            pprint('Make sure that other applications are not using any of the files')
+            print()
+            pprint('----------------------------------------------------------')
+            print()
+            input('    Press Enter to try again...')
+        clear()
 
 f.close()
 
-os.execv('Steam Account Switcher.exe', sys.argv)
+if not force:
+    os.execv('Steam Account Switcher.exe', sys.argv)
+else:
+    input('Forced update complete. Press Enter to exit...')
