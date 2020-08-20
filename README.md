@@ -60,7 +60,7 @@ This app has no affiliation with Steam and Valve.
 
 # Source code information
 * All other branches except master are considered as acitve-development branch and might have issues, bugs, WIP features, or might not just work at all.
-* Written in Python 3.8
+* At least Python 3.7 is required.
 * Do not run updater.py in python interpreter. It's designed to run only in frozen environment.
 * Use requirements.txt to install dependencies.
 * Source code is written in English. Translation to other languages is done with gettext.
