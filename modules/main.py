@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+import tkinter.font as tkfont
 from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox as msgbox
 import gettext
@@ -12,7 +13,7 @@ from time import sleep
 from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
-from modules.config import get_config, config_write_dict, config_write_value
+from modules.config import get_config, config_write_dict, config_write_value, system_locale
 from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos
 from modules.update import start_checkupdate, hide_update, show_update
 from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, ask_steam_dir
@@ -127,7 +128,13 @@ class MainApp(tk.Tk):
             ask_steam_dir()
 
         menubar = tk.Menu(self, bg='white')
-        menu = tk.Menu(menubar, tearoff=0)
+
+        if system_locale == 'ko_KR':
+            menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
+            menu = tk.Menu(menubar, tearoff=0, font=menu_font)
+        else:
+            menu = tk.Menu(menubar, tearoff=0)
+
         menu.add_command(label=_('Import accounts from Steam'),
                          command=self.importwindow)
         menu.add_command(label=_("Add accounts"),
