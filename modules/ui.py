@@ -55,7 +55,7 @@ class AccountButton:
         self.master = master
         self.frame = tk.Frame(master, borderwidth=3)
         self.command = command
-        self.frame.config(background='white')
+        self.frame.config(background='white', cursor='hand2')
 
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
@@ -170,7 +170,7 @@ class AccountButton:
         self.enabled = True
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
-        self.frame.config(background='white')
+        self.frame.config(background='white', cursor='hand2')
 
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
@@ -184,7 +184,7 @@ class AccountButton:
         self.enabled = False
         self.frame.unbind('<Button-1>')
         self.frame.unbind('<ButtonRelease-1>')
-        self.frame.config(background=COLOR_DISABLED)
+        self.frame.config(background=COLOR_DISABLED, cursor='arrow')
 
         self.acc_label.unbind('<Button-1>')
         self.acc_label.unbind('<ButtonRelease-1>')
