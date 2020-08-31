@@ -14,7 +14,7 @@ from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, system_locale
-from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos
+from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater
 from modules.update import start_checkupdate, hide_update, show_update
 from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, ask_steam_dir
 from modules.avatar import download_avatar
@@ -174,6 +174,8 @@ class MainApp(tk.Tk):
                                    command=raise_exception)
             debug_menu.add_command(label="Open about window with copyright notice",
                                    command=lambda: self.about(version, force_copyright=True))
+            debug_menu.add_command(label="Launch updater (update.zip required)",
+                                   command=launch_updater)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         self.bottomframe = tk.Frame(self, bg='white')
