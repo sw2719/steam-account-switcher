@@ -285,7 +285,7 @@ class MainApp(tk.Tk):
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':
                 if self.accounts:
-                    download_avatar()
+                    self.update_avatar()
                 self.refresh()
 
         window.bind('<Destroy>', event_function)
@@ -607,15 +607,16 @@ class MainApp(tk.Tk):
 
         print('Menu refreshed with %s account(s)' % len(self.accounts))
 
-    def update_avatar(self, steamid_list=None):
-        self.no_user_frame.destroy()
-        self.button_frame.destroy()
-        hide_update()
-        self.bottomframe.pack_forget()
+    def update_avatar(self, steamid_list=None, no_ui=False):
+        if not no_ui:
+            self.no_user_frame.destroy()
+            self.button_frame.destroy()
+            hide_update()
+            self.bottomframe.pack_forget()
 
-        label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
-        label.pack(expand=True)
-        self.update()
+            label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
+            label.pack(expand=True)
+            self.update()
 
         if steamid_list:
             dl_list = steamid_list
@@ -629,10 +630,11 @@ class MainApp(tk.Tk):
 
         download_avatar(dl_list)
 
-        label.destroy()
-        self.refresh(no_frame=True)
-        self.bottomframe.pack(side='bottom', fill='x')
-        show_update()
+        if not no_ui:
+            label.destroy()
+            self.refresh(no_frame=True)
+            self.bottomframe.pack(side='bottom', fill='x')
+            show_update()
 
     def about(self, version, force_copyright=False):
         '''Open about window'''
@@ -1371,7 +1373,7 @@ class MainApp(tk.Tk):
 
             if last_config['show_avatar'] == 'false' and 'selected' in avatar_chkb.state():
                 if msgbox.askyesno('', _('Do you want to download avatar images now?'), parent=settingswindow):
-                    download_avatar(loginusers()[0])
+                    self.update_avatar(no_ui=True)
 
             self.refresh()
             if last_config['locale'] != locale[locale_cb.current()]:
