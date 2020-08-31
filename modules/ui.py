@@ -388,7 +388,7 @@ class WelcomeWindow(tk.Toplevel):
         self.finish_label.pack(expand=True, fill='both')
 
         self.shortcut_chkb = ttk.Checkbutton(self,
-                                             text=_('Create desktop shortcut'),
+                                             text=_('Create a desktop shortcut'),
                                              style='welcome.TCheckbutton')
         self.shortcut_chkb.state(['!alternate'])
         self.shortcut_chkb.state(['!selected'])
