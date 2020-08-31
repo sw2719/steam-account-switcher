@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+import tkinter.font as tkfont
 from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox as msgbox
 import gettext
@@ -12,8 +13,8 @@ from time import sleep
 from ruamel.yaml import YAML
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
-from modules.config import get_config, config_write_dict, config_write_value
-from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos
+from modules.config import get_config, config_write_dict, config_write_value, system_locale
+from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update
 from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, ask_steam_dir
 from modules.avatar import download_avatar
@@ -127,7 +128,13 @@ class MainApp(tk.Tk):
             ask_steam_dir()
 
         menubar = tk.Menu(self, bg='white')
-        menu = tk.Menu(menubar, tearoff=0)
+
+        if system_locale == 'ko_KR':
+            menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
+            menu = tk.Menu(menubar, tearoff=0, font=menu_font)
+        else:
+            menu = tk.Menu(menubar, tearoff=0)
+
         menu.add_command(label=_('Import accounts from Steam'),
                          command=self.importwindow)
         menu.add_command(label=_("Add accounts"),
@@ -167,6 +174,10 @@ class MainApp(tk.Tk):
                                    command=raise_exception)
             debug_menu.add_command(label="Open about window with copyright notice",
                                    command=lambda: self.about(version, force_copyright=True))
+            debug_menu.add_command(label="Launch updater (update.zip required)",
+                                   command=launch_updater)
+            debug_menu.add_command(label="Create shortcut",
+                                   command=create_shortcut)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         self.bottomframe = tk.Frame(self, bg='white')
@@ -276,7 +287,7 @@ class MainApp(tk.Tk):
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':
                 if self.accounts:
-                    download_avatar()
+                    self.update_avatar()
                 self.refresh()
 
         window.bind('<Destroy>', event_function)
@@ -598,15 +609,16 @@ class MainApp(tk.Tk):
 
         print('Menu refreshed with %s account(s)' % len(self.accounts))
 
-    def update_avatar(self, steamid_list=None):
-        self.no_user_frame.destroy()
-        self.button_frame.destroy()
-        hide_update()
-        self.bottomframe.pack_forget()
+    def update_avatar(self, steamid_list=None, no_ui=False):
+        if not no_ui:
+            self.no_user_frame.destroy()
+            self.button_frame.destroy()
+            hide_update()
+            self.bottomframe.pack_forget()
 
-        label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
-        label.pack(expand=True)
-        self.update()
+            label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
+            label.pack(expand=True)
+            self.update()
 
         if steamid_list:
             dl_list = steamid_list
@@ -620,10 +632,11 @@ class MainApp(tk.Tk):
 
         download_avatar(dl_list)
 
-        label.destroy()
-        self.refresh(no_frame=True)
-        self.bottomframe.pack(side='bottom', fill='x')
-        show_update()
+        if not no_ui:
+            label.destroy()
+            self.refresh(no_frame=True)
+            self.bottomframe.pack(side='bottom', fill='x')
+            show_update()
 
     def about(self, version, force_copyright=False):
         '''Open about window'''
@@ -1362,7 +1375,7 @@ class MainApp(tk.Tk):
 
             if last_config['show_avatar'] == 'false' and 'selected' in avatar_chkb.state():
                 if msgbox.askyesno('', _('Do you want to download avatar images now?'), parent=settingswindow):
-                    download_avatar(loginusers()[0])
+                    self.update_avatar(no_ui=True)
 
             self.refresh()
             if last_config['locale'] != locale[locale_cb.current()]:

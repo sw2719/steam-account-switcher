@@ -5,7 +5,6 @@ import os
 import sys
 import asyncio
 from io import BytesIO
-from modules.account import loginusers
 
 API_KEY = '88CA6F49C590BF8B498AF4FCFB9964F1'
 
@@ -13,7 +12,7 @@ if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.starts
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-def download_avatar(steamid_list=loginusers()[0]):
+def download_avatar(steamid_list):
     '''Downloads avatar images through Steam API.
     param steamid_list: A list containing steamid64'''
 

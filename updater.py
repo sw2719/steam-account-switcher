@@ -28,12 +28,6 @@ elif not getattr(sys, 'frozen', False):
     print()
     input('    Press Enter to exit...')
     sys.exit(0)
-elif 'Steam Account Switcher.exe' not in ' '.join(sys.argv):
-    print()
-    pprint("Running updater without main app not supported")
-    print()
-    input('    Press Enter to exit...')
-    sys.exit(0)
 else:
     force = False
 

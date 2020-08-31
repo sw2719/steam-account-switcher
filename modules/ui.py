@@ -9,7 +9,7 @@ import gettext
 from PIL import Image, ImageTk
 from modules.config import get_config, config_write_value, config_write_dict
 from ruamel.yaml import YAML
-from modules.util import check_steam_dir, get_center_pos
+from modules.util import check_steam_dir, get_center_pos, create_shortcut
 from modules.steamid import steam64_to_3, steam64_to_32, steam64_to_2
 
 COLOR_DISABLED = '#cfcfcf'
@@ -55,7 +55,7 @@ class AccountButton:
         self.master = master
         self.frame = tk.Frame(master, borderwidth=3)
         self.command = command
-        self.frame.config(background='white')
+        self.frame.config(background='white', cursor='hand2')
 
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
@@ -170,7 +170,7 @@ class AccountButton:
         self.enabled = True
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
-        self.frame.config(background='white')
+        self.frame.config(background='white', cursor='hand2')
 
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
@@ -184,7 +184,7 @@ class AccountButton:
         self.enabled = False
         self.frame.unbind('<Button-1>')
         self.frame.unbind('<ButtonRelease-1>')
-        self.frame.config(background=COLOR_DISABLED)
+        self.frame.config(background=COLOR_DISABLED, cursor='arrow')
 
         self.acc_label.unbind('<Button-1>')
         self.acc_label.unbind('<ButtonRelease-1>')
@@ -220,8 +220,8 @@ class WelcomeWindow(tk.Toplevel):
         tk.Toplevel.__init__(self, self.master, bg='white')
         self.title(_('Welcome'))
 
-        x, y = get_center_pos(self.master, 320, 230)
-        self.geometry(f"320x230+{x}+{y}")
+        self.x, self.y = get_center_pos(self.master, 320, 230)
+        self.geometry(f"320x230+{self.x}+{self.y}")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.on_window_close)
         self.focus()
@@ -297,6 +297,9 @@ class WelcomeWindow(tk.Toplevel):
             self.save()
             self.page_3()
         elif self.active_page == 3:
+            if 'selected' in self.shortcut_chkb.state():
+                create_shortcut()
+
             self.ok_button['text'] = _('Please wait...')
             self.ok_button['state'] = 'disabled'
             self.focus()
@@ -376,12 +379,21 @@ class WelcomeWindow(tk.Toplevel):
 
     def page_3(self):
         self.active_page = 3
+        self.geometry(f"320x250+{self.x}+{self.y}")
         self.top_label['text'] = _('Good to go!')
 
         # tkinter doesn't like three quotes string, so... yeah.
         self.finish_label = tk.Label(self, bg='white',
                                      text=_("Add or import accounts via Menu.\nRight click on accounts to see more options.\n\nYou can change settings in Menu > Settings\nif you don't like the settings you just set.\n\nPlease read GitHub README's How to use-4\nif you are using this app for first time.\n\nYou can open GitHub repo via Menu > About."))
         self.finish_label.pack(expand=True, fill='both')
+
+        self.shortcut_chkb = ttk.Checkbutton(self,
+                                             text=_('Create a desktop shortcut'),
+                                             style='welcome.TCheckbutton')
+        self.shortcut_chkb.state(['!alternate'])
+        self.shortcut_chkb.state(['!selected'])
+
+        self.shortcut_chkb.pack(anchor='center', pady=(3, 1))
 
     def save(self):
         dump_dict = {'locale': get_config('locale'),
