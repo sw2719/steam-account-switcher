@@ -3,6 +3,7 @@ import psutil
 import os
 import zipfile as zf
 import sys
+import winshell
 from modules.reg import fetch_reg
 from modules.config import get_config
 from modules.steamid import steam64_to_32
@@ -27,6 +28,15 @@ def check_steam_dir():
         return True
     else:
         return False
+
+
+def create_shortcut():
+    desktop = winshell.desktop()
+
+    with winshell.shortcut(os.path.join(desktop, "Steam Account Switcher.lnk")) as shortcut:
+        shortcut.path = sys.argv[0]
+        shortcut.icon = sys.argv[0], 0
+        shortcut.working_directory = os.getcwd()
 
 
 def launch_updater():
