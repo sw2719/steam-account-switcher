@@ -12,9 +12,18 @@ from ruamel.yaml import YAML
 from modules.util import check_steam_dir, get_center_pos, create_shortcut
 from modules.steamid import steam64_to_3, steam64_to_32, steam64_to_2
 
+dark = True
+
+COLOR_TEXT = 'black'
+COLOR_TEXT_DISABLED = 'black'
+COLOR_TEXT_CLICKED = 'white'
+COLOR_NORMAL = 'white'
 COLOR_DISABLED = '#cfcfcf'
-COLOR_CLICKED = '#363636'
+COLOR_CLICKED = '#0078d7'
 COLOR_HOVER = '#f2f2f2'
+COLOR_BTN_CLICKED = '#1c1c1c'
+COLOR_BTN_HOVER = '#262626'
+
 yaml = YAML()
 
 t = gettext.translation('steamswitcher',
@@ -55,7 +64,7 @@ class AccountButton:
         self.master = master
         self.frame = tk.Frame(master, borderwidth=3)
         self.command = command
-        self.frame.config(background='white', cursor='hand2')
+        self.frame.config(background=COLOR_NORMAL, cursor='hand2')
 
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
@@ -65,7 +74,6 @@ class AccountButton:
 
         self.onbutton = False
         self.clicked = False
-        self.onpress = False
         self.enabled = True
         self.avatar = None
 
@@ -85,21 +93,21 @@ class AccountButton:
 
             self.imgtk = ImageTk.PhotoImage(img)
             self.avatar.create_image(20, 20, image=self.imgtk)
-            self.avatar.pack(side='left', padx=(2, 3), pady=0)
+            self.avatar.pack(side='left', padx=(1, 3), pady=0)
 
             self.avatar.bind('<Button-1>', lambda event: self.__click())
             self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release())
             self.avatar.bind('<Button-3>', rightcommand)
 
         self.acc_label = ttk.Label(self.frame, text=username, font=username_font)
-        self.acc_label.config(background='white')
+        self.acc_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
         self.acc_label.pack(anchor='w', padx=(3, 0))
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.acc_label.bind('<Button-3>', rightcommand)
 
         self.profile_label = ttk.Label(self.frame, text=profilename)
-        self.profile_label.config(background='white')
+        self.profile_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
         self.profile_label.pack(anchor='w', padx=(3, 0))
         self.profile_label.bind('<Button-1>', lambda event: self.__click())
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
@@ -116,8 +124,8 @@ class AccountButton:
     def color_clicked(self):
         self.frame.config(background=COLOR_CLICKED)
 
-        self.acc_label.config(background=COLOR_CLICKED, foreground='white')
-        self.profile_label.config(background=COLOR_CLICKED, foreground='white')
+        self.acc_label.config(background=COLOR_CLICKED, foreground=COLOR_TEXT_CLICKED)
+        self.profile_label.config(background=COLOR_CLICKED, foreground=COLOR_TEXT_CLICKED)
 
     def color_hover(self):
         self.frame.config(background=COLOR_HOVER)
@@ -126,10 +134,10 @@ class AccountButton:
         self.profile_label.config(background=COLOR_HOVER)
 
     def color_normal(self):
-        self.frame.config(background='white')
+        self.frame.config(background=COLOR_NORMAL)
 
-        self.acc_label.config(background='white', foreground='black')
-        self.profile_label.config(background='white', foreground='black')
+        self.acc_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
+        self.profile_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
 
     def __click(self):
         self.clicked = True
@@ -170,15 +178,15 @@ class AccountButton:
         self.enabled = True
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
-        self.frame.config(background='white', cursor='hand2')
+        self.frame.config(background=COLOR_NORMAL, cursor='hand2')
 
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
-        self.acc_label.config(background='white')
+        self.acc_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
 
         self.profile_label.bind('<Button-1>', lambda event: self.__click())
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
-        self.profile_label.config(background='white')
+        self.profile_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
 
     def disable(self):
         self.enabled = False
@@ -188,11 +196,11 @@ class AccountButton:
 
         self.acc_label.unbind('<Button-1>')
         self.acc_label.unbind('<ButtonRelease-1>')
-        self.acc_label.config(background=COLOR_DISABLED)
+        self.acc_label.config(background=COLOR_DISABLED, foreground=COLOR_TEXT_DISABLED)
 
         self.profile_label.unbind('<Button-1>')
         self.profile_label.unbind('<ButtonRelease-1>')
-        self.profile_label.config(background=COLOR_DISABLED)
+        self.profile_label.config(background=COLOR_DISABLED, foreground=COLOR_TEXT_DISABLED)
 
     def pack(self, **kw):
         self.frame.pack(**kw)
@@ -405,6 +413,109 @@ class WelcomeWindow(tk.Toplevel):
                      'steam_path': get_config('steam_path')}
 
         config_write_dict(dump_dict)
+
+
+class CreateToolTip(object):
+    '''
+    create a tooltip for a given widget
+    '''
+    def __init__(self, widget, text='widget info'):
+        self.widget = widget
+        self.text = text
+        self.widget.bind("<Enter>", self.enter)
+        self.widget.bind("<Leave>", self.close)
+
+    def enter(self, event=None):
+        x = y = 0
+        x, y, cx, cy = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx()
+        y += self.widget.winfo_rooty() + 30
+
+        self.win = tk.Toplevel(self.widget)
+        self.win.wm_overrideredirect(True)
+
+        label = tk.Label(self.win, text=self.text, justify='left',
+                         background='white', relief='solid', borderwidth=1)
+        label.pack(ipadx=1)
+
+        self.win.wm_geometry("+%d+%d" % (x, y))
+
+    def close(self, event=None):
+        if self.win:
+            self.win.destroy()
+
+
+class ImageButton(tk.Frame):
+    def __init__(self, master, image_path, command):
+        self.bg = master['background']
+        self.command = command
+        self.onbutton = False
+        self.clicked = False
+        self.onpress = False
+
+        super().__init__(master, background=self.bg)
+        self.canvas = tk.Canvas(self, width=28, height=28, bg=self.bg, bd=0, highlightthickness=0)
+
+        img = Image.open(image_path).resize((28, 28))
+        imgtk = ImageTk.PhotoImage(img)
+        self.label = tk.Label(self, image=imgtk)
+        self.label.pack()
+
+        self.bind('<Button-1>', lambda event: self.__click())
+        self.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.canvas.bind('<Button-1>', lambda event: self.__click())
+        self.canvas.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.canvas.bind('<Enter>', lambda event: self.__enter())
+        self.canvas.bind('<Leave>', lambda event: self.__leave())
+
+        CreateToolTip(self, 'Exit application.')
+
+    def check_cursor(self, event):
+        widget = event.widget.winfo_containing(event.x_root, event.y_root)
+
+        if widget in (self, self.canvas):
+            self.__enter()
+        else:
+            self.__leave()
+
+    def color_clicked(self):
+        self['bg'] = COLOR_BTN_CLICKED
+        self.canvas['bg'] = COLOR_BTN_CLICKED
+
+    def color_hover(self):
+        self['bg'] = COLOR_BTN_HOVER
+        self.canvas['bg'] = COLOR_BTN_HOVER
+
+    def color_normal(self):
+        self['bg'] = self.bg
+        self.canvas['bg'] = self.bg
+
+    def __click(self):
+        self.clicked = True
+        self.color_clicked()
+        self.bind('<B1-Motion>', self.check_cursor)
+        self.canvas.bind('<B1-Motion>', self.check_cursor)
+
+    def __release(self):
+        self.clicked = False
+        self.color_normal()
+        self.unbind('<B1-Motion>')
+        self.canvas.unbind('<B1-Motion>')
+
+        if self.command and self.onbutton:
+            self.command()
+
+    def __enter(self):
+        self.onbutton = True
+
+        if self.clicked:
+            self.color_clicked()
+        else:
+            self.color_hover()
+
+    def __leave(self):
+        self.onbutton = False
+        self.color_normal()
 
 
 def ask_steam_dir():

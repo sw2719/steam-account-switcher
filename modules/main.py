@@ -16,7 +16,7 @@ from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, system_locale
 from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update
-from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, ask_steam_dir
+from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, CreateToolTip, ImageButton, ask_steam_dir
 from modules.avatar import download_avatar
 
 yaml = YAML()
@@ -28,6 +28,13 @@ t = gettext.translation('steamswitcher',
                         languages=[LOCALE],
                         fallback=True)
 _ = t.gettext
+
+BACKGROUND_COLOR = 'white'
+UPPERFRAME_COLOR = 'white'
+BOTTOMFRAME_COLOR = 'white'
+TEXT_COLOR = 'black'
+AUTOLOGIN_ON_COLOR = 'green'
+AUTOLOGIN_OFF_COLOR = 'red'
 
 
 def legacy_restart(silent=True):
@@ -102,11 +109,11 @@ class MainApp(tk.Tk):
         self.after_update = after_update
 
         tk.Tk.__init__(self)
-        self['bg'] = 'white'
+        self['bg'] = BACKGROUND_COLOR
         self.title(_("Account Switcher"))
 
         self.window_width = 310
-        self.window_height = 472
+        self.window_height = 465
 
         center_x, center_y = get_center_pos(self, self.window_width, self.window_height)
 
@@ -180,23 +187,22 @@ class MainApp(tk.Tk):
                                    command=create_shortcut)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
-        self.bottomframe = tk.Frame(self, bg='white')
+        self.bottomframe = tk.Frame(self, bg=BOTTOMFRAME_COLOR)
         self.bottomframe.pack(side='bottom', fill='x')
 
         def toggleAutologin():
             '''Toggle autologin registry value between 0 and 1'''
             if fetch_reg('RememberPassword') == 1:
-                value = 0
+                setkey('RememberPassword', 0, winreg.REG_DWORD)
             elif fetch_reg('RememberPassword') == 0:
-                value = 1
-            setkey('RememberPassword', value, winreg.REG_DWORD)
+                setkey('RememberPassword', 1, winreg.REG_DWORD)
 
             if fetch_reg('RememberPassword') == 1:
                 self.auto_var.set(_('Auto-login Enabled'))
-                self.autolabel['fg'] = 'green'
+                self.autolabel['fg'] = AUTOLOGIN_ON_COLOR
             else:
                 self.auto_var.set(_('Auto-login Disabled'))
-                self.autolabel['fg'] = 'red'
+                self.autolabel['fg'] = AUTOLOGIN_OFF_COLOR
 
         self.restartbutton_text = tk.StringVar()
 
@@ -218,39 +224,45 @@ class MainApp(tk.Tk):
                                     textvariable=self.restartbutton_text,
                                     command=self.exit_after_restart)
 
+        CreateToolTip(button_toggle, _('Turn on/off Steam autologin.'))
+        CreateToolTip(button_exit, _('Exit application.'))
+        CreateToolTip(button_restart, 'Restart Steam and exit application if set to.')
+
         button_toggle.pack(side='left', padx=3, pady=3)
         button_exit.pack(side='left', pady=3)
         button_restart.pack(side='right', padx=3, pady=3, fill='x', expand=True)
 
         self.button_dict = {}
 
-        upper_frame = tk.Frame(self, bg='white')
-        upper_frame.pack(side='top', fill='x')
+        self.upper_frame = tk.Frame(self, bg=UPPERFRAME_COLOR)
+        self.upper_frame.pack(side='top', fill='x')
 
-        self.button_frame = tk.Frame(self, bg='white')
+        self.button_frame = tk.Frame(self, bg=BACKGROUND_COLOR)
         self.button_frame.pack(side='top', fill='both', expand=True)
 
-        userlabel_1 = tk.Label(upper_frame, text=_('Current Auto-login user:'), bg='white')
+        userlabel_1 = tk.Label(self.upper_frame, text=_('Current Auto-login user:'), bg=UPPERFRAME_COLOR, fg=TEXT_COLOR)
         userlabel_1.pack(side='top')
 
         self.user_var = tk.StringVar()
         self.user_var.set(fetch_reg('AutoLoginUser'))
 
-        userlabel_2 = tk.Label(upper_frame, textvariable=self.user_var, bg='white')
+        userlabel_2 = tk.Label(self.upper_frame, textvariable=self.user_var, bg=UPPERFRAME_COLOR, fg=TEXT_COLOR)
         userlabel_2.pack(side='top', pady=2)
 
         self.auto_var = tk.StringVar()
 
         if fetch_reg('RememberPassword') == 1:
             self.auto_var.set(_('Auto-login Enabled'))
-            auto_color = 'green'
+            auto_color = AUTOLOGIN_ON_COLOR
         else:
             self.auto_var.set(_('Auto-login Disabled'))
-            auto_color = 'red'
+            auto_color = AUTOLOGIN_OFF_COLOR
 
-        self.autolabel = tk.Label(upper_frame, textvariable=self.auto_var, bg='white', fg=auto_color)
+        self.autolabel = tk.Label(self.upper_frame, textvariable=self.auto_var, bg=UPPERFRAME_COLOR, fg=auto_color)
         self.autolabel.pack(side='top')
-        ttk.Separator(upper_frame, orient='horizontal').pack(fill='x')
+        shadow = tk.Frame(self.upper_frame, bg='grey')
+        shadow.pack(fill='x')
+        #ttk.Separator(upper_frame, orient='horizontal').pack(fill='x')
 
         self.draw_button()
 
@@ -461,11 +473,11 @@ class MainApp(tk.Tk):
                     self.button_dict[x].disable()
 
                 self.button_dict[x].pack(fill='x')
-                ttk.Separator(buttonframe, orient='horizontal').pack(fill='x')
+                tk.Frame(buttonframe, bg='#c4c4c4').pack(fill='x')
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
-            h = 50 * 8
+            h = 49 * 8
             canvas.create_window((0, 0), height=h, width=310, window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
@@ -511,12 +523,18 @@ class MainApp(tk.Tk):
                         steam64 = steam64_list[i]
                         image = steam64
                     else:
+                        steam64 = None
                         image = 'default'
 
                     profilename = profilename[:30]
 
                 # We have to make a menu for every account! Sounds ridiculous? Me too.
-                menu_dict[username] = tk.Menu(self, tearoff=0)
+                if system_locale == 'ko_KR':
+                    menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
+                    menu_dict[username] = tk.Menu(self, tearoff=0, font=menu_font)
+                else:
+                    menu_dict[username] = tk.Menu(self, tearoff=0)
+
                 menu_dict[username].add_command(label=_("Set as auto-login account"),
                                                 command=lambda name=username: self.button_func(name))
                 menu_dict[username].add_separator()
@@ -551,11 +569,11 @@ class MainApp(tk.Tk):
                     self.button_dict[username].disable()
 
                 self.button_dict[username].pack(fill='x')
-                ttk.Separator(buttonframe, orient='horizontal').pack(fill='x')
+                tk.Frame(buttonframe, bg='#c4c4c4').pack(fill='x')
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
-            h = 50 * len(self.accounts)
+            h = 49 * len(self.accounts)
             canvas.create_window((0, 0), height=h, width=295, window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
@@ -1313,6 +1331,7 @@ class MainApp(tk.Tk):
                                         text=_('Exit app after Steam is restarted'))
 
         autoexit_chkb.state(['!alternate'])
+
         if config_dict['autoexit'] == 'true':
             autoexit_chkb.state(['selected'])
         else:
