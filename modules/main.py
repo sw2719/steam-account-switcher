@@ -16,7 +16,7 @@ from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, system_locale
 from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update
-from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, CreateToolTip, ImageButton, ask_steam_dir
+from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, CreateToolTip, ask_steam_dir
 from modules.avatar import download_avatar
 
 yaml = YAML()
@@ -262,7 +262,6 @@ class MainApp(tk.Tk):
         self.autolabel.pack(side='top')
         shadow = tk.Frame(self.upper_frame, bg='grey')
         shadow.pack(fill='x')
-        #ttk.Separator(upper_frame, orient='horizontal').pack(fill='x')
 
         self.draw_button()
 
@@ -628,13 +627,13 @@ class MainApp(tk.Tk):
         print('Menu refreshed with %s account(s)' % len(self.accounts))
 
     def update_avatar(self, steamid_list=None, no_ui=False):
+        label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
+
         if not no_ui:
             self.no_user_frame.destroy()
             self.button_frame.destroy()
             hide_update()
             self.bottomframe.pack_forget()
-
-            label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
             label.pack(expand=True)
             self.update()
 
@@ -1364,7 +1363,7 @@ class MainApp(tk.Tk):
 
             if radio_var.get() == 1:
                 mode = 'express'
-            elif radio_var.get() == 0:
+            else:
                 mode = 'normal'
 
             if 'selected' in soft_chkb.state():
