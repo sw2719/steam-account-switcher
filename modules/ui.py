@@ -6,13 +6,12 @@ from tkinter import filedialog
 import os
 import sys
 import gettext
+import colour
 from PIL import Image, ImageTk
 from modules.config import get_config, config_write_value, config_write_dict
 from ruamel.yaml import YAML
 from modules.util import check_steam_dir, get_center_pos, create_shortcut
 from modules.steamid import steam64_to_3, steam64_to_32, steam64_to_2
-
-dark = True
 
 COLOR_TEXT = 'black'
 COLOR_TEXT_DISABLED = 'black'
@@ -21,6 +20,7 @@ COLOR_NORMAL = 'white'
 COLOR_DISABLED = '#cfcfcf'
 COLOR_CLICKED = '#0078d7'
 COLOR_HOVER = '#f2f2f2'
+COLOR_ON_CURSOR_EXIT = '#c7d6ed'
 COLOR_BTN_CLICKED = '#1c1c1c'
 COLOR_BTN_HOVER = '#262626'
 
@@ -31,6 +31,28 @@ t = gettext.translation('steamswitcher',
                         languages=[get_config('locale')],
                         fallback=True)
 _ = t.gettext
+
+
+def color_fade(widget, **kw):
+    if not getattr(widget, '_after_ids', None):
+        widget._after_ids = {}
+
+    widget.after_cancel(widget._after_ids.get(list(kw)[0], ' '))
+
+    color_a = tuple(c / 65535 for c in widget.winfo_rgb(widget[list(kw)[0]]))
+    color_b = tuple(c / 65535 for c in widget.winfo_rgb(list(kw.values())[0]))
+
+    colors = tuple(colour.rgb2hex(color, force_long=True) for color in colour.color_scale(color_a, color_b, 70))
+
+    def update_widget_after(count=0):
+        if len(colors) - 1 <= count:
+            return
+
+        else:
+            widget.config({list(kw)[0]: colors[count]})
+            widget._after_ids.update({list(kw)[0]: widget.after(1, update_widget_after, count+1)})
+
+    update_widget_after()
 
 
 class DragDropListbox(tk.Listbox):
@@ -122,29 +144,42 @@ class AccountButton:
             self.__leave()
 
     def color_clicked(self):
-        self.frame.config(background=COLOR_CLICKED)
-
-        self.acc_label.config(background=COLOR_CLICKED, foreground=COLOR_TEXT_CLICKED)
-        self.profile_label.config(background=COLOR_CLICKED, foreground=COLOR_TEXT_CLICKED)
+        color_fade(self.frame, background=COLOR_CLICKED)
+        color_fade(self.acc_label, background=COLOR_CLICKED)
+        color_fade(self.acc_label, foreground='white')
+        color_fade(self.profile_label, background=COLOR_CLICKED)
+        color_fade(self.profile_label, foreground='white')
 
     def color_hover(self):
-        self.frame.config(background=COLOR_HOVER)
-
-        self.acc_label.config(background=COLOR_HOVER)
-        self.profile_label.config(background=COLOR_HOVER)
+        color_fade(self.frame, background=COLOR_HOVER)
+        color_fade(self.acc_label, background=COLOR_HOVER)
+        color_fade(self.profile_label, background=COLOR_HOVER)
 
     def color_normal(self):
-        self.frame.config(background=COLOR_NORMAL)
+        color_fade(self.frame, background=COLOR_NORMAL)
+        color_fade(self.acc_label, background=COLOR_NORMAL)
+        color_fade(self.acc_label, foreground=COLOR_TEXT)
+        color_fade(self.profile_label, background=COLOR_NORMAL)
+        color_fade(self.profile_label, foreground=COLOR_TEXT)
 
-        self.acc_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
-        self.profile_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
+    def color_on_cursor_exit(self):
+        color_fade(self.frame, background=COLOR_ON_CURSOR_EXIT)
+        color_fade(self.acc_label, background=COLOR_ON_CURSOR_EXIT)
+        color_fade(self.acc_label, foreground=COLOR_TEXT)
+        color_fade(self.profile_label, background=COLOR_ON_CURSOR_EXIT)
+        color_fade(self.profile_label, foreground=COLOR_TEXT)
 
     def __click(self):
         self.clicked = True
         self.color_clicked()
+
+        # This method of checking cursor is ridiculously CPU intensive (releatively to other parts of the application)
+        # It checks cursor location every cursor movement while MB1 is pressed.
+        # Enter and leave event don't work properly with mouse button held down so I had to do it this way.
         self.frame.bind('<B1-Motion>', self.check_cursor)
         self.acc_label.bind('<B1-Motion>', self.check_cursor)
         self.profile_label.bind('<B1-Motion>', self.check_cursor)
+
         if self.avatar:
             self.avatar.bind('<B1-Motion>', self.check_cursor)
 
@@ -171,7 +206,9 @@ class AccountButton:
     def __leave(self):
         self.onbutton = False
 
-        if self.clicked or self.enabled:
+        if self.clicked:
+            self.color_on_cursor_exit()
+        elif self.enabled:
             self.color_normal()
 
     def enable(self):
@@ -188,23 +225,204 @@ class AccountButton:
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.profile_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
 
-    def disable(self):
+    def disable(self, no_fade=False):
         self.enabled = False
         self.frame.unbind('<Button-1>')
         self.frame.unbind('<ButtonRelease-1>')
-        self.frame.config(background=COLOR_DISABLED, cursor='arrow')
+        self.frame.config(cursor='arrow')
 
         self.acc_label.unbind('<Button-1>')
-        self.acc_label.unbind('<ButtonRelease-1>')
-        self.acc_label.config(background=COLOR_DISABLED, foreground=COLOR_TEXT_DISABLED)
-
         self.profile_label.unbind('<Button-1>')
         self.profile_label.unbind('<ButtonRelease-1>')
-        self.profile_label.config(background=COLOR_DISABLED, foreground=COLOR_TEXT_DISABLED)
+
+        if no_fade:
+            self.frame.config(background=COLOR_DISABLED)
+            self.acc_label.config(background=COLOR_DISABLED, foreground=COLOR_TEXT_DISABLED)
+            self.profile_label.config(background=COLOR_DISABLED, foreground=COLOR_TEXT_DISABLED)
+        else:
+            color_fade(self.frame, background=COLOR_DISABLED)
+            color_fade(self.acc_label, background=COLOR_DISABLED)
+            color_fade(self.acc_label, foreground=COLOR_TEXT_DISABLED)
+            color_fade(self.profile_label, background=COLOR_DISABLED)
+            color_fade(self.profile_label, foreground=COLOR_TEXT_DISABLED)
 
     def pack(self, **kw):
         self.frame.pack(**kw)
 
+class AccountButtonGrid:
+    def __init__(self, master, username, profilename, command=None, rightcommand=None, image='default'):
+        self.master = master
+        self.frame = tk.Frame(master, borderwidth=3, width=84, height=100)
+        self.command = command
+        self.frame.config(background=COLOR_NORMAL, cursor='hand2')
+        self.frame.pack_propagate(0)
+
+        self.frame.bind('<Button-1>', lambda event: self.__click())
+        self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.frame.bind('<Button-3>', rightcommand)
+        self.frame.bind('<Enter>', lambda event: self.__enter())
+        self.frame.bind('<Leave>', lambda event: self.__leave())
+
+        self.onbutton = False
+        self.clicked = False
+        self.enabled = True
+        self.avatar = None
+        size = 48
+
+        if get_config('show_avatar') == 'true':
+            self.avatar = tk.Canvas(self.frame, width=size, height=size, bd=0, highlightthickness=0)
+
+            try:
+                if image != 'default':
+                    img = Image.open(f"avatar/{image}.jpg").resize((size, size))
+                else:
+                    raise FileNotFoundError
+
+            except FileNotFoundError:
+                img = Image.open("asset/default.jpg").resize((size, size))
+
+            self.imgtk = ImageTk.PhotoImage(img)
+            self.avatar.create_image(size // 2, size // 2, image=self.imgtk)
+            self.avatar.pack(side='top', pady=(2, 0))
+
+            self.avatar.bind('<Button-1>', lambda event: self.__click())
+            self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release())
+            self.avatar.bind('<Button-3>', rightcommand)
+
+        self.acc_label = ttk.Label(self.frame, text=username)
+        self.acc_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
+        self.acc_label.pack(side='top', pady=(2, 0))
+        self.acc_label.bind('<Button-1>', lambda event: self.__click())
+        self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.acc_label.bind('<Button-3>', rightcommand)
+
+        self.profile_label = ttk.Label(self.frame)
+        self.profile_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
+        self.profile_label.pack(side='top')
+        self.profile_label.bind('<Button-1>', lambda event: self.__click())
+        self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.profile_label.bind('<Button-3>', rightcommand)
+
+        if tkfont.Font(font=self.acc_label['font']).measure(profilename) > 85:
+            while tkfont.Font(font=self.acc_label['font']).measure(profilename) > 85:
+                profilename = profilename[:-1]
+            else:
+                profilename = f'{profilename}..'
+        self.profile_label.configure(text=profilename)
+
+    def check_cursor(self, event):
+        widget = event.widget.winfo_containing(event.x_root, event.y_root)
+
+        if widget in (self.frame, self.acc_label, self.profile_label, self.avatar):
+            self.__enter()
+        else:
+            self.__leave()
+
+    def color_clicked(self):
+        color_fade(self.frame, background=COLOR_CLICKED)
+        color_fade(self.acc_label, background=COLOR_CLICKED)
+        color_fade(self.acc_label, foreground='white')
+        color_fade(self.profile_label, background=COLOR_CLICKED)
+        color_fade(self.profile_label, foreground='white')
+
+    def color_hover(self):
+        color_fade(self.frame, background=COLOR_HOVER)
+        color_fade(self.acc_label, background=COLOR_HOVER)
+        color_fade(self.profile_label, background=COLOR_HOVER)
+
+    def color_normal(self):
+        color_fade(self.frame, background=COLOR_NORMAL)
+        color_fade(self.acc_label, background=COLOR_NORMAL)
+        color_fade(self.acc_label, foreground=COLOR_TEXT)
+        color_fade(self.profile_label, background=COLOR_NORMAL)
+        color_fade(self.profile_label, foreground=COLOR_TEXT)
+
+    def color_on_cursor_exit(self):
+        color_fade(self.frame, background=COLOR_ON_CURSOR_EXIT)
+        color_fade(self.acc_label, background=COLOR_ON_CURSOR_EXIT)
+        color_fade(self.acc_label, foreground=COLOR_TEXT)
+        color_fade(self.profile_label, background=COLOR_ON_CURSOR_EXIT)
+        color_fade(self.profile_label, foreground=COLOR_TEXT)
+
+    def __click(self):
+        self.clicked = True
+        self.color_clicked()
+
+        # This method of checking cursor is ridiculously CPU intensive (releatively to other parts of the application)
+        # It checks cursor location every cursor movement while MB1 is pressed.
+        # Enter and leave event don't work properly with mouse button held down so I had to do it this way.
+        self.frame.bind('<B1-Motion>', self.check_cursor)
+        self.acc_label.bind('<B1-Motion>', self.check_cursor)
+        self.profile_label.bind('<B1-Motion>', self.check_cursor)
+
+        if self.avatar:
+            self.avatar.bind('<B1-Motion>', self.check_cursor)
+
+    def __release(self):
+        self.clicked = False
+        self.color_normal()
+        self.frame.unbind('<B1-Motion>')
+        self.acc_label.unbind('<B1-Motion>')
+        self.profile_label.unbind('<B1-Motion>')
+        if self.avatar:
+            self.avatar.unbind('<B1-Motion>')
+
+        if self.command and self.onbutton:
+            self.command()
+
+    def __enter(self):
+        self.onbutton = True
+
+        if self.clicked:
+            self.color_clicked()
+        elif self.enabled:
+            self.color_hover()
+
+    def __leave(self):
+        self.onbutton = False
+
+        if self.clicked:
+            self.color_on_cursor_exit()
+        elif self.enabled:
+            self.color_normal()
+
+    def enable(self):
+        self.enabled = True
+        self.frame.bind('<Button-1>', lambda event: self.__click())
+        self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.frame.config(background=COLOR_NORMAL, cursor='hand2')
+
+        self.acc_label.bind('<Button-1>', lambda event: self.__click())
+        self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.acc_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
+
+        self.profile_label.bind('<Button-1>', lambda event: self.__click())
+        self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.profile_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
+
+    def disable(self, no_fade=False):
+        self.enabled = False
+        self.frame.unbind('<Button-1>')
+        self.frame.unbind('<ButtonRelease-1>')
+        self.frame.config(cursor='arrow')
+
+        self.acc_label.unbind('<Button-1>')
+        self.profile_label.unbind('<Button-1>')
+        self.profile_label.unbind('<ButtonRelease-1>')
+
+        if no_fade:
+            self.frame.config(background=COLOR_DISABLED)
+            self.acc_label.config(background=COLOR_DISABLED, foreground=COLOR_TEXT_DISABLED)
+            self.profile_label.config(background=COLOR_DISABLED, foreground=COLOR_TEXT_DISABLED)
+        else:
+            color_fade(self.frame, background=COLOR_DISABLED)
+            color_fade(self.acc_label, background=COLOR_DISABLED)
+            color_fade(self.acc_label, foreground=COLOR_TEXT_DISABLED)
+            color_fade(self.profile_label, background=COLOR_DISABLED)
+            color_fade(self.profile_label, foreground=COLOR_TEXT_DISABLED)
+
+    def grid(self, **kw):
+        self.frame.grid(**kw)
 
 class ReadonlyEntryWithLabel:
     def __init__(self, master, label, text, bg='white'):
@@ -454,12 +672,12 @@ class ImageButton(tk.Frame):
         self.onpress = False
 
         super().__init__(master, background=self.bg)
-        self.canvas = tk.Canvas(self, width=28, height=28, bg=self.bg, bd=0, highlightthickness=0)
+        self.canvas = tk.Canvas(self, width=26, height=26, bg=self.bg, bd=0, highlightthickness=0)
 
-        img = Image.open(image_path).resize((28, 28))
-        imgtk = ImageTk.PhotoImage(img)
-        self.label = tk.Label(self, image=imgtk)
-        self.label.pack()
+        img = Image.open(image_path).resize((22, 22))
+        self.imgtk = ImageTk.PhotoImage(img)
+        self.canvas.create_image(13, 13, image=self.imgtk)
+        self.canvas.pack()
 
         self.bind('<Button-1>', lambda event: self.__click())
         self.bind('<ButtonRelease-1>', lambda event: self.__release())
@@ -483,8 +701,8 @@ class ImageButton(tk.Frame):
         self.canvas['bg'] = COLOR_BTN_CLICKED
 
     def color_hover(self):
-        self['bg'] = COLOR_BTN_HOVER
-        self.canvas['bg'] = COLOR_BTN_HOVER
+        self['bg'] = '#EAEAEA'
+        self.canvas['bg'] = '#EAEAEA'
 
     def color_normal(self):
         self['bg'] = self.bg

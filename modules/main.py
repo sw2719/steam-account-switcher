@@ -16,7 +16,7 @@ from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, system_locale
 from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update
-from modules.ui import DragDropListbox, AccountButton, WelcomeWindow, steamid_window, CreateToolTip, ask_steam_dir
+from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, WelcomeWindow, steamid_window, CreateToolTip, ask_steam_dir, ImageButton
 from modules.avatar import download_avatar
 
 yaml = YAML()
@@ -219,6 +219,9 @@ class MainApp(tk.Tk):
                                  width=7,
                                  text=_('Exit'),
                                  command=self.exit_app)
+        #button_exit = ImageButton(self.bottomframe,
+        #                          'asset/exit_icon.png',
+        #                          command=self.exit_app)
 
         button_restart = ttk.Button(self.bottomframe,
                                     textvariable=self.restartbutton_text,
@@ -263,7 +266,7 @@ class MainApp(tk.Tk):
         shadow = tk.Frame(self.upper_frame, bg='grey')
         shadow.pack(fill='x')
 
-        self.draw_button()
+        self.draw_button_grid()
 
     def get_window_pos(self):
         geo = self.geometry().split('+')
@@ -447,6 +450,172 @@ class MainApp(tk.Tk):
                 yaml.dump(dump_dict, acc)
             self.refresh()
 
+    def draw_button_grid(self):
+        menu_dict = {}
+        self.no_user_frame = tk.Frame(self.button_frame, bg='white')
+
+        def onFrameConfigure(canvas):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+        if self.demo_mode:
+            canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
+            canvas.config(bg='white')
+            buttonframe = tk.Frame(canvas, bg='white')
+            scroll_bar = ttk.Scrollbar(self.button_frame,
+                                       orient="vertical",
+                                       command=canvas.yview)
+
+            for x in range(0, 13):
+                self.button_dict[x] = AccountButtonGrid(buttonframe,
+                                                        username='username' + str(x),
+                                                        profilename='profilename' + str(x),
+                                                        image='default')
+
+                if x == 0:
+                    self.button_dict[x].disable()
+
+                row = x // 3
+                column = x % 3
+
+                if column == 1:
+                    self.button_dict[x].grid(row=row, column=column, padx=0, pady=(9, 0))
+                else:
+                    self.button_dict[x].grid(row=row, column=column, padx=10, pady=(9, 0))
+
+            buttonframe.grid_propagate(0)
+            scroll_bar.pack(side="right", fill="y")
+            canvas.pack(side="left", fill='both', expand=True)
+
+            h = 109 * (12 // 3)
+
+            canvas.create_window((0, 0), height=h + 9, width=295, window=buttonframe, anchor="nw")
+            canvas.configure(yscrollcommand=scroll_bar.set)
+            canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
+
+            def _on_mousewheel(event):
+                '''Scroll window on mousewheel input'''
+                widget = event.widget.winfo_containing(event.x_root, event.y_root)
+
+                if 'disabled' not in scroll_bar.state() and '!canvas' in str(widget):
+                    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+            buttonframe.bind("<Configure>", lambda event,
+                             canvas=canvas: onFrameConfigure(canvas))
+            self.bind("<MouseWheel>", _on_mousewheel)
+
+        elif self.accounts:
+            canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
+            canvas.config(bg='white')
+            buttonframe = tk.Frame(canvas, bg='white')
+            scroll_bar = ttk.Scrollbar(self.button_frame,
+                                       orient="vertical",
+                                       command=canvas.yview)
+
+            for index, username in enumerate(self.accounts):
+                steam64_list, account_name, persona_name = loginusers()
+
+                if username in account_name:
+                    i = account_name.index(username)
+                else:
+                    i = None
+
+                try:
+                    acc_index = self.accounts.index(username)
+                    profilename = self.acc_dict[acc_index]['customname']
+
+                except KeyError:  # No custom name set
+                    if i is not None:  # i could be 0 so we can't use if i:
+                        profilename = persona_name[i]
+                    else:
+                        profilename = _('N/A')
+
+                finally:
+                    if i is not None:  # i could be 0 so we can't use if i:
+                        steam64 = steam64_list[i]
+                        image = steam64
+                    else:
+                        steam64 = None
+                        image = 'default'
+
+                    profilename = profilename[:30]
+
+                # We have to make a menu for every account! Sounds ridiculous? Me too.
+                if system_locale == 'ko_KR':
+                    menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
+                    menu_dict[username] = tk.Menu(self, tearoff=0, font=menu_font)
+                else:
+                    menu_dict[username] = tk.Menu(self, tearoff=0)
+
+                menu_dict[username].add_command(label=_("Set as auto-login account"),
+                                                command=lambda name=username: self.button_func(name))
+                menu_dict[username].add_separator()
+
+                if i is not None:  # i could be 0 so we can't use if i:
+                    menu_dict[username].add_command(label=_('Open profile in browser'),
+                                                    command=lambda steamid64=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steamid64}'))
+                    menu_dict[username].add_command(label=_('Open screenshots folder'),
+                                                    command=lambda steamid64=steam64: open_screenshot(steamid64))
+                    menu_dict[username].add_command(label=_('View SteamID'),
+                                                    command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.popup_geometry(270, 180)))
+                    menu_dict[username].add_command(label=_('Update avatar'),
+                                                    command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
+                    menu_dict[username].add_separator()
+
+                menu_dict[username].add_command(label=_("Name settings"),
+                                                command=lambda name=username, pname=profilename: self.configwindow(name, pname))
+                menu_dict[username].add_command(label=_("Delete"),
+                                                command=lambda name=username: self.remove_user(name))
+
+                def popup(username, event):
+                    menu_dict[username].tk_popup(event.x_root + 86, event.y_root + 13, 0)
+
+                self.button_dict[username] = AccountButtonGrid(buttonframe,
+                                                               username=username,
+                                                               profilename=profilename,
+                                                               command=lambda name=username: self.button_func(name),
+                                                               rightcommand=lambda event, username=username: popup(username, event),
+                                                               image=image)
+
+                if username == fetch_reg('AutoLoginUser'):
+                    self.button_dict[username].disable(no_fade=True)
+
+                row = index // 3
+                column = index % 3
+
+                if column == 1:
+                    self.button_dict[username].grid(row=row, column=column, padx=0, pady=(9, 0))
+                else:
+                    self.button_dict[username].grid(row=row, column=column, padx=10, pady=(9, 0))
+
+            buttonframe.grid_propagate(0)
+            scroll_bar.pack(side="right", fill="y")
+            canvas.pack(side="left", fill='both', expand=True)
+
+            if len(self.accounts) % 3 == 0:
+                h = 109 * (len(self.accounts) // 3)
+            else:
+                h = 109 * (len(self.accounts) // 3 + 1)
+
+            canvas.create_window((0, 0), height=h + 9, width=295, window=buttonframe, anchor="nw")
+            canvas.configure(yscrollcommand=scroll_bar.set)
+            canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
+
+            def _on_mousewheel(event):
+                '''Scroll window on mousewheel input'''
+                widget = event.widget.winfo_containing(event.x_root, event.y_root)
+
+                if 'disabled' not in scroll_bar.state() and '!canvas' in str(widget):
+                    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+            buttonframe.bind("<Configure>", lambda event,
+                             canvas=canvas: onFrameConfigure(canvas))
+            self.bind("<MouseWheel>", _on_mousewheel)
+        else:
+            self.no_user_frame.pack(side='top', fill='both', expand=True)
+            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg='white')
+            self.unbind("<MouseWheel>")
+            no_user.pack(pady=(150, 0))
+
     def draw_button(self):
         menu_dict = {}
         self.no_user_frame = tk.Frame(self.button_frame, bg='white')
@@ -565,7 +734,7 @@ class MainApp(tk.Tk):
                                                            image=image)
 
                 if username == fetch_reg('AutoLoginUser'):
-                    self.button_dict[username].disable()
+                    self.button_dict[username].disable(no_fade=True)
 
                 self.button_dict[username].pack(fill='x')
                 tk.Frame(buttonframe, bg='#c4c4c4').pack(fill='x')
@@ -617,7 +786,7 @@ class MainApp(tk.Tk):
         else:
             self.auto_var.set(_('Auto-login Disabled'))
 
-        self.draw_button()
+        self.draw_button_grid()
 
         if get_config('autoexit') == 'true':
             self.restartbutton_text.set(_('Restart Steam & Exit'))
