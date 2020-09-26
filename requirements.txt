@@ -7,3 +7,6 @@ pget
 aiohttp
 aiodns
 cchardet
+winshell
+pywin32
+colour
