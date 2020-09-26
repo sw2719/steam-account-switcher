@@ -160,6 +160,8 @@ class MainApp(tk.Tk):
         menu.add_separator()
         menu.add_command(label=_("Settings"),
                          command=self.settingswindow)
+        menu.add_command(label=_("Send feedback"),
+                         command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher/issues'))
         menu.add_command(label=_("About"),
                          command=lambda: self.about(version))
 
