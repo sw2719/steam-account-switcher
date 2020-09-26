@@ -7,9 +7,14 @@ import asyncio
 from io import BytesIO
 
 API_KEY = '88CA6F49C590BF8B498AF4FCFB9964F1'
+PY_VERSION = float(f'{sys.version_info[0]}.{sys.version_info[1]}')
 
-if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+if PY_VERSION >= 3.8 and sys.platform.startswith('win'):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+elif PY_VERSION <= 3.4:
+    print('Not supported Python version. At least 3.5 is required.')
+    sys.exit(0)
 
 
 def download_avatar(steamid_list):
@@ -35,8 +40,16 @@ def download_avatar(steamid_list):
         except (aiohttp.ClientError, OSError):
             print(f'Exception while downloading image for {steamid64}')
 
-    async def main():
-        tasks = [asyncio.create_task(download_image(steamid)) for steamid in steamid_list]
-        await asyncio.gather(*tasks)
+    if PY_VERSION >= 3.7:
+        async def main():
+            tasks = [asyncio.create_task(download_image(steamid)) for steamid in steamid_list]
+            await asyncio.gather(*tasks)
 
-    asyncio.run(main())
+        asyncio.run(main())
+    else:
+        async def main():
+            futures = [asyncio.ensure_future(download_image(steamid)) for steamid in steamid_list]
+            await asyncio.gather(*futures)
+
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())

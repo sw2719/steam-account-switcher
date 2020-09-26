@@ -27,7 +27,8 @@ def reset_config():
                    'mode': 'normal',
                    'show_avatar': 'true',
                    'steam_path': 'reg',
-                   'last_pos': '0/0'}
+                   'last_pos': '0/0',
+                   'ui_mode': 'list'}
         yaml.dump(default, cfg)
 
 
@@ -81,6 +82,12 @@ try:
 
     steam_path_invalid = 'steam_path' not in set(test_dict)
 
+    no_ui_mode = 'ui_mode' not in set(test_dict)
+    if not no_ui_mode:
+        ui_mode_invalid = test_dict['ui_mode'] not in ('list', 'grid')
+    else:
+        ui_mode_invalid = True
+
     if True in (locale_invalid, try_soft_invalid, autoexit_invalid,
                 mode_invalid, avatar_invalid, pos_invalid, steam_path_invalid):
 
@@ -115,6 +122,11 @@ try:
         else:
             cfg_write['last_pos'] = test_dict['last_pos']
 
+        if ui_mode_invalid:
+            cfg_write['ui_mode'] = 'list'
+        else:
+            cfg_write['ui_mode'] = test_dict['ui_mode']
+
         if steam_path_invalid:
             if os.path.isfile('steam_path.txt'):
                 with open('steam_path.txt', 'r') as f:
@@ -123,6 +135,9 @@ try:
                 cfg_write['steam_path'] = 'reg'
         else:
             cfg_write['steam_path'] = test_dict['steam_path']
+
+        if cfg_write['ui_mode'] == 'grid' and cfg_write['show_avatar'] == 'false':
+            cfg_write['show_avatar'] == 'true'
 
         with open('config.yml', 'w') as cfg:
             yaml.dump(cfg_write, cfg)
@@ -174,7 +189,8 @@ def config_write_value(key, value):
                    'try_soft_shutdown': get_config('try_soft_shutdown'),
                    'show_avatar': get_config('show_avatar'),
                    'last_pos': get_config('last_pos'),
-                   'steam_path': get_config('steam_path')}
+                   'steam_path': get_config('steam_path'),
+                   'ui_mode': get_config('ui_mode')}
 
     config_dict[key] = value
 
