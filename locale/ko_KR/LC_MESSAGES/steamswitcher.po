@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-09-27 02:41+0900\n"
-"PO-Revision-Date: 2020-09-27 02:45+0900\n"
+"PO-Revision-Date: 2020-09-27 03:46+0900\n"
 "Last-Translator: sw2719\n"
 "Language-Team: Korean\n"
 "Language: ko_KR\n"
@@ -327,11 +327,11 @@ msgstr "계정을 세로 목록으로 표시합니다."
 
 #: modules/main.py:1500 modules/ui.py:609
 msgid "Grid Mode"
-msgstr "아이콘 모드"
+msgstr "그리드 모드"
 
 #: modules/main.py:1505
 msgid "Display accounts in 3 x n grid."
-msgstr "계정을 한 줄에 세개씩 그리드로 표시합니다."
+msgstr "계정을 3 x n 그리드로 표시합니다."
 
 #: modules/main.py:1514 modules/ui.py:682
 msgid "Show avatar images"
