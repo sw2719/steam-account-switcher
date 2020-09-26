@@ -89,7 +89,7 @@ try:
         ui_mode_invalid = True
 
     if True in (locale_invalid, try_soft_invalid, autoexit_invalid,
-                mode_invalid, avatar_invalid, pos_invalid, steam_path_invalid):
+                mode_invalid, avatar_invalid, pos_invalid, steam_path_invalid, ui_mode_invalid):
 
         cfg_write = {}
         if no_locale or locale_invalid:
