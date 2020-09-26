@@ -27,7 +27,8 @@ def reset_config():
                    'mode': 'normal',
                    'show_avatar': 'true',
                    'steam_path': 'reg',
-                   'last_pos': '0/0'}
+                   'last_pos': '0/0',
+                   'ui_mode': 'list'}
         yaml.dump(default, cfg)
 
 
@@ -134,6 +135,9 @@ try:
                 cfg_write['steam_path'] = 'reg'
         else:
             cfg_write['steam_path'] = test_dict['steam_path']
+
+        if cfg_write['ui_mode'] == 'grid' and cfg_write['show_avatar'] == 'false':
+            cfg_write['show_avatar'] == 'true'
 
         with open('config.yml', 'w') as cfg:
             yaml.dump(cfg_write, cfg)

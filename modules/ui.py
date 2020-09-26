@@ -189,6 +189,7 @@ class AccountButton:
         self.frame.unbind('<B1-Motion>')
         self.acc_label.unbind('<B1-Motion>')
         self.profile_label.unbind('<B1-Motion>')
+
         if self.avatar:
             self.avatar.unbind('<B1-Motion>')
 
@@ -217,9 +218,6 @@ class AccountButton:
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.frame.config(background=COLOR_NORMAL, cursor='hand2')
 
-        self.avatar.bind('<Button-1>', lambda event: self.__click())
-        self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release())
-
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.acc_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
@@ -228,18 +226,24 @@ class AccountButton:
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.profile_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
 
+        if self.avatar:
+            self.avatar.bind('<Button-1>', lambda event: self.__click())
+            self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release())
+
     def disable(self, no_fade=False):
         self.enabled = False
         self.frame.unbind('<Button-1>')
         self.frame.unbind('<ButtonRelease-1>')
         self.frame.config(cursor='arrow')
 
-        self.avatar.unbind('<Button-1>')
-        self.avatar.unbind('<ButtonRelease-1>')
         self.acc_label.unbind('<Button-1>')
         self.acc_label.unbind('<ButtonRelease-1>')
         self.profile_label.unbind('<Button-1>')
         self.profile_label.unbind('<ButtonRelease-1>')
+
+        if self.avatar:
+            self.avatar.unbind('<Button-1>')
+            self.avatar.unbind('<ButtonRelease-1>')
 
         if no_fade:
             self.frame.config(background=COLOR_DISABLED)
@@ -254,6 +258,7 @@ class AccountButton:
 
     def pack(self, **kw):
         self.frame.pack(**kw)
+
 
 class AccountButtonGrid:
     def __init__(self, master, username, profilename, command=None, rightcommand=None, image='default'):
@@ -445,6 +450,7 @@ class AccountButtonGrid:
     def grid(self, **kw):
         self.frame.grid(**kw)
 
+
 class ReadonlyEntryWithLabel:
     def __init__(self, master, label, text, bg='white'):
         self.frame = tk.Frame(master, bg=bg)
@@ -462,13 +468,12 @@ class ReadonlyEntryWithLabel:
 
 
 class WelcomeWindow(tk.Toplevel):
-    def __init__(self, master, after_update, debug):
+    def __init__(self, master, geometry, after_update, debug):
         self.master = master
         tk.Toplevel.__init__(self, self.master, bg='white')
-        self.title(_('Welcome'))
+        self.title(_('Setup'))
 
-        self.x, self.y = get_center_pos(self.master, 320, 230)
-        self.geometry(f"320x230+{self.x}+{self.y}")
+        self.geometry(geometry)
         self.resizable(False, False)
 
         if not debug:
@@ -489,7 +494,11 @@ class WelcomeWindow(tk.Toplevel):
         self.active_page = 0
 
         self.upper_frame = tk.Frame(self, bg='white')
-        self.upper_frame.pack(side='top')
+        self.upper_frame.pack(side='top', fill='x')
+
+        self.top_font = tkfont.Font(weight=tkfont.BOLD, size=17, family='Arial')
+        self.top_label = tk.Label(self.upper_frame, bg='white', text=_('Welcome'), font=self.top_font)
+        self.top_label.pack(side='left', padx=6, pady=10)
 
         self.ok_button = ttk.Button(self, text=_('OK'), command=self.ok)
         self.ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
@@ -510,9 +519,8 @@ class WelcomeWindow(tk.Toplevel):
     def ok(self):
         if self.active_page == 0:
             self.welcome_label.destroy()
-            self.top_label = tk.Label(self.upper_frame, bg='white')
-            self.top_label.pack(pady=(4, 3))
             self.page_1()
+            self.focus()
 
         elif self.active_page == 1:
             if self.radio_var.get() == 0:
@@ -523,6 +531,7 @@ class WelcomeWindow(tk.Toplevel):
             self.radio_frame1.destroy()
             self.radio_frame2.destroy()
             self.page_2()
+            self.focus()
 
         elif self.active_page == 2:
             if self.radio_var.get() == 0:
@@ -533,6 +542,7 @@ class WelcomeWindow(tk.Toplevel):
             self.radio_frame1.destroy()
             self.radio_frame2.destroy()
             self.page_3()
+            self.focus()
 
         elif self.active_page == 3:
             if 'selected' in self.soft_chkb.state():
@@ -556,6 +566,8 @@ class WelcomeWindow(tk.Toplevel):
 
             self.save()
             self.page_4()
+            self.focus()
+
         elif self.active_page == 4:
             if 'selected' in self.shortcut_chkb.state():
                 create_shortcut()
@@ -570,30 +582,44 @@ class WelcomeWindow(tk.Toplevel):
         self.active_page = 1
         self.top_label['text'] = _('UI Appearance')
         self.radio_frame1 = tk.Frame(self, bg='white')
-        self.radio_frame1.pack(side='top', padx=20, pady=(4, 10), fill='x')
+        self.radio_frame1.pack(side='left', padx=(45, 0), pady=5)
 
-        radio_normal = ttk.Radiobutton(self.radio_frame1,
-                                       text=_('List Mode'),
-                                       variable=self.radio_var,
-                                       value=0,
-                                       style='welcome.TRadiobutton')
-        radio_normal.pack(side='top', anchor='w', pady=2)
+        self.list_canvas = tk.Canvas(self.radio_frame1, width=50, height=50, bg='white', bd=0, highlightthickness=0)
+        img = Image.open("asset/list.png").resize((50, 50))
+
+        self.list_imgtk = ImageTk.PhotoImage(img)
+        self.list_canvas.create_image(25, 25, image=self.list_imgtk)
+        self.list_canvas.pack(side='top', padx=0, pady=5)
+
+        radio_list = ttk.Radiobutton(self.radio_frame1,
+                                     text=_('List Mode'),
+                                     variable=self.radio_var,
+                                     value=0,
+                                     style='welcome.TRadiobutton')
+        radio_list.pack(side='top', pady=2)
 
         tk.Label(self.radio_frame1, justify='left', bg='white',
-                 text=_("Display your accounts in vertical list.")).pack(side='left', pady=5)
+                 text=_("Display accounts\nin vertical list")).pack(side='bottom', pady=5)
 
         self.radio_frame2 = tk.Frame(self, bg='white')
-        self.radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
+        self.radio_frame2.pack(side='right', padx=(0, 45), pady=5)
 
-        radio_express = ttk.Radiobutton(self.radio_frame2,
-                                        text=_('Grid Mode'),
-                                        variable=self.radio_var,
-                                        value=1,
-                                        style='welcome.TRadiobutton')
-        radio_express.pack(side='top', anchor='w', pady=2)
+        self.grid_canvas = tk.Canvas(self.radio_frame2, width=50, height=50, bg='white', bd=0, highlightthickness=0)
+        img = Image.open("asset/grid.png").resize((50, 50))
+
+        self.grid_imgtk = ImageTk.PhotoImage(img)
+        self.grid_canvas.create_image(25, 25, image=self.grid_imgtk)
+        self.grid_canvas.pack(side='top', padx=0, pady=5)
+
+        radio_grid = ttk.Radiobutton(self.radio_frame2,
+                                     text=_('Grid Mode'),
+                                     variable=self.radio_var,
+                                     value=1,
+                                     style='welcome.TRadiobutton')
+        radio_grid.pack(side='top', pady=2)
 
         tk.Label(self.radio_frame2, justify='left', bg='white',
-                 text=_('Display your accounts in 3 x n grid.')).pack(side='left', pady=5)
+                 text=_('Display accounts\nin 3 x n grid')).pack(side='bottom', pady=5)
 
     def page_2(self):
         self.active_page = 2
@@ -665,12 +691,14 @@ class WelcomeWindow(tk.Toplevel):
         self.avatar_chkb.state(['!alternate'])
         self.avatar_chkb.state(['selected'])
 
+        if self.ui_mode == 'grid':
+            self.avatar_chkb.state(['disabled'])
+
         self.avatar_chkb.pack(side='top', anchor='w')
         tk.Label(self.avatar_frame, text=_('Show avatars in account list'), bg='white').pack(side='top', anchor='w')
 
     def page_4(self):
         self.active_page = 4
-        self.geometry(f"320x250+{self.x}+{self.y}")
         self.top_label['text'] = _('Good to go!')
 
         # tkinter doesn't like three quotes string, so... yeah.
@@ -699,7 +727,7 @@ class WelcomeWindow(tk.Toplevel):
         config_write_dict(dump_dict)
 
 
-class CreateToolTip(object):
+class ToolTipWindow(object):
     '''
     create a tooltip for a given widget
     '''
@@ -711,7 +739,7 @@ class CreateToolTip(object):
 
     def enter(self, event=None):
         x = y = 0
-        x, y, cx, cy = self.widget.bbox("insert")
+        x, y, _, _ = self.widget.bbox("insert")
         x += self.widget.winfo_rootx()
         y += self.widget.winfo_rooty() + 30
 
@@ -751,8 +779,6 @@ class ImageButton(tk.Frame):
         self.canvas.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.canvas.bind('<Enter>', lambda event: self.__enter())
         self.canvas.bind('<Leave>', lambda event: self.__leave())
-
-        CreateToolTip(self, 'Exit application.')
 
     def check_cursor(self, event):
         widget = event.widget.winfo_containing(event.x_root, event.y_root)

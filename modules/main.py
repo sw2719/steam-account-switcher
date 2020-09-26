@@ -11,12 +11,13 @@ import sys
 import queue as q
 from time import sleep
 from ruamel.yaml import YAML
+from PIL import Image, ImageTk
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, system_locale
 from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update
-from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, WelcomeWindow, steamid_window, CreateToolTip, ask_steam_dir, ImageButton
+from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, WelcomeWindow, steamid_window, ToolTipWindow, ask_steam_dir
 from modules.avatar import download_avatar
 
 yaml = YAML()
@@ -35,6 +36,10 @@ BOTTOMFRAME_COLOR = 'white'
 TEXT_COLOR = 'black'
 AUTOLOGIN_ON_COLOR = 'green'
 AUTOLOGIN_OFF_COLOR = 'red'
+
+# For ImageTk, global variables must be used to prevent them from being GC'd.
+image1 = None
+iamge2 = None
 
 
 def legacy_restart(silent=True):
@@ -219,9 +224,10 @@ class MainApp(tk.Tk):
                                  width=7,
                                  text=_('Exit'),
                                  command=self.exit_app)
-        #button_exit = ImageButton(self.bottomframe,
-        #                          'asset/exit_icon.png',
-        #                          command=self.exit_app)
+
+        # button_exit = ImageButton(self.bottomframe,
+        #                           'asset/exit_icon.png',
+        #                           command=self.exit_app)
 
         button_restart = ttk.Button(self.bottomframe,
                                     textvariable=self.restartbutton_text,
@@ -292,7 +298,7 @@ class MainApp(tk.Tk):
         self.refresh()
 
     def welcomewindow(self, debug=False):
-        window = WelcomeWindow(self, self.after_update, debug)
+        window = WelcomeWindow(self, self.popup_geometry(320, 270, multiplier=2), self.after_update, debug)
 
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':
@@ -1394,6 +1400,9 @@ class MainApp(tk.Tk):
 
     def settingswindow(self):
         '''Open settings window'''
+        global image1
+        global image2
+
         config_dict = get_config('all')
         last_config = config_dict
 
@@ -1402,11 +1411,9 @@ class MainApp(tk.Tk):
         else:
             width = 260
 
-        x, y = self.get_window_pos()
-
         settingswindow = tk.Toplevel(self, bg='white')
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(self.popup_geometry(width, 380))  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 360))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
@@ -1436,6 +1443,7 @@ class MainApp(tk.Tk):
                                  values=['English',  # 0
                                          '한국어 (Korean)',  # 1
                                          'Français (French)'])  # 2
+
         if config_dict['locale'] == 'en_US':
             locale_cb.current(0)
         elif config_dict['locale'] == 'ko_KR':
@@ -1456,28 +1464,76 @@ class MainApp(tk.Tk):
         s.configure('Settings.TRadiobutton', background='white')
         s.configure('Settings.TCheckbutton', background='white')
 
-        ui_radio_frame1 = tk.Frame(settingswindow, bg='white')
-        ui_radio_frame1.pack(side='top', padx=12, pady=(13, 3), fill='x')
-        ui_radio_frame2 = tk.Frame(settingswindow, bg='white')
-        ui_radio_frame2.pack(side='top', padx=12, pady=(3, 12), fill='x')
+        ui_frame = tk.Frame(settingswindow, bg='white')
+        ui_frame.pack(side='top', pady=(12, 5), fill='x')
         ui_radio_var = tk.IntVar()
 
-        radio_normal = ttk.Radiobutton(ui_radio_frame1,
-                                       text=_('List mode'),
-                                       variable=ui_radio_var,
-                                       value=0,
-                                       style='Settings.TRadiobutton')
-        radio_normal.pack(side='left', pady=2)
+        list_radio_frame = tk.Frame(ui_frame, bg='white')
+        list_radio_frame.pack(side='left', padx=(35, 0))
 
-        radio_express = ttk.Radiobutton(ui_radio_frame2,
-                                        text=_('Grid mode'),
-                                        variable=ui_radio_var,
-                                        value=1,
-                                        style='Settings.TRadiobutton')
-        radio_express.pack(side='left', pady=2)
+        list_canvas = tk.Canvas(list_radio_frame, width=30, height=30, bg='white', bd=0, highlightthickness=0)
+        list_img = Image.open("asset/list.png").resize((30, 30))
+
+        image1 = ImageTk.PhotoImage(list_img)
+        list_canvas.create_image(15, 15, image=image1)
+        list_canvas.pack(side='top', padx=0, pady=5)
+
+        radio_list = ttk.Radiobutton(list_radio_frame,
+                                     text=_('List Mode'),
+                                     variable=ui_radio_var,
+                                     value=0,
+                                     style='Settings.TRadiobutton')
+        radio_list.pack(side='top', pady=2)
+        ToolTipWindow(radio_list, _('Display accounts in vertical list.'))
+
+        grid_radio_frame = tk.Frame(ui_frame, bg='white')
+        grid_radio_frame.pack(side='right', padx=(0, 35))
+
+        grid_canvas = tk.Canvas(grid_radio_frame, width=30, height=30, bg='white', bd=0, highlightthickness=0)
+        grid_img = Image.open("asset/grid.png").resize((30, 30))
+
+        image2 = ImageTk.PhotoImage(grid_img)
+        grid_canvas.create_image(15, 15, image=image2)
+        grid_canvas.pack(side='top', padx=0, pady=5)
+
+        radio_grid = ttk.Radiobutton(grid_radio_frame,
+                                     text=_('Grid Mode'),
+                                     variable=ui_radio_var,
+                                     value=1,
+                                     style='Settings.TRadiobutton')
+        radio_grid.pack(side='top', pady=2)
+        ToolTipWindow(radio_grid, _('Display accounts in 3 x n grid.'))
 
         if get_config('ui_mode') == 'grid':
             ui_radio_var.set(1)
+
+        avatar_frame = tk.Frame(settingswindow, bg='white')
+        avatar_frame.pack(fill='x', side='top', padx=12)
+
+        avatar_chkb = ttk.Checkbutton(avatar_frame, style='Settings.TCheckbutton',
+                                      text=_('Show avatar images'))
+
+        avatar_chkb.state(['!alternate'])
+
+        if config_dict['show_avatar'] == 'true':
+            avatar_chkb.state(['selected'])
+        else:
+            avatar_chkb.state(['!selected'])
+
+        avatar_chkb.pack(side='top')
+
+        def on_list_check():
+            avatar_chkb.state(['!disabled'])
+
+        def on_grid_check():
+            avatar_chkb.state(['selected'])
+            avatar_chkb.state(['disabled'])
+
+        if ui_radio_var.get() == 1:
+            on_grid_check()
+
+        radio_list['command'] = on_list_check
+        radio_grid['command'] = on_grid_check
 
         mode_radio_frame1 = tk.Frame(settingswindow, bg='white')
         mode_radio_frame1.pack(side='top', padx=12, pady=(13, 3), fill='x')
@@ -1531,21 +1587,6 @@ class MainApp(tk.Tk):
             autoexit_chkb.state(['!selected'])
 
         autoexit_chkb.pack(side='left')
-
-        avatar_frame = tk.Frame(settingswindow, bg='white')
-        avatar_frame.pack(fill='x', side='top', padx=12)
-
-        avatar_chkb = ttk.Checkbutton(avatar_frame, style='Settings.TCheckbutton',
-                                      text=_('Show avatar images'))
-
-        avatar_chkb.state(['!alternate'])
-
-        if config_dict['show_avatar'] == 'true':
-            avatar_chkb.state(['selected'])
-        else:
-            avatar_chkb.state(['!selected'])
-
-        avatar_chkb.pack(side='left')
 
         def close():
             settingswindow.destroy()
