@@ -1547,6 +1547,7 @@ class MainApp(tk.Tk):
                                        value=0,
                                        style='Settings.TRadiobutton')
         radio_normal.pack(side='left', pady=2)
+        ToolTipWindow(radio_normal, _("Restart Steam by clicking on 'Restart Steam' button."))
 
         radio_express = ttk.Radiobutton(mode_radio_frame2,
                                         text=_('Express Mode (Auto-restart Steam)'),
@@ -1554,7 +1555,7 @@ class MainApp(tk.Tk):
                                         value=1,
                                         style='Settings.TRadiobutton')
         radio_express.pack(side='left', pady=2)
-
+        ToolTipWindow(radio_express, _("Automatically restart Steam when autologin account is changed."))
         if get_config('mode') == 'express':
             mode_radio_var.set(1)
 

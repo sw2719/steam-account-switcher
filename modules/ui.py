@@ -741,7 +741,7 @@ class ToolTipWindow(object):
         x = y = 0
         x, y, _, _ = self.widget.bbox("insert")
         x += self.widget.winfo_rootx()
-        y += self.widget.winfo_rooty() + 30
+        y += self.widget.winfo_rooty() + 40
 
         self.win = tk.Toplevel(self.widget)
         self.win.wm_overrideredirect(True)
