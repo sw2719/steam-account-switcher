@@ -174,7 +174,7 @@ class MainApp(tk.Tk):
             debug_menu.add_command(label="Download avatar images",
                                    command=download_avatar)
             debug_menu.add_command(label="Open initial setup",
-                                   command=self.welcomewindow)
+                                   command=lambda: self.welcomewindow(debug=True))
             debug_menu.add_command(label="Toggle demo mode",
                                    command=self.toggle_demo)
             debug_menu.add_command(label="Raise exception",
@@ -227,10 +227,6 @@ class MainApp(tk.Tk):
                                     textvariable=self.restartbutton_text,
                                     command=self.exit_after_restart)
 
-        CreateToolTip(button_toggle, _('Turn on/off Steam autologin.'))
-        CreateToolTip(button_exit, _('Exit application.'))
-        CreateToolTip(button_restart, 'Restart Steam and exit application if set to.')
-
         button_toggle.pack(side='left', padx=3, pady=3)
         button_exit.pack(side='left', pady=3)
         button_restart.pack(side='right', padx=3, pady=3, fill='x', expand=True)
@@ -266,7 +262,7 @@ class MainApp(tk.Tk):
         shadow = tk.Frame(self.upper_frame, bg='grey')
         shadow.pack(fill='x')
 
-        self.draw_button_grid()
+        self.draw_button()
 
     def get_window_pos(self):
         geo = self.geometry().split('+')
@@ -295,8 +291,8 @@ class MainApp(tk.Tk):
 
         self.refresh()
 
-    def welcomewindow(self):
-        window = WelcomeWindow(self, self.after_update)
+    def welcomewindow(self, debug=False):
+        window = WelcomeWindow(self, self.after_update, debug)
 
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':
@@ -449,6 +445,12 @@ class MainApp(tk.Tk):
             with open('accounts.yml', 'w') as acc:
                 yaml.dump(dump_dict, acc)
             self.refresh()
+
+    def draw_button(self):
+        if get_config('ui_mode') == 'list':
+            self.draw_button_list()
+        elif get_config('ui_mode') == 'grid':
+            self.draw_button_grid()
 
     def draw_button_grid(self):
         menu_dict = {}
@@ -616,7 +618,7 @@ class MainApp(tk.Tk):
             self.unbind("<MouseWheel>")
             no_user.pack(pady=(150, 0))
 
-    def draw_button(self):
+    def draw_button_list(self):
         menu_dict = {}
         self.no_user_frame = tk.Frame(self.button_frame, bg='white')
 
@@ -786,7 +788,7 @@ class MainApp(tk.Tk):
         else:
             self.auto_var.set(_('Auto-login Disabled'))
 
-        self.draw_button_grid()
+        self.draw_button()
 
         if get_config('autoexit') == 'true':
             self.restartbutton_text.set(_('Restart Steam & Exit'))
@@ -1404,7 +1406,7 @@ class MainApp(tk.Tk):
 
         settingswindow = tk.Toplevel(self, bg='white')
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(self.popup_geometry(width, 300))  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 380))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
@@ -1450,32 +1452,55 @@ class MainApp(tk.Tk):
                                  text=_('Restart app to apply language settings.'))
         restart_label.pack(pady=(1, 0))
 
-        radio_frame1 = tk.Frame(settingswindow, bg='white')
-        radio_frame1.pack(side='top', padx=12, pady=(13, 3), fill='x')
-        radio_frame2 = tk.Frame(settingswindow, bg='white')
-        radio_frame2.pack(side='top', padx=12, pady=(3, 12), fill='x')
-        radio_var = tk.IntVar()
-
-        if get_config('mode') == 'express':
-            radio_var.set(1)
-
         s = ttk.Style()
         s.configure('Settings.TRadiobutton', background='white')
         s.configure('Settings.TCheckbutton', background='white')
 
-        radio_normal = ttk.Radiobutton(radio_frame1,
-                                       text=_('Normal Mode (Manually restart Steam)'),
-                                       variable=radio_var,
+        ui_radio_frame1 = tk.Frame(settingswindow, bg='white')
+        ui_radio_frame1.pack(side='top', padx=12, pady=(13, 3), fill='x')
+        ui_radio_frame2 = tk.Frame(settingswindow, bg='white')
+        ui_radio_frame2.pack(side='top', padx=12, pady=(3, 12), fill='x')
+        ui_radio_var = tk.IntVar()
+
+        radio_normal = ttk.Radiobutton(ui_radio_frame1,
+                                       text=_('List mode'),
+                                       variable=ui_radio_var,
                                        value=0,
                                        style='Settings.TRadiobutton')
         radio_normal.pack(side='left', pady=2)
 
-        radio_express = ttk.Radiobutton(radio_frame2,
-                                        text=_('Express Mode (Auto-restart Steam)'),
-                                        variable=radio_var,
+        radio_express = ttk.Radiobutton(ui_radio_frame2,
+                                        text=_('Grid mode'),
+                                        variable=ui_radio_var,
                                         value=1,
                                         style='Settings.TRadiobutton')
         radio_express.pack(side='left', pady=2)
+
+        if get_config('ui_mode') == 'grid':
+            ui_radio_var.set(1)
+
+        mode_radio_frame1 = tk.Frame(settingswindow, bg='white')
+        mode_radio_frame1.pack(side='top', padx=12, pady=(13, 3), fill='x')
+        mode_radio_frame2 = tk.Frame(settingswindow, bg='white')
+        mode_radio_frame2.pack(side='top', padx=12, pady=(3, 12), fill='x')
+        mode_radio_var = tk.IntVar()
+
+        radio_normal = ttk.Radiobutton(mode_radio_frame1,
+                                       text=_('Normal Mode (Manually restart Steam)'),
+                                       variable=mode_radio_var,
+                                       value=0,
+                                       style='Settings.TRadiobutton')
+        radio_normal.pack(side='left', pady=2)
+
+        radio_express = ttk.Radiobutton(mode_radio_frame2,
+                                        text=_('Express Mode (Auto-restart Steam)'),
+                                        variable=mode_radio_var,
+                                        value=1,
+                                        style='Settings.TRadiobutton')
+        radio_express.pack(side='left', pady=2)
+
+        if get_config('mode') == 'express':
+            mode_radio_var.set(1)
 
         softshutdwn_frame = tk.Frame(settingswindow, bg='white')
         softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=(1, 0))
@@ -1530,7 +1555,12 @@ class MainApp(tk.Tk):
             '''Write new config values to config.txt'''
             locale = ('en_US', 'ko_KR', 'fr_FR')
 
-            if radio_var.get() == 1:
+            if ui_radio_var.get() == 1:
+                ui_mode = 'grid'
+            else:
+                ui_mode = 'list'
+
+            if mode_radio_var.get() == 1:
                 mode = 'express'
             else:
                 mode = 'normal'
@@ -1556,7 +1586,8 @@ class MainApp(tk.Tk):
                            'try_soft_shutdown': soft_shutdown,
                            'show_avatar': avatar,
                            'last_pos': get_config('last_pos'),
-                           'steam_path': get_config('steam_path')}
+                           'steam_path': get_config('steam_path'),
+                           'ui_mode': ui_mode}
 
             config_write_dict(config_dict)
 

@@ -217,6 +217,9 @@ class AccountButton:
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.frame.config(background=COLOR_NORMAL, cursor='hand2')
 
+        self.avatar.bind('<Button-1>', lambda event: self.__click())
+        self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release())
+
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.acc_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
@@ -231,7 +234,10 @@ class AccountButton:
         self.frame.unbind('<ButtonRelease-1>')
         self.frame.config(cursor='arrow')
 
+        self.avatar.unbind('<Button-1>')
+        self.avatar.unbind('<ButtonRelease-1>')
         self.acc_label.unbind('<Button-1>')
+        self.acc_label.unbind('<ButtonRelease-1>')
         self.profile_label.unbind('<Button-1>')
         self.profile_label.unbind('<ButtonRelease-1>')
 
@@ -289,12 +295,20 @@ class AccountButtonGrid:
             self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release())
             self.avatar.bind('<Button-3>', rightcommand)
 
-        self.acc_label = ttk.Label(self.frame, text=username)
+        self.acc_label = ttk.Label(self.frame)
         self.acc_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
         self.acc_label.pack(side='top', pady=(2, 0))
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.acc_label.bind('<Button-3>', rightcommand)
+
+        if tkfont.Font(font=self.acc_label['font']).measure(username) > 86:
+            while tkfont.Font(font=self.acc_label['font']).measure(username) > 86:
+                username = username[:-1]
+            else:
+                username = f'{username}..'
+
+        self.acc_label.configure(text=username)
 
         self.profile_label = ttk.Label(self.frame)
         self.profile_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
@@ -303,11 +317,12 @@ class AccountButtonGrid:
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.profile_label.bind('<Button-3>', rightcommand)
 
-        if tkfont.Font(font=self.acc_label['font']).measure(profilename) > 85:
-            while tkfont.Font(font=self.acc_label['font']).measure(profilename) > 85:
+        if tkfont.Font(font=self.profile_label['font']).measure(profilename) > 86:
+            while tkfont.Font(font=self.profile_label['font']).measure(profilename) > 86:
                 profilename = profilename[:-1]
             else:
                 profilename = f'{profilename}..'
+
         self.profile_label.configure(text=profilename)
 
     def check_cursor(self, event):
@@ -392,6 +407,9 @@ class AccountButtonGrid:
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.frame.config(background=COLOR_NORMAL, cursor='hand2')
 
+        self.avatar.bind('<Button-1>', lambda event: self.__click())
+        self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release())
+
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
         self.acc_label.config(background=COLOR_NORMAL, foreground=COLOR_TEXT)
@@ -406,7 +424,10 @@ class AccountButtonGrid:
         self.frame.unbind('<ButtonRelease-1>')
         self.frame.config(cursor='arrow')
 
+        self.avatar.unbind('<Button-1>')
+        self.avatar.unbind('<ButtonRelease-1>')
         self.acc_label.unbind('<Button-1>')
+        self.acc_label.unbind('<ButtonRelease-1>')
         self.profile_label.unbind('<Button-1>')
         self.profile_label.unbind('<ButtonRelease-1>')
 
@@ -441,7 +462,7 @@ class ReadonlyEntryWithLabel:
 
 
 class WelcomeWindow(tk.Toplevel):
-    def __init__(self, master, after_update):
+    def __init__(self, master, after_update, debug):
         self.master = master
         tk.Toplevel.__init__(self, self.master, bg='white')
         self.title(_('Welcome'))
@@ -449,7 +470,10 @@ class WelcomeWindow(tk.Toplevel):
         self.x, self.y = get_center_pos(self.master, 320, 230)
         self.geometry(f"320x230+{self.x}+{self.y}")
         self.resizable(False, False)
-        self.protocol("WM_DELETE_WINDOW", self.on_window_close)
+
+        if not debug:
+            self.protocol("WM_DELETE_WINDOW", self.on_window_close)
+
         self.focus()
 
         try:
@@ -486,11 +510,21 @@ class WelcomeWindow(tk.Toplevel):
     def ok(self):
         if self.active_page == 0:
             self.welcome_label.destroy()
-            self.top_label = tk.Label(self.upper_frame, text=_('Customize your settings.'), bg='white')
+            self.top_label = tk.Label(self.upper_frame, bg='white')
             self.top_label.pack(pady=(4, 3))
             self.page_1()
 
         elif self.active_page == 1:
+            if self.radio_var.get() == 0:
+                self.ui_mode = 'list'
+            elif self.radio_var.get() == 1:
+                self.ui_mode = 'grid'
+
+            self.radio_frame1.destroy()
+            self.radio_frame2.destroy()
+            self.page_2()
+
+        elif self.active_page == 2:
             if self.radio_var.get() == 0:
                 self.mode = 'normal'
             elif self.radio_var.get() == 1:
@@ -498,9 +532,9 @@ class WelcomeWindow(tk.Toplevel):
 
             self.radio_frame1.destroy()
             self.radio_frame2.destroy()
-            self.page_2()
+            self.page_3()
 
-        elif self.active_page == 2:
+        elif self.active_page == 3:
             if 'selected' in self.soft_chkb.state():
                 self.soft_shutdown = 'true'
             else:
@@ -521,8 +555,8 @@ class WelcomeWindow(tk.Toplevel):
             self.avatar_frame.destroy()
 
             self.save()
-            self.page_3()
-        elif self.active_page == 3:
+            self.page_4()
+        elif self.active_page == 4:
             if 'selected' in self.shortcut_chkb.state():
                 create_shortcut()
 
@@ -534,6 +568,36 @@ class WelcomeWindow(tk.Toplevel):
 
     def page_1(self):
         self.active_page = 1
+        self.top_label['text'] = _('UI Appearance')
+        self.radio_frame1 = tk.Frame(self, bg='white')
+        self.radio_frame1.pack(side='top', padx=20, pady=(4, 10), fill='x')
+
+        radio_normal = ttk.Radiobutton(self.radio_frame1,
+                                       text=_('List Mode'),
+                                       variable=self.radio_var,
+                                       value=0,
+                                       style='welcome.TRadiobutton')
+        radio_normal.pack(side='top', anchor='w', pady=2)
+
+        tk.Label(self.radio_frame1, justify='left', bg='white',
+                 text=_("Display your accounts in vertical list.")).pack(side='left', pady=5)
+
+        self.radio_frame2 = tk.Frame(self, bg='white')
+        self.radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
+
+        radio_express = ttk.Radiobutton(self.radio_frame2,
+                                        text=_('Grid Mode'),
+                                        variable=self.radio_var,
+                                        value=1,
+                                        style='welcome.TRadiobutton')
+        radio_express.pack(side='top', anchor='w', pady=2)
+
+        tk.Label(self.radio_frame2, justify='left', bg='white',
+                 text=_('Display your accounts in 3 x n grid.')).pack(side='left', pady=5)
+
+    def page_2(self):
+        self.active_page = 2
+        self.top_label['text'] = _('Steam restart behaviour')
 
         self.radio_frame1 = tk.Frame(self, bg='white')
         self.radio_frame1.pack(side='top', padx=20, pady=(4, 10), fill='x')
@@ -561,8 +625,9 @@ class WelcomeWindow(tk.Toplevel):
         tk.Label(self.radio_frame2, justify='left', bg='white',
                  text=_('In express mode, Steam will be automatically\nrestarted when you change account.')).pack(side='left', pady=5)
 
-    def page_2(self):
-        self.active_page = 2
+    def page_3(self):
+        self.active_page = 3
+        self.top_label['text'] = _('Other settings')
 
         self.softshutdown_frame = tk.Frame(self, bg='white')
         self.softshutdown_frame.pack(fill='x', side='top', padx=(14, 0), pady=(4, 0))
@@ -603,8 +668,8 @@ class WelcomeWindow(tk.Toplevel):
         self.avatar_chkb.pack(side='top', anchor='w')
         tk.Label(self.avatar_frame, text=_('Show avatars in account list'), bg='white').pack(side='top', anchor='w')
 
-    def page_3(self):
-        self.active_page = 3
+    def page_4(self):
+        self.active_page = 4
         self.geometry(f"320x250+{self.x}+{self.y}")
         self.top_label['text'] = _('Good to go!')
 
@@ -628,7 +693,8 @@ class WelcomeWindow(tk.Toplevel):
                      'mode': self.mode,
                      'show_avatar': self.avatar,
                      'last_pos': get_config('last_pos'),
-                     'steam_path': get_config('steam_path')}
+                     'steam_path': get_config('steam_path'),
+                     'ui_mode': self.ui_mode}
 
         config_write_dict(dump_dict)
 
