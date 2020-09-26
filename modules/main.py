@@ -1408,8 +1408,10 @@ class MainApp(tk.Tk):
 
         if LOCALE == 'fr_FR':
             width = 330
+            radio_pad = 70
         else:
             width = 260
+            radio_pad = 35
 
         settingswindow = tk.Toplevel(self, bg='white')
         settingswindow.title(_("Settings"))
@@ -1469,7 +1471,7 @@ class MainApp(tk.Tk):
         ui_radio_var = tk.IntVar()
 
         list_radio_frame = tk.Frame(ui_frame, bg='white')
-        list_radio_frame.pack(side='left', padx=(35, 0))
+        list_radio_frame.pack(side='left', padx=(radio_pad, 0))
 
         list_canvas = tk.Canvas(list_radio_frame, width=30, height=30, bg='white', bd=0, highlightthickness=0)
         list_img = Image.open("asset/list.png").resize((30, 30))
@@ -1487,7 +1489,7 @@ class MainApp(tk.Tk):
         ToolTipWindow(radio_list, _('Display accounts in vertical list.'))
 
         grid_radio_frame = tk.Frame(ui_frame, bg='white')
-        grid_radio_frame.pack(side='right', padx=(0, 35))
+        grid_radio_frame.pack(side='right', padx=(0, radio_pad))
 
         grid_canvas = tk.Canvas(grid_radio_frame, width=30, height=30, bg='white', bd=0, highlightthickness=0)
         grid_img = Image.open("asset/grid.png").resize((30, 30))

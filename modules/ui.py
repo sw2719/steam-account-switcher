@@ -582,7 +582,7 @@ class WelcomeWindow(tk.Toplevel):
         self.active_page = 1
         self.top_label['text'] = _('UI Appearance')
         self.radio_frame1 = tk.Frame(self, bg='white')
-        self.radio_frame1.pack(side='left', padx=(45, 0), pady=5)
+        self.radio_frame1.pack(side='left', padx=(35, 0), pady=5)
 
         self.list_canvas = tk.Canvas(self.radio_frame1, width=50, height=50, bg='white', bd=0, highlightthickness=0)
         img = Image.open("asset/list.png").resize((50, 50))
@@ -602,7 +602,7 @@ class WelcomeWindow(tk.Toplevel):
                  text=_("Display accounts\nin vertical list")).pack(side='bottom', pady=5)
 
         self.radio_frame2 = tk.Frame(self, bg='white')
-        self.radio_frame2.pack(side='right', padx=(0, 45), pady=5)
+        self.radio_frame2.pack(side='right', padx=(0, 35), pady=5)
 
         self.grid_canvas = tk.Canvas(self.radio_frame2, width=50, height=50, bg='white', bd=0, highlightthickness=0)
         img = Image.open("asset/grid.png").resize((50, 50))
