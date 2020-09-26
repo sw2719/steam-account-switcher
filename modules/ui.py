@@ -10,7 +10,7 @@ import colour
 from PIL import Image, ImageTk
 from modules.config import get_config, config_write_value, config_write_dict
 from ruamel.yaml import YAML
-from modules.util import check_steam_dir, get_center_pos, create_shortcut
+from modules.util import check_steam_dir, create_shortcut
 from modules.steamid import steam64_to_3, steam64_to_32, steam64_to_2
 
 COLOR_TEXT = 'black'
@@ -490,7 +490,8 @@ class WelcomeWindow(tk.Toplevel):
         self.style.configure('welcome.TCheckbutton', background='white')
         self.style.configure('welcome.TRadiobutton', background='white')
 
-        self.radio_var = tk.IntVar()
+        self.ui_radio_var = tk.IntVar()
+        self.mode_radio_var = tk.IntVar()
         self.active_page = 0
 
         self.upper_frame = tk.Frame(self, bg='white')
@@ -523,9 +524,9 @@ class WelcomeWindow(tk.Toplevel):
             self.focus()
 
         elif self.active_page == 1:
-            if self.radio_var.get() == 0:
+            if self.ui_radio_var.get() == 0:
                 self.ui_mode = 'list'
-            elif self.radio_var.get() == 1:
+            elif self.ui_radio_var.get() == 1:
                 self.ui_mode = 'grid'
 
             self.radio_frame1.destroy()
@@ -534,9 +535,9 @@ class WelcomeWindow(tk.Toplevel):
             self.focus()
 
         elif self.active_page == 2:
-            if self.radio_var.get() == 0:
+            if self.mode_radio_var.get() == 0:
                 self.mode = 'normal'
-            elif self.radio_var.get() == 1:
+            elif self.mode_radio_var.get() == 1:
                 self.mode = 'express'
 
             self.radio_frame1.destroy()
@@ -593,7 +594,7 @@ class WelcomeWindow(tk.Toplevel):
 
         radio_list = ttk.Radiobutton(self.radio_frame1,
                                      text=_('List Mode'),
-                                     variable=self.radio_var,
+                                     variable=self.ui_radio_var,
                                      value=0,
                                      style='welcome.TRadiobutton')
         radio_list.pack(side='top', pady=2)
@@ -613,7 +614,7 @@ class WelcomeWindow(tk.Toplevel):
 
         radio_grid = ttk.Radiobutton(self.radio_frame2,
                                      text=_('Grid Mode'),
-                                     variable=self.radio_var,
+                                     variable=self.ui_radio_var,
                                      value=1,
                                      style='welcome.TRadiobutton')
         radio_grid.pack(side='top', pady=2)
@@ -630,7 +631,7 @@ class WelcomeWindow(tk.Toplevel):
 
         radio_normal = ttk.Radiobutton(self.radio_frame1,
                                        text=_('Normal Mode'),
-                                       variable=self.radio_var,
+                                       variable=self.mode_radio_var,
                                        value=0,
                                        style='welcome.TRadiobutton')
         radio_normal.pack(side='top', anchor='w', pady=2)
@@ -643,7 +644,7 @@ class WelcomeWindow(tk.Toplevel):
 
         radio_express = ttk.Radiobutton(self.radio_frame2,
                                         text=_('Express Mode'),
-                                        variable=self.radio_var,
+                                        variable=self.mode_radio_var,
                                         value=1,
                                         style='welcome.TRadiobutton')
         radio_express.pack(side='top', anchor='w', pady=2)
