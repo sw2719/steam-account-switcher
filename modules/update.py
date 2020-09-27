@@ -26,6 +26,13 @@ t = gettext.translation('steamswitcher',
                         fallback=True)
 _ = t.gettext
 
+dark = True
+
+if dark:
+    BACKGROUND_COLOR = '#1c1c1c'
+else:
+    BACKGROUND_COLOR = 'white'
+
 update_frame = None
 
 #  Update code is a real mess right now. You have been warned.
@@ -44,16 +51,16 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
         update_frame.destroy()
 
     update_frame = tk.Frame(master)
-    update_frame.config(bg='white')
+    update_frame.config(bg=BACKGROUND_COLOR)
 
     if not bundle and not debug:
-        ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 0), fill='x')
+        tk.Frame(update_frame, bg='grey').pack(fill='x')
         update_frame.pack(side='bottom', fill='x')
         return
     else:
         update_frame.pack(side='bottom', fill='x')
 
-    ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 0), fill='x')
+    tk.Frame(update_frame, bg='grey').pack(fill='x')
     master.update()
 
     def update(sv_version, changelog):
@@ -284,7 +291,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 update_frame.destroy()
 
                 update_frame = tk.Frame(master, bg='white')
-                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                tk.Frame(update_frame, bg='grey').pack(fill='x')
                 update_frame.pack(side='bottom', fill='x')
 
                 update_label = tk.Label(update_frame,
@@ -305,7 +312,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 update_frame.destroy()
 
                 update_frame = tk.Frame(master, bg='white')
-                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                tk.Frame(update_frame, bg='grey').pack(fill='x')
                 update_frame.pack(side='bottom', fill='x')
 
                 update_label = tk.Label(update_frame,
@@ -321,7 +328,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 update_frame.destroy()
 
                 update_frame = tk.Frame(master, bg='white')
-                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 0), fill='x')
+                tk.Frame(update_frame, bg='grey').pack(fill='x')
                 update_frame.pack(side='bottom', fill='x')
             elif update_code == 'dev':
                 print('Development version')
@@ -329,7 +336,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 update_frame.destroy()
 
                 update_frame = tk.Frame(master, bg='white')
-                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                tk.Frame(update_frame, bg='grey').pack(fill='x')
                 update_frame.pack(side='bottom', fill='x')
 
                 update_label = tk.Label(update_frame,
@@ -342,7 +349,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 update_frame.destroy()
 
                 update_frame = tk.Frame(master, bg='white')
-                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                tk.Frame(update_frame, bg='grey').pack(fill='x')
                 update_frame.pack(side='bottom', fill='x')
 
                 update_label = tk.Label(update_frame,

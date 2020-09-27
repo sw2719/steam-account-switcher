@@ -13,16 +13,31 @@ from ruamel.yaml import YAML
 from modules.util import check_steam_dir, create_shortcut
 from modules.steamid import steam64_to_3, steam64_to_32, steam64_to_2
 
-COLOR_TEXT = 'black'
-COLOR_TEXT_DISABLED = 'black'
-COLOR_TEXT_CLICKED = 'white'
-COLOR_NORMAL = 'white'
-COLOR_DISABLED = '#cfcfcf'
-COLOR_CLICKED = '#0078d7'
-COLOR_HOVER = '#f2f2f2'
-COLOR_ON_CURSOR_EXIT = '#c7d6ed'
-COLOR_BTN_CLICKED = '#1c1c1c'
-COLOR_BTN_HOVER = '#262626'
+dark = True
+
+if dark:
+    COLOR_TEXT = 'white'
+    COLOR_TEXT_DISABLED = 'white'
+    COLOR_TEXT_CLICKED = 'white'
+    COLOR_NORMAL = '#1c1c1c'
+    COLOR_DISABLED = '#3b3b3b'
+    COLOR_CLICKED = '#667f8c'
+    COLOR_HOVER = '#242424'
+    COLOR_ON_CURSOR_EXIT = '#374145'
+    COLOR_BTN_CLICKED = '#1c1c1c'
+    COLOR_BTN_HOVER = '#262626'
+
+else:
+    COLOR_TEXT = 'black'
+    COLOR_TEXT_DISABLED = 'black'
+    COLOR_TEXT_CLICKED = 'white'
+    COLOR_NORMAL = 'white'
+    COLOR_DISABLED = '#cfcfcf'
+    COLOR_CLICKED = '#0078d7'
+    COLOR_HOVER = '#f2f2f2'
+    COLOR_ON_CURSOR_EXIT = '#c7d6ed'
+    COLOR_BTN_CLICKED = '#1c1c1c'
+    COLOR_BTN_HOVER = '#262626'
 
 yaml = YAML()
 
@@ -446,6 +461,98 @@ class AccountButtonGrid:
             color_fade(self.acc_label, foreground=COLOR_TEXT_DISABLED)
             color_fade(self.profile_label, background=COLOR_DISABLED)
             color_fade(self.profile_label, foreground=COLOR_TEXT_DISABLED)
+
+    def grid(self, **kw):
+        self.frame.grid(**kw)
+
+
+class SimpleButton:
+    def __init__(self, master, text='', textvariable=None, command=None, bg=COLOR_NORMAL, fg=COLOR_TEXT, bd=0):
+        self.frame = tk.Frame(master, bg=bg, bd=bd)
+        self.command = command
+        self.button_text = tk.Label(self.frame, bg=bg, fg=fg)
+
+        if textvariable:
+            self.button_text['textvariable'] = textvariable
+        else:
+            self.button_text['text'] = text
+
+        self.button_text.pack(padx=2, pady=1)
+        self.onbutton = False
+        self.clicked = False
+
+        self.frame.bind('<Button-1>', lambda event: self.__click())
+        self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.frame.bind('<Enter>', lambda event: self.__enter())
+        self.frame.bind('<Leave>', lambda event: self.__leave())
+
+        self.button_text.bind('<Button-1>', lambda event: self.__click())
+        self.button_text.bind('<ButtonRelease-1>', lambda event: self.__release())
+
+    def check_cursor(self, event):
+        widget = event.widget.winfo_containing(event.x_root, event.y_root)
+
+        if widget in (self.frame, self.button_text):
+            self.__enter()
+        else:
+            self.__leave()
+
+    def color_clicked(self):
+        color_fade(self.frame, background=COLOR_CLICKED)
+        color_fade(self.button_text, background=COLOR_CLICKED)
+        color_fade(self.button_text, foreground='white')
+
+    def color_hover(self):
+        color_fade(self.frame, background=COLOR_HOVER)
+        color_fade(self.button_text, background=COLOR_HOVER)
+
+    def color_normal(self):
+        color_fade(self.frame, background=COLOR_NORMAL)
+        color_fade(self.button_text, background=COLOR_NORMAL)
+        color_fade(self.button_text, foreground=COLOR_TEXT)
+
+    def color_on_cursor_exit(self):
+        color_fade(self.frame, background=COLOR_ON_CURSOR_EXIT)
+        color_fade(self.button_text, background=COLOR_ON_CURSOR_EXIT)
+        color_fade(self.button_text, foreground=COLOR_TEXT)
+
+    def __click(self):
+        self.clicked = True
+        self.color_clicked()
+
+        # This method of checking cursor is ridiculously CPU intensive (releatively to other parts of the application)
+        # It checks cursor location every cursor movement while MB1 is pressed.
+        # Enter and leave event don't work properly with mouse button held down so I had to do it this way.
+        self.frame.bind('<B1-Motion>', self.check_cursor)
+        self.button_text.bind('<B1-Motion>', self.check_cursor)
+
+    def __release(self):
+        self.clicked = False
+        self.color_normal()
+        self.frame.unbind('<B1-Motion>')
+        self.button_text.unbind('<B1-Motion>')
+
+        if self.command and self.onbutton:
+            self.command()
+
+    def __enter(self):
+        self.onbutton = True
+
+        if self.clicked:
+            self.color_clicked()
+        else:
+            self.color_hover()
+
+    def __leave(self):
+        self.onbutton = False
+
+        if self.clicked:
+            self.color_on_cursor_exit()
+        else:
+            self.color_normal()
+
+    def pack(self, **kw):
+        self.frame.pack(**kw)
 
     def grid(self, **kw):
         self.frame.grid(**kw)

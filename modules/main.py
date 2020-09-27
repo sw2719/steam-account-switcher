@@ -17,7 +17,7 @@ from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, system_locale
 from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update
-from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, WelcomeWindow, steamid_window, ToolTipWindow, ask_steam_dir
+from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, ToolTipWindow, ask_steam_dir
 from modules.avatar import download_avatar
 
 yaml = YAML()
@@ -30,12 +30,25 @@ t = gettext.translation('steamswitcher',
                         fallback=True)
 _ = t.gettext
 
-BACKGROUND_COLOR = 'white'
-UPPERFRAME_COLOR = 'white'
-BOTTOMFRAME_COLOR = 'white'
-TEXT_COLOR = 'black'
-AUTOLOGIN_ON_COLOR = 'green'
-AUTOLOGIN_OFF_COLOR = 'red'
+dark = True
+
+if dark:
+    BACKGROUND_COLOR = '#1c1c1c'
+    UPPERFRAME_COLOR = '#292929'
+    BOTTOMFRAME_COLOR = '#292929'
+    TEXT_COLOR = 'white'
+    AUTOLOGIN_ON_COLOR = '#28d487'
+    AUTOLOGIN_OFF_COLOR = '#cc4b4b'
+    SEP_COLOR = '#545454'
+
+else:
+    BACKGROUND_COLOR = 'white'
+    UPPERFRAME_COLOR = 'white'
+    BOTTOMFRAME_COLOR = 'white'
+    TEXT_COLOR = 'black'
+    AUTOLOGIN_ON_COLOR = 'green'
+    AUTOLOGIN_OFF_COLOR = 'red'
+    SEP_COLOR = '#c4c4c4'
 
 # For ImageTk, global variables must be used to prevent them from being GC'd.
 image1 = None
@@ -218,22 +231,23 @@ class MainApp(tk.Tk):
         else:
             self.restartbutton_text.set(_('Restart Steam'))
 
-        button_toggle = ttk.Button(self.bottomframe,
-                                   text=_('Toggle auto-login'),
-                                   command=toggleAutologin)
-
-        button_exit = ttk.Button(self.bottomframe,
-                                 width=7,
-                                 text=_('Exit'),
-                                 command=self.exit_app)
+        button_toggle = SimpleButton(self.bottomframe,
+                                     text=_('Toggle auto-login'),
+                                     command=toggleAutologin,
+                                     bd=2)
+        button_exit = SimpleButton(self.bottomframe,
+                                   text=_('Exit'),
+                                   command=self.exit_app,
+                                   bd=2)
 
         # button_exit = ImageButton(self.bottomframe,
         #                           'asset/exit_icon.png',
         #                           command=self.exit_app)
 
-        button_restart = ttk.Button(self.bottomframe,
-                                    textvariable=self.restartbutton_text,
-                                    command=self.exit_after_restart)
+        button_restart = SimpleButton(self.bottomframe,
+                                      textvariable=self.restartbutton_text,
+                                      command=self.exit_after_restart,
+                                      bd=2)
 
         button_toggle.pack(side='left', padx=3, pady=3)
         button_exit.pack(side='left', pady=3)
@@ -267,8 +281,7 @@ class MainApp(tk.Tk):
 
         self.autolabel = tk.Label(self.upper_frame, textvariable=self.auto_var, bg=UPPERFRAME_COLOR, fg=auto_color)
         self.autolabel.pack(side='top')
-        shadow = tk.Frame(self.upper_frame, bg='grey')
-        shadow.pack(fill='x')
+        tk.Frame(self.upper_frame, bg='grey').pack(fill='x')
 
         self.draw_button()
 
@@ -462,15 +475,15 @@ class MainApp(tk.Tk):
 
     def draw_button_grid(self):
         menu_dict = {}
-        self.no_user_frame = tk.Frame(self.button_frame, bg='white')
+        self.no_user_frame = tk.Frame(self.button_frame, bg=BACKGROUND_COLOR)
 
         def onFrameConfigure(canvas):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
         if self.demo_mode:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
-            canvas.config(bg='white')
-            buttonframe = tk.Frame(canvas, bg='white')
+            canvas.config(bg=BACKGROUND_COLOR)
+            buttonframe = tk.Frame(canvas, bg=BACKGROUND_COLOR)
             scroll_bar = ttk.Scrollbar(self.button_frame,
                                        orient="vertical",
                                        command=canvas.yview)
@@ -515,8 +528,8 @@ class MainApp(tk.Tk):
 
         elif self.accounts:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
-            canvas.config(bg='white')
-            buttonframe = tk.Frame(canvas, bg='white')
+            canvas.config(bg=BACKGROUND_COLOR)
+            buttonframe = tk.Frame(canvas, bg=BACKGROUND_COLOR)
             scroll_bar = ttk.Scrollbar(self.button_frame,
                                        orient="vertical",
                                        command=canvas.yview)
@@ -622,20 +635,20 @@ class MainApp(tk.Tk):
             self.bind("<MouseWheel>", _on_mousewheel)
         else:
             self.no_user_frame.pack(side='top', fill='both', expand=True)
-            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg='white')
+            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg=BACKGROUND_COLOR)
             self.unbind("<MouseWheel>")
             no_user.pack(pady=(150, 0))
 
     def draw_button_list(self):
         menu_dict = {}
-        self.no_user_frame = tk.Frame(self.button_frame, bg='white')
+        self.no_user_frame = tk.Frame(self.button_frame, bg=BACKGROUND_COLOR)
 
         def onFrameConfigure(canvas):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
         if self.demo_mode:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
-            canvas.config(bg='white')
+            canvas.config(bg=BACKGROUND_COLOR)
             buttonframe = tk.Frame(canvas)
             scroll_bar = ttk.Scrollbar(self.button_frame,
                                        orient="vertical",
@@ -672,7 +685,7 @@ class MainApp(tk.Tk):
             self.bind("<MouseWheel>", _on_mousewheel)
         elif self.accounts:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
-            canvas.config(bg='white')
+            canvas.config(bg=BACKGROUND_COLOR)
             buttonframe = tk.Frame(canvas)
             scroll_bar = ttk.Scrollbar(self.button_frame,
                                        orient="vertical",
@@ -747,7 +760,7 @@ class MainApp(tk.Tk):
                     self.button_dict[username].disable(no_fade=True)
 
                 self.button_dict[username].pack(fill='x')
-                tk.Frame(buttonframe, bg='#c4c4c4').pack(fill='x')
+                tk.Frame(buttonframe, bg=SEP_COLOR).pack(fill='x')
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
