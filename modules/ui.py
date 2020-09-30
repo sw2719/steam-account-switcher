@@ -70,6 +70,53 @@ def color_fade(widget, **kw):
     update_widget_after()
 
 
+class MenuBar(tk.Frame):
+    def __init__(self, master, bg, fg, selected_bg):
+        tk.Frame.__init__(self, master, bd=1, relief='raised')
+        self.master = master
+        self.configure(background=bg)
+
+        menu_button = tk.Menubutton(self, text='File',
+                                    background=bg,
+                                    foreground=fg,
+                                    activeforeground=bg,
+                                    activebackground='white')
+
+        file_menu = tk.Menu(menu_button, tearoff=0)
+        file_menu.add_command(label='Example',
+                              background=bg,
+                              foreground=bg,
+                              activeforeground=bg,
+                              activebackground='white'
+                              )
+
+        menu_button.config(menu=file_menu)
+        menu_button.pack(side='left')
+
+        close = SimpleButton(self, text=' X ',
+                             command=master.quit,
+                             bg=bg,
+                             fg=fg)
+        close.pack(side='right')
+
+        self.bind("<Button-1>", self.start_move)
+        self.bind("<ButtonRelease-1>", self.stop_move)
+        self.bind("<B1-Motion>", self.moving)
+
+    def start_move(self, event):
+        self.master.x = event.x
+        self.master.y = event.y
+
+    def stop_move(self, event):
+        self.master.x = None
+        self.master.y = None
+
+    def moving(self, event):
+        x = (event.x_root - self.master.x)
+        y = (event.y_root - self.master.y)
+        self.master.geometry("+%s+%s" % (x, y))
+
+
 class DragDropListbox(tk.Listbox):
     '''Listbox with drag reordering of entries'''
     def __init__(self, master, **kw):
@@ -605,18 +652,21 @@ class WelcomeWindow(tk.Toplevel):
         self.upper_frame.pack(side='top', fill='x')
 
         self.top_font = tkfont.Font(weight=tkfont.BOLD, size=17, family='Arial')
-        self.top_label = tk.Label(self.upper_frame, bg='white', text=_('Welcome'), font=self.top_font)
-        self.top_label.pack(side='left', padx=6, pady=10)
+        self.title_font = tkfont.Font(weight=tkfont.BOLD, size=23, family='Arial')
 
         self.ok_button = ttk.Button(self, text=_('OK'), command=self.ok)
         self.ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
 
-        if after_update:
-            self.welcome_label = tk.Label(self, text=_('Update completed successfully.\nClick OK to continue.'), bg='white')
-        else:
-            self.welcome_label = tk.Label(self, text=_('Thank you for downloading this app.\nClick OK to continue.'), bg='white')
+        self.title_label = tk.Label(self, bg='white', text=_('Update complete'), font=self.title_font)
 
-        self.welcome_label.pack(expand=True, fill='both')
+        if after_update:
+            self.title_label['text'] = _('Update complete')
+        else:
+            self.title_label['text'] = _('Welcome')
+
+        self.welcome_label = tk.Label(self, text=_('Click OK to continue.'), bg='white')
+        self.title_label.pack(expand=True, pady=1)
+        self.welcome_label.pack(expand=True, pady=1)
 
         self.grab_set()
 
@@ -626,7 +676,10 @@ class WelcomeWindow(tk.Toplevel):
 
     def ok(self):
         if self.active_page == 0:
+            self.title_label.destroy()
             self.welcome_label.destroy()
+            self.top_label = tk.Label(self.upper_frame, bg='white', font=self.top_font)
+            self.top_label.pack(side='left', padx=6, pady=10)
             self.page_1()
             self.focus()
 
