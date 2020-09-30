@@ -679,7 +679,7 @@ class WelcomeWindow(tk.Toplevel):
             self.title_label.destroy()
             self.welcome_label.destroy()
             self.top_label = tk.Label(self.upper_frame, bg='white', font=self.top_font)
-            self.top_label.pack(side='left', padx=6, pady=10)
+            self.top_label.pack(side='left', padx=(10, 0), pady=10)
             self.page_1()
             self.focus()
 
@@ -725,6 +725,8 @@ class WelcomeWindow(tk.Toplevel):
             self.autoexit_frame.destroy()
             self.avatar_frame.destroy()
 
+            self.top_label.pack_forget()
+            self.top_label.pack(pady=10)
             self.save()
             self.page_4()
             self.focus()
