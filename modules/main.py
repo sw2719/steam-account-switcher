@@ -217,6 +217,8 @@ class MainApp(tk.Tk):
                                    command=download_avatar)
             debug_menu.add_command(label="Open initial setup",
                                    command=lambda: self.welcomewindow(debug=True))
+            debug_menu.add_command(label="Open initial setup with after_update True",
+                                   command=lambda: self.welcomewindow(debug=True, update_override=True))
             debug_menu.add_command(label="Toggle demo mode",
                                    command=self.toggle_demo)
             debug_menu.add_command(label="Raise exception",
@@ -337,8 +339,11 @@ class MainApp(tk.Tk):
 
         self.refresh()
 
-    def welcomewindow(self, debug=False):
-        window = WelcomeWindow(self, self.popup_geometry(320, 270, multiplier=2), self.after_update, debug)
+    def welcomewindow(self, debug=False, update_override=False):
+        if update_override:
+            window = WelcomeWindow(self, self.popup_geometry(320, 270, multiplier=2), True, debug)
+        else:
+            window = WelcomeWindow(self, self.popup_geometry(320, 270, multiplier=2), self.after_update, debug)
 
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':
