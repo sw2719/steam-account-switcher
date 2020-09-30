@@ -17,7 +17,7 @@ from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, system_locale
 from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update
-from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, ToolTipWindow, ask_steam_dir
+from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, ToolTipWindow, ask_steam_dir, MenuBar
 from modules.avatar import download_avatar
 
 yaml = YAML()
@@ -49,6 +49,25 @@ else:
     AUTOLOGIN_ON_COLOR = 'green'
     AUTOLOGIN_OFF_COLOR = 'red'
     SEP_COLOR = '#c4c4c4'
+
+def color_getter():
+    if get_config('theme') == 'dark':
+        BACKGROUND_COLOR = '#1c1c1c'
+        UPPERFRAME_COLOR = '#292929'
+        BOTTOMFRAME_COLOR = '#292929'
+        TEXT_COLOR = 'white'
+        AUTOLOGIN_ON_COLOR = '#28d487'
+        AUTOLOGIN_OFF_COLOR = '#cc4b4b'
+        SEP_COLOR = '#545454'
+
+    elif get_config('theme') == 'light':
+        BACKGROUND_COLOR = 'white'
+        UPPERFRAME_COLOR = 'white'
+        BOTTOMFRAME_COLOR = 'white'
+        TEXT_COLOR = 'black'
+        AUTOLOGIN_ON_COLOR = 'green'
+        AUTOLOGIN_OFF_COLOR = 'red'
+        SEP_COLOR = '#c4c4c4'
 
 # For ImageTk, global variables must be used to prevent them from being GC'd.
 image1 = None
@@ -152,6 +171,9 @@ class MainApp(tk.Tk):
         if not test():
             ask_steam_dir()
 
+        # self.overrideredirect(1)
+        # self.attributes("-topmost", True)
+
         menubar = tk.Menu(self, bg='white')
 
         if system_locale == 'ko_KR':
@@ -207,6 +229,8 @@ class MainApp(tk.Tk):
                                    command=create_shortcut)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
+        # MenuBar(self, BACKGROUND_COLOR, TEXT_COLOR, SEP_COLOR).pack(side='top', fill='x')
+
         self.bottomframe = tk.Frame(self, bg=BOTTOMFRAME_COLOR)
         self.bottomframe.pack(side='bottom', fill='x')
 
@@ -240,18 +264,19 @@ class MainApp(tk.Tk):
                                    command=self.exit_app,
                                    bd=2)
 
-        # button_exit = ImageButton(self.bottomframe,
-        #                           'asset/exit_icon.png',
-        #                           command=self.exit_app)
-
         button_restart = SimpleButton(self.bottomframe,
                                       textvariable=self.restartbutton_text,
                                       command=self.exit_after_restart,
                                       bd=2)
 
-        button_toggle.pack(side='left', padx=3, pady=3)
-        button_exit.pack(side='left', pady=3)
-        button_restart.pack(side='right', padx=3, pady=3, fill='x', expand=True)
+        button_toggle.grid(row=0, column=0, padx=3, pady=3, sticky='nesw')
+        button_exit.grid(row=0, column=1, pady=3, sticky='nesw')
+        button_restart.grid(row=0, column=2, padx=3, pady=3, sticky='nesw')
+
+        self.bottomframe.grid_columnconfigure(0, weight=1)
+        self.bottomframe.grid_columnconfigure(1, weight=1)
+        self.bottomframe.grid_columnconfigure(2, weight=1)
+        self.bottomframe.grid_rowconfigure(0, weight=1)
 
         self.button_dict = {}
 
@@ -855,7 +880,7 @@ class MainApp(tk.Tk):
         else:
             height = 180
 
-        aboutwindow = tk.Toplevel(self, bg='white')
+        aboutwindow = tk.Toplevel(self, bg=BACKGROUND_COLOR)
         aboutwindow.title(_('About'))
         aboutwindow.geometry(self.popup_geometry(360, height))
         aboutwindow.resizable(False, False)
@@ -867,18 +892,20 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
-        about_disclaimer = tk.Label(aboutwindow, bg='white',
+        about_disclaimer = tk.Label(aboutwindow, bg=BACKGROUND_COLOR, fg=TEXT_COLOR,
                                     text=_('Warning: The developer of this application is not responsible for\n' +
                                            'data loss or any other damage from the use of this app.'))
-        about_steam_trademark = tk.Label(aboutwindow, bg='white',
+        about_steam_trademark = tk.Label(aboutwindow, bg=BACKGROUND_COLOR, fg=TEXT_COLOR,
                                          text=_('STEAM is a registered trademark of Valve Corporation.'))
         if self.BUNDLE or force_copyright:
-            copyright_label = tk.Label(aboutwindow, text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
-                                       'View copyright notice for details', bg='white')
+            copyright_label = tk.Label(aboutwindow, bg=BACKGROUND_COLOR, fg=TEXT_COLOR,
+                                       text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
+                                       'View copyright notice for details')
         else:
-            copyright_label = tk.Label(aboutwindow, text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
-                                       'View LICENSE file for details', bg='white')
-        ver = tk.Label(aboutwindow, bg='white',
+            copyright_label = tk.Label(aboutwindow, bg=BACKGROUND_COLOR, fg=TEXT_COLOR,
+                                       text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
+                                       'View LICENSE file for details')
+        ver = tk.Label(aboutwindow, bg=BACKGROUND_COLOR, fg=TEXT_COLOR,
                        text='Steam Account Switcher | Version ' + version)
 
         def copyright_notice():
@@ -900,19 +927,21 @@ class MainApp(tk.Tk):
             cpright_text.configure(state=tk.DISABLED)
             cpright_text.pack(side='top', expand=True)
 
-        button_frame = tk.Frame(aboutwindow, bg='white')
+        button_frame = tk.Frame(aboutwindow, bg=BACKGROUND_COLOR)
         button_frame.pack(side='bottom', pady=5)
 
-        button_close = ttk.Button(button_frame,
-                                  text=_('Close'),
-                                  width=8,
-                                  command=aboutwindow.destroy)
-        button_github = ttk.Button(button_frame,
-                                   text=_('GitHub page'),
-                                   command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher'))
-        button_copyright = ttk.Button(button_frame,
-                                      text=_('Copyright notice'),
-                                      command=copyright_notice)
+        button_close = SimpleButton(button_frame,
+                                    text=_('Close'),
+                                    command=aboutwindow.destroy,
+                                    bg=UPPERFRAME_COLOR)
+        button_github = SimpleButton(button_frame,
+                                     text=_('GitHub page'),
+                                     command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher'),
+                                     bg=UPPERFRAME_COLOR)
+        button_copyright = SimpleButton(button_frame,
+                                        text=_('Copyright notice'),
+                                        command=copyright_notice,
+                                        bg=UPPERFRAME_COLOR)
 
         about_disclaimer.pack(pady=8)
         about_steam_trademark.pack()
