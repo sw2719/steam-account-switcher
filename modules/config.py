@@ -88,8 +88,17 @@ try:
     else:
         ui_mode_invalid = True
 
+    no_theme = 'theme' not in set(test_dict)
+    if not no_theme:
+        no_theme = test_dict['theme'] not in ('light', 'dark')
+    else:
+        no_theme = True
+
     if True in (locale_invalid, try_soft_invalid, autoexit_invalid,
-                mode_invalid, avatar_invalid, pos_invalid, steam_path_invalid, ui_mode_invalid):
+                mode_invalid, avatar_invalid, pos_invalid, steam_path_invalid,
+                ui_mode_invalid, no_theme):
+
+        print('Found invalid config value')
 
         cfg_write = {}
         if no_locale or locale_invalid:
@@ -126,6 +135,11 @@ try:
             cfg_write['ui_mode'] = 'list'
         else:
             cfg_write['ui_mode'] = test_dict['ui_mode']
+
+        if no_theme:
+            cfg_write['theme'] = 'light'
+        else:
+            cfg_write['theme'] = test_dict['theme']
 
         if steam_path_invalid:
             if os.path.isfile('steam_path.txt'):
@@ -190,7 +204,8 @@ def config_write_value(key, value):
                    'show_avatar': get_config('show_avatar'),
                    'last_pos': get_config('last_pos'),
                    'steam_path': get_config('steam_path'),
-                   'ui_mode': get_config('ui_mode')}
+                   'ui_mode': get_config('ui_mode'),
+                   'theme': get_config('theme')}
 
     config_dict[key] = value
 
