@@ -190,6 +190,8 @@ class MainApp(tk.Tk):
                                    command=launch_updater)
             debug_menu.add_command(label="Create shortcut",
                                    command=create_shortcut)
+            debug_menu.add_command(label="Exit app with sys.exit",
+                                   command=sys.exit)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
         # MenuBar(self, self['bg'], get_color('text'), SEP_COLOR).pack(side='top', fill='x')
@@ -775,7 +777,7 @@ class MainApp(tk.Tk):
             self.bind("<MouseWheel>", _on_mousewheel)
         else:
             self.no_user_frame.pack(side='top', fill='both', expand=True)
-            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg='white')
+            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg=self['bg'], fg=get_color('text'))
             self.unbind("<MouseWheel>")
             no_user.pack(pady=(150, 0))
 
@@ -813,7 +815,7 @@ class MainApp(tk.Tk):
         print('Menu refreshed with %s account(s)' % len(self.accounts))
 
     def update_avatar(self, steamid_list=None, no_ui=False):
-        label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
+        label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg=self['bg'], fg=get_color('text'))
 
         if not no_ui:
             self.no_user_frame.destroy()
@@ -849,7 +851,7 @@ class MainApp(tk.Tk):
         else:
             height = 180
 
-        aboutwindow = tk.Toplevel(self, bg=self['bg'])
+        aboutwindow = tk.Toplevel(self, bg='white')
         aboutwindow.title(_('About'))
         aboutwindow.geometry(self.popup_geometry(360, height))
         aboutwindow.resizable(False, False)
@@ -861,20 +863,20 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
-        about_disclaimer = tk.Label(aboutwindow, bg=self['bg'], fg=get_color('text'),
+        about_disclaimer = tk.Label(aboutwindow, bg='white', fg='black',
                                     text=_('Warning: The developer of this application is not responsible for\n' +
                                            'data loss or any other damage from the use of this app.'))
-        about_steam_trademark = tk.Label(aboutwindow, bg=self['bg'], fg=get_color('text'),
+        about_steam_trademark = tk.Label(aboutwindow, bg='white', fg='black',
                                          text=_('STEAM is a registered trademark of Valve Corporation.'))
         if self.BUNDLE or force_copyright:
-            copyright_label = tk.Label(aboutwindow, bg=self['bg'], fg=get_color('text'),
+            copyright_label = tk.Label(aboutwindow, bg='white', fg='black',
                                        text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
                                        'View copyright notice for details')
         else:
-            copyright_label = tk.Label(aboutwindow, bg=self['bg'], fg=get_color('text'),
+            copyright_label = tk.Label(aboutwindow, bg='white', fg='black',
                                        text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
                                        'View LICENSE file for details')
-        ver = tk.Label(aboutwindow, bg=self['bg'], fg=get_color('text'),
+        ver = tk.Label(aboutwindow, bg='white', fg='black',
                        text='Steam Account Switcher | Version ' + version)
 
         def copyright_notice():
@@ -896,32 +898,34 @@ class MainApp(tk.Tk):
             cpright_text.configure(state=tk.DISABLED)
             cpright_text.pack(side='top', expand=True)
 
-        button_frame = tk.Frame(aboutwindow, bg=self['bg'])
+        button_frame = tk.Frame(aboutwindow, bg='white')
         button_frame.pack(side='bottom', pady=5)
 
-        button_close = SimpleButton(button_frame,
-                                    text=_('Close'),
-                                    command=aboutwindow.destroy,
-                                    bg=self.upper_frame['bg'])
-        button_github = SimpleButton(button_frame,
-                                     text=_('GitHub page'),
-                                     command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher'),
-                                     bg=self.upper_frame['bg'])
-        button_copyright = SimpleButton(button_frame,
-                                        text=_('Copyright notice'),
-                                        command=copyright_notice,
-                                        bg=self.upper_frame['bg'])
+        button_close = ttk.Button(button_frame,
+                                  text=_('Close'),
+                                  command=aboutwindow.destroy)
+        button_github = ttk.Button(button_frame,
+                                   text=_('GitHub page'),
+                                   command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher'))
+        button_copyright = ttk.Button(button_frame,
+                                      text=_('Copyright notice'),
+                                      command=copyright_notice)
+
+        button_frame.grid_columnconfigure(0, weight=1)
+        button_frame.grid_columnconfigure(1, weight=1)
+        button_frame.grid_columnconfigure(2, weight=1)
+        button_frame.grid_rowconfigure(0, weight=1)
 
         about_disclaimer.pack(pady=8)
         about_steam_trademark.pack()
         copyright_label.pack(pady=5)
         ver.pack()
 
-        button_close.pack(side='left', padx=2)
-        button_github.pack(side='left', padx=2)
+        button_close.grid(row=0, column=0, padx=2)
+        button_github.grid(row=0, column=1, padx=2)
 
         if self.BUNDLE or force_copyright:
-            button_copyright.pack(side='left', padx=2)
+            button_copyright.grid(row=0, column=2, padx=2)
 
     def refreshwindow(self):
         '''Open remove accounts window'''
