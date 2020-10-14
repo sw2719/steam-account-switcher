@@ -5,8 +5,8 @@ import os
 import sys
 import asyncio
 from io import BytesIO
+from bs4 import BeautifulSoup
 
-API_KEY = '88CA6F49C590BF8B498AF4FCFB9964F1'
 PY_VERSION = float(f'{sys.version_info[0]}.{sys.version_info[1]}')
 
 if PY_VERSION >= 3.8 and sys.platform.startswith('win'):
@@ -27,9 +27,10 @@ def download_avatar(steamid_list):
     async def download_image(steamid64):
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(f'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={API_KEY}&steamids={steamid64}', timeout=5) as r:
-                    data = json.loads(await r.text())
-                    image_url = data['response']['players'][0]['avatarmedium']
+                async with session.get(f'https://steamcommunity.com/profiles/{steamid64}') as r:
+                    soup = BeautifulSoup(await r.read(), 'html.parser')
+
+                    image_url = soup.select('.playerAvatarAutoSizeInner > img')[0].get('src')
                     print(f'Found image URL for {steamid64}')
 
                 async with session.get(image_url) as r:
