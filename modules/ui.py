@@ -575,9 +575,9 @@ class AccountButtonGrid:
 
 
 class SimpleButton:
-    def __init__(self, master, text='', widget='button', textvariable=None, command=None, bd=0):
+    def __init__(self, master, text='', widget='button', textvariable=None, command=None, bd=2):
         self.normal = get_color(widget)
-        self.onexit = get_color(widget)
+        self.onexit = get_color('button_cursor_exit')
         self.clicked = get_color(f'{widget}_clicked')
         self.hover = get_color(f'{widget}_hover')
         self.disabled = get_color('button_disabled')
