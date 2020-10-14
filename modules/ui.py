@@ -22,6 +22,7 @@ t = gettext.translation('steamswitcher',
                         fallback=True)
 _ = t.gettext
 
+# This method of storing color is temporary.
 COLOR_LIGHT = {
     'text': 'black',
     'text_disabled': 'black',
