@@ -24,33 +24,34 @@ def download_avatar(steamid_list):
     if not os.path.isdir('avatar'):
         os.mkdir('avatar')
 
-    async def download_image(steamid64):
+    async def download_image(session, steamid64):
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f'https://steamcommunity.com/profiles/{steamid64}') as r:
-                    soup = BeautifulSoup(await r.read(), 'html.parser')
+            async with session.get(f'https://steamcommunity.com/profiles/{steamid64}') as r:
+                soup = BeautifulSoup(await r.read(), 'html.parser')
 
-                    image_url = soup.select('.playerAvatarAutoSizeInner > img')[0].get('src')
-                    print(f'Found image URL for {steamid64}')
+                image_url = soup.select('.playerAvatarAutoSizeInner > img')[0].get('src')
+                print(f'Found image URL for {steamid64}')
 
-                async with session.get(image_url) as r:
-                    print(f'Downloading {image_url} for {steamid64}...')
+            async with session.get(image_url) as r:
+                print(f'Downloading {image_url} for {steamid64}...')
 
-                    with open(f'avatar/{steamid64}.jpg', 'wb') as f:
-                        shutil.copyfileobj(BytesIO(await r.read()), f)
+                with open(f'avatar/{steamid64}.jpg', 'wb') as f:
+                    shutil.copyfileobj(BytesIO(await r.read()), f)
         except (aiohttp.ClientError, OSError):
             print(f'Exception while downloading image for {steamid64}')
 
     if PY_VERSION >= 3.7:
         async def main():
-            tasks = [asyncio.create_task(download_image(steamid)) for steamid in steamid_list]
-            await asyncio.gather(*tasks)
+            async with aiohttp.ClientSession() as session:
+                tasks = [asyncio.create_task(download_image(session, steamid)) for steamid in steamid_list]
+                await asyncio.gather(*tasks)
 
         asyncio.run(main())
     else:
         async def main():
-            futures = [asyncio.ensure_future(download_image(steamid)) for steamid in steamid_list]
-            await asyncio.gather(*futures)
+            async with aiohttp.ClientSession as session:
+                futures = [asyncio.ensure_future(download_image(session, steamid)) for steamid in steamid_list]
+                await asyncio.gather(*futures)
 
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main())
