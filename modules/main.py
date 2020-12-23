@@ -1808,4 +1808,4 @@ class MainApp(tk.Tk):
                     enable_button()
                 self.after(1000, launch_steam)
 
-        self.after(1000, launch_steam)
+        self.after(2000, launch_steam)
