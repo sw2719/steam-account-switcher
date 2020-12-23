@@ -575,6 +575,7 @@ class SimpleButton:
 
         self.button_text.pack(padx=2, pady=1)
         self.enabled = True
+        self.is_clicked = False
 
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release(event))
@@ -603,6 +604,7 @@ class SimpleButton:
         self.color_clicked()
 
     def __release(self, event):
+        self.is_clicked = False
         widget = event.widget.winfo_containing(event.x_root, event.y_root)
 
         self.color_normal()
@@ -615,8 +617,7 @@ class SimpleButton:
             self.color_hover()
 
     def __leave(self):
-
-        if self.enabled:
+        if self.enabled and not self.is_clicked:
             self.color_normal()
 
     def enable(self):
