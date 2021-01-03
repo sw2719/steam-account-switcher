@@ -936,7 +936,8 @@ class WelcomeWindow(tk.Toplevel):
                      'show_avatar': self.avatar,
                      'last_pos': get_config('last_pos'),
                      'steam_path': get_config('steam_path'),
-                     'ui_mode': self.ui_mode}
+                     'ui_mode': self.ui_mode,
+                     'theme': 'light'}
 
         config_write_dict(dump_dict)
 
