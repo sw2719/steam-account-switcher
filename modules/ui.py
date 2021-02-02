@@ -7,6 +7,7 @@ import os
 import sys
 import gettext
 import colour
+import json
 from PIL import Image, ImageTk
 from modules.config import get_config, config_write_value, config_write_dict
 from ruamel.yaml import YAML
@@ -22,67 +23,10 @@ t = gettext.translation('steamswitcher',
                         fallback=True)
 _ = t.gettext
 
-# This method of storing color is temporary.
-COLOR_LIGHT = {
-    'text': 'black',
-    'text_disabled': 'black',
-    'text_clicked': 'white',
-    'account_button': 'white',
-    'account_button_disabled': '#cfcfcf',
-    'account_button_clicked': '#0078d7',
-    'account_button_hover': '#f2f2f2',
-    'account_button_cursor_exit': '#c7d6ed',
-    'account_button_text': 'black',
-    'account_button_text_disabled': 'black',
-    'account_button_text_clicked': 'white',
-    'bottom_button': '#d1d1d1',
-    'bottom_button_clicked': '#0078d7',
-    'bottom_button_hover': '#ededed',
-    'bottom_button_cursor_exit': '#c7d6ed',
-    'button': '#d1d1d1',
-    'button_disabled': '#a6a6a6',
-    'button_clicked': '#0078d7',
-    'button_hover': '#ededed',
-    'button_cursor_exit': '#c7d6ed',
-    'button_text_disabled': '#c2c2c2',
-    'window_background': 'white',
-    'upperframe': 'white',
-    'bottomframe': 'white',
-    'autologin_text_on': 'green',
-    'autologin_text_off': 'red',
-    'seperator': '#c4c4c4'
-}
-
-COLOR_DARK = {
-    'text': 'white',
-    'text_disabled': 'white',
-    'text_clicked': 'white',
-    'account_button': '#1c1c1c',
-    'account_button_disabled': '#3b3b3b',
-    'account_button_clicked': '#667f8c',
-    'account_button_hover': '#242424',
-    'account_button_cursor_exit': '#374145',
-    'account_button_text': 'white',
-    'account_button_text_disabled': 'white',
-    'account_button_text_clicked': 'white',
-    'bottom_button': '#1c1c1c',
-    'bottom_button_disabled': '#3b3b3b',
-    'bottom_button_clicked': '#667f8c',
-    'bottom_button_hover': '#242424',
-    'bottom_button_cursor_exit': '#374145',
-    'button': '#1c1c1c',
-    'button_disabled': '#404040',
-    'button_clicked': '#667f8c',
-    'button_hover': '#242424',
-    'button_cursor_exit': '#374145',
-    'button_text_disabled': '#c2c2c2',
-    'window_background': '#1c1c1c',
-    'upperframe': '#292929',
-    'bottomframe': '#292929',
-    'autologin_text_on': '#28d487',
-    'autologin_text_off': '#cc4b4b',
-    'seperator': '#545454'
-}
+with open('theme.json') as theme_json:
+    theme_dict = json.loads(theme_json.read())
+    COLOR_LIGHT = theme_dict['light']
+    COLOR_DARK = theme_dict['dark']
 
 
 def get_color(key, theme=get_config('theme')):
