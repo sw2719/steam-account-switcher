@@ -220,26 +220,26 @@ class MainApp(tk.Tk):
         else:
             self.restartbutton_text.set(_('Restart Steam'))
 
-        button_toggle = SimpleButton(self.bottomframe,
-                                     widget='bottom_button',
-                                     text=_('Toggle auto-login'),
-                                     command=toggleAutologin,
-                                     bd=2)
-        button_exit = SimpleButton(self.bottomframe,
-                                   widget='bottom_button',
-                                   text=_('Exit'),
-                                   command=self.exit_app,
-                                   bd=2)
+        self.button_toggle = SimpleButton(self.bottomframe,
+                                          widget='bottom_button',
+                                          text=_('Toggle auto-login'),
+                                          command=toggleAutologin,
+                                          bd=2)
+        self.button_exit = SimpleButton(self.bottomframe,
+                                        widget='bottom_button',
+                                        text=_('Exit'),
+                                        command=self.exit_app,
+                                        bd=2)
 
-        button_restart = SimpleButton(self.bottomframe,
-                                      widget='bottom_button',
-                                      textvariable=self.restartbutton_text,
-                                      command=self.exit_after_restart,
-                                      bd=2)
+        self.button_restart = SimpleButton(self.bottomframe,
+                                           widget='bottom_button',
+                                           textvariable=self.restartbutton_text,
+                                           command=self.exit_after_restart,
+                                           bd=2)
 
-        button_toggle.grid(row=0, column=0, padx=3, pady=3, sticky='nesw')
-        button_exit.grid(row=0, column=1, pady=3, sticky='nesw')
-        button_restart.grid(row=0, column=2, padx=3, pady=3, sticky='nesw')
+        self.button_toggle.grid(row=0, column=0, padx=3, pady=3, sticky='nesw')
+        self.button_exit.grid(row=0, column=1, pady=3, sticky='nesw')
+        self.button_restart.grid(row=0, column=2, padx=3, pady=3, sticky='nesw')
 
         self.bottomframe.grid_columnconfigure(0, weight=1)
         self.bottomframe.grid_columnconfigure(1, weight=1)
@@ -254,14 +254,14 @@ class MainApp(tk.Tk):
         self.button_frame = tk.Frame(self, bg=get_color('upperframe'))
         self.button_frame.pack(side='top', fill='both', expand=True)
 
-        userlabel_1 = tk.Label(self.upper_frame, text=_('Current Auto-login user:'), bg=self.upper_frame['bg'], fg=get_color('text'))
-        userlabel_1.pack(side='top')
+        self.userlabel_1 = tk.Label(self.upper_frame, text=_('Current Auto-login user:'), bg=self.upper_frame['bg'], fg=get_color('text'))
+        self.userlabel_1.pack(side='top')
 
         self.user_var = tk.StringVar()
         self.user_var.set(fetch_reg('AutoLoginUser'))
 
-        userlabel_2 = tk.Label(self.upper_frame, textvariable=self.user_var, bg=self.upper_frame['bg'], fg=get_color('text'))
-        userlabel_2.pack(side='top', pady=2)
+        self.userlabel_2 = tk.Label(self.upper_frame, textvariable=self.user_var, bg=self.upper_frame['bg'], fg=get_color('text'))
+        self.userlabel_2.pack(side='top', pady=2)
 
         self.auto_var = tk.StringVar()
 
@@ -315,11 +315,12 @@ class MainApp(tk.Tk):
             if str(event.widget) == '.!welcomewindow':
                 if self.accounts:
                     self.update_avatar()
+
                 self.refresh()
 
         window.bind('<Destroy>', event_function)
 
-    def configwindow(self, username, profilename):
+    def configwindow(self, username):
         configwindow = tk.Toplevel(self, bg='white')
         configwindow.title('')
 
@@ -790,8 +791,26 @@ class MainApp(tk.Tk):
             self.no_user_frame.destroy()
             self.button_frame.destroy()
 
-        self.button_frame = tk.Frame(self)
+        self.button_frame = tk.Frame(self, bg=get_color('bottomframe'))
         self.button_frame.pack(side='top', fill='both', expand=True)
+        self['bg'] = get_color('window_background')
+
+        self.bottomframe.configure(bg=get_color('bottomframe'))
+        self.button_toggle.update_color()
+        self.button_exit.update_color()
+        self.button_restart.update_color()
+        self.upper_frame.configure(bg=get_color('upperframe'))
+        self.userlabel_1.configure(bg=self.upper_frame['bg'], fg=get_color('text'))
+        self.userlabel_2.configure(bg=self.upper_frame['bg'], fg=get_color('text'))
+
+        if fetch_reg('RememberPassword') == 1:
+            self.auto_var.set(_('Auto-login Enabled'))
+            auto_color = get_color('autologin_text_on')
+        else:
+            self.auto_var.set(_('Auto-login Disabled'))
+            auto_color = get_color('autologin_text_off')
+
+        self.autolabel.configure(bg=self.upper_frame['bg'], fg=auto_color)
 
         if self.demo_mode:
             self.user_var.set('username0')

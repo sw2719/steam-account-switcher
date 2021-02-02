@@ -29,7 +29,8 @@ with open('theme.json') as theme_json:
     COLOR_DARK = theme_dict['dark']
 
 
-def get_color(key, theme=get_config('theme')):
+def get_color(key):
+    theme = get_config('theme')
     if theme == 'light':
         return COLOR_LIGHT[key]
     elif theme == 'dark':
@@ -133,14 +134,7 @@ class DragDropListbox(tk.Listbox):
 
 class AccountButton:
     def __init__(self, master, username, profilename, command=None, rightcommand=None, image='default'):
-        self.normal = get_color('account_button')
-        self.disabled = get_color('account_button_disabled')
-        self.clicked = get_color('account_button_clicked')
-        self.hover = get_color('account_button_hover')
-        self.onexit = get_color('account_button_cursor_exit')
-        self.text = get_color('account_button_text')
-        self.text_disabled = get_color('account_button_text_disabled')
-        self.text_clicked = get_color('account_button_text_clicked')
+        self.update_color(init=True)
 
         self.master = master
         self.frame = tk.Frame(master, borderwidth=3)
@@ -192,6 +186,26 @@ class AccountButton:
         self.profile_label.bind('<Button-1>', lambda event: self.__click())
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.profile_label.bind('<Button-3>', rightcommand)
+
+    def update_color(self, init=False):
+        self.normal = get_color('account_button')
+        self.disabled = get_color('account_button_disabled')
+        self.clicked = get_color('account_button_clicked')
+        self.hover = get_color('account_button_hover')
+        self.onexit = get_color('account_button_cursor_exit')
+        self.text = get_color('account_button_text')
+        self.text_disabled = get_color('account_button_text_disabled')
+        self.text_clicked = get_color('account_button_text_clicked')
+
+        if not init:
+            if self.enabled:
+                self.frame.configure(background=self.normal)
+                self.acc_label.configure(background=self.normal, foreground=self.text)
+                self.profile_label.configure(background=self.normal, foreground=self.text)
+            else:
+                self.frame.config(background=self.disabled)
+                self.acc_label.config(background=self.disabled, foreground=self.text_disabled)
+                self.profile_label.config(background=self.disabled, foreground=self.text_disabled)
 
     def check_cursor(self, event):
         widget = event.widget.winfo_containing(event.x_root, event.y_root)
@@ -300,14 +314,7 @@ class AccountButton:
 
 class AccountButtonGrid:
     def __init__(self, master, username, profilename, command=None, rightcommand=None, image='default'):
-        self.normal = get_color('account_button')
-        self.disabled = get_color('account_button_disabled')
-        self.clicked = get_color('account_button_clicked')
-        self.hover = get_color('account_button_hover')
-        self.onexit = get_color('account_button_cursor_exit')
-        self.text = get_color('account_button_text')
-        self.text_disabled = get_color('account_button_text_disabled')
-        self.text_clicked = get_color('account_button_text_clicked')
+        self.update_color(init=True)
 
         self.master = master
         self.frame = tk.Frame(master, borderwidth=3, width=84, height=100)
@@ -376,6 +383,26 @@ class AccountButtonGrid:
                 profilename = f'{profilename}..'
 
         self.profile_label.configure(text=profilename)
+
+    def update_color(self, init=False):
+        self.normal = get_color('account_button')
+        self.disabled = get_color('account_button_disabled')
+        self.clicked = get_color('account_button_clicked')
+        self.hover = get_color('account_button_hover')
+        self.onexit = get_color('account_button_cursor_exit')
+        self.text = get_color('account_button_text')
+        self.text_disabled = get_color('account_button_text_disabled')
+        self.text_clicked = get_color('account_button_text_clicked')
+
+        if not init:
+            if self.enabled:
+                self.frame.configure(background=self.normal)
+                self.acc_label.configure(background=self.normal, foreground=self.text)
+                self.profile_label.configure(background=self.normal, foreground=self.text)
+            else:
+                self.frame.config(background=self.disabled)
+                self.acc_label.config(background=self.disabled, foreground=self.text_disabled)
+                self.profile_label.config(background=self.disabled, foreground=self.text_disabled)
 
     def check_cursor(self, event):
         widget = event.widget.winfo_containing(event.x_root, event.y_root)
@@ -500,13 +527,8 @@ class AccountButtonGrid:
 
 class SimpleButton:
     def __init__(self, master, text='', widget='button', textvariable=None, command=None, bd=2):
-        self.normal = get_color(widget)
-        self.clicked = get_color(f'{widget}_clicked')
-        self.hover = get_color(f'{widget}_hover')
-        self.disabled = get_color('button_disabled')
-        self.text = get_color('text')
-        self.text_clicked = get_color('text_clicked')
-        self.text_disabled = get_color('button_text_disabled')
+        self.widget = widget
+        self.update_color(init=True)
 
         self.frame = tk.Frame(master, bg=self.normal, bd=bd)
         self.command = command
@@ -528,6 +550,23 @@ class SimpleButton:
 
         self.button_text.bind('<Button-1>', lambda event: self.__click())
         self.button_text.bind('<ButtonRelease-1>', lambda event: self.__release(event))
+
+    def update_color(self, init=False):
+        self.normal = get_color(self.widget)
+        self.clicked = get_color(f'{self.widget}_clicked')
+        self.hover = get_color(f'{self.widget}_hover')
+        self.disabled = get_color('button_disabled')
+        self.text = get_color('text')
+        self.text_clicked = get_color('text_clicked')
+        self.text_disabled = get_color('button_text_disabled')
+
+        if not init:
+            if self.enabled:
+                self.frame.configure(background=self.normal)
+                self.button_text.configure(background=self.normal, foreground=self.text)
+            else:
+                self.frame.configure(background=self.disabled)
+                self.button_text.configure(background=self.disabled, foreground=self.text_disabled)
 
     def color_clicked(self):
         color_fade(self.frame, background=self.clicked)
@@ -639,6 +678,7 @@ class WelcomeWindow(tk.Toplevel):
         self.style.configure('welcome.TCheckbutton', background='white')
         self.style.configure('welcome.TRadiobutton', background='white')
 
+        self.theme_radio_var = tk.IntVar()
         self.ui_radio_var = tk.IntVar()
         self.mode_radio_var = tk.IntVar()
         self.active_page = 0
@@ -679,6 +719,18 @@ class WelcomeWindow(tk.Toplevel):
             self.focus()
 
         elif self.active_page == 1:
+            if self.theme_radio_var.get() == 0:
+                self.theme = 'light'
+            elif self.theme_radio_var.get() == 1:
+                self.theme = 'dark'
+
+            self.radio_frame1.destroy()
+            self.radio_frame2.destroy()
+            self.dark_alert.destroy()
+            self.page_2()
+            self.focus()
+
+        elif self.active_page == 2:
             if self.ui_radio_var.get() == 0:
                 self.ui_mode = 'list'
             elif self.ui_radio_var.get() == 1:
@@ -686,10 +738,10 @@ class WelcomeWindow(tk.Toplevel):
 
             self.radio_frame1.destroy()
             self.radio_frame2.destroy()
-            self.page_2()
+            self.page_3()
             self.focus()
 
-        elif self.active_page == 2:
+        elif self.active_page == 3:
             if self.mode_radio_var.get() == 0:
                 self.mode = 'normal'
             elif self.mode_radio_var.get() == 1:
@@ -697,10 +749,10 @@ class WelcomeWindow(tk.Toplevel):
 
             self.radio_frame1.destroy()
             self.radio_frame2.destroy()
-            self.page_3()
+            self.page_4()
             self.focus()
 
-        elif self.active_page == 3:
+        elif self.active_page == 4:
             if 'selected' in self.soft_chkb.state():
                 self.soft_shutdown = 'true'
             else:
@@ -723,10 +775,10 @@ class WelcomeWindow(tk.Toplevel):
             self.top_label.pack_forget()
             self.top_label.pack(pady=10)
             self.save()
-            self.page_4()
+            self.page_5()
             self.focus()
 
-        elif self.active_page == 4:
+        elif self.active_page == 5:
             if 'selected' in self.shortcut_chkb.state():
                 create_shortcut()
 
@@ -739,8 +791,61 @@ class WelcomeWindow(tk.Toplevel):
     def page_1(self):
         self.active_page = 1
         self.top_label['text'] = _('UI Appearance')
+        self.bottomframe = tk.Frame(self, bg='white')
+        self.bottomframe.pack(side='bottom', fill='x')
+
+        self.dark_alert = tk.Label(self.bottomframe, bg='white',
+                                   text=_(' '))
+        self.dark_alert.pack(side='bottom', pady=(0, 4), fill='x')
+
+        icon_w = 60
+        icon_h = 96
+
         self.radio_frame1 = tk.Frame(self, bg='white')
-        self.radio_frame1.pack(side='left', padx=(35, 0), pady=5)
+        self.radio_frame1.pack(side='left', padx=(60, 0), pady=5)
+
+        self.light_canvas = tk.Canvas(self.radio_frame1, width=icon_w, height=icon_h, bg='white', bd=0, highlightthickness=0)
+        img = Image.open("asset/light.png").resize((icon_w, icon_h))
+
+        self.light_imgtk = ImageTk.PhotoImage(img)
+        self.light_canvas.create_image(icon_w / 2, icon_h / 2, image=self.light_imgtk)
+        self.light_canvas.pack(side='top', padx=0, pady=5)
+
+        def on_button():
+            if self.theme_radio_var.get():
+                self.dark_alert['text'] = _('Dark theme is applied only to main window.')
+            else:
+                self.dark_alert['text'] = ' '
+
+        radio_light = ttk.Radiobutton(self.radio_frame1,
+                                      text=_('Light'),
+                                      variable=self.theme_radio_var,
+                                      value=0,
+                                      style='welcome.TRadiobutton',
+                                      command=on_button)
+        radio_light.pack(side='top', pady=2)
+
+        self.radio_frame2 = tk.Frame(self, bg='white')
+        self.radio_frame2.pack(side='right', padx=(0, 60), pady=5)
+
+        self.dark_canvas = tk.Canvas(self.radio_frame2, width=icon_w, height=icon_h, bg='white', bd=0, highlightthickness=0)
+        img = Image.open("asset/dark.png").resize((icon_w, icon_h))
+        self.dark_imgtk = ImageTk.PhotoImage(img)
+        self.dark_canvas.create_image(icon_w / 2, icon_h / 2, image=self.dark_imgtk)
+        self.dark_canvas.pack(side='top', padx=0, pady=5)
+
+        radio_dark = ttk.Radiobutton(self.radio_frame2,
+                                     text=_('Dark'),
+                                     variable=self.theme_radio_var,
+                                     value=1,
+                                     style='welcome.TRadiobutton',
+                                     command=on_button)
+        radio_dark.pack(side='top', pady=2)
+
+    def page_2(self):
+        self.active_page = 2
+        self.radio_frame1 = tk.Frame(self, bg='white')
+        self.radio_frame1.pack(side='left', padx=(43, 0), pady=5)
 
         self.list_canvas = tk.Canvas(self.radio_frame1, width=50, height=50, bg='white', bd=0, highlightthickness=0)
         img = Image.open("asset/list.png").resize((50, 50))
@@ -760,7 +865,7 @@ class WelcomeWindow(tk.Toplevel):
                  text=_("Display accounts\nin vertical list")).pack(side='bottom', pady=5)
 
         self.radio_frame2 = tk.Frame(self, bg='white')
-        self.radio_frame2.pack(side='right', padx=(0, 35), pady=5)
+        self.radio_frame2.pack(side='right', padx=(0, 43), pady=5)
 
         self.grid_canvas = tk.Canvas(self.radio_frame2, width=50, height=50, bg='white', bd=0, highlightthickness=0)
         img = Image.open("asset/grid.png").resize((50, 50))
@@ -779,8 +884,8 @@ class WelcomeWindow(tk.Toplevel):
         tk.Label(self.radio_frame2, justify='left', bg='white',
                  text=_('Display accounts\nin 3 x n grid')).pack(side='bottom', pady=5)
 
-    def page_2(self):
-        self.active_page = 2
+    def page_3(self):
+        self.active_page = 3
         self.top_label['text'] = _('Steam restart behaviour')
 
         self.radio_frame1 = tk.Frame(self, bg='white')
@@ -809,8 +914,8 @@ class WelcomeWindow(tk.Toplevel):
         tk.Label(self.radio_frame2, justify='left', bg='white',
                  text=_('In express mode, Steam will be automatically\nrestarted when you change account.')).pack(side='left', pady=5)
 
-    def page_3(self):
-        self.active_page = 3
+    def page_4(self):
+        self.active_page = 4
         self.top_label['text'] = _('Other settings')
 
         self.softshutdown_frame = tk.Frame(self, bg='white')
@@ -855,8 +960,8 @@ class WelcomeWindow(tk.Toplevel):
         self.avatar_chkb.pack(side='top', anchor='w')
         tk.Label(self.avatar_frame, text=_('Show avatars in account list'), bg='white').pack(side='top', anchor='w')
 
-    def page_4(self):
-        self.active_page = 4
+    def page_5(self):
+        self.active_page = 5
         self.top_label['text'] = _('Good to go!')
 
         # tkinter doesn't like three quotes string, so... yeah.
@@ -881,7 +986,7 @@ class WelcomeWindow(tk.Toplevel):
                      'last_pos': get_config('last_pos'),
                      'steam_path': get_config('steam_path'),
                      'ui_mode': self.ui_mode,
-                     'theme': 'light'}
+                     'theme': self.theme}
 
         config_write_dict(dump_dict)
 
