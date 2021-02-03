@@ -28,7 +28,8 @@ def reset_config():
                    'show_avatar': 'true',
                    'steam_path': 'reg',
                    'last_pos': '0/0',
-                   'ui_mode': 'list'}
+                   'ui_mode': 'list',
+                   'theme': 'light'}
         yaml.dump(default, cfg)
 
 
