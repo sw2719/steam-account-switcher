@@ -132,9 +132,6 @@ class MainApp(tk.Tk):
         if not test():
             ask_steam_dir()
 
-        # self.overrideredirect(1)
-        # self.attributes("-topmost", True)
-
         menubar = tk.Menu(self)
 
         if system_locale == 'ko_KR':
@@ -193,8 +190,6 @@ class MainApp(tk.Tk):
             debug_menu.add_command(label="Exit app with sys.exit",
                                    command=sys.exit)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
-
-        # MenuBar(self, self['bg'], get_color('text'), SEP_COLOR).pack(side='top', fill='x')
 
         self.bottomframe = tk.Frame(self, bg=get_color('bottomframe'))
         self.bottomframe.pack(side='bottom', fill='x')
