@@ -31,10 +31,15 @@ with open('theme.json') as theme_json:
 
 def get_color(key):
     theme = get_config('theme')
-    if theme == 'light':
-        return COLOR_LIGHT[key]
-    elif theme == 'dark':
-        return COLOR_DARK[key]
+    try:
+        if theme == 'light':
+            return COLOR_LIGHT[key]
+        elif theme == 'dark':
+            return COLOR_DARK[key]
+
+    except KeyError:
+        print('WARNING: get_color was called with wrong color key', key)
+        return 'black'
 
 
 def color_fade(widget, **kw):
@@ -207,14 +212,6 @@ class AccountButton:
                 self.acc_label.config(background=self.disabled, foreground=self.text_disabled)
                 self.profile_label.config(background=self.disabled, foreground=self.text_disabled)
 
-    def check_cursor(self, event):
-        widget = event.widget.winfo_containing(event.x_root, event.y_root)
-
-        if widget in (self.frame, self.acc_label, self.profile_label, self.avatar):
-            self.__enter()
-        else:
-            self.__leave()
-
     def color_clicked(self):
         color_fade(self.frame, background=self.clicked)
         color_fade(self.acc_label, background=self.clicked)
@@ -323,7 +320,7 @@ class AccountButtonGrid:
         self.frame.pack_propagate(0)
 
         self.frame.bind('<Button-1>', lambda event: self.__click())
-        self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.frame.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.frame.bind('<Button-3>', rightcommand)
         self.frame.bind('<Enter>', lambda event: self.__enter())
         self.frame.bind('<Leave>', lambda event: self.__leave())
@@ -351,14 +348,14 @@ class AccountButtonGrid:
             self.avatar.pack(side='top', pady=(2, 0))
 
             self.avatar.bind('<Button-1>', lambda event: self.__click())
-            self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release())
+            self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release(event))
             self.avatar.bind('<Button-3>', rightcommand)
 
         self.acc_label = ttk.Label(self.frame)
         self.acc_label.config(background=self.normal, foreground=self.text)
         self.acc_label.pack(side='top', pady=(2, 0))
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
-        self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.acc_label.bind('<Button-3>', rightcommand)
 
         if tkfont.Font(font=self.acc_label['font']).measure(username) > 86:
@@ -373,7 +370,7 @@ class AccountButtonGrid:
         self.profile_label.config(background=self.normal, foreground=self.text)
         self.profile_label.pack(side='top')
         self.profile_label.bind('<Button-1>', lambda event: self.__click())
-        self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.profile_label.bind('<Button-3>', rightcommand)
 
         if tkfont.Font(font=self.profile_label['font']).measure(profilename) > 86:
@@ -442,59 +439,40 @@ class AccountButtonGrid:
         self.is_clicked = True
         self.color_clicked()
 
-        # This method of checking cursor is ridiculously CPU intensive (releatively to other parts of the application)
-        # It checks cursor location every cursor movement while MB1 is pressed.
-        # Enter and leave event don't work properly with mouse button held down so I had to do it this way.
-        self.frame.bind('<B1-Motion>', self.check_cursor)
-        self.acc_label.bind('<B1-Motion>', self.check_cursor)
-        self.profile_label.bind('<B1-Motion>', self.check_cursor)
-
-        if self.avatar:
-            self.avatar.bind('<B1-Motion>', self.check_cursor)
-
-    def __release(self):
+    def __release(self, event):
         self.is_clicked = False
         self.color_normal()
-        self.frame.unbind('<B1-Motion>')
-        self.acc_label.unbind('<B1-Motion>')
-        self.profile_label.unbind('<B1-Motion>')
-        if self.avatar:
-            self.avatar.unbind('<B1-Motion>')
 
-        if self.command and self.onbutton:
+        widget = event.widget.winfo_containing(event.x_root, event.y_root)
+
+        if self.command and widget in (self.frame, self.acc_label, self.profile_label, self.avatar):
             self.command()
 
     def __enter(self):
-        self.onbutton = True
-
         if self.is_clicked:
             self.color_clicked()
         elif self.enabled:
             self.color_hover()
 
     def __leave(self):
-        self.onbutton = False
-
-        if self.is_clicked:
-            self.color_on_cursor_exit()
-        elif self.enabled:
+        if self.enabled and not self.is_clicked:
             self.color_normal()
 
     def enable(self):
         self.enabled = True
         self.frame.bind('<Button-1>', lambda event: self.__click())
-        self.frame.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.frame.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.frame.config(background=self.normal, cursor='hand2')
 
         self.avatar.bind('<Button-1>', lambda event: self.__click())
-        self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.avatar.bind('<ButtonRelease-1>', lambda event: self.__release(event))
 
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
-        self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.acc_label.config(background=self.normal, foreground=self.text)
 
         self.profile_label.bind('<Button-1>', lambda event: self.__click())
-        self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release())
+        self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.profile_label.config(background=self.normal, foreground=self.text)
 
     def disable(self, no_fade=False):
