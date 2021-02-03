@@ -197,7 +197,6 @@ class AccountButton:
         self.disabled = get_color('account_button_disabled')
         self.clicked = get_color('account_button_clicked')
         self.hover = get_color('account_button_hover')
-        self.onexit = get_color('account_button_cursor_exit')
         self.text = get_color('account_button_text')
         self.text_disabled = get_color('account_button_text_disabled')
         self.text_clicked = get_color('account_button_text_clicked')
@@ -229,13 +228,6 @@ class AccountButton:
         color_fade(self.acc_label, background=self.normal)
         color_fade(self.acc_label, foreground=self.text)
         color_fade(self.profile_label, background=self.normal)
-        color_fade(self.profile_label, foreground=self.text)
-
-    def color_on_cursor_exit(self):
-        color_fade(self.frame, background=self.onexit)
-        color_fade(self.acc_label, background=self.onexit)
-        color_fade(self.acc_label, foreground=self.text)
-        color_fade(self.profile_label, background=self.onexit)
         color_fade(self.profile_label, foreground=self.text)
 
     def __click(self):
@@ -386,7 +378,6 @@ class AccountButtonGrid:
         self.disabled = get_color('account_button_disabled')
         self.clicked = get_color('account_button_clicked')
         self.hover = get_color('account_button_hover')
-        self.onexit = get_color('account_button_cursor_exit')
         self.text = get_color('account_button_text')
         self.text_disabled = get_color('account_button_text_disabled')
         self.text_clicked = get_color('account_button_text_clicked')
@@ -426,13 +417,6 @@ class AccountButtonGrid:
         color_fade(self.acc_label, background=self.normal)
         color_fade(self.acc_label, foreground=self.text)
         color_fade(self.profile_label, background=self.normal)
-        color_fade(self.profile_label, foreground=self.text)
-
-    def color_on_cursor_exit(self):
-        color_fade(self.frame, background=self.onexit)
-        color_fade(self.acc_label, background=self.onexit)
-        color_fade(self.acc_label, foreground=self.text)
-        color_fade(self.profile_label, background=self.onexit)
         color_fade(self.profile_label, foreground=self.text)
 
     def __click(self):
