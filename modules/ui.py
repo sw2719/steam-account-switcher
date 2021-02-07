@@ -757,14 +757,14 @@ class WelcomeWindow(tk.Toplevel):
         self.bottomframe.pack(side='bottom', fill='x')
 
         self.dark_alert = tk.Label(self.bottomframe, bg='white',
-                                   text=_(' '))
+                                   text=' ')
         self.dark_alert.pack(side='bottom', pady=(0, 4), fill='x')
 
         icon_w = 60
         icon_h = 96
 
         self.radio_frame1 = tk.Frame(self, bg='white')
-        self.radio_frame1.pack(side='left', padx=(60, 0), pady=5)
+        self.radio_frame1.pack(side='left', padx=(50, 0), pady=5)
 
         self.light_canvas = tk.Canvas(self.radio_frame1, width=icon_w, height=icon_h, bg='white', bd=0, highlightthickness=0)
         img = Image.open("asset/light.png").resize((icon_w, icon_h))
@@ -780,7 +780,7 @@ class WelcomeWindow(tk.Toplevel):
                 self.dark_alert['text'] = ' '
 
         radio_light = ttk.Radiobutton(self.radio_frame1,
-                                      text=_('Light'),
+                                      text=_('Light Theme'),
                                       variable=self.theme_radio_var,
                                       value=0,
                                       style='welcome.TRadiobutton',
@@ -788,7 +788,7 @@ class WelcomeWindow(tk.Toplevel):
         radio_light.pack(side='top', pady=2)
 
         self.radio_frame2 = tk.Frame(self, bg='white')
-        self.radio_frame2.pack(side='right', padx=(0, 60), pady=5)
+        self.radio_frame2.pack(side='right', padx=(0, 50), pady=5)
 
         self.dark_canvas = tk.Canvas(self.radio_frame2, width=icon_w, height=icon_h, bg='white', bd=0, highlightthickness=0)
         img = Image.open("asset/dark.png").resize((icon_w, icon_h))
@@ -797,7 +797,7 @@ class WelcomeWindow(tk.Toplevel):
         self.dark_canvas.pack(side='top', padx=0, pady=5)
 
         radio_dark = ttk.Radiobutton(self.radio_frame2,
-                                     text=_('Dark'),
+                                     text=_('Dark Theme'),
                                      variable=self.theme_radio_var,
                                      value=1,
                                      style='welcome.TRadiobutton',

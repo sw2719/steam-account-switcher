@@ -1200,7 +1200,7 @@ class MainApp(tk.Tk):
         steamid_list, account_name, persona_name = loginusers()
 
         if set(account_name).issubset(set(acc_getlist())):
-            msgbox.showinfo(_('Info'), _("There's no account left to add."))
+            msgbox.showinfo(_('Info'), _("There's no account left to import."))
             return
 
         s = ttk.Style()
