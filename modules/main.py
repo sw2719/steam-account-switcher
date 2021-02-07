@@ -33,6 +33,8 @@ _ = t.gettext
 # For ImageTk, global variables must be used to prevent them from being GC'd.
 image1 = None
 iamge2 = None
+image3 = None
+image4 = None
 
 
 def legacy_restart(silent=True):
@@ -1433,6 +1435,8 @@ class MainApp(tk.Tk):
         '''Open settings window'''
         global image1
         global image2
+        global image3
+        global image4
 
         config_dict = get_config('all')
         last_config = config_dict
@@ -1446,7 +1450,7 @@ class MainApp(tk.Tk):
 
         settingswindow = tk.Toplevel(self, bg='white')
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(self.popup_geometry(width, 360))  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 430))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
@@ -1468,7 +1472,7 @@ class MainApp(tk.Tk):
             padx_int = 24
 
         localeframe = tk.Frame(settingswindow, bg='white')
-        localeframe.pack(side='top', pady=14, fill='x')
+        localeframe.pack(side='top', pady=(14, 7), fill='x')
         locale_label = tk.Label(localeframe, text=_('Language'), bg='white')
         locale_label.pack(side='left', padx=(padx_int, 13))
         locale_cb = ttk.Combobox(localeframe,
@@ -1489,16 +1493,12 @@ class MainApp(tk.Tk):
         restart_frame = tk.Frame(settingswindow, bg='white')
         restart_frame.pack(side='top')
 
-        restart_label = tk.Label(restart_frame, bg='white',
-                                 text=_('Restart app to apply language settings.'))
-        restart_label.pack(pady=(1, 0))
-
         s = ttk.Style()
         s.configure('Settings.TRadiobutton', background='white')
         s.configure('Settings.TCheckbutton', background='white')
 
         ui_frame = tk.Frame(settingswindow, bg='white')
-        ui_frame.pack(side='top', pady=(12, 5), fill='x')
+        ui_frame.pack(side='top', pady=(5, 5), fill='x')
         ui_radio_var = tk.IntVar()
 
         list_radio_frame = tk.Frame(ui_frame, bg='white')
@@ -1517,7 +1517,7 @@ class MainApp(tk.Tk):
                                      value=0,
                                      style='Settings.TRadiobutton')
         radio_list.pack(side='top', pady=2)
-        ToolTipWindow(radio_list, _('Display accounts in vertical list.'))
+        ToolTipWindow(radio_list, _('Display accounts in vertical list.'), center=True)
 
         grid_radio_frame = tk.Frame(ui_frame, bg='white')
         grid_radio_frame.pack(side='right', padx=(0, radio_pad))
@@ -1535,13 +1535,13 @@ class MainApp(tk.Tk):
                                      value=1,
                                      style='Settings.TRadiobutton')
         radio_grid.pack(side='top', pady=2)
-        ToolTipWindow(radio_grid, _('Display accounts in 3 x n grid.'))
+        ToolTipWindow(radio_grid, _('Display accounts in 3 x n grid.'), center=True)
 
         if get_config('ui_mode') == 'grid':
             ui_radio_var.set(1)
 
         avatar_frame = tk.Frame(settingswindow, bg='white')
-        avatar_frame.pack(fill='x', side='top', padx=12)
+        avatar_frame.pack(fill='x', side='top', padx=12, pady=(2, 5))
 
         avatar_chkb = ttk.Checkbutton(avatar_frame, style='Settings.TCheckbutton',
                                       text=_('Show avatar images'))
@@ -1568,10 +1568,52 @@ class MainApp(tk.Tk):
         radio_list['command'] = on_list_check
         radio_grid['command'] = on_grid_check
 
+        theme_frame = tk.Frame(settingswindow, bg='white')
+        theme_frame.pack(side='top', pady=(5, 5), fill='x')
+        theme_radio_var = tk.IntVar()
+
+        light_radio_frame = tk.Frame(theme_frame, bg='white')
+        light_radio_frame.pack(side='left', padx=(radio_pad, 0))
+
+        light_canvas = tk.Canvas(light_radio_frame, width=40, height=64, bg='white', bd=0, highlightthickness=0)
+        light_img = Image.open("asset/light.png").resize((40, 64))
+
+        image3 = ImageTk.PhotoImage(light_img)
+        light_canvas.create_image(20, 32, image=image3)
+        light_canvas.pack(side='top', padx=0, pady=5)
+
+        radio_light = ttk.Radiobutton(light_radio_frame,
+                                      text=_('Light Theme'),
+                                      variable=theme_radio_var,
+                                      value=0,
+                                      style='Settings.TRadiobutton')
+        radio_light.pack(side='top', pady=2)
+
+        dark_radio_frame = tk.Frame(theme_frame, bg='white')
+        dark_radio_frame.pack(side='right', padx=(0, radio_pad))
+
+        dark_canvas = tk.Canvas(dark_radio_frame, width=40, height=64, bg='white', bd=0, highlightthickness=0)
+        dark_img = Image.open("asset/dark.png").resize((40, 64))
+
+        image4 = ImageTk.PhotoImage(dark_img)
+        dark_canvas.create_image(20, 32, image=image4)
+        dark_canvas.pack(side='top', padx=0, pady=5)
+
+        radio_dark = ttk.Radiobutton(dark_radio_frame,
+                                     text=_('Dark Theme'),
+                                     variable=theme_radio_var,
+                                     value=1,
+                                     style='Settings.TRadiobutton')
+        radio_dark.pack(side='top', pady=2)
+
+        ToolTipWindow(radio_dark, _('Dark theme is applied only to main window.'), center=True)
+        if get_config('theme') == 'dark':
+            theme_radio_var.set(1)
+
         mode_radio_frame1 = tk.Frame(settingswindow, bg='white')
-        mode_radio_frame1.pack(side='top', padx=12, pady=(13, 3), fill='x')
+        mode_radio_frame1.pack(side='top', padx=12, pady=(7, 2), fill='x')
         mode_radio_frame2 = tk.Frame(settingswindow, bg='white')
-        mode_radio_frame2.pack(side='top', padx=12, pady=(3, 12), fill='x')
+        mode_radio_frame2.pack(side='top', padx=12, pady=(2, 7), fill='x')
         mode_radio_var = tk.IntVar()
 
         radio_normal = ttk.Radiobutton(mode_radio_frame1,
@@ -1593,7 +1635,7 @@ class MainApp(tk.Tk):
             mode_radio_var.set(1)
 
         softshutdwn_frame = tk.Frame(settingswindow, bg='white')
-        softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=(1, 0))
+        softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=(7, 5))
 
         soft_chkb = ttk.Checkbutton(softshutdwn_frame, style='Settings.TCheckbutton',
                                     text=_('Try to soft shutdown Steam client'))
@@ -1608,7 +1650,7 @@ class MainApp(tk.Tk):
         soft_chkb.pack(side='left')
 
         autoexit_frame = tk.Frame(settingswindow, bg='white')
-        autoexit_frame.pack(fill='x', side='top', padx=12, pady=17)
+        autoexit_frame.pack(fill='x', side='top', padx=12, pady=(5, 0))
 
         autoexit_chkb = ttk.Checkbutton(autoexit_frame, style='Settings.TCheckbutton',
                                         text=_('Exit app after Steam is restarted'))
@@ -1634,6 +1676,11 @@ class MainApp(tk.Tk):
                 ui_mode = 'grid'
             else:
                 ui_mode = 'list'
+
+            if theme_radio_var.get() == 1:
+                theme = 'dark'
+            else:
+                theme = 'light'
 
             if mode_radio_var.get() == 1:
                 mode = 'express'
@@ -1662,7 +1709,8 @@ class MainApp(tk.Tk):
                            'show_avatar': avatar,
                            'last_pos': get_config('last_pos'),
                            'steam_path': get_config('steam_path'),
-                           'ui_mode': ui_mode}
+                           'ui_mode': ui_mode,
+                           'theme': theme}
 
             config_write_dict(config_dict)
 

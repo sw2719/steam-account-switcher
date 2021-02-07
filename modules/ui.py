@@ -957,9 +957,10 @@ class ToolTipWindow(object):
     '''
     create a tooltip for a given widget
     '''
-    def __init__(self, widget, text='widget info'):
+    def __init__(self, widget, text='widget info', center=False):
         self.widget = widget
         self.text = text
+        self.center = center
         self.widget.bind("<Enter>", self.enter)
         self.widget.bind("<Leave>", self.close)
 
@@ -967,7 +968,7 @@ class ToolTipWindow(object):
         x = y = 0
         x, y, _, _ = self.widget.bbox("insert")
         x += self.widget.winfo_rootx()
-        y += self.widget.winfo_rooty() + 40
+        y += self.widget.winfo_rooty() + 30
 
         self.win = tk.Toplevel(self.widget)
         self.win.wm_overrideredirect(True)
@@ -975,6 +976,10 @@ class ToolTipWindow(object):
         label = tk.Label(self.win, text=self.text, justify='left',
                          background='white', relief='solid', borderwidth=1)
         label.pack(ipadx=1)
+
+        if self.center:
+            d = self.win.winfo_width() - self.widget.winfo_width()
+            x += d // 2
 
         self.win.wm_geometry("+%d+%d" % (x, y))
 
