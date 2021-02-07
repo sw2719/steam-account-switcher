@@ -289,8 +289,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 update_frame.destroy()
 
                 update_frame = tk.Frame(master, bg='white')
-                tk.Frame(update_frame, bg='grey').pack(fill='x')
-                update_frame.pack(side='bottom', fill='x', pady=(0, 2))
+                tk.Frame(update_frame, bg='grey').pack(fill='x', pady=(0, 2))
+                update_frame.pack(side='bottom', fill='x')
 
                 update_label = tk.Label(update_frame,
                                         text=f'Client: {cl_ver_str} / Server: {sv_version} / {update_code} / Click to open UI',
