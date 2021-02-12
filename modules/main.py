@@ -1443,10 +1443,12 @@ class MainApp(tk.Tk):
 
         if LOCALE == 'fr_FR':
             width = 330
-            radio_pad = 70
+            ui_padx = 70
+            theme_padx = 50
         else:
             width = 260
-            radio_pad = 35
+            ui_padx = 35
+            theme_padx = 40
 
         settingswindow = tk.Toplevel(self, bg='white')
         settingswindow.title(_("Settings"))
@@ -1502,7 +1504,7 @@ class MainApp(tk.Tk):
         ui_radio_var = tk.IntVar()
 
         list_radio_frame = tk.Frame(ui_frame, bg='white')
-        list_radio_frame.pack(side='left', padx=(radio_pad, 0))
+        list_radio_frame.pack(side='left', padx=(ui_padx, 0))
 
         list_canvas = tk.Canvas(list_radio_frame, width=30, height=30, bg='white', bd=0, highlightthickness=0)
         list_img = Image.open("asset/list.png").resize((30, 30))
@@ -1520,7 +1522,7 @@ class MainApp(tk.Tk):
         ToolTipWindow(radio_list, _('Display accounts in vertical list.'), center=True)
 
         grid_radio_frame = tk.Frame(ui_frame, bg='white')
-        grid_radio_frame.pack(side='right', padx=(0, radio_pad))
+        grid_radio_frame.pack(side='right', padx=(0, ui_padx))
 
         grid_canvas = tk.Canvas(grid_radio_frame, width=30, height=30, bg='white', bd=0, highlightthickness=0)
         grid_img = Image.open("asset/grid.png").resize((30, 30))
@@ -1573,7 +1575,7 @@ class MainApp(tk.Tk):
         theme_radio_var = tk.IntVar()
 
         light_radio_frame = tk.Frame(theme_frame, bg='white')
-        light_radio_frame.pack(side='left', padx=(radio_pad, 0))
+        light_radio_frame.pack(side='left', padx=(theme_padx, 0))
 
         light_canvas = tk.Canvas(light_radio_frame, width=40, height=64, bg='white', bd=0, highlightthickness=0)
         light_img = Image.open("asset/light.png").resize((40, 64))
@@ -1590,7 +1592,7 @@ class MainApp(tk.Tk):
         radio_light.pack(side='top', pady=2)
 
         dark_radio_frame = tk.Frame(theme_frame, bg='white')
-        dark_radio_frame.pack(side='right', padx=(0, radio_pad))
+        dark_radio_frame.pack(side='right', padx=(0, theme_padx))
 
         dark_canvas = tk.Canvas(dark_radio_frame, width=40, height=64, bg='white', bd=0, highlightthickness=0)
         dark_img = Image.open("asset/dark.png").resize((40, 64))
