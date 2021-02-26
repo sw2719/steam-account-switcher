@@ -1,5 +1,22 @@
-version: '2.4.2'
+version: '2.6'
 changelog_en: |
+  ----------2.6----------
+
+  • Added dark mode. (for main menu only)
+
+  • Optimized color transition.
+
+  • Optimized cursor events.
+
+  • Increased delay prior to launching Steam to reduce the chances of Steam failing from starting up.
+
+  • Tweaked initial setup.
+
+  • Changed avatar download source from Steam Web API to profile page.
+    - This is a bit slower but no API key is required using this method.
+    - After a period of time, the hardcoded API key will be revoked.
+    - Please update to v2.6 to continue using the app.
+
   ----------2.5----------
 
   • Added grid layout main UI. Go to settings to change between two layouts.
@@ -191,6 +208,23 @@ changelog_en: |
   • Added a setting to choose whether app exits after restarting Steam or not.
 
 changelog_ko: |
+  ----------2.6----------
+
+  • 다크 모드를 추가했습니다. (메인 메뉴 전용)
+
+  • 색상 전환을 최적화했습니다.
+
+  • 커서 이벤트를 최적화했습니다.
+
+  • 가끔 Steam이 실행되지 않는 것을 수정하기 위해 Steam 실행 전 대기 시간을 늘렸습니다.
+
+  • 초기 설정 경험을 향상했습니다.
+
+  • Steam Web API 대신 프로필 페이지에서 프로필 사진을 다운로드하도록 수정했습니다.
+    - 조금 느리지만 API 키가 필요 없습니다.
+    - 일정 시간 이후, 하드코딩된 API 키가 취소될 것입니다.
+    - 앱을 계속 사용하려면 v2.6로 업데이트 해주세요.
+
   ----------2.5----------
 
   • 새로운 그리드 메인 레이웃을 추가했습니다. 설정에서 바꿀 수 있습니다.
@@ -383,8 +417,3 @@ changelog_ko: |
   • 설정에서 스팀 재시작후 앱이 종료되지 않도록 변경 가능
 
 msg:
-  '2.2':
-    ko:
-      'UI 문제로 인해 2.2.1 버전으로 업데이트 할 것을 권장합니다.'
-    en:
-      'Due to UI issue, it is recommended to update to version 2.2.1.'
