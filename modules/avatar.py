@@ -1,5 +1,4 @@
 import aiohttp
-import json
 import shutil
 import os
 import sys
