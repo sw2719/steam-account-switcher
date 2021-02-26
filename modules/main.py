@@ -1483,11 +1483,13 @@ class MainApp(tk.Tk):
                                          '한국어 (Korean)',  # 1
                                          'Français (French)'])  # 2
 
-        if config_dict['locale'] == 'en_US':
+        current_locale = config_dict['locale']
+
+        if current_locale == 'en_US':
             locale_cb.current(0)
-        elif config_dict['locale'] == 'ko_KR':
+        elif current_locale == 'ko_KR':
             locale_cb.current(1)
-        elif config_dict['locale'] == 'fr_FR':
+        elif current_locale == 'fr_FR':
             locale_cb.current(2)
 
         locale_cb.pack(side='left')
@@ -1671,6 +1673,7 @@ class MainApp(tk.Tk):
 
         def apply():
             nonlocal config_dict
+            nonlocal current_locale
             '''Write new config values to config.txt'''
             locale = ('en_US', 'ko_KR', 'fr_FR')
 
@@ -1720,10 +1723,13 @@ class MainApp(tk.Tk):
                 if msgbox.askyesno('', _('Do you want to download avatar images now?'), parent=settingswindow):
                     self.update_avatar(no_ui=True)
 
-            self.refresh()
-            if last_config['locale'] != locale[locale_cb.current()]:
+            if current_locale != locale[locale_cb.current()]:
                 self.after(100, lambda: msgbox.showinfo(_('Locale has been changed'),
-                                                        _('Restart app to apply new locale settings.')))
+                                                        _('Restart app to apply new locale settings.'),
+                                                        parent=settingswindow))
+                current_locale = locale[locale_cb.current()]
+
+            self.refresh()
 
         def ok():
             apply()
