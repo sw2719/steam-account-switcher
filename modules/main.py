@@ -579,7 +579,7 @@ class MainApp(tk.Tk):
                     menu_dict[username].add_separator()
 
                 menu_dict[username].add_command(label=_("Name settings"),
-                                                command=lambda name=username, pname=profilename: self.configwindow(name, pname))
+                                                command=lambda name=username, pname=profilename: self.configwindow(name))
                 menu_dict[username].add_command(label=_("Delete"),
                                                 command=lambda name=username: self.remove_user(name))
 
@@ -736,7 +736,7 @@ class MainApp(tk.Tk):
                     menu_dict[username].add_separator()
 
                 menu_dict[username].add_command(label=_("Name settings"),
-                                                command=lambda name=username, pname=profilename: self.configwindow(name, pname))
+                                                command=lambda name=username, pname=profilename: self.configwindow(name))
                 menu_dict[username].add_command(label=_("Delete"),
                                                 command=lambda name=username: self.remove_user(name))
 
