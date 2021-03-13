@@ -16,7 +16,7 @@ from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, system_locale
 from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater, create_shortcut
-from modules.update import start_checkupdate, hide_update, show_update
+from modules.update import start_checkupdate, hide_update, show_update, update_frame_color
 from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, ToolTipWindow, ask_steam_dir, get_color
 from modules.avatar import download_avatar
 
@@ -102,6 +102,7 @@ class MainApp(tk.Tk):
     def __init__(self, version, url, bundle, std_out, std_err, after_update):
         sys.stdout = std_out
         sys.stderr = std_err
+
         self.accounts = acc_getlist()
         self.acc_dict = acc_getdict()
         self.demo_mode = False
@@ -799,6 +800,8 @@ class MainApp(tk.Tk):
         self.upper_frame.configure(bg=get_color('upperframe'))
         self.userlabel_1.configure(bg=self.upper_frame['bg'], fg=get_color('text'))
         self.userlabel_2.configure(bg=self.upper_frame['bg'], fg=get_color('text'))
+
+        update_frame_color()
 
         if fetch_reg('RememberPassword') == 1:
             self.auto_var.set(_('Auto-login Enabled'))
