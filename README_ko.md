@@ -1,4 +1,4 @@
-<img align="right" src="https://user-images.githubusercontent.com/22590718/89107306-1230d200-d46b-11ea-92ce-c4245d76f839.PNG">
+<img align="right" src="https://user-images.githubusercontent.com/22590718/111099662-551e6080-8589-11eb-8927-e2cf055bcc06.PNG">
 
 # Steam Account Switcher
 쉽고 빠르게 스팀 계정 간 전환
