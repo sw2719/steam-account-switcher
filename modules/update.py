@@ -28,6 +28,7 @@ t = gettext.translation('steamswitcher',
 _ = t.gettext
 
 update_frame = None
+bundled = True
 
 #  Update code is a real mess right now. You have been warned.
 
@@ -36,6 +37,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
     '''Check if application has update'''
     global update_frame
     global update_label
+    global bundled
 
     try:
         exception = kw['exception']
@@ -52,6 +54,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
     if not bundle and not debug:
         tk.Frame(update_frame, bg='grey').pack(fill='x')
         update_frame.pack(side='bottom', fill='x')
+        bundled = False
         return
     else:
         update_frame.pack(side='bottom', fill='x')
@@ -380,10 +383,13 @@ def update_frame_color():
     global update_label
     global update_code
     global update_frame
+    global bundled
     update_frame.configure(bg=get_color('bottomframe'))
     update_label.configure(bg=get_color('bottomframe'))
 
-    if update_code == 'avail':
+    if not bundled:
+        return
+    elif update_code == 'avail':
         update_label.configure(fg=get_color('autologin_text_on'))
     elif update_code == 'latest':
         update_label.configure(fg=get_color('text'))
