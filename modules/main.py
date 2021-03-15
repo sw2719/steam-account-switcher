@@ -1723,13 +1723,12 @@ class MainApp(tk.Tk):
             config_write_dict(config_dict)
 
             if last_config['show_avatar'] == 'false' and 'selected' in avatar_chkb.state():
-                if msgbox.askyesno('', _('Do you want to download avatar images now?'), parent=settingswindow):
+                if msgbox.askyesno('', _('Do you want to download avatar images now?')):
                     self.update_avatar(no_ui=True)
 
             if current_locale != locale[locale_cb.current()]:
                 self.after(100, lambda: msgbox.showinfo(_('Locale has been changed'),
-                                                        _('Restart app to apply new locale settings.'),
-                                                        parent=settingswindow))
+                                                        _('Restart app to apply new locale settings.')))
                 current_locale = locale[locale_cb.current()]
 
             self.refresh()
