@@ -1,4 +1,4 @@
-<img align="right" src="https://user-images.githubusercontent.com/22590718/89107236-861eaa80-d46a-11ea-8d1e-0a126823e01a.PNG">
+<img align="right" src="https://user-images.githubusercontent.com/22590718/111099604-3750fb80-8589-11eb-90be-bfbef898acdf.PNG">
 
 # Steam Account Switcher
 Lightweight, fast account switcher for Steam.
