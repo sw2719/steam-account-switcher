@@ -10,3 +10,4 @@ cchardet
 pywin32
 winshell
 colour
+bs4

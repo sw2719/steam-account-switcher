@@ -16,8 +16,8 @@ from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, system_locale
 from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater, create_shortcut
-from modules.update import start_checkupdate, hide_update, show_update
-from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, WelcomeWindow, steamid_window, ToolTipWindow, ask_steam_dir
+from modules.update import start_checkupdate, hide_update, show_update, update_frame_color
+from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, ToolTipWindow, ask_steam_dir, get_color
 from modules.avatar import download_avatar
 
 yaml = YAML()
@@ -30,16 +30,11 @@ t = gettext.translation('steamswitcher',
                         fallback=True)
 _ = t.gettext
 
-BACKGROUND_COLOR = 'white'
-UPPERFRAME_COLOR = 'white'
-BOTTOMFRAME_COLOR = 'white'
-TEXT_COLOR = 'black'
-AUTOLOGIN_ON_COLOR = 'green'
-AUTOLOGIN_OFF_COLOR = 'red'
-
 # For ImageTk, global variables must be used to prevent them from being GC'd.
 image1 = None
 iamge2 = None
+image3 = None
+image4 = None
 
 
 def legacy_restart(silent=True):
@@ -107,6 +102,7 @@ class MainApp(tk.Tk):
     def __init__(self, version, url, bundle, std_out, std_err, after_update):
         sys.stdout = std_out
         sys.stderr = std_err
+
         self.accounts = acc_getlist()
         self.acc_dict = acc_getdict()
         self.demo_mode = False
@@ -114,7 +110,7 @@ class MainApp(tk.Tk):
         self.after_update = after_update
 
         tk.Tk.__init__(self)
-        self['bg'] = BACKGROUND_COLOR
+        self['bg'] = get_color('window_background')
         self.title(_("Account Switcher"))
 
         self.window_width = 310
@@ -139,7 +135,7 @@ class MainApp(tk.Tk):
         if not test():
             ask_steam_dir()
 
-        menubar = tk.Menu(self, bg='white')
+        menubar = tk.Menu(self)
 
         if system_locale == 'ko_KR':
             menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
@@ -182,6 +178,8 @@ class MainApp(tk.Tk):
                                    command=download_avatar)
             debug_menu.add_command(label="Open initial setup",
                                    command=lambda: self.welcomewindow(debug=True))
+            debug_menu.add_command(label="Open initial setup with after_update True",
+                                   command=lambda: self.welcomewindow(debug=True, update_override=True))
             debug_menu.add_command(label="Toggle demo mode",
                                    command=self.toggle_demo)
             debug_menu.add_command(label="Raise exception",
@@ -192,9 +190,11 @@ class MainApp(tk.Tk):
                                    command=launch_updater)
             debug_menu.add_command(label="Create shortcut",
                                    command=create_shortcut)
+            debug_menu.add_command(label="Exit app with sys.exit",
+                                   command=sys.exit)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
 
-        self.bottomframe = tk.Frame(self, bg=BOTTOMFRAME_COLOR)
+        self.bottomframe = tk.Frame(self, bg=get_color('bottomframe'))
         self.bottomframe.pack(side='bottom', fill='x')
 
         def toggleAutologin():
@@ -206,10 +206,10 @@ class MainApp(tk.Tk):
 
             if fetch_reg('RememberPassword') == 1:
                 self.auto_var.set(_('Auto-login Enabled'))
-                self.autolabel['fg'] = AUTOLOGIN_ON_COLOR
+                self.autolabel['fg'] = get_color('autologin_text_on')
             else:
                 self.auto_var.set(_('Auto-login Disabled'))
-                self.autolabel['fg'] = AUTOLOGIN_OFF_COLOR
+                self.autolabel['fg'] = get_color('autologin_text_off')
 
         self.restartbutton_text = tk.StringVar()
 
@@ -218,57 +218,61 @@ class MainApp(tk.Tk):
         else:
             self.restartbutton_text.set(_('Restart Steam'))
 
-        button_toggle = ttk.Button(self.bottomframe,
-                                   text=_('Toggle auto-login'),
-                                   command=toggleAutologin)
+        self.button_toggle = SimpleButton(self.bottomframe,
+                                          widget='bottom_button',
+                                          text=_('Toggle auto-login'),
+                                          command=toggleAutologin,
+                                          bd=2)
+        self.button_exit = SimpleButton(self.bottomframe,
+                                        widget='bottom_button',
+                                        text=_('Exit'),
+                                        command=self.exit_app,
+                                        bd=2)
 
-        button_exit = ttk.Button(self.bottomframe,
-                                 width=7,
-                                 text=_('Exit'),
-                                 command=self.exit_app)
+        self.button_restart = SimpleButton(self.bottomframe,
+                                           widget='bottom_button',
+                                           textvariable=self.restartbutton_text,
+                                           command=self.exit_after_restart,
+                                           bd=2)
 
-        # button_exit = ImageButton(self.bottomframe,
-        #                           'asset/exit_icon.png',
-        #                           command=self.exit_app)
+        self.button_toggle.grid(row=0, column=0, padx=3, pady=3, sticky='nesw')
+        self.button_exit.grid(row=0, column=1, pady=3, sticky='nesw')
+        self.button_restart.grid(row=0, column=2, padx=3, pady=3, sticky='nesw')
 
-        button_restart = ttk.Button(self.bottomframe,
-                                    textvariable=self.restartbutton_text,
-                                    command=self.exit_after_restart)
-
-        button_toggle.pack(side='left', padx=3, pady=3)
-        button_exit.pack(side='left', pady=3)
-        button_restart.pack(side='right', padx=3, pady=3, fill='x', expand=True)
+        self.bottomframe.grid_columnconfigure(0, weight=1)
+        self.bottomframe.grid_columnconfigure(1, weight=1)
+        self.bottomframe.grid_columnconfigure(2, weight=1)
+        self.bottomframe.grid_rowconfigure(0, weight=1)
 
         self.button_dict = {}
 
-        self.upper_frame = tk.Frame(self, bg=UPPERFRAME_COLOR)
+        self.upper_frame = tk.Frame(self, bg=get_color('upperframe'))
         self.upper_frame.pack(side='top', fill='x')
 
-        self.button_frame = tk.Frame(self, bg=BACKGROUND_COLOR)
+        self.button_frame = tk.Frame(self, bg=get_color('upperframe'))
         self.button_frame.pack(side='top', fill='both', expand=True)
 
-        userlabel_1 = tk.Label(self.upper_frame, text=_('Current Auto-login user:'), bg=UPPERFRAME_COLOR, fg=TEXT_COLOR)
-        userlabel_1.pack(side='top')
+        self.userlabel_1 = tk.Label(self.upper_frame, text=_('Current Auto-login user:'), bg=self.upper_frame['bg'], fg=get_color('text'))
+        self.userlabel_1.pack(side='top')
 
         self.user_var = tk.StringVar()
         self.user_var.set(fetch_reg('AutoLoginUser'))
 
-        userlabel_2 = tk.Label(self.upper_frame, textvariable=self.user_var, bg=UPPERFRAME_COLOR, fg=TEXT_COLOR)
-        userlabel_2.pack(side='top', pady=2)
+        self.userlabel_2 = tk.Label(self.upper_frame, textvariable=self.user_var, bg=self.upper_frame['bg'], fg=get_color('text'))
+        self.userlabel_2.pack(side='top', pady=2)
 
         self.auto_var = tk.StringVar()
 
         if fetch_reg('RememberPassword') == 1:
             self.auto_var.set(_('Auto-login Enabled'))
-            auto_color = AUTOLOGIN_ON_COLOR
+            auto_color = get_color('autologin_text_on')
         else:
             self.auto_var.set(_('Auto-login Disabled'))
-            auto_color = AUTOLOGIN_OFF_COLOR
+            auto_color = get_color('autologin_text_off')
 
-        self.autolabel = tk.Label(self.upper_frame, textvariable=self.auto_var, bg=UPPERFRAME_COLOR, fg=auto_color)
+        self.autolabel = tk.Label(self.upper_frame, textvariable=self.auto_var, bg=self.upper_frame['bg'], fg=auto_color)
         self.autolabel.pack(side='top')
-        shadow = tk.Frame(self.upper_frame, bg='grey')
-        shadow.pack(fill='x')
+        tk.Frame(self.upper_frame, bg='grey').pack(fill='x')
 
         self.draw_button()
 
@@ -299,18 +303,22 @@ class MainApp(tk.Tk):
 
         self.refresh()
 
-    def welcomewindow(self, debug=False):
-        window = WelcomeWindow(self, self.popup_geometry(320, 270, multiplier=2), self.after_update, debug)
+    def welcomewindow(self, debug=False, update_override=False):
+        if update_override:
+            window = WelcomeWindow(self, self.popup_geometry(320, 270, multiplier=2), True, debug)
+        else:
+            window = WelcomeWindow(self, self.popup_geometry(320, 270, multiplier=2), self.after_update, debug)
 
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':
                 if self.accounts:
                     self.update_avatar()
+
                 self.refresh()
 
         window.bind('<Destroy>', event_function)
 
-    def configwindow(self, username, profilename):
+    def configwindow(self, username):
         configwindow = tk.Toplevel(self, bg='white')
         configwindow.title('')
 
@@ -462,15 +470,15 @@ class MainApp(tk.Tk):
 
     def draw_button_grid(self):
         menu_dict = {}
-        self.no_user_frame = tk.Frame(self.button_frame, bg='white')
+        self.no_user_frame = tk.Frame(self.button_frame, bg=self['bg'])
 
         def onFrameConfigure(canvas):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
         if self.demo_mode:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
-            canvas.config(bg='white')
-            buttonframe = tk.Frame(canvas, bg='white')
+            canvas.config(bg=self['bg'])
+            buttonframe = tk.Frame(canvas, bg=self['bg'])
             scroll_bar = ttk.Scrollbar(self.button_frame,
                                        orient="vertical",
                                        command=canvas.yview)
@@ -515,8 +523,8 @@ class MainApp(tk.Tk):
 
         elif self.accounts:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
-            canvas.config(bg='white')
-            buttonframe = tk.Frame(canvas, bg='white')
+            canvas.config(bg=self['bg'])
+            buttonframe = tk.Frame(canvas, bg=self['bg'])
             scroll_bar = ttk.Scrollbar(self.button_frame,
                                        orient="vertical",
                                        command=canvas.yview)
@@ -572,7 +580,7 @@ class MainApp(tk.Tk):
                     menu_dict[username].add_separator()
 
                 menu_dict[username].add_command(label=_("Name settings"),
-                                                command=lambda name=username, pname=profilename: self.configwindow(name, pname))
+                                                command=lambda name=username, pname=profilename: self.configwindow(name))
                 menu_dict[username].add_command(label=_("Delete"),
                                                 command=lambda name=username: self.remove_user(name))
 
@@ -622,20 +630,20 @@ class MainApp(tk.Tk):
             self.bind("<MouseWheel>", _on_mousewheel)
         else:
             self.no_user_frame.pack(side='top', fill='both', expand=True)
-            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg='white')
+            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg=self['bg'])
             self.unbind("<MouseWheel>")
             no_user.pack(pady=(150, 0))
 
     def draw_button_list(self):
         menu_dict = {}
-        self.no_user_frame = tk.Frame(self.button_frame, bg='white')
+        self.no_user_frame = tk.Frame(self.button_frame, bg=self['bg'])
 
         def onFrameConfigure(canvas):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
         if self.demo_mode:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
-            canvas.config(bg='white')
+            canvas.config(bg=self['bg'])
             buttonframe = tk.Frame(canvas)
             scroll_bar = ttk.Scrollbar(self.button_frame,
                                        orient="vertical",
@@ -672,7 +680,7 @@ class MainApp(tk.Tk):
             self.bind("<MouseWheel>", _on_mousewheel)
         elif self.accounts:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
-            canvas.config(bg='white')
+            canvas.config(bg=self['bg'])
             buttonframe = tk.Frame(canvas)
             scroll_bar = ttk.Scrollbar(self.button_frame,
                                        orient="vertical",
@@ -729,7 +737,7 @@ class MainApp(tk.Tk):
                     menu_dict[username].add_separator()
 
                 menu_dict[username].add_command(label=_("Name settings"),
-                                                command=lambda name=username, pname=profilename: self.configwindow(name, pname))
+                                                command=lambda name=username, pname=profilename: self.configwindow(name))
                 menu_dict[username].add_command(label=_("Delete"),
                                                 command=lambda name=username: self.remove_user(name))
 
@@ -747,7 +755,7 @@ class MainApp(tk.Tk):
                     self.button_dict[username].disable(no_fade=True)
 
                 self.button_dict[username].pack(fill='x')
-                tk.Frame(buttonframe, bg='#c4c4c4').pack(fill='x')
+                tk.Frame(buttonframe, bg=get_color('seperator')).pack(fill='x')
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
@@ -768,7 +776,7 @@ class MainApp(tk.Tk):
             self.bind("<MouseWheel>", _on_mousewheel)
         else:
             self.no_user_frame.pack(side='top', fill='both', expand=True)
-            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg='white')
+            no_user = tk.Label(self.no_user_frame, text=_('No accounts added'), bg=self['bg'], fg=get_color('text'))
             self.unbind("<MouseWheel>")
             no_user.pack(pady=(150, 0))
 
@@ -781,8 +789,28 @@ class MainApp(tk.Tk):
             self.no_user_frame.destroy()
             self.button_frame.destroy()
 
-        self.button_frame = tk.Frame(self)
+        self.button_frame = tk.Frame(self, bg=get_color('bottomframe'))
         self.button_frame.pack(side='top', fill='both', expand=True)
+        self['bg'] = get_color('window_background')
+
+        self.bottomframe.configure(bg=get_color('bottomframe'))
+        self.button_toggle.update_color()
+        self.button_exit.update_color()
+        self.button_restart.update_color()
+        self.upper_frame.configure(bg=get_color('upperframe'))
+        self.userlabel_1.configure(bg=self.upper_frame['bg'], fg=get_color('text'))
+        self.userlabel_2.configure(bg=self.upper_frame['bg'], fg=get_color('text'))
+
+        update_frame_color()
+
+        if fetch_reg('RememberPassword') == 1:
+            self.auto_var.set(_('Auto-login Enabled'))
+            auto_color = get_color('autologin_text_on')
+        else:
+            self.auto_var.set(_('Auto-login Disabled'))
+            auto_color = get_color('autologin_text_off')
+
+        self.autolabel.configure(bg=self.upper_frame['bg'], fg=auto_color)
 
         if self.demo_mode:
             self.user_var.set('username0')
@@ -806,7 +834,7 @@ class MainApp(tk.Tk):
         print('Menu refreshed with %s account(s)' % len(self.accounts))
 
     def update_avatar(self, steamid_list=None, no_ui=False):
-        label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg='white')
+        label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg=self['bg'], fg=get_color('text'))
 
         if not no_ui:
             self.no_user_frame.destroy()
@@ -854,24 +882,26 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
-        about_disclaimer = tk.Label(aboutwindow, bg='white',
+        about_disclaimer = tk.Label(aboutwindow, bg='white', fg='black',
                                     text=_('Warning: The developer of this application is not responsible for\n' +
                                            'data loss or any other damage from the use of this app.'))
-        about_steam_trademark = tk.Label(aboutwindow, bg='white',
+        about_steam_trademark = tk.Label(aboutwindow, bg='white', fg='black',
                                          text=_('STEAM is a registered trademark of Valve Corporation.'))
         if self.BUNDLE or force_copyright:
-            copyright_label = tk.Label(aboutwindow, text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
-                                       'View copyright notice for details', bg='white')
+            copyright_label = tk.Label(aboutwindow, bg='white', fg='black',
+                                       text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
+                                       'View copyright notice for details')
         else:
-            copyright_label = tk.Label(aboutwindow, text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
-                                       'View LICENSE file for details', bg='white')
-        ver = tk.Label(aboutwindow, bg='white',
+            copyright_label = tk.Label(aboutwindow, bg='white', fg='black',
+                                       text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
+                                       'View LICENSE file for details')
+        ver = tk.Label(aboutwindow, bg='white', fg='black',
                        text='Steam Account Switcher | Version ' + version)
 
         def copyright_notice():
             cprightwindow = tk.Toplevel(aboutwindow, bg='white')
             cprightwindow.title(_('Copyright notice'))
-            cprightwindow.geometry(self.popup_geometry(590, 350, multiplier=2))
+            cprightwindow.geometry(self.popup_geometry(630, 350, multiplier=2))
             cprightwindow.resizable(False, False)
             cprightwindow.focus()
             cprightwindow.bind('<Escape>', lambda event: cprightwindow.destroy())
@@ -885,14 +915,13 @@ class MainApp(tk.Tk):
                 cpright_text.insert(tk.CURRENT, txt.read())
 
             cpright_text.configure(state=tk.DISABLED)
-            cpright_text.pack(side='top', expand=True)
+            cpright_text.pack(side='top', expand=True, fill='both')
 
         button_frame = tk.Frame(aboutwindow, bg='white')
         button_frame.pack(side='bottom', pady=5)
 
         button_close = ttk.Button(button_frame,
                                   text=_('Close'),
-                                  width=8,
                                   command=aboutwindow.destroy)
         button_github = ttk.Button(button_frame,
                                    text=_('GitHub page'),
@@ -901,16 +930,21 @@ class MainApp(tk.Tk):
                                       text=_('Copyright notice'),
                                       command=copyright_notice)
 
+        button_frame.grid_columnconfigure(0, weight=1)
+        button_frame.grid_columnconfigure(1, weight=1)
+        button_frame.grid_columnconfigure(2, weight=1)
+        button_frame.grid_rowconfigure(0, weight=1)
+
         about_disclaimer.pack(pady=8)
         about_steam_trademark.pack()
         copyright_label.pack(pady=5)
         ver.pack()
 
-        button_close.pack(side='left', padx=2)
-        button_github.pack(side='left', padx=2)
+        button_close.grid(row=0, column=0, padx=2)
+        button_github.grid(row=0, column=1, padx=2)
 
         if self.BUNDLE or force_copyright:
-            button_copyright.pack(side='left', padx=2)
+            button_copyright.grid(row=0, column=2, padx=2)
 
     def refreshwindow(self):
         '''Open remove accounts window'''
@@ -1169,7 +1203,7 @@ class MainApp(tk.Tk):
         steamid_list, account_name, persona_name = loginusers()
 
         if set(account_name).issubset(set(acc_getlist())):
-            msgbox.showinfo(_('Info'), _("There's no account left to add."))
+            msgbox.showinfo(_('Info'), _("There's no account left to import."))
             return
 
         s = ttk.Style()
@@ -1404,20 +1438,24 @@ class MainApp(tk.Tk):
         '''Open settings window'''
         global image1
         global image2
+        global image3
+        global image4
 
         config_dict = get_config('all')
         last_config = config_dict
 
         if LOCALE == 'fr_FR':
             width = 330
-            radio_pad = 70
+            ui_padx = 70
+            theme_padx = 50
         else:
             width = 260
-            radio_pad = 35
+            ui_padx = 35
+            theme_padx = 40
 
         settingswindow = tk.Toplevel(self, bg='white')
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(self.popup_geometry(width, 360))  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 430))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
@@ -1439,7 +1477,7 @@ class MainApp(tk.Tk):
             padx_int = 24
 
         localeframe = tk.Frame(settingswindow, bg='white')
-        localeframe.pack(side='top', pady=14, fill='x')
+        localeframe.pack(side='top', pady=(14, 7), fill='x')
         locale_label = tk.Label(localeframe, text=_('Language'), bg='white')
         locale_label.pack(side='left', padx=(padx_int, 13))
         locale_cb = ttk.Combobox(localeframe,
@@ -1448,11 +1486,13 @@ class MainApp(tk.Tk):
                                          '한국어 (Korean)',  # 1
                                          'Français (French)'])  # 2
 
-        if config_dict['locale'] == 'en_US':
+        current_locale = config_dict['locale']
+
+        if current_locale == 'en_US':
             locale_cb.current(0)
-        elif config_dict['locale'] == 'ko_KR':
+        elif current_locale == 'ko_KR':
             locale_cb.current(1)
-        elif config_dict['locale'] == 'fr_FR':
+        elif current_locale == 'fr_FR':
             locale_cb.current(2)
 
         locale_cb.pack(side='left')
@@ -1460,20 +1500,16 @@ class MainApp(tk.Tk):
         restart_frame = tk.Frame(settingswindow, bg='white')
         restart_frame.pack(side='top')
 
-        restart_label = tk.Label(restart_frame, bg='white',
-                                 text=_('Restart app to apply language settings.'))
-        restart_label.pack(pady=(1, 0))
-
         s = ttk.Style()
         s.configure('Settings.TRadiobutton', background='white')
         s.configure('Settings.TCheckbutton', background='white')
 
         ui_frame = tk.Frame(settingswindow, bg='white')
-        ui_frame.pack(side='top', pady=(12, 5), fill='x')
+        ui_frame.pack(side='top', pady=(5, 5), fill='x')
         ui_radio_var = tk.IntVar()
 
         list_radio_frame = tk.Frame(ui_frame, bg='white')
-        list_radio_frame.pack(side='left', padx=(radio_pad, 0))
+        list_radio_frame.pack(side='left', padx=(ui_padx, 0))
 
         list_canvas = tk.Canvas(list_radio_frame, width=30, height=30, bg='white', bd=0, highlightthickness=0)
         list_img = Image.open("asset/list.png").resize((30, 30))
@@ -1488,10 +1524,10 @@ class MainApp(tk.Tk):
                                      value=0,
                                      style='Settings.TRadiobutton')
         radio_list.pack(side='top', pady=2)
-        ToolTipWindow(radio_list, _('Display accounts in vertical list.'))
+        ToolTipWindow(radio_list, _('Display accounts in vertical list.'), center=True)
 
         grid_radio_frame = tk.Frame(ui_frame, bg='white')
-        grid_radio_frame.pack(side='right', padx=(0, radio_pad))
+        grid_radio_frame.pack(side='right', padx=(0, ui_padx))
 
         grid_canvas = tk.Canvas(grid_radio_frame, width=30, height=30, bg='white', bd=0, highlightthickness=0)
         grid_img = Image.open("asset/grid.png").resize((30, 30))
@@ -1506,13 +1542,13 @@ class MainApp(tk.Tk):
                                      value=1,
                                      style='Settings.TRadiobutton')
         radio_grid.pack(side='top', pady=2)
-        ToolTipWindow(radio_grid, _('Display accounts in 3 x n grid.'))
+        ToolTipWindow(radio_grid, _('Display accounts in 3 x n grid.'), center=True)
 
         if get_config('ui_mode') == 'grid':
             ui_radio_var.set(1)
 
         avatar_frame = tk.Frame(settingswindow, bg='white')
-        avatar_frame.pack(fill='x', side='top', padx=12)
+        avatar_frame.pack(fill='x', side='top', padx=12, pady=(2, 5))
 
         avatar_chkb = ttk.Checkbutton(avatar_frame, style='Settings.TCheckbutton',
                                       text=_('Show avatar images'))
@@ -1539,10 +1575,52 @@ class MainApp(tk.Tk):
         radio_list['command'] = on_list_check
         radio_grid['command'] = on_grid_check
 
+        theme_frame = tk.Frame(settingswindow, bg='white')
+        theme_frame.pack(side='top', pady=(5, 5), fill='x')
+        theme_radio_var = tk.IntVar()
+
+        light_radio_frame = tk.Frame(theme_frame, bg='white')
+        light_radio_frame.pack(side='left', padx=(theme_padx, 0))
+
+        light_canvas = tk.Canvas(light_radio_frame, width=40, height=64, bg='white', bd=0, highlightthickness=0)
+        light_img = Image.open("asset/light.png").resize((40, 64))
+
+        image3 = ImageTk.PhotoImage(light_img)
+        light_canvas.create_image(20, 32, image=image3)
+        light_canvas.pack(side='top', padx=0, pady=5)
+
+        radio_light = ttk.Radiobutton(light_radio_frame,
+                                      text=_('Light Theme'),
+                                      variable=theme_radio_var,
+                                      value=0,
+                                      style='Settings.TRadiobutton')
+        radio_light.pack(side='top', pady=2)
+
+        dark_radio_frame = tk.Frame(theme_frame, bg='white')
+        dark_radio_frame.pack(side='right', padx=(0, theme_padx))
+
+        dark_canvas = tk.Canvas(dark_radio_frame, width=40, height=64, bg='white', bd=0, highlightthickness=0)
+        dark_img = Image.open("asset/dark.png").resize((40, 64))
+
+        image4 = ImageTk.PhotoImage(dark_img)
+        dark_canvas.create_image(20, 32, image=image4)
+        dark_canvas.pack(side='top', padx=0, pady=5)
+
+        radio_dark = ttk.Radiobutton(dark_radio_frame,
+                                     text=_('Dark Theme'),
+                                     variable=theme_radio_var,
+                                     value=1,
+                                     style='Settings.TRadiobutton')
+        radio_dark.pack(side='top', pady=2)
+
+        ToolTipWindow(radio_dark, _('Dark theme is applied only to main window.'), center=True)
+        if get_config('theme') == 'dark':
+            theme_radio_var.set(1)
+
         mode_radio_frame1 = tk.Frame(settingswindow, bg='white')
-        mode_radio_frame1.pack(side='top', padx=12, pady=(13, 3), fill='x')
+        mode_radio_frame1.pack(side='top', padx=12, pady=(7, 2), fill='x')
         mode_radio_frame2 = tk.Frame(settingswindow, bg='white')
-        mode_radio_frame2.pack(side='top', padx=12, pady=(3, 12), fill='x')
+        mode_radio_frame2.pack(side='top', padx=12, pady=(2, 7), fill='x')
         mode_radio_var = tk.IntVar()
 
         radio_normal = ttk.Radiobutton(mode_radio_frame1,
@@ -1564,7 +1642,7 @@ class MainApp(tk.Tk):
             mode_radio_var.set(1)
 
         softshutdwn_frame = tk.Frame(settingswindow, bg='white')
-        softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=(1, 0))
+        softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=(7, 5))
 
         soft_chkb = ttk.Checkbutton(softshutdwn_frame, style='Settings.TCheckbutton',
                                     text=_('Try to soft shutdown Steam client'))
@@ -1579,7 +1657,7 @@ class MainApp(tk.Tk):
         soft_chkb.pack(side='left')
 
         autoexit_frame = tk.Frame(settingswindow, bg='white')
-        autoexit_frame.pack(fill='x', side='top', padx=12, pady=17)
+        autoexit_frame.pack(fill='x', side='top', padx=12, pady=(5, 0))
 
         autoexit_chkb = ttk.Checkbutton(autoexit_frame, style='Settings.TCheckbutton',
                                         text=_('Exit app after Steam is restarted'))
@@ -1598,6 +1676,7 @@ class MainApp(tk.Tk):
 
         def apply():
             nonlocal config_dict
+            nonlocal current_locale
             '''Write new config values to config.txt'''
             locale = ('en_US', 'ko_KR', 'fr_FR')
 
@@ -1605,6 +1684,11 @@ class MainApp(tk.Tk):
                 ui_mode = 'grid'
             else:
                 ui_mode = 'list'
+
+            if theme_radio_var.get() == 1:
+                theme = 'dark'
+            else:
+                theme = 'light'
 
             if mode_radio_var.get() == 1:
                 mode = 'express'
@@ -1633,7 +1717,8 @@ class MainApp(tk.Tk):
                            'show_avatar': avatar,
                            'last_pos': get_config('last_pos'),
                            'steam_path': get_config('steam_path'),
-                           'ui_mode': ui_mode}
+                           'ui_mode': ui_mode,
+                           'theme': theme}
 
             config_write_dict(config_dict)
 
@@ -1641,10 +1726,13 @@ class MainApp(tk.Tk):
                 if msgbox.askyesno('', _('Do you want to download avatar images now?'), parent=settingswindow):
                     self.update_avatar(no_ui=True)
 
-            self.refresh()
-            if last_config['locale'] != locale[locale_cb.current()]:
+            if current_locale != locale[locale_cb.current()]:
                 self.after(100, lambda: msgbox.showinfo(_('Locale has been changed'),
-                                                        _('Restart app to apply new locale settings.')))
+                                                        _('Restart app to apply new locale settings.'),
+                                                        parent=settingswindow))
+                current_locale = locale[locale_cb.current()]
+
+            self.refresh()
 
         def ok():
             apply()
@@ -1684,26 +1772,26 @@ class MainApp(tk.Tk):
         self.button_frame.destroy()
         hide_update()
         self.bottomframe.pack_forget()
-        button_frame = tk.Frame(self, bg='white')
+        button_frame = tk.Frame(self, bg=self['bg'])
         button_frame.pack(side='bottom', fill='x')
-        cancel_button = ttk.Button(button_frame,
-                                   text=_('Cancel'))
-        cancel_button['state'] = 'disabled'
-        force_button = ttk.Button(button_frame,
-                                  text=_('Force quit Steam'),
-                                  command=forcequit)
-        force_button['state'] = 'disabled'
+        cancel_button = SimpleButton(button_frame,
+                                     text=_('Cancel'))
+        force_button = SimpleButton(button_frame,
+                                    text=_('Force quit Steam'),
+                                    command=forcequit)
+        cancel_button.disable(no_fade=True)
+        force_button.disable(no_fade=True)
 
         def enable_button():
-            cancel_button['state'] = 'normal'
-            force_button['state'] = 'normal'
+            cancel_button.enable()
+            force_button.enable()
 
         cancel_button.pack(side='bottom', padx=3, pady=3, fill='x')
         force_button.pack(side='bottom', padx=3, fill='x')
 
         label_var = tk.StringVar()
         label_var.set(_('Initializing...'))
-        label = tk.Label(self, textvariable=label_var, bg='white')
+        label = tk.Label(self, textvariable=label_var, bg=self['bg'], fg=get_color('text'))
         label.pack(pady=(150, 0))
 
         def cleanup():
@@ -1764,7 +1852,7 @@ class MainApp(tk.Tk):
 
             t = StoppableThread(target=steam_checker)
             t.start()
-            cancel_button['command'] = cancel
+            cancel_button.update_command(cancel)
         else:
             queue.put(1)
 
@@ -1793,4 +1881,4 @@ class MainApp(tk.Tk):
                     enable_button()
                 self.after(1000, launch_steam)
 
-        self.after(1000, launch_steam)
+        self.after(2000, launch_steam)

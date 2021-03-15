@@ -15,6 +15,7 @@ from ruamel.yaml import YAML
 from pget.down import Downloader
 from modules.config import get_config
 from modules.errormsg import error_msg
+from modules.ui import get_color
 
 yaml = YAML()
 
@@ -34,6 +35,7 @@ update_frame = None
 def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
     '''Check if application has update'''
     global update_frame
+    global update_label
 
     try:
         exception = kw['exception']
@@ -43,17 +45,18 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
     if update_frame is not None:
         update_frame.destroy()
 
+    update_label = tk.Label(master)
     update_frame = tk.Frame(master)
-    update_frame.config(bg='white')
+    update_frame.config(bg=get_color('bottomframe'))
 
     if not bundle and not debug:
-        ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 0), fill='x')
+        tk.Frame(update_frame, bg='grey').pack(fill='x')
         update_frame.pack(side='bottom', fill='x')
         return
     else:
         update_frame.pack(side='bottom', fill='x')
 
-    ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 0), fill='x')
+    tk.Frame(update_frame, bg='grey').pack(fill='x')
     master.update()
 
     def update(sv_version, changelog):
@@ -268,7 +271,9 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
     def get_output():
         '''Get version info from checkupdate() and draw UI accordingly.'''
         global update_frame
-        nonlocal update_code
+        global update_label
+        global update_code
+
         nonlocal sv_version
         nonlocal changelog
         nonlocal debug
@@ -284,7 +289,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 update_frame.destroy()
 
                 update_frame = tk.Frame(master, bg='white')
-                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                tk.Frame(update_frame, bg='grey').pack(fill='x', pady=(0, 2))
                 update_frame.pack(side='bottom', fill='x')
 
                 update_label = tk.Label(update_frame,
@@ -304,14 +309,14 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
 
                 update_frame.destroy()
 
-                update_frame = tk.Frame(master, bg='white')
-                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                update_frame = tk.Frame(master, bg=get_color('bottomframe'))
+                tk.Frame(update_frame, bg='grey').pack(fill='x', pady=(0, 2))
                 update_frame.pack(side='bottom', fill='x')
 
                 update_label = tk.Label(update_frame,
                                         text=_('Version %s is available. Click here to update!') % sv_version,
-                                        bg='white',
-                                        fg='green')  # NOQA
+                                        bg=get_color('bottomframe'),
+                                        fg=get_color('autologin_text_on'))
                 update_label.pack(side='bottom')
                 update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog))
                 update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog))
@@ -320,35 +325,36 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
 
                 update_frame.destroy()
 
-                update_frame = tk.Frame(master, bg='white')
-                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 0), fill='x')
+                update_frame = tk.Frame(master, bg=get_color('bottomframe'))
+                tk.Frame(update_frame, bg='grey').pack(fill='x', pady=(0, 2))
                 update_frame.pack(side='bottom', fill='x')
             elif update_code == 'dev':
                 print('Development version')
 
                 update_frame.destroy()
 
-                update_frame = tk.Frame(master, bg='white')
-                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                update_frame = tk.Frame(master, bg=get_color('bottomframe'))
+                tk.Frame(update_frame, bg='grey').pack(fill='x', pady=(0, 2))
                 update_frame.pack(side='bottom', fill='x')
 
                 update_label = tk.Label(update_frame,
                                         text=_('Development version'),
-                                        bg='white')
+                                        bg=get_color('bottomframe'),
+                                        fg=get_color('text'))
                 update_label.pack(side='bottom')
             else:
                 print('Exception while getting server version')
 
                 update_frame.destroy()
 
-                update_frame = tk.Frame(master, bg='white')
-                ttk.Separator(update_frame, orient='horizontal').pack(side='top', pady=(0, 3), fill='x')
+                update_frame = tk.Frame(master, bg=get_color('bottomframe'))
+                tk.Frame(update_frame, bg='grey').pack(fill='x', pady=(0, 2))
                 update_frame.pack(side='bottom', fill='x')
 
                 update_label = tk.Label(update_frame,
                                         text=_('Failed checking for updates. Click here to try again.'),
                                         bg='white',
-                                        fg='red')
+                                        fg=get_color('autologin_text_off'))
                 update_frame.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, cl_ver_str, URL, bundle, debug=debug))
                 update_label.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, cl_ver_str, URL, bundle, debug=debug))
                 update_label.pack(side='bottom')
@@ -368,3 +374,20 @@ def hide_update():
 def show_update():
     global update_frame
     update_frame.pack(side='bottom', fill='x')
+
+
+def update_frame_color():
+    global update_label
+    global update_code
+    global update_frame
+    update_frame.configure(bg=get_color('bottomframe'))
+    update_label.configure(bg=get_color('bottomframe'))
+
+    if update_code == 'avail':
+        update_label.configure(fg=get_color('autologin_text_on'))
+    elif update_code == 'latest':
+        update_label.configure(fg=get_color('text'))
+    elif update_code == 'dev':
+        update_label.configure(fg=get_color('text'))
+    else:
+        update_label.configure(fg=get_color('autologin_text_off'))

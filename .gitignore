@@ -3,7 +3,6 @@
 avatar/
 
 avatar/
-asset/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
@@ -144,4 +143,3 @@ messages.po
 updater/python37.dll
 updater/updater.exe
 setup_c.py
-*.png
