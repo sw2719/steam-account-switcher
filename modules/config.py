@@ -152,7 +152,7 @@ try:
             cfg_write['steam_path'] = test_dict['steam_path']
 
         if cfg_write['ui_mode'] == 'grid' and cfg_write['show_avatar'] == 'false':
-            cfg_write['show_avatar'] == 'true'
+            cfg_write['show_avatar'] = 'true'
 
         with open('config.yml', 'w') as cfg:
             yaml.dump(cfg_write, cfg)
