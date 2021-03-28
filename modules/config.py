@@ -1,166 +1,92 @@
 import os
 import locale
 import gettext
-import sys
 from ruamel.yaml import YAML
 from modules.errormsg import error_msg
 
-system_locale = locale.getdefaultlocale()[0]
+SYS_LOCALE = locale.getdefaultlocale()[0]
+
+if SYS_LOCALE == 'ko_KR':
+    DEFAULT_LOCALE = 'ko_KR'
+elif SYS_LOCALE == 'fr_FR':
+    DEFAULT_LOCALE = 'fr_FR'
+else:
+    DEFAULT_LOCALE = 'en_US'
 
 yaml = YAML()
+
+valid_values = {
+    'locale':
+        ['ko_KR',
+         'en_US',
+         'fr_FR'],
+    'try_soft_shutdown':
+        ['true',
+         'false'],
+    'autoexit':
+        ['true',
+         'false'],
+    'mode':
+        ['normal',
+         'express'],
+    'show_avatar':
+        ['true',
+         'false'],
+    'ui_mode':
+        ['list',
+         'grid'],
+    'theme':
+        ['light',
+         'dark']
+}
+
+DEFAULT_CONFIG = {'locale': DEFAULT_LOCALE,
+                  'try_soft_shutdown': 'true',
+                  'autoexit': 'true',
+                  'mode': 'normal',
+                  'show_avatar': 'true',
+                  'steam_path': 'reg',
+                  'last_pos': '200/100',
+                  'ui_mode': 'list',
+                  'theme': 'light'}
 
 
 def reset_config():
     '''Initialize config.txt with default values'''
     with open('config.yml', 'w') as cfg:
-
-        if system_locale == 'ko_KR':
-            locale_write = 'ko_KR'
-        elif system_locale == 'fr_FR':
-            locale_write = 'fr_FR'
-        else:
-            locale_write = 'en_US'
-
-        default = {'locale': locale_write,
-                   'try_soft_shutdown': 'true',
-                   'autoexit': 'true',
-                   'mode': 'normal',
-                   'show_avatar': 'true',
-                   'steam_path': 'reg',
-                   'last_pos': '0/0',
-                   'ui_mode': 'list',
-                   'theme': 'light'}
-        yaml.dump(default, cfg)
+        yaml.dump(DEFAULT_CONFIG, cfg)
 
 
 if not os.path.isfile('config.yml'):
     reset_config()
     first_run = True
 else:
-    with open('config.yml') as f:
-        if not f.read().strip():
+    with open('config.yml') as cfg:
+        if not cfg.read().strip():
             reset_config()
             first_run = True
         else:
             first_run = False
 
-# TODO: Simplify config file test code
-try:
-    with open('config.yml', 'r') as cfg:
-        test_dict = yaml.load(cfg)
+with open('config.yml', 'r') as cfg:
+    test_dict = yaml.load(cfg)
 
-    no_locale = 'locale' not in set(test_dict)
-    if not no_locale:
-        locale_invalid = test_dict['locale'] not in ('ko_KR', 'en_US', 'fr_FR')
-    else:
-        locale_invalid = True
+invalid = False
 
-    no_try_soft = 'try_soft_shutdown' not in set(test_dict)
-    if not no_try_soft:
-        try_soft_invalid = test_dict['try_soft_shutdown'] not in ('true', 'false')
-    else:
-        try_soft_invalid = True
+for key, value in valid_values.items():
+    try:
+        if test_dict[key] not in valid_values[key] and key not in ('steam_path', 'last_pos'):
+            invalid = True
+            print(f'Config {key} has invalid value "{test_dict[key]}"')
+            test_dict[key] = DEFAULT_CONFIG[key]
+    except KeyError:
+        invalid = True
+        print(f'Config {key} is missing. Creating one with default value..')
+        test_dict[key] = DEFAULT_CONFIG[key]
 
-    no_autoexit = 'autoexit' not in set(test_dict)
-    if not no_autoexit:
-        autoexit_invalid = test_dict['autoexit'] not in ('true', 'false')
-    else:
-        autoexit_invalid = True
-
-    no_mode = 'mode' not in set(test_dict)
-    if not no_mode:
-        mode_invalid = test_dict['mode'] not in ('normal', 'express')
-    else:
-        mode_invalid = True
-
-    no_avatar = 'show_avatar' not in set(test_dict)
-    if not no_avatar:
-        avatar_invalid = test_dict['show_avatar'] not in ('true', 'false')
-    else:
-        avatar_invalid = True
-
-    pos_invalid = 'last_pos' not in set(test_dict)
-
-    steam_path_invalid = 'steam_path' not in set(test_dict)
-
-    no_ui_mode = 'ui_mode' not in set(test_dict)
-    if not no_ui_mode:
-        ui_mode_invalid = test_dict['ui_mode'] not in ('list', 'grid')
-    else:
-        ui_mode_invalid = True
-
-    no_theme = 'theme' not in set(test_dict)
-    if not no_theme:
-        no_theme = test_dict['theme'] not in ('light', 'dark')
-    else:
-        no_theme = True
-
-    if True in (locale_invalid, try_soft_invalid, autoexit_invalid,
-                mode_invalid, avatar_invalid, pos_invalid, steam_path_invalid,
-                ui_mode_invalid, no_theme):
-
-        print('Found invalid config value')
-
-        cfg_write = {}
-        if no_locale or locale_invalid:
-            locale_write = 'en_US'
-
-            if system_locale == 'ko_KR':
-                locale_write = 'ko_KR'
-            cfg_write['locale'] = locale_write
-        else:
-            cfg_write['locale'] = test_dict['locale']
-        if no_autoexit or autoexit_invalid:
-            cfg_write['autoexit'] = 'true'
-        else:
-            cfg_write['autoexit'] = test_dict['autoexit']
-        if no_mode or mode_invalid:
-            cfg_write['mode'] = 'normal'
-        else:
-            cfg_write['mode'] = test_dict['mode']
-        if no_try_soft or try_soft_invalid:
-            cfg_write['try_soft_shutdown'] = 'true'
-        else:
-            cfg_write['try_soft_shutdown'] = test_dict['try_soft_shutdown']
-        if no_avatar or avatar_invalid:
-            cfg_write['show_avatar'] = 'true'
-        else:
-            cfg_write['show_avatar'] = test_dict['show_avatar']
-
-        if pos_invalid:
-            cfg_write['last_pos'] = '0/0'
-        else:
-            cfg_write['last_pos'] = test_dict['last_pos']
-
-        if ui_mode_invalid:
-            cfg_write['ui_mode'] = 'list'
-        else:
-            cfg_write['ui_mode'] = test_dict['ui_mode']
-
-        if no_theme:
-            cfg_write['theme'] = 'light'
-        else:
-            cfg_write['theme'] = test_dict['theme']
-
-        if steam_path_invalid:
-            if os.path.isfile('steam_path.txt'):
-                with open('steam_path.txt', 'r') as f:
-                    cfg_write['steam_path'] = f.read().strip()
-            else:
-                cfg_write['steam_path'] = 'reg'
-        else:
-            cfg_write['steam_path'] = test_dict['steam_path']
-
-        if cfg_write['ui_mode'] == 'grid' and cfg_write['show_avatar'] == 'false':
-            cfg_write['show_avatar'] = 'true'
-
-        with open('config.yml', 'w') as cfg:
-            yaml.dump(cfg_write, cfg)
-        del cfg_write
-        del test_dict
-except (FileNotFoundError, TypeError):
-    reset_config()
-    sys.exit(1)
+if invalid:
+    with open('config.yml', 'w') as cfg:
+        yaml.dump(test_dict, cfg)
 
 with open('config.yml', 'r') as cfg:
     config_dict = yaml.load(cfg)
