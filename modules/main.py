@@ -14,7 +14,7 @@ from ruamel.yaml import YAML
 from PIL import Image, ImageTk
 from modules.account import acc_getlist, acc_getdict, loginusers
 from modules.reg import fetch_reg, setkey
-from modules.config import get_config, config_write_dict, config_write_value, system_locale
+from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE
 from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update, update_frame_color
 from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, ToolTipWindow, ask_steam_dir, get_color
@@ -137,7 +137,7 @@ class MainApp(tk.Tk):
 
         menubar = tk.Menu(self)
 
-        if system_locale == 'ko_KR':
+        if SYS_LOCALE == 'ko_KR':
             menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
             menu = tk.Menu(menubar, tearoff=0, font=menu_font)
         else:
@@ -558,7 +558,7 @@ class MainApp(tk.Tk):
                     profilename = profilename[:30]
 
                 # We have to make a menu for every account! Sounds ridiculous? Me too.
-                if system_locale == 'ko_KR':
+                if SYS_LOCALE == 'ko_KR':
                     menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
                     menu_dict[username] = tk.Menu(self, tearoff=0, font=menu_font)
                 else:
@@ -715,7 +715,7 @@ class MainApp(tk.Tk):
                     profilename = profilename[:30]
 
                 # We have to make a menu for every account! Sounds ridiculous? Me too.
-                if system_locale == 'ko_KR':
+                if SYS_LOCALE == 'ko_KR':
                     menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
                     menu_dict[username] = tk.Menu(self, tearoff=0, font=menu_font)
                 else:
