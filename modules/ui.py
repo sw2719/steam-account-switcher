@@ -688,7 +688,7 @@ class WelcomeWindow(tk.Toplevel):
 
             self.radio_frame1.destroy()
             self.radio_frame2.destroy()
-            self.dark_alert.destroy()
+            self.bottomframe.destroy()
             self.page_2()
             self.focus()
 
@@ -734,8 +734,6 @@ class WelcomeWindow(tk.Toplevel):
             self.autoexit_frame.destroy()
             self.avatar_frame.destroy()
 
-            self.top_label.pack_forget()
-            self.top_label.pack(pady=10)
             self.save()
             self.page_5()
             self.focus()
@@ -926,18 +924,18 @@ class WelcomeWindow(tk.Toplevel):
         self.active_page = 5
         self.top_label['text'] = _('Good to go!')
 
-        # tkinter doesn't like three quotes string, so... yeah.
-        self.finish_label = tk.Label(self, bg='white',
-                                     text=_("Add or import accounts via Menu.\nRight click on accounts to see more options.\n\nYou can change settings in Menu > Settings\nif you don't like the settings you just set.\n\nPlease read GitHub README's How to use-4\nif you are using this app for first time.\n\nYou can open GitHub repo via Menu > About."))
-        self.finish_label.pack(expand=True, fill='both')
-
         self.shortcut_chkb = ttk.Checkbutton(self,
                                              text=_('Create a desktop shortcut'),
                                              style='welcome.TCheckbutton')
         self.shortcut_chkb.state(['!alternate'])
         self.shortcut_chkb.state(['!selected'])
 
-        self.shortcut_chkb.pack(anchor='center', pady=(3, 1))
+        self.shortcut_chkb.pack(side='bottom', pady=(3, 0))
+
+        # tkinter doesn't like three quotes string, so... yeah.
+        self.finish_label = tk.Label(self, bg='white',
+                                     text=_("Add or import accounts via Menu.\nRight click on accounts to see more options.\n\nYou can change settings in Menu > Settings\nif you don't like the settings you just set.\n\nPlease read GitHub README's How to use-4\nif you are using this app for first time.\n\nYou can open GitHub repo via Menu > About."))
+        self.finish_label.pack(expand=True, fill='both')
 
     def save(self):
         dump_dict = {'locale': get_config('locale'),
