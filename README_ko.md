@@ -1,9 +1,7 @@
 <img align="right" src="https://user-images.githubusercontent.com/22590718/111099662-551e6080-8589-11eb-8927-e2cf055bcc06.PNG">
 
 # Steam Account Switcher
-쉽고 빠르게 스팀 계정 간 전환
-
-Python으로 작성됨
+쉽고 빠르게 다른 스팀 계정으로 로그인하세요!
 
 [This document is also available in English.](https://github.com/sw2719/steam-account-switcher/blob/master/README.md)
 
@@ -14,19 +12,19 @@ STEAM은 Valve Corporation 의 등록상표입니다.
 이 프로그램은 Steam 및 Valve 와 아무런 연관이 없습니다.
 
 # 특징
-* 몇 번의 클릭만으로 스팀 계정간 전환
+* 몇 번의 클릭만으로 스팀 계정간 전환할 수 있습니다.
 
-* 계정을 전환할때마다 ID, 비밀번호, 그리고 스팀가드 코드조차 입력 할 필요 없음
+* 계정을 전환할때마다 ID, 비밀번호, 그리고 스팀가드 코드조차 입력 할 필요 없습니다.
 
-* 프로그램 사용시 비밀번호가 필요 없으므로 안전
+* 프로그램 사용시 비밀번호가 필요 없으므로 안전합니다.
 
-* 스팀에서 아이디 자동 불러오기
+* 스팀에서 계정을 자동으로 불러올 수 있습니다.
 
-* 자동 업데이트 내장
+* 자동 업데이트가 내장되어 있습니다.
 
 # 요구사항
 * 64비트 Windows
-* Steam 설치됨
+* Steam 이 설치됨
 * Visual Studio 2015 또는 2017용 Visual C++ 재배포 패키지
   - [다운로드](https://aka.ms/vs/16/release/vc_redist.x64.exe)
 
@@ -57,8 +55,8 @@ STEAM은 Valve Corporation 의 등록상표입니다.
   - config.yml을 삭제해보세요.
 
 # 소스 코드 정보
-* master를 제외한 모든 branch 는 개발 branch이며 작동을 보장하지 않습니다.
-* Python 3.8 64-bit 으로 작성되었습니다. 최소 Python 3.7이 필요합니다.
+* master를 제외한 모든 branch는 개발 branch이며 작동을 보장하지 않습니다.
+* Python 3.8 64-bit 으로 작성되었습니다. 실행하려면 최소 Python 3.7이 필요합니다.
 * updater.py 는 cx_freeze 로 번들된 배포용 프로그램에서 작동하게 설계되었으므로 Python 인터프리터로 실행하지 마세요.
 * requirements.txt로 의존성을 설치하세요.
 * 소스코드 원문은 영어이며 gettext 로 한글로 번역됩니다.
