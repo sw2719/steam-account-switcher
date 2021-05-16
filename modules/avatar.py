@@ -3,15 +3,16 @@ import shutil
 import os
 import sys
 import asyncio
+from packaging import version
 from io import BytesIO
 from bs4 import BeautifulSoup
 
-PY_VERSION = float(f'{sys.version_info[0]}.{sys.version_info[1]}')
+PY_VERSION = version.parse(f'{sys.version_info[0]}.{sys.version_info[1]}')
 
-if PY_VERSION >= 3.8 and sys.platform.startswith('win'):
+if PY_VERSION >= version.parse('3.8') and sys.platform.startswith('win'):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-elif PY_VERSION <= 3.4:
+elif PY_VERSION <= version.parse('3.4'):
     print('Not supported Python version. At least 3.5 is required.')
     sys.exit(0)
 
@@ -39,7 +40,7 @@ def download_avatar(steamid_list):
         except (aiohttp.ClientError, OSError):
             print(f'Exception while downloading image for {steamid64}')
 
-    if PY_VERSION >= 3.7:
+    if PY_VERSION >= version.parse('3.7'):
         async def main():
             async with aiohttp.ClientSession() as session:
                 tasks = [asyncio.create_task(download_image(session, steamid)) for steamid in steamid_list]
