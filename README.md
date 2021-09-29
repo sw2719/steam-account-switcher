@@ -64,4 +64,4 @@ This app has no affiliation with Steam and Valve.
 * Do not run updater.py in python interpreter. It's designed to run only in frozen environment.
 * Use requirements.txt to install dependencies.
 * Source code is written in English. Translation to other languages is done with gettext.
-* This code is still based on old code I wrote back in mid 2020, and certainly a lot of part of it is unideal and messy. I'm thinking of a complete rewrite but I just don't have time for it. Also it's really hard to add new features because many things are hardcoded including settings UI, config file R/W, UI, etc. But if any bug is to be found, I will try to fix it ASAP.
+* This code is still based on old code I wrote back in mid 2019, and certainly a lot of parts of it is unideal and messy. I'm thinking of a complete rewrite but I just don't have time for it. Also it's really hard to add new features because many things are hardcoded including settings UI, config file R/W, UI, etc. But if any bug is to be found, I will try to fix it ASAP.
