@@ -5,6 +5,8 @@ Lightweight, fast account switcher for Steam.
 
 Written in Python
 
+[Regarding no updates for a long time](#source-code-information)
+
 [이 문서는 한국어로도 읽을 수 있습니다.](https://github.com/sw2719/steam-account-switcher/blob/master/README_ko.md)
 
 [Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
