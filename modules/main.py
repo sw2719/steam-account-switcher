@@ -9,6 +9,7 @@ import subprocess
 import os
 import sys
 import queue as q
+import traceback
 from time import sleep
 from ruamel.yaml import YAML
 from PIL import Image, ImageTk
@@ -275,6 +276,10 @@ class MainApp(tk.Tk):
         tk.Frame(self.upper_frame, bg='grey').pack(fill='x')
 
         self.draw_button()
+
+    def report_callback_exception(self, exc, val, tb):
+        msgbox.showerror(_('Unhandled Exception'),
+                         message=traceback.format_exc() + '\n' + _('Please contact the developer if the issue persists.'))
 
     def get_window_pos(self):
         geo = self.geometry().split('+')
