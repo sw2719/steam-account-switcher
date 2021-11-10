@@ -5,6 +5,8 @@ Lightweight, fast account switcher for Steam.
 
 Written in Python
 
+[Regarding no updates for a long time](#source-code-information)
+
 [이 문서는 한국어로도 읽을 수 있습니다.](https://github.com/sw2719/steam-account-switcher/blob/master/README_ko.md)
 
 [Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
@@ -64,4 +66,4 @@ This app has no affiliation with Steam and Valve.
 * Do not run updater.py in python interpreter. It's designed to run only in frozen environment.
 * Use requirements.txt to install dependencies.
 * Source code is written in English. Translation to other languages is done with gettext.
-* My code is probably a low-quality, poorly written mess. But hey, at least it works right?
+* This code is still based on old code I wrote back in mid 2019, and certainly a lot of parts of it is unideal and messy. I'm thinking of a complete rewrite but I just don't have time for it. Also it's really hard to add new features because many things are hardcoded including settings UI, config file R/W, UI, etc. But if any bug is to be found, I will try to fix it ASAP.
