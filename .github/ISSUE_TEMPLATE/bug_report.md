@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a bug or any problem you are experiencing.
+about: Report a bug or any problem you are experiencing
 title: "[BUG]"
 labels: bug
 assignees: sw2719
