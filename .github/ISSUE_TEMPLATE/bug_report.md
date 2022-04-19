@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Having an issue? Report it and I will try to fix it ASAP.
+about: Report a bug or any problem you are experiencing.
 title: "[BUG]"
 labels: bug
 assignees: sw2719
@@ -23,7 +23,7 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
+**Environment**
  - OS: [e.g. Windows 10 x64]
  - Program Version [e.g. 2.6.1]
 
