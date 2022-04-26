@@ -5,8 +5,6 @@ Lightweight, fast account switcher for Steam.
 
 Written in Python
 
-[Regarding no updates for a long time](#source-code-information)
-
 [이 문서는 한국어로도 읽을 수 있습니다.](https://github.com/sw2719/steam-account-switcher/blob/master/README_ko.md)
 
 [Download in releases](https://github.com/sw2719/steam-account-switcher/releases)
@@ -14,6 +12,9 @@ Written in Python
 STEAM is a trademark of Valve Corporation.
 
 This app has no affiliation with Steam and Valve.
+
+# Important Notice
+Currently I'm not adding new things to this program since A. it has everything that I need and B. it works. But any bug report or suggestion is welcome.
 
 # Features
 * Switch between your accounts with just few clicks.
@@ -52,10 +53,10 @@ This app has no affiliation with Steam and Valve.
   - See How to use-4. Right above.
 
 * Windows SmartScreen says this program is potentially harmful!
-  - That's because I didn't sign my executable with EV certificate which is expensive as f#@!. Great job, M$.
+  - That's because I didn't sign my executable with EV certificate which costs money. As you know, this program is free. Also, it's malicious code-free, so don't worry about it.
 
 * I have a request! / I found a bug!
-  - Bug reports and requests are always welcome. Please submit a issue.
+  - Bug reports and requests are always welcome. Please submit an issue.
 
 * Some of the elements in settings are missing!
   - Delete config.yml and launch application again.
@@ -66,4 +67,3 @@ This app has no affiliation with Steam and Valve.
 * Do not run updater.py in python interpreter. It's designed to run only in frozen environment.
 * Use requirements.txt to install dependencies.
 * Source code is written in English. Translation to other languages is done with gettext.
-* This code is still based on old code I wrote back in mid 2019, and certainly a lot of parts of it is unideal and messy. I'm thinking of a complete rewrite but I just don't have time for it. Also it's really hard to add new features because many things are hardcoded including settings UI, config file R/W, UI, etc. But if any bug is to be found, I will try to fix it ASAP.
