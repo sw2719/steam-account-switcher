@@ -13,12 +13,15 @@ import traceback
 from time import sleep
 from ruamel.yaml import YAML
 from PIL import Image, ImageTk
-from modules.account import acc_getlist, acc_getdict, loginusers
+from modules.account import acc_getlist, acc_getdict, fetch_loginusers, loginusers_accountnames, loginusers_steamid, \
+    loginusers_personanames, check_autologin_availability
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE
-from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, launch_updater, create_shortcut
+from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, \
+    launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update, update_frame_color
-from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, ToolTipWindow, ask_steam_dir, get_color
+from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, \
+    ToolTipWindow, ask_steam_dir, get_color
 from modules.avatar import download_avatar
 
 yaml = YAML()
@@ -198,20 +201,6 @@ class MainApp(tk.Tk):
         self.bottomframe = tk.Frame(self, bg=get_color('bottomframe'))
         self.bottomframe.pack(side='bottom', fill='x')
 
-        def toggleAutologin():
-            '''Toggle autologin registry value between 0 and 1'''
-            if fetch_reg('RememberPassword') == 1:
-                setkey('RememberPassword', 0, winreg.REG_DWORD)
-            elif fetch_reg('RememberPassword') == 0:
-                setkey('RememberPassword', 1, winreg.REG_DWORD)
-
-            if fetch_reg('RememberPassword') == 1:
-                self.auto_var.set(_('Auto-login Enabled'))
-                self.autolabel['fg'] = get_color('autologin_text_on')
-            else:
-                self.auto_var.set(_('Auto-login Disabled'))
-                self.autolabel['fg'] = get_color('autologin_text_off')
-
         self.restartbutton_text = tk.StringVar()
 
         if get_config('autoexit') == 'true':
@@ -222,7 +211,6 @@ class MainApp(tk.Tk):
         self.button_toggle = SimpleButton(self.bottomframe,
                                           widget='bottom_button',
                                           text=_('Toggle auto-login'),
-                                          command=toggleAutologin,
                                           bd=2)
         self.button_exit = SimpleButton(self.bottomframe,
                                         widget='bottom_button',
@@ -264,15 +252,16 @@ class MainApp(tk.Tk):
 
         self.auto_var = tk.StringVar()
 
-        if fetch_reg('RememberPassword') == 1:
-            self.auto_var.set(_('Auto-login Enabled'))
-            auto_color = get_color('autologin_text_on')
+        if check_autologin_availability(self.user_var.get()):
+            self.auto_var.set(_('Auto-login Available'))
+            auto_color = get_color('autologin_text_avail')
         else:
-            self.auto_var.set(_('Auto-login Disabled'))
-            auto_color = get_color('autologin_text_off')
+            self.auto_var.set(_('Auto-login Unavailable'))
+            auto_color = get_color('autologin_text_unavail')
 
         self.autolabel = tk.Label(self.upper_frame, textvariable=self.auto_var, bg=self.upper_frame['bg'], fg=auto_color)
         self.autolabel.pack(side='top')
+
         tk.Frame(self.upper_frame, bg='grey').pack(fill='x')
 
         self.draw_button()
@@ -445,6 +434,16 @@ class MainApp(tk.Tk):
         setkey('AutoLoginUser', username, winreg.REG_SZ)
         self.button_dict[username].disable()
         self.user_var.set(fetch_reg('AutoLoginUser'))
+
+        if check_autologin_availability(self.user_var.get()):
+            self.auto_var.set(_('Auto-login Available'))
+            auto_color = get_color('autologin_text_avail')
+        else:
+            self.auto_var.set(_('Auto-login Unavailable'))
+            auto_color = get_color('autologin_text_unavail')
+
+        self.autolabel['fg'] = auto_color
+
         self.focus()
 
         if get_config('mode') == 'express':
@@ -505,7 +504,7 @@ class MainApp(tk.Tk):
                 else:
                     self.button_dict[x].grid(row=row, column=column, padx=10, pady=(9, 0))
 
-            buttonframe.grid_propagate(0)
+            buttonframe.grid_propagate(False)
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
 
@@ -535,7 +534,9 @@ class MainApp(tk.Tk):
                                        command=canvas.yview)
 
             for index, username in enumerate(self.accounts):
-                steam64_list, account_name, persona_name = loginusers()
+                steam64_list = loginusers_steamid()
+                account_name = loginusers_accountnames()
+                persona_name = loginusers_personanames()
 
                 if username in account_name:
                     i = account_name.index(username)
@@ -692,7 +693,9 @@ class MainApp(tk.Tk):
                                        command=canvas.yview)
 
             for username in self.accounts:
-                steam64_list, account_name, persona_name = loginusers()
+                steam64_list = loginusers_steamid()
+                account_name = loginusers_accountnames()
+                persona_name = loginusers_personanames()
 
                 if username in account_name:
                     i = account_name.index(username)
@@ -747,7 +750,7 @@ class MainApp(tk.Tk):
                                                 command=lambda name=username: self.remove_user(name))
 
                 def popup(username, event):
-                    menu_dict[username].tk_popup(event.x_root + 86, event.y_root + 13, 0)
+                    menu_dict[username].tk_popup(event.x_root, event.y_root, 0)
 
                 self.button_dict[username] = AccountButton(buttonframe,
                                                            username=username,
@@ -808,26 +811,25 @@ class MainApp(tk.Tk):
 
         update_frame_color()
 
-        if fetch_reg('RememberPassword') == 1:
-            self.auto_var.set(_('Auto-login Enabled'))
-            auto_color = get_color('autologin_text_on')
-        else:
-            self.auto_var.set(_('Auto-login Disabled'))
-            auto_color = get_color('autologin_text_off')
-
-        self.autolabel.configure(bg=self.upper_frame['bg'], fg=auto_color)
-
         if self.demo_mode:
             self.user_var.set('username0')
         else:
             self.user_var.set(fetch_reg('AutoLoginUser'))
 
+        self.auto_var = tk.StringVar()
+
         if self.demo_mode:
-            self.auto_var.set(_('Auto-login Enabled'))
-        elif fetch_reg('RememberPassword') == 1:
-            self.auto_var.set(_('Auto-login Enabled'))
+            self.auto_var.set(_('Auto-login Available'))
+            auto_color = get_color('autologin_text_avail')
+        elif check_autologin_availability(self.user_var.get()):
+            self.auto_var.set(_('Auto-login Available'))
+            auto_color = get_color('autologin_text_avail')
         else:
-            self.auto_var.set(_('Auto-login Disabled'))
+            self.auto_var.set(_('Auto-login Unavailable'))
+            auto_color = get_color('autologin_text_unavail')
+
+        self.autolabel = tk.Label(self.upper_frame, textvariable=self.auto_var, bg=self.upper_frame['bg'], fg=auto_color)
+        self.autolabel.pack(side='top')
 
         self.draw_button()
 
@@ -853,10 +855,11 @@ class MainApp(tk.Tk):
             dl_list = steamid_list
         else:
             dl_list = []
-            steamid_list, accountname, __ = loginusers()
+            steam64_list = loginusers_steamid()
+            account_name = loginusers_accountnames()
 
             for index, steamid in enumerate(steamid_list):
-                if accountname[index] in self.accounts:
+                if account_name[index] in self.accounts:
                     dl_list.append(steamid)
 
         download_avatar(dl_list)
@@ -1107,7 +1110,10 @@ class MainApp(tk.Tk):
         '''Open add accounts window'''
         accounts = acc_getlist()
         acc_dict = acc_getdict()
-        steamid_list, account_name, persona_name = loginusers()
+
+        steamid_list = []
+        account_names = []
+
         x, y = self.get_window_pos()
 
         addwindow = tk.Toplevel(self, bg='white')
@@ -1157,8 +1163,8 @@ class MainApp(tk.Tk):
                     if name_to_write not in accounts:
                         acc_dict[len(acc_dict)] = {'accountname': name_to_write}
 
-                        if name_to_write in account_name:
-                            dl_list.append(steamid_list[account_name.index(name_to_write)])
+                        if name_to_write in account_names:
+                            dl_list.append(steamid_list[account_names.index(name_to_write)])
 
                     else:
                         print(f'Account {name_to_write} already exists!')
@@ -1205,7 +1211,9 @@ class MainApp(tk.Tk):
         '''Open import accounts window'''
         accounts = acc_getlist()
         acc_dict = acc_getdict()
-        steamid_list, account_name, persona_name = loginusers()
+        steam64_list = loginusers_steamid()
+        account_name = loginusers_accountnames()
+        persona_name = loginusers_personanames()
 
         if set(account_name).issubset(set(acc_getlist())):
             msgbox.showinfo(_('Info'), _("There's no account left to import."))
@@ -1287,7 +1295,7 @@ class MainApp(tk.Tk):
             for key, value in checkbox_dict.items():
                 if value.get() == 1:
                     acc_dict[len(acc_dict)] = {'accountname': key}
-                    dl_list.append(steamid_list[account_name.index(key)])
+                    dl_list.append(steam64_list[account_name.index(key)])
 
             with open('accounts.yml', 'w') as acc:
                 yaml = YAML()

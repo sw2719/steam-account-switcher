@@ -21,8 +21,8 @@
         "window_background": "white",
         "upperframe": "white",
         "bottomframe": "white",
-        "autologin_text_on": "green",
-        "autologin_text_off": "red",
+        "autologin_text_avail": "green",
+        "autologin_text_unavail": "red",
         "seperator": "#c4c4c4"
     },
 
@@ -49,8 +49,8 @@
         "window_background": "#1c1c1c",
         "upperframe": "#292929",
         "bottomframe": "#292929",
-        "autologin_text_on": "#28d487",
-        "autologin_text_off": "#cc4b4b",
+        "autologin_text_avail": "#28d487",
+        "autologin_text_unavail": "#cc4b4b",
         "seperator": "#545454"
     }
 }
