@@ -208,10 +208,6 @@ class MainApp(tk.Tk):
         else:
             self.restartbutton_text.set(_('Restart Steam'))
 
-        self.button_toggle = SimpleButton(self.bottomframe,
-                                          widget='bottom_button',
-                                          text=_('Toggle auto-login'),
-                                          bd=2)
         self.button_exit = SimpleButton(self.bottomframe,
                                         widget='bottom_button',
                                         text=_('Exit'),
@@ -224,13 +220,11 @@ class MainApp(tk.Tk):
                                            command=self.exit_after_restart,
                                            bd=2)
 
-        self.button_toggle.grid(row=0, column=0, padx=3, pady=3, sticky='nesw')
-        self.button_exit.grid(row=0, column=1, pady=3, sticky='nesw')
-        self.button_restart.grid(row=0, column=2, padx=3, pady=3, sticky='nesw')
+        self.button_exit.grid(row=0, column=0, pady=3, sticky='nesw')
+        self.button_restart.grid(row=0, column=1, padx=3, pady=3, sticky='nesw')
 
         self.bottomframe.grid_columnconfigure(0, weight=1)
         self.bottomframe.grid_columnconfigure(1, weight=1)
-        self.bottomframe.grid_columnconfigure(2, weight=1)
         self.bottomframe.grid_rowconfigure(0, weight=1)
 
         self.button_dict = {}
