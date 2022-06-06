@@ -796,7 +796,6 @@ class MainApp(tk.Tk):
         self['bg'] = get_color('window_background')
 
         self.bottomframe.configure(bg=get_color('bottomframe'))
-        self.button_toggle.update_color()
         self.button_exit.update_color()
         self.button_restart.update_color()
         self.upper_frame.configure(bg=get_color('upperframe'))
