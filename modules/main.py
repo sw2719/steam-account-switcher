@@ -809,8 +809,6 @@ class MainApp(tk.Tk):
         else:
             self.user_var.set(fetch_reg('AutoLoginUser'))
 
-        self.auto_var = tk.StringVar()
-
         if self.demo_mode:
             self.auto_var.set(_('Auto-login Available'))
             auto_color = get_color('autologin_text_avail')
@@ -822,6 +820,7 @@ class MainApp(tk.Tk):
             auto_color = get_color('autologin_text_unavail')
 
         self.autolabel['fg'] = auto_color
+        self.autolabel['bg'] = get_color('upperframe')
         self.draw_button()
 
         if get_config('autoexit') == 'true':
