@@ -30,7 +30,7 @@ def fetch_reg(key):
         winreg.CloseKey(reg_key)
     except OSError:
         error_msg(_('Registry Error'),
-                  _('Failed to read registry value.') + '\n' +
+                  _('Failed to read registry value: ') + key + '\n' +
                   _('Make sure that Steam is installed.'))
     return value
 

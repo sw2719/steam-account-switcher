@@ -11,3 +11,4 @@ pywin32
 winshell
 colour
 bs4
+vdf

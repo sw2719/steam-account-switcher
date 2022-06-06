@@ -3,6 +3,7 @@ import re
 from modules.config import get_config
 from modules.reg import fetch_reg
 from ruamel.yaml import YAML
+import vdf
 
 yaml = YAML()
 
@@ -35,12 +36,11 @@ def acc_getdict():
     return acc_dict
 
 
-def loginusers():
-    '''
-    Fetch loginusers.vdf and return SteamID64, AccountName,
-    PersonaName values as lists.
-    :param steam_path: Steam installation path override
-    '''
+def fetch_loginusers():
+    """
+    Returns the contents of loginusers.vdf as dict
+    :returns: dict
+    """
     if get_config('steam_path') == 'reg':
         steam_path = fetch_reg('steampath')
     else:
@@ -53,24 +53,59 @@ def loginusers():
 
     try:
         with open(vdf_file, 'r', encoding='utf-8') as vdf_file:
-            vdf = vdf_file.read().splitlines()
+            return vdf.load(vdf_file)
     except FileNotFoundError:
-        return [], [], []
+        return {}
 
-    steam64_list = []
-    account_name = []
-    persona_name = []
 
-    rep = {"\t": "", '"': ""}
-    rep = dict((re.escape(k), v) for k, v in rep.items())
-    pattern = re.compile("|".join(rep.keys()))
+def loginusers_accountnames():
+    """
+    Returns a list of account names from loginusers.vdf
+    :returns: list
+    """
+    loginusers = fetch_loginusers()
+    accounts = []
+    for user in loginusers['users'].values():
+        accounts.append(user['AccountName'])
+    return accounts
 
-    for i, v in enumerate(vdf):
-        if v == "\t{":
-            steam64 = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i-1])
-            account = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+1])
-            persona = pattern.sub(lambda m: rep[re.escape(m.group(0))], vdf[i+2])
-            steam64_list.append(steam64)
-            account_name.append(account.replace("AccountName", ""))
-            persona_name.append(persona.replace("PersonaName", ""))
-    return steam64_list, account_name, persona_name
+
+def loginusers_steamid():
+    """
+    Returns a list of SteamIDs from loginusers.vdf
+    :returns: list
+    """
+    loginusers = fetch_loginusers()
+    steamid_list = []
+    for steamid in loginusers['users'].keys():
+        steamid_list.append(steamid)
+    return steamid_list
+
+
+def loginusers_personanames():
+    """
+    Returns a list of personanames from loginusers.vdf
+    :returns: list
+    """
+    loginusers = fetch_loginusers()
+    personanames = []
+    for user in loginusers['users'].values():
+        personanames.append(user['PersonaName'])
+    return personanames
+
+
+def check_autologin_availability(username):
+    """
+    Checks if the username is available for autologin
+    :param username: str
+    :returns: bool
+    """
+    loginusers_dict = fetch_loginusers()
+
+    for user in loginusers_dict['users'].values():
+        if user['AccountName'] == username:
+            return user['AllowAutoLogin'] == '1'
+        else:
+            continue
+
+    return False
