@@ -1,5 +1,14 @@
 import sys
 import os
+
+
+def exc_hook(type, value, traceback, oldhook=sys.excepthook):
+    oldhook(type, value, traceback)
+    input('    Press Enter to exit...')
+
+
+sys.excepthook = exc_hook
+
 import zipfile as zf
 import locale
 import shutil
@@ -7,7 +16,7 @@ import shutil
 locale_buf = locale.getdefaultlocale()
 LOCALE = locale_buf[0]
 DIRS_TO_DELETE = ('.vs', 'tcl', 'tk')
-FILES_TO_DELETE = ('libcrypto-1_1.dll', 'libssl-1_1.dll', 'tcl86t.dll', 'tk86t.dll', 'python37.dll')
+FILES_TO_DELETE = ('libcrypto-1_1.dll', 'libssl-1_1.dll', 'tcl86t.dll', 'tk86t.dll', 'python37.dll', 'python38.dll')
 
 
 def pprint(content):
@@ -63,8 +72,11 @@ else:
 print()
 archive = os.path.join(cwd, 'update.zip')
 
-if not os.path.isfile(archive) or not zf.is_zipfile(archive):
-    pprint("Error: Archive file doesn't exist or is not a zip file")
+if not os.path.isfile(archive):
+    pprint("Error: Archive file doesn't exist")
+    invalidzip()
+elif not zf.is_zipfile(archive):
+    pprint("Error: Archive file is not a zip file")
     invalidzip()
 else:
     try:
