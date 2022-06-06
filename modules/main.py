@@ -220,7 +220,7 @@ class MainApp(tk.Tk):
                                            command=self.exit_after_restart,
                                            bd=2)
 
-        self.button_exit.grid(row=0, column=0, pady=3, sticky='nesw')
+        self.button_exit.grid(row=0, column=0, padx=(3,0), pady=3, sticky='nesw')
         self.button_restart.grid(row=0, column=1, padx=3, pady=3, sticky='nesw')
 
         self.bottomframe.grid_columnconfigure(0, weight=1)
@@ -821,9 +821,7 @@ class MainApp(tk.Tk):
             self.auto_var.set(_('Auto-login Unavailable'))
             auto_color = get_color('autologin_text_unavail')
 
-        self.autolabel = tk.Label(self.upper_frame, textvariable=self.auto_var, bg=self.upper_frame['bg'], fg=auto_color)
-        self.autolabel.pack(side='top')
-
+        self.autolabel['fg'] = auto_color
         self.draw_button()
 
         if get_config('autoexit') == 'true':
