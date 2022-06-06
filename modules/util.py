@@ -62,7 +62,7 @@ def test():
     print('steam_path:', get_config('steam_path'))
 
     print('Checking registry...')
-    for key in ('AutoLoginUser', 'RememberPassword', 'SteamExe', 'SteamPath', 'pid', 'ActiveUser'):
+    for key in ('AutoLoginUser', 'SteamExe', 'SteamPath', 'pid', 'ActiveUser'):
         print(f'{key}:', fetch_reg(key))
 
     print('Checking Steam.exe location...')
