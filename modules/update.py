@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+import traceback
 from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox as msgbox
 import gettext
@@ -157,7 +158,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 total_in_MB = round(total_size / 1048576, 1)
             except req.RequestException:
                 msgbox.showerror(_('Error'),
-                                 _('Error occured while downloading update.'))
+                                 _('Error occured while downloading update.') + '\n\n' + traceback.format_exc())
                 os._exit(1)
 
             if round(total_in_MB, 1).is_integer():
@@ -319,7 +320,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 update_label = tk.Label(update_frame,
                                         text=_('Version %s is available. Click here to update!') % sv_version,
                                         bg=get_color('bottomframe'),
-                                        fg=get_color('autologin_text_on'))
+                                        fg=get_color('autologin_text_avail'))
                 update_label.pack(side='bottom')
                 update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog))
                 update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog))
@@ -356,8 +357,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
 
                 update_label = tk.Label(update_frame,
                                         text=_('Failed checking for updates. Click here to try again.'),
-                                        bg='white',
-                                        fg=get_color('autologin_text_off'))
+                                        bg=get_color('bottomframe'),
+                                        fg=get_color('autologin_text_unavail'))
                 update_frame.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, cl_ver_str, URL, bundle, debug=debug))
                 update_label.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, cl_ver_str, URL, bundle, debug=debug))
                 update_label.pack(side='bottom')
@@ -390,10 +391,10 @@ def update_frame_color():
     if not bundled:
         return
     elif update_code == 'avail':
-        update_label.configure(fg=get_color('autologin_text_on'))
+        update_label.configure(fg=get_color('autologin_text_avail'))
     elif update_code == 'latest':
         update_label.configure(fg=get_color('text'))
     elif update_code == 'dev':
         update_label.configure(fg=get_color('text'))
     else:
-        update_label.configure(fg=get_color('autologin_text_off'))
+        update_label.configure(fg=get_color('autologin_text_unavail'))

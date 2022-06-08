@@ -142,3 +142,4 @@ updater/python37.dll
 updater/updater.exe
 setup_c.py
 .idea/
+manifest.xml

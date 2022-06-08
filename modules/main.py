@@ -23,6 +23,7 @@ from modules.update import start_checkupdate, hide_update, show_update, update_f
 from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, \
     ToolTipWindow, ask_steam_dir, get_color
 from modules.avatar import download_avatar
+from modules.errormsg import error_msg
 
 yaml = YAML()
 
@@ -194,6 +195,8 @@ class MainApp(tk.Tk):
                                    command=launch_updater)
             debug_menu.add_command(label="Create shortcut",
                                    command=create_shortcut)
+            debug_menu.add_command(label="Call error_msg",
+                                   command=lambda: error_msg('Test error', 'Test error message'))
             debug_menu.add_command(label="Exit app with sys.exit",
                                    command=sys.exit)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
@@ -261,8 +264,11 @@ class MainApp(tk.Tk):
         self.draw_button()
 
     def report_callback_exception(self, exc, val, tb):
-        msgbox.showerror(_('Unhandled Exception'),
-                         message=traceback.format_exc() + '\n' + _('Please contact the developer if the issue persists.'))
+        if self.BUNDLE:
+            msgbox.showerror(_('Unhandled Exception'),
+                             message=traceback.format_exc() + '\n' + _('Please contact the developer if the issue persists.'))
+        else:
+            traceback.print_exc()
 
     def get_window_pos(self):
         geo = self.geometry().split('+')
@@ -848,7 +854,7 @@ class MainApp(tk.Tk):
             steam64_list = loginusers_steamid()
             account_name = loginusers_accountnames()
 
-            for index, steamid in enumerate(steamid_list):
+            for index, steamid in enumerate(steam64_list):
                 if account_name[index] in self.accounts:
                     dl_list.append(steamid)
 
