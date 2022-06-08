@@ -30,7 +30,8 @@ Currently I'm not adding new things to this program since A. it has everything t
 * Auto-updating is built-in, and it's fast. (Unless GitHub's server is having a hard time..)
 
 # Requirements (for executable release)
-* 64-bit Windows
+* Windows Operating System
+  - 64-bit is no longer required since version 2.7.
 * Steam installed correctly
 * Visual C++ Redistributable for Visual Studio 2015 or 2017
   - [Download here](https://aka.ms/vs/16/release/vc_redist.x64.exe)
