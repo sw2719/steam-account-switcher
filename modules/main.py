@@ -23,6 +23,7 @@ from modules.update import start_checkupdate, hide_update, show_update, update_f
 from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, \
     ToolTipWindow, ask_steam_dir, get_color
 from modules.avatar import download_avatar
+from modules.errormsg import error_msg
 
 yaml = YAML()
 
@@ -194,6 +195,8 @@ class MainApp(tk.Tk):
                                    command=launch_updater)
             debug_menu.add_command(label="Create shortcut",
                                    command=create_shortcut)
+            debug_menu.add_command(label="Call error_msg",
+                                   command=lambda: error_msg('Test error', 'Test error message'))
             debug_menu.add_command(label="Exit app with sys.exit",
                                    command=sys.exit)
             menubar.add_cascade(label=_("Debug"), menu=debug_menu)
