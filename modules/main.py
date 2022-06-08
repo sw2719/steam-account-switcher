@@ -851,7 +851,7 @@ class MainApp(tk.Tk):
             steam64_list = loginusers_steamid()
             account_name = loginusers_accountnames()
 
-            for index, steamid in enumerate(steamid_list):
+            for index, steamid in enumerate(steam64_list):
                 if account_name[index] in self.accounts:
                     dl_list.append(steamid)
 
