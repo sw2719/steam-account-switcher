@@ -261,8 +261,11 @@ class MainApp(tk.Tk):
         self.draw_button()
 
     def report_callback_exception(self, exc, val, tb):
-        msgbox.showerror(_('Unhandled Exception'),
-                         message=traceback.format_exc() + '\n' + _('Please contact the developer if the issue persists.'))
+        if self.BUNDLE:
+            msgbox.showerror(_('Unhandled Exception'),
+                             message=traceback.format_exc() + '\n' + _('Please contact the developer if the issue persists.'))
+        else:
+            traceback.print_exc()
 
     def get_window_pos(self):
         geo = self.geometry().split('+')
