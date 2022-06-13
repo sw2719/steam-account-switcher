@@ -34,7 +34,9 @@ Currently I'm not adding new things to this program since A. it has everything t
   - 64-bit is no longer required since version 2.7.
 * Steam installed correctly
 * Visual C++ Redistributable for Visual Studio 2015 or 2017
-  - [Download here](https://aka.ms/vs/16/release/vc_redist.x64.exe)
+  - Chances are it's already installed, but if it isn't, you can download it below.
+  - [Download for 32-bit](https://aka.ms/vs/16/release/vc_redist.x32.exe)
+  - [Download for 64-bit](https://aka.ms/vs/16/release/vc_redist.x64.exe)
 
 # How to use
 1. Unpack the archive to desired folder
