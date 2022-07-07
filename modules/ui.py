@@ -8,6 +8,7 @@ import sys
 import gettext
 import colour
 import json
+import sv_ttk
 from PIL import Image, ImageTk
 from modules.config import get_config, config_write_value, config_write_dict
 from ruamel.yaml import YAML
@@ -62,53 +63,6 @@ def color_fade(widget, **kw):
             widget._after_ids.update({list(kw)[0]: widget.after(1, update_widget_after, count+1)})
 
     update_widget_after()
-
-
-class MenuBar(tk.Frame):
-    def __init__(self, master, bg, fg, selected_bg):
-        tk.Frame.__init__(self, master, bd=1, relief='raised')
-        self.master = master
-        self.configure(background=bg)
-
-        menu_button = tk.Menubutton(self, text='File',
-                                    background=bg,
-                                    foreground=fg,
-                                    activeforeground=bg,
-                                    activebackground='white')
-
-        file_menu = tk.Menu(menu_button, tearoff=0)
-        file_menu.add_command(label='Example',
-                              background=bg,
-                              foreground=bg,
-                              activeforeground=bg,
-                              activebackground='white'
-                              )
-
-        menu_button.config(menu=file_menu)
-        menu_button.pack(side='left')
-
-        close = SimpleButton(self, text=' X ',
-                             command=master.quit,
-                             bg=bg,
-                             fg=fg)
-        close.pack(side='right')
-
-        self.bind("<Button-1>", self.start_move)
-        self.bind("<ButtonRelease-1>", self.stop_move)
-        self.bind("<B1-Motion>", self.moving)
-
-    def start_move(self, event):
-        self.master.x = event.x
-        self.master.y = event.y
-
-    def stop_move(self, event):
-        self.master.x = None
-        self.master.y = None
-
-    def moving(self, event):
-        x = (event.x_root - self.master.x)
-        y = (event.y_root - self.master.y)
-        self.master.geometry("+%s+%s" % (x, y))
 
 
 class DragDropListbox(tk.Listbox):
@@ -621,15 +575,13 @@ class WelcomeWindow(tk.Toplevel):
     def __init__(self, master, geometry, after_update, debug):
         self.master = master
         tk.Toplevel.__init__(self, self.master)
-        self.title(_('Setup'))
+        self.title(_('Initial Setup'))
 
         self.geometry(geometry)
         self.resizable(False, False)
 
         if not debug:
             self.protocol("WM_DELETE_WINDOW", self.on_window_close)
-
-        self.focus()
 
         try:
             self.iconbitmap('asset/icon.ico')
@@ -661,6 +613,7 @@ class WelcomeWindow(tk.Toplevel):
         self.title_label.pack(expand=True, pady=1)
         self.welcome_label.pack(expand=True, pady=1)
 
+        self.focus_force()
         self.grab_set()
 
     def on_window_close(self):
@@ -741,7 +694,6 @@ class WelcomeWindow(tk.Toplevel):
             self.ok_button['text'] = _('Please wait...')
             self.ok_button['state'] = 'disabled'
             self.focus()
-            self.master.update()
             self.destroy()
 
     def page_1(self):
@@ -770,7 +722,8 @@ class WelcomeWindow(tk.Toplevel):
         radio_light = ttk.Radiobutton(self.radio_frame1,
                                       text=_('Light Theme'),
                                       variable=self.theme_radio_var,
-                                      value=0)
+                                      value=0,
+                                      command=sv_ttk.use_light_theme)
         radio_light.pack(side='top', pady=2)
 
         self.radio_frame2 = tk.Frame(self)
@@ -785,7 +738,8 @@ class WelcomeWindow(tk.Toplevel):
         radio_dark = ttk.Radiobutton(self.radio_frame2,
                                      text=_('Dark Theme'),
                                      variable=self.theme_radio_var,
-                                     value=1)
+                                     value=1,
+                                     command=sv_ttk.use_dark_theme)
         radio_dark.pack(side='top', pady=2)
 
         if get_config('theme') == 'dark':
@@ -795,11 +749,16 @@ class WelcomeWindow(tk.Toplevel):
         self.active_page = 2
         self.radio_frame1 = tk.Frame(self)
         self.radio_frame1.pack(side='left', padx=(30, 0), pady=5)
-
         self.list_canvas = tk.Canvas(self.radio_frame1, width=50, height=50, bd=0, highlightthickness=0)
-        img = Image.open("asset/list.png").resize((50, 50))
 
-        self.list_imgtk = ImageTk.PhotoImage(img)
+        if not self.theme_radio_var.get():
+            img_list = Image.open("asset/list.png").resize((50, 50))
+            img_grid = Image.open("asset/grid.png").resize((50, 50))
+        else:
+            img_list = Image.open("asset/list_white.png").resize((50, 50))
+            img_grid = Image.open("asset/grid_white.png").resize((50, 50))
+
+        self.list_imgtk = ImageTk.PhotoImage(img_list)
         self.list_canvas.create_image(25, 25, image=self.list_imgtk)
         self.list_canvas.pack(side='top', padx=0, pady=5)
 
@@ -817,9 +776,8 @@ class WelcomeWindow(tk.Toplevel):
         self.radio_frame2.pack(side='right', padx=(0, 30), pady=5)
 
         self.grid_canvas = tk.Canvas(self.radio_frame2, width=50, height=50, bd=0, highlightthickness=0)
-        img = Image.open("asset/grid.png").resize((50, 50))
 
-        self.grid_imgtk = ImageTk.PhotoImage(img)
+        self.grid_imgtk = ImageTk.PhotoImage(img_grid)
         self.grid_canvas.create_image(25, 25, image=self.grid_imgtk)
         self.grid_canvas.pack(side='top', padx=0, pady=5)
 
