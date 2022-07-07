@@ -1,5 +1,15 @@
-version: '2.7.1'
+version: '2.8'
 changelog_en: |
+  ----------2.8----------
+
+  • Added app-wide light/dark theme.
+  
+  • App now detects system light/dark mode and defaults to corresponding theme on first launch.
+  
+  • After update, previous setting values are used if possible in initial setup.
+  
+  • Made minor improvements in initial setup.
+  
   ----------2.7.1----------
   
   • Fixed error when downloading avatars.
@@ -228,6 +238,16 @@ changelog_en: |
   • Added a setting to choose whether app exits after restarting Steam or not.
 
 changelog_ko: |
+  ----------2.8----------
+
+  • 앱 전반에 걸친 밝은/어두운 테마를 추가했습니다.
+  
+  • 이제 첫 실행시 시스템의 라이트/다크 모드 설정에 따른 테마가 적용됩니다.
+  
+  • 이제 업데이트 후 초기 설정시 가능한 경우 이전 설정 값이 기억됩니다.
+  
+  • 초기 설정을 개선했습니다.
+  
   ----------2.7.1----------
   
   • 프로필 사진을 다운로드 할때 발생하던 오류를 수정했습니다.
