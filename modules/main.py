@@ -301,6 +301,8 @@ class MainApp(tk.Tk):
         self.refresh()
 
     def welcomewindow(self, debug=False, update_override=False):
+        self.withdraw()
+
         if update_override:
             window = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), True, debug)
         else:
@@ -312,6 +314,8 @@ class MainApp(tk.Tk):
                     self.update_avatar()
 
                 self.refresh()
+                self.update_idletasks()
+                self.deiconify()
 
         window.bind('<Destroy>', event_function)
 
