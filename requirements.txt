@@ -12,3 +12,5 @@ winshell
 colour
 bs4
 vdf
+sv-ttk
+darkdetect
