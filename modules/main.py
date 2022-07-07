@@ -116,7 +116,8 @@ class MainApp(tk.Tk):
         self.after_update = after_update
 
         tk.Tk.__init__(self)
-        sv_ttk.set_theme("dark")  # Set dark theme
+
+        sv_ttk.set_theme(get_config('theme'))
         self['bg'] = get_color('window_background')
         self.title(_("Account Switcher"))
 
@@ -866,9 +867,9 @@ class MainApp(tk.Tk):
         '''Open about window'''
 
         if LOCALE == 'fr_FR':
-            height = 220
-        else:
             height = 200
+        else:
+            height = 180
 
         aboutwindow = tk.Toplevel(self)
         aboutwindow.title(_('About'))
@@ -889,12 +890,12 @@ class MainApp(tk.Tk):
                                          text=_('STEAM is a registered trademark of Valve Corporation.'))
         if self.BUNDLE or force_copyright:
             copyright_label = tk.Label(aboutwindow,
-                                       text='Copyright (c) 2022 sw2719 | All Rights Reserved\n' +
-                                       'Read copyright notice for details')
+                                        text='Copyright (c) 2022 sw2719 | All Rights Reserved' + '\n' +
+                                             'Read copyright notice for details')
         else:
             copyright_label = tk.Label(aboutwindow,
-                                       text='Copyright (c) 2022 sw2719 | All Rights Reserved\n' +
-                                       'Read LICENSE file for details')
+                                       text='Copyright (c) 2022 sw2719 | All Rights Reserved' + '\n' +
+                                            'Read LICENSE file for details')
         ver = tk.Label(aboutwindow,
                        text='Steam Account Switcher | Version ' + version)
 
@@ -911,7 +912,7 @@ class MainApp(tk.Tk):
             except tk.TclError:
                 pass
 
-            ttk.Button(cprightwindow, text=_('Close'), command=cprightwindow.destroy).pack(side='bottom', pady=3)
+            ttk.Button(cprightwindow, text=_('Close'), command=cprightwindow.destroy, style="Accent.TButton").pack(side='bottom', pady=3)
             ttk.Separator(cprightwindow, orient=tk.HORIZONTAL).pack(side='bottom', fill='x')
 
             cpright_text = ScrolledText(cprightwindow, bd=1, relief='flat')
@@ -927,7 +928,8 @@ class MainApp(tk.Tk):
 
         button_close = ttk.Button(button_frame,
                                   text=_('Close'),
-                                  command=aboutwindow.destroy)
+                                  command=aboutwindow.destroy,
+                                  style="Accent.TButton")
         button_github = ttk.Button(button_frame,
                                    text=_('GitHub page'),
                                    command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher'))
@@ -1191,7 +1193,7 @@ class MainApp(tk.Tk):
             adduser(account_entry.get())
 
         addwindow.bind('<Return>', enterkey)
-        button_add = ttk.Button(bottomframe_add, width=10, text=_('Add'),
+        button_add = ttk.Button(bottomframe_add, width=10, text=_('Add'), style="Accent.TButton",
                                 command=lambda: adduser(account_entry.get()))
         button_addcancel = ttk.Button(addwindow, width=10,
                                       text=_('Cancel'), command=close)
@@ -1315,7 +1317,8 @@ class MainApp(tk.Tk):
         import_ok = ttk.Button(bottomframe_imp,
                                text=_('Import'),
                                command=import_user,
-                               width=9)
+                               width=9,
+                               style="Accent.TButton")
 
         import_cancel.pack(side='left', padx=5, pady=3)
         import_ok.pack(side='left', padx=5, pady=3)
@@ -1424,7 +1427,7 @@ class MainApp(tk.Tk):
             close()
 
         button_ok = ttk.Button(bottomframe,
-                               width=9, text=_('OK'), command=ok)
+                               width=9, text=_('OK'), command=ok, style="Accent.TButton")
         button_cancel = ttk.Button(bottomframe,
                                    width=9, text=_('Cancel'), command=close)
 
@@ -1694,8 +1697,10 @@ class MainApp(tk.Tk):
 
             if theme_radio_var.get() == 1:
                 theme = 'dark'
+                sv_ttk.use_dark_theme()
             else:
                 theme = 'light'
+                sv_ttk.use_light_theme()
 
             if mode_radio_var.get() == 1:
                 mode = 'express'
@@ -1747,7 +1752,8 @@ class MainApp(tk.Tk):
         settings_ok = ttk.Button(bottomframe_set,
                                  text=_('OK'),
                                  command=ok,
-                                 width=10)
+                                 width=10,
+                                 style="Accent.TButton")
 
         settings_cancel = ttk.Button(bottomframe_set,
                                      text=_('Cancel'),
