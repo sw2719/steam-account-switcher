@@ -10,6 +10,7 @@ import os
 import sys
 import queue as q
 import traceback
+import sv_ttk
 from time import sleep
 from ruamel.yaml import YAML
 from PIL import Image, ImageTk
@@ -115,6 +116,7 @@ class MainApp(tk.Tk):
         self.after_update = after_update
 
         tk.Tk.__init__(self)
+        sv_ttk.set_theme("dark")  # Set dark theme
         self['bg'] = get_color('window_background')
         self.title(_("Account Switcher"))
 
@@ -299,9 +301,9 @@ class MainApp(tk.Tk):
 
     def welcomewindow(self, debug=False, update_override=False):
         if update_override:
-            window = WelcomeWindow(self, self.popup_geometry(320, 270, multiplier=2), True, debug)
+            window = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), True, debug)
         else:
-            window = WelcomeWindow(self, self.popup_geometry(320, 270, multiplier=2), self.after_update, debug)
+            window = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), self.after_update, debug)
 
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':
@@ -313,7 +315,7 @@ class MainApp(tk.Tk):
         window.bind('<Destroy>', event_function)
 
     def configwindow(self, username):
-        configwindow = tk.Toplevel(self, bg='white')
+        configwindow = tk.Toplevel(self)
         configwindow.title('')
 
         x, y = self.get_window_pos()
@@ -332,7 +334,7 @@ class MainApp(tk.Tk):
         except KeyError:
             custom_name = ''
 
-        button_frame = tk.Frame(configwindow, bg='white')
+        button_frame = tk.Frame(configwindow)
         button_frame.pack(side='bottom', pady=3)
 
         ok_button = ttk.Button(button_frame, text=_('OK'))
@@ -343,12 +345,12 @@ class MainApp(tk.Tk):
                                    command=configwindow.destroy)
         cancel_button.pack(side='left', padx=1.5)
 
-        top_label = tk.Label(configwindow, text=_('Select name settings\nfor %s') % username, bg='white')
+        top_label = tk.Label(configwindow, text=_('Select name settings\nfor %s') % username)
         top_label.pack(side='top', pady=(4, 3))
 
-        radio_frame1 = tk.Frame(configwindow, bg='white')
+        radio_frame1 = tk.Frame(configwindow)
         radio_frame1.pack(side='top', padx=20, pady=(4, 2), fill='x')
-        radio_frame2 = tk.Frame(configwindow, bg='white')
+        radio_frame2 = tk.Frame(configwindow)
         radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
         radio_var = tk.IntVar()
 
@@ -357,27 +359,22 @@ class MainApp(tk.Tk):
         else:
             radio_var.set(0)
 
-        s = ttk.Style()
-        s.configure('config.TRadiobutton', background='white')
-
         radio_default = ttk.Radiobutton(radio_frame1,
                                         text=_('Use profile name if available'),
                                         variable=radio_var,
-                                        value=0,
-                                        style='config.TRadiobutton')
+                                        value=0)
         radio_custom = ttk.Radiobutton(radio_frame2,
                                        text=_('Use custom name'),
                                        variable=radio_var,
-                                       value=1,
-                                       style='config.TRadiobutton')
+                                       value=1)
 
         radio_default.pack(side='left', pady=2)
         radio_custom.pack(side='left', pady=2)
 
-        entry_frame = tk.Frame(configwindow, bg='white')
+        entry_frame = tk.Frame(configwindow)
         entry_frame.pack(side='bottom', pady=(1, 4))
 
-        name_entry = tk.Entry(entry_frame, width=27, disabledbackground='#C6C6C6', relief='solid')
+        name_entry = ttk.Entry(entry_frame, width=27)
         name_entry.insert(0, custom_name)
         name_entry.pack()
 
@@ -386,7 +383,6 @@ class MainApp(tk.Tk):
 
         if radio_var.get() == 0:
             name_entry['state'] = 'disabled'
-            name_entry.focus()
 
         def reset_entry():
             name_entry.delete(0, 'end')
@@ -580,7 +576,7 @@ class MainApp(tk.Tk):
                     menu_dict[username].add_command(label=_('Open screenshots folder'),
                                                     command=lambda steamid64=steam64: open_screenshot(steamid64))
                     menu_dict[username].add_command(label=_('View SteamID'),
-                                                    command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.popup_geometry(270, 180)))
+                                                    command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.popup_geometry(270, 240)))
                     menu_dict[username].add_command(label=_('Update avatar'),
                                                     command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
                     menu_dict[username].add_separator()
@@ -739,7 +735,7 @@ class MainApp(tk.Tk):
                     menu_dict[username].add_command(label=_('Open screenshots folder'),
                                                     command=lambda steamid64=steam64: open_screenshot(steamid64))
                     menu_dict[username].add_command(label=_('View SteamID'),
-                                                    command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.popup_geometry(270, 180)))
+                                                    command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.popup_geometry(270, 240)))
                     menu_dict[username].add_command(label=_('Update avatar'),
                                                     command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
                     menu_dict[username].add_separator()
@@ -870,11 +866,11 @@ class MainApp(tk.Tk):
         '''Open about window'''
 
         if LOCALE == 'fr_FR':
-            height = 200
+            height = 220
         else:
-            height = 180
+            height = 200
 
-        aboutwindow = tk.Toplevel(self, bg='white')
+        aboutwindow = tk.Toplevel(self)
         aboutwindow.title(_('About'))
         aboutwindow.geometry(self.popup_geometry(360, height))
         aboutwindow.resizable(False, False)
@@ -886,29 +882,34 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
-        about_disclaimer = tk.Label(aboutwindow, bg='white', fg='black',
+        about_disclaimer = tk.Label(aboutwindow,
                                     text=_('Warning: The developer of this application is not responsible for\n' +
                                            'data loss or any other damage from the use of this app.'))
-        about_steam_trademark = tk.Label(aboutwindow, bg='white', fg='black',
+        about_steam_trademark = tk.Label(aboutwindow,
                                          text=_('STEAM is a registered trademark of Valve Corporation.'))
         if self.BUNDLE or force_copyright:
-            copyright_label = tk.Label(aboutwindow, bg='white', fg='black',
-                                       text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
-                                       'View copyright notice for details')
+            copyright_label = tk.Label(aboutwindow,
+                                       text='Copyright (c) 2022 sw2719 | All Rights Reserved\n' +
+                                       'Read copyright notice for details')
         else:
-            copyright_label = tk.Label(aboutwindow, bg='white', fg='black',
-                                       text='Copyright (c) 2020 sw2719 | All Rights Reserved\n' +
-                                       'View LICENSE file for details')
-        ver = tk.Label(aboutwindow, bg='white', fg='black',
+            copyright_label = tk.Label(aboutwindow,
+                                       text='Copyright (c) 2022 sw2719 | All Rights Reserved\n' +
+                                       'Read LICENSE file for details')
+        ver = tk.Label(aboutwindow,
                        text='Steam Account Switcher | Version ' + version)
 
         def copyright_notice():
-            cprightwindow = tk.Toplevel(aboutwindow, bg='white')
+            cprightwindow = tk.Toplevel(aboutwindow)
             cprightwindow.title(_('Copyright notice'))
             cprightwindow.geometry(self.popup_geometry(630, 350, multiplier=2))
             cprightwindow.resizable(False, False)
             cprightwindow.focus()
             cprightwindow.bind('<Escape>', lambda event: cprightwindow.destroy())
+
+            try:
+                cprightwindow.iconbitmap('asset/icon.ico')
+            except tk.TclError:
+                pass
 
             ttk.Button(cprightwindow, text=_('Close'), command=cprightwindow.destroy).pack(side='bottom', pady=3)
             ttk.Separator(cprightwindow, orient=tk.HORIZONTAL).pack(side='bottom', fill='x')
@@ -921,7 +922,7 @@ class MainApp(tk.Tk):
             cpright_text.configure(state=tk.DISABLED)
             cpright_text.pack(side='top', expand=True, fill='both')
 
-        button_frame = tk.Frame(aboutwindow, bg='white')
+        button_frame = tk.Frame(aboutwindow)
         button_frame.pack(side='bottom', pady=5)
 
         button_close = ttk.Button(button_frame,
@@ -1112,9 +1113,9 @@ class MainApp(tk.Tk):
 
         x, y = self.get_window_pos()
 
-        addwindow = tk.Toplevel(self, bg='white')
+        addwindow = tk.Toplevel(self)
         addwindow.title(_("Add"))
-        addwindow.geometry(self.popup_geometry(300, 150))
+        addwindow.geometry(self.popup_geometry(320, 200))
         addwindow.resizable(False, False)
         addwindow.bind('<Escape>', lambda event: addwindow.destroy())
 
@@ -1123,19 +1124,17 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
-        topframe_add = tk.Frame(addwindow, bg='white')
+        topframe_add = tk.Frame(addwindow)
         topframe_add.pack(side='top', anchor='center')
 
-        bottomframe_add = tk.Frame(addwindow, bg='white')
+        bottomframe_add = tk.Frame(addwindow)
         bottomframe_add.pack(side='bottom', anchor='e', fill='x')
 
-        addlabel_row1 = tk.Label(topframe_add, bg='white',
-                                 text=_('Enter account(s) to add.'))
-        addlabel_row2 = tk.Label(topframe_add, bg='white',
-                                 text=_("In case of adding multiple accounts,") + '\n' +
-                                 _("seperate each account with '/' (slash)."))
+        addlabel_row1 = tk.Label(topframe_add, text=_('Enter account(s) to add.'))
+        addlabel_row2 = tk.Label(topframe_add, text=_("In case of adding multiple accounts,") + '\n' +
+                                                    _("seperate each account with '/' (slash)."))
 
-        account_entry = ttk.Entry(bottomframe_add, width=29)
+        account_entry = ttk.Entry(bottomframe_add, width=27)
 
         addwindow.grab_set()
         addwindow.focus()
@@ -1215,12 +1214,9 @@ class MainApp(tk.Tk):
             msgbox.showinfo(_('Info'), _("There's no account left to import."))
             return
 
-        s = ttk.Style()
-        s.configure('Import.TCheckbutton', background='white')
-
         x, y = self.get_window_pos()
 
-        importwindow = tk.Toplevel(self, bg='white')
+        importwindow = tk.Toplevel(self)
         importwindow.title(_("Import"))
         importwindow.geometry(self.popup_geometry(280, 300))
         importwindow.resizable(False, False)
@@ -1233,12 +1229,11 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
-        bottomframe_imp = tk.Frame(importwindow, bg='white')
+        bottomframe_imp = tk.Frame(importwindow)
         bottomframe_imp.pack(side='bottom')
 
         import_label = tk.Label(importwindow, text=_('Select accounts to import.') + '\n' +
-                                _("Added accounts don't show up."),
-                                bg='white')
+                                _("Added accounts don't show up."))
         import_label.pack(side='top', padx=5, pady=5)
 
         def close():
@@ -1251,8 +1246,8 @@ class MainApp(tk.Tk):
             '''Reset the scroll region to encompass the inner frame'''
             canvas.configure(scrollregion=canvas.bbox("all"))
 
-        canvas = tk.Canvas(importwindow, borderwidth=0, highlightthickness=0, background='white')
-        check_frame = tk.Frame(canvas, bg='white')
+        canvas = tk.Canvas(importwindow, borderwidth=0, highlightthickness=0)
+        check_frame = tk.Frame(canvas)
         scroll_bar = ttk.Scrollbar(importwindow, orient="vertical", command=canvas.yview,)
 
         canvas.configure(yscrollcommand=scroll_bar.set)
@@ -1306,7 +1301,7 @@ class MainApp(tk.Tk):
                 importwindow.protocol("WM_DELETE_WINDOW", disable_close)
                 importwindow.focus()
 
-                tk.Label(importwindow, text=_('Please wait while downloading avatars...'), bg='white').pack(fill='both', expand=True)
+                tk.Label(importwindow, text=_('Please wait while downloading avatars...')).pack(fill='both', expand=True)
                 self.update()
                 download_avatar(dl_list)
 
@@ -1336,9 +1331,9 @@ class MainApp(tk.Tk):
 
         x, y = self.get_window_pos()
 
-        orderwindow = tk.Toplevel(self, bg='white')
+        orderwindow = tk.Toplevel(self)
         orderwindow.title("")
-        orderwindow.geometry(self.popup_geometry(224, 270))
+        orderwindow.geometry(self.popup_geometry(230, 270))
         orderwindow.resizable(False, False)
         orderwindow.bind('<Escape>', lambda event: orderwindow.destroy())
 
@@ -1347,16 +1342,16 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
-        bottomframe = tk.Frame(orderwindow, bg='white')
+        bottomframe = tk.Frame(orderwindow)
         bottomframe.pack(side='bottom', padx=3, pady=3)
 
-        labelframe = tk.Frame(orderwindow, bg='white')
+        labelframe = tk.Frame(orderwindow)
         labelframe.pack(side='bottom', padx=3)
 
         orderwindow.grab_set()
         orderwindow.focus()
 
-        lbframe = tk.Frame(orderwindow, bg='white')
+        lbframe = tk.Frame(orderwindow)
 
         scrollbar = ttk.Scrollbar(lbframe)
         scrollbar.pack(side='right', fill='y')
@@ -1430,18 +1425,25 @@ class MainApp(tk.Tk):
 
         button_ok = ttk.Button(bottomframe,
                                width=9, text=_('OK'), command=ok)
-        button_ok.pack(side='left', padx=(0, 1))
         button_cancel = ttk.Button(bottomframe,
                                    width=9, text=_('Cancel'), command=close)
-        button_cancel.pack(side='left', padx=(1, 1.5))
 
         button_up = ttk.Button(bottomframe, width=3,
                                text='↑', command=up)
-        button_up.pack(side='right', padx=(1.5, 1))
 
         button_down = ttk.Button(bottomframe, width=3,
                                  text='↓', command=down)
-        button_down.pack(side='right', padx=(1, 0))
+
+        button_ok.grid(row=0, column=0, padx=(3, 0), pady=3, sticky='nesw')
+        button_cancel.grid(row=0, column=1, padx=3, pady=3, sticky='nesw')
+        button_up.grid(row=0, column=2, padx=3, pady=3, sticky='nesw')
+        button_down.grid(row=0, column=3, padx=(0, 3), pady=3, sticky='nesw')
+
+        bottomframe.grid_columnconfigure(0, weight=1)
+        bottomframe.grid_columnconfigure(1, weight=1)
+        bottomframe.grid_columnconfigure(2, weight=1)
+        bottomframe.grid_columnconfigure(3, weight=1)
+        bottomframe.grid_rowconfigure(0, weight=1)
 
     def settingswindow(self):
         '''Open settings window'''
@@ -1458,13 +1460,13 @@ class MainApp(tk.Tk):
             ui_padx = 70
             theme_padx = 50
         else:
-            width = 260
+            width = 280
             ui_padx = 35
             theme_padx = 40
 
-        settingswindow = tk.Toplevel(self, bg='white')
+        settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(self.popup_geometry(width, 430))  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 500))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
@@ -1473,7 +1475,7 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
-        bottomframe_set = tk.Frame(settingswindow, bg='white')
+        bottomframe_set = tk.Frame(settingswindow)
         bottomframe_set.pack(side='bottom')
         settingswindow.grab_set()
         settingswindow.focus()
@@ -1485,9 +1487,9 @@ class MainApp(tk.Tk):
         else:
             padx_int = 24
 
-        localeframe = tk.Frame(settingswindow, bg='white')
+        localeframe = tk.Frame(settingswindow)
         localeframe.pack(side='top', pady=(14, 7), fill='x')
-        locale_label = tk.Label(localeframe, text=_('Language'), bg='white')
+        locale_label = tk.Label(localeframe, text=_('Language'))
         locale_label.pack(side='left', padx=(padx_int, 13))
         locale_cb = ttk.Combobox(localeframe,
                                  state="readonly",
@@ -1506,22 +1508,24 @@ class MainApp(tk.Tk):
 
         locale_cb.pack(side='left')
 
-        restart_frame = tk.Frame(settingswindow, bg='white')
+        restart_frame = tk.Frame(settingswindow)
         restart_frame.pack(side='top')
 
-        s = ttk.Style()
-        s.configure('Settings.TRadiobutton', background='white')
-        s.configure('Settings.TCheckbutton', background='white')
-
-        ui_frame = tk.Frame(settingswindow, bg='white')
+        ui_frame = tk.Frame(settingswindow)
         ui_frame.pack(side='top', pady=(5, 5), fill='x')
         ui_radio_var = tk.IntVar()
 
-        list_radio_frame = tk.Frame(ui_frame, bg='white')
+        list_radio_frame = tk.Frame(ui_frame)
         list_radio_frame.pack(side='left', padx=(ui_padx, 0))
 
-        list_canvas = tk.Canvas(list_radio_frame, width=30, height=30, bg='white', bd=0, highlightthickness=0)
-        list_img = Image.open("asset/list.png").resize((30, 30))
+        if get_config('theme') == 'light':
+            list_img = Image.open("asset/list.png").resize((30, 30))
+            grid_img = Image.open("asset/grid.png").resize((30, 30))
+        else:
+            list_img = Image.open("asset/list_white.png").resize((30, 30))
+            grid_img = Image.open("asset/grid_white.png").resize((30, 30))
+
+        list_canvas = tk.Canvas(list_radio_frame, width=30, height=30, bd=0, highlightthickness=0)
 
         image1 = ImageTk.PhotoImage(list_img)
         list_canvas.create_image(15, 15, image=image1)
@@ -1530,16 +1534,14 @@ class MainApp(tk.Tk):
         radio_list = ttk.Radiobutton(list_radio_frame,
                                      text=_('List Mode'),
                                      variable=ui_radio_var,
-                                     value=0,
-                                     style='Settings.TRadiobutton')
+                                     value=0)
         radio_list.pack(side='top', pady=2)
         ToolTipWindow(radio_list, _('Display accounts in vertical list.'), center=True)
 
-        grid_radio_frame = tk.Frame(ui_frame, bg='white')
+        grid_radio_frame = tk.Frame(ui_frame)
         grid_radio_frame.pack(side='right', padx=(0, ui_padx))
 
-        grid_canvas = tk.Canvas(grid_radio_frame, width=30, height=30, bg='white', bd=0, highlightthickness=0)
-        grid_img = Image.open("asset/grid.png").resize((30, 30))
+        grid_canvas = tk.Canvas(grid_radio_frame, width=30, height=30, bd=0, highlightthickness=0)
 
         image2 = ImageTk.PhotoImage(grid_img)
         grid_canvas.create_image(15, 15, image=image2)
@@ -1548,19 +1550,17 @@ class MainApp(tk.Tk):
         radio_grid = ttk.Radiobutton(grid_radio_frame,
                                      text=_('Grid Mode'),
                                      variable=ui_radio_var,
-                                     value=1,
-                                     style='Settings.TRadiobutton')
+                                     value=1)
         radio_grid.pack(side='top', pady=2)
         ToolTipWindow(radio_grid, _('Display accounts in 3 x n grid.'), center=True)
 
         if get_config('ui_mode') == 'grid':
             ui_radio_var.set(1)
 
-        avatar_frame = tk.Frame(settingswindow, bg='white')
+        avatar_frame = tk.Frame(settingswindow)
         avatar_frame.pack(fill='x', side='top', padx=12, pady=(2, 5))
 
-        avatar_chkb = ttk.Checkbutton(avatar_frame, style='Settings.TCheckbutton',
-                                      text=_('Show avatar images'))
+        avatar_chkb = ttk.Checkbutton(avatar_frame, text=_('Show avatar images'))
 
         avatar_chkb.state(['!alternate'])
 
@@ -1584,14 +1584,14 @@ class MainApp(tk.Tk):
         radio_list['command'] = on_list_check
         radio_grid['command'] = on_grid_check
 
-        theme_frame = tk.Frame(settingswindow, bg='white')
+        theme_frame = tk.Frame(settingswindow)
         theme_frame.pack(side='top', pady=(5, 5), fill='x')
         theme_radio_var = tk.IntVar()
 
-        light_radio_frame = tk.Frame(theme_frame, bg='white')
+        light_radio_frame = tk.Frame(theme_frame)
         light_radio_frame.pack(side='left', padx=(theme_padx, 0))
 
-        light_canvas = tk.Canvas(light_radio_frame, width=40, height=64, bg='white', bd=0, highlightthickness=0)
+        light_canvas = tk.Canvas(light_radio_frame, width=40, height=64, bd=0, highlightthickness=0)
         light_img = Image.open("asset/light.png").resize((40, 64))
 
         image3 = ImageTk.PhotoImage(light_img)
@@ -1601,14 +1601,13 @@ class MainApp(tk.Tk):
         radio_light = ttk.Radiobutton(light_radio_frame,
                                       text=_('Light Theme'),
                                       variable=theme_radio_var,
-                                      value=0,
-                                      style='Settings.TRadiobutton')
+                                      value=0)
         radio_light.pack(side='top', pady=2)
 
-        dark_radio_frame = tk.Frame(theme_frame, bg='white')
+        dark_radio_frame = tk.Frame(theme_frame)
         dark_radio_frame.pack(side='right', padx=(0, theme_padx))
 
-        dark_canvas = tk.Canvas(dark_radio_frame, width=40, height=64, bg='white', bd=0, highlightthickness=0)
+        dark_canvas = tk.Canvas(dark_radio_frame, width=40, height=64, bd=0, highlightthickness=0)
         dark_img = Image.open("asset/dark.png").resize((40, 64))
 
         image4 = ImageTk.PhotoImage(dark_img)
@@ -1622,13 +1621,12 @@ class MainApp(tk.Tk):
                                      style='Settings.TRadiobutton')
         radio_dark.pack(side='top', pady=2)
 
-        ToolTipWindow(radio_dark, _('Dark theme is applied only to main window.'), center=True)
         if get_config('theme') == 'dark':
             theme_radio_var.set(1)
 
-        mode_radio_frame1 = tk.Frame(settingswindow, bg='white')
+        mode_radio_frame1 = tk.Frame(settingswindow)
         mode_radio_frame1.pack(side='top', padx=12, pady=(7, 2), fill='x')
-        mode_radio_frame2 = tk.Frame(settingswindow, bg='white')
+        mode_radio_frame2 = tk.Frame(settingswindow)
         mode_radio_frame2.pack(side='top', padx=12, pady=(2, 7), fill='x')
         mode_radio_var = tk.IntVar()
 
@@ -1650,10 +1648,10 @@ class MainApp(tk.Tk):
         if get_config('mode') == 'express':
             mode_radio_var.set(1)
 
-        softshutdwn_frame = tk.Frame(settingswindow, bg='white')
+        softshutdwn_frame = tk.Frame(settingswindow)
         softshutdwn_frame.pack(fill='x', side='top', padx=12, pady=(7, 5))
 
-        soft_chkb = ttk.Checkbutton(softshutdwn_frame, style='Settings.TCheckbutton',
+        soft_chkb = ttk.Checkbutton(softshutdwn_frame, style="Switch.TCheckbutton",
                                     text=_('Try to soft shutdown Steam client'))
 
         soft_chkb.state(['!alternate'])
@@ -1665,10 +1663,10 @@ class MainApp(tk.Tk):
 
         soft_chkb.pack(side='left')
 
-        autoexit_frame = tk.Frame(settingswindow, bg='white')
+        autoexit_frame = tk.Frame(settingswindow)
         autoexit_frame.pack(fill='x', side='top', padx=12, pady=(5, 0))
 
-        autoexit_chkb = ttk.Checkbutton(autoexit_frame, style='Settings.TCheckbutton',
+        autoexit_chkb = ttk.Checkbutton(autoexit_frame, style="Switch.TCheckbutton",
                                         text=_('Exit app after Steam is restarted'))
 
         autoexit_chkb.state(['!alternate'])
@@ -1761,9 +1759,14 @@ class MainApp(tk.Tk):
                                     command=apply,
                                     width=10)
 
-        settings_ok.pack(side='left', padx=3, pady=3)
-        settings_cancel.pack(side='left', padx=3, pady=3)
-        settings_apply.pack(side='left', padx=3, pady=3)
+        settings_ok.grid(row=0, column=0, padx=(3, 0), pady=3, sticky='nesw')
+        settings_cancel.grid(row=0, column=1, padx=3, pady=3, sticky='nesw')
+        settings_apply.grid(row=0, column=2, padx=(0, 3), pady=3, sticky='nesw')
+
+        bottomframe_set.grid_columnconfigure(0, weight=1)
+        bottomframe_set.grid_columnconfigure(1, weight=1)
+        bottomframe_set.grid_columnconfigure(2, weight=1)
+        bottomframe_set.grid_rowconfigure(0, weight=1)
 
     def exit_after_restart(self, refresh_override=False, silent=True):
         '''Restart Steam client and exit application.

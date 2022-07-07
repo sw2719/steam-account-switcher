@@ -180,7 +180,7 @@ class AccountButton:
 
         self.acc_label = ttk.Label(self.frame, text=username, font=username_font)
         self.acc_label.config(background=self.normal, foreground=self.text)
-        self.acc_label.pack(anchor='w', padx=(3, 0))
+        self.acc_label.pack(anchor='w', padx=(3, 0), pady=(1, 0))
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.acc_label.bind('<Button-3>', rightcommand)
@@ -350,8 +350,8 @@ class AccountButtonGrid:
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.acc_label.bind('<Button-3>', rightcommand)
 
-        if tkfont.Font(font=self.acc_label['font']).measure(username) > 86:
-            while tkfont.Font(font=self.acc_label['font']).measure(username) > 86:
+        if tkfont.Font(font=self.acc_label['font']).measure(username) > 73:
+            while tkfont.Font(font=self.acc_label['font']).measure(username) > 73:
                 username = username[:-1]
             else:
                 username = f'{username}..'
@@ -365,8 +365,8 @@ class AccountButtonGrid:
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.profile_label.bind('<Button-3>', rightcommand)
 
-        if tkfont.Font(font=self.profile_label['font']).measure(profilename) > 86:
-            while tkfont.Font(font=self.profile_label['font']).measure(profilename) > 86:
+        if tkfont.Font(font=self.profile_label['font']).measure(profilename) > 73:
+            while tkfont.Font(font=self.profile_label['font']).measure(profilename) > 73:
                 profilename = profilename[:-1]
             else:
                 profilename = f'{profilename}..'
@@ -602,10 +602,10 @@ class SimpleButton:
 
 
 class ReadonlyEntryWithLabel:
-    def __init__(self, master, label, text, bg='white'):
-        self.frame = tk.Frame(master, bg=bg)
-        label = tk.Label(self.frame, text=label, bg=bg)
-        entry = tk.Entry(self.frame, width=21, readonlybackground='white', relief='solid')
+    def __init__(self, master, label, text):
+        self.frame = tk.Frame(master)
+        label = ttk.Label(self.frame, text=label)
+        entry = ttk.Entry(self.frame, width=21,)
         entry.insert(0, text)
         entry['state'] = 'readonly'
 
@@ -620,7 +620,7 @@ class ReadonlyEntryWithLabel:
 class WelcomeWindow(tk.Toplevel):
     def __init__(self, master, geometry, after_update, debug):
         self.master = master
-        tk.Toplevel.__init__(self, self.master, bg='white')
+        tk.Toplevel.__init__(self, self.master)
         self.title(_('Setup'))
 
         self.geometry(geometry)
@@ -636,16 +636,12 @@ class WelcomeWindow(tk.Toplevel):
         except tk.TclError:
             pass
 
-        self.style = ttk.Style()
-        self.style.configure('welcome.TCheckbutton', background='white')
-        self.style.configure('welcome.TRadiobutton', background='white')
-
         self.theme_radio_var = tk.IntVar()
         self.ui_radio_var = tk.IntVar()
         self.mode_radio_var = tk.IntVar()
         self.active_page = 0
 
-        self.upper_frame = tk.Frame(self, bg='white')
+        self.upper_frame = tk.Frame(self)
         self.upper_frame.pack(side='top', fill='x')
 
         self.top_font = tkfont.Font(weight=tkfont.BOLD, size=17, family='Arial')
@@ -654,14 +650,14 @@ class WelcomeWindow(tk.Toplevel):
         self.ok_button = ttk.Button(self, text=_('OK'), command=self.ok)
         self.ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
 
-        self.title_label = tk.Label(self, bg='white', text=_('Update complete'), font=self.title_font)
+        self.title_label = tk.Label(self, text=_('Update complete'), font=self.title_font)
 
         if after_update:
             self.title_label['text'] = _('Update complete')
         else:
             self.title_label['text'] = _('Welcome')
 
-        self.welcome_label = tk.Label(self, text=_('Click OK to continue.'), bg='white')
+        self.welcome_label = tk.Label(self, text=_('Click OK to continue.'))
         self.title_label.pack(expand=True, pady=1)
         self.welcome_label.pack(expand=True, pady=1)
 
@@ -675,7 +671,7 @@ class WelcomeWindow(tk.Toplevel):
         if self.active_page == 0:
             self.title_label.destroy()
             self.welcome_label.destroy()
-            self.top_label = tk.Label(self.upper_frame, bg='white', font=self.top_font)
+            self.top_label = tk.Label(self.upper_frame, font=self.top_font)
             self.top_label.pack(side='left', padx=(10, 0), pady=10)
             self.page_1()
             self.focus()
@@ -751,44 +747,36 @@ class WelcomeWindow(tk.Toplevel):
     def page_1(self):
         self.active_page = 1
         self.top_label['text'] = _('UI Appearance')
-        self.bottomframe = tk.Frame(self, bg='white')
+        self.bottomframe = tk.Frame(self)
         self.bottomframe.pack(side='bottom', fill='x')
 
-        self.dark_alert = tk.Label(self.bottomframe, bg='white',
+        self.dark_alert = tk.Label(self.bottomframe,
                                    text=' ')
         self.dark_alert.pack(side='bottom', pady=(0, 4), fill='x')
 
         icon_w = 60
         icon_h = 96
 
-        self.radio_frame1 = tk.Frame(self, bg='white')
+        self.radio_frame1 = tk.Frame(self)
         self.radio_frame1.pack(side='left', padx=(50, 0), pady=5)
 
-        self.light_canvas = tk.Canvas(self.radio_frame1, width=icon_w, height=icon_h, bg='white', bd=0, highlightthickness=0)
+        self.light_canvas = tk.Canvas(self.radio_frame1, width=icon_w, height=icon_h, bd=0, highlightthickness=0)
         img = Image.open("asset/light.png").resize((icon_w, icon_h))
 
         self.light_imgtk = ImageTk.PhotoImage(img)
         self.light_canvas.create_image(icon_w / 2, icon_h / 2, image=self.light_imgtk)
         self.light_canvas.pack(side='top', padx=0, pady=5)
 
-        def on_button():
-            if self.theme_radio_var.get():
-                self.dark_alert['text'] = _('Dark theme is applied only to main window.')
-            else:
-                self.dark_alert['text'] = ' '
-
         radio_light = ttk.Radiobutton(self.radio_frame1,
                                       text=_('Light Theme'),
                                       variable=self.theme_radio_var,
-                                      value=0,
-                                      style='welcome.TRadiobutton',
-                                      command=on_button)
+                                      value=0)
         radio_light.pack(side='top', pady=2)
 
-        self.radio_frame2 = tk.Frame(self, bg='white')
+        self.radio_frame2 = tk.Frame(self)
         self.radio_frame2.pack(side='right', padx=(0, 50), pady=5)
 
-        self.dark_canvas = tk.Canvas(self.radio_frame2, width=icon_w, height=icon_h, bg='white', bd=0, highlightthickness=0)
+        self.dark_canvas = tk.Canvas(self.radio_frame2, width=icon_w, height=icon_h, bd=0, highlightthickness=0)
         img = Image.open("asset/dark.png").resize((icon_w, icon_h))
         self.dark_imgtk = ImageTk.PhotoImage(img)
         self.dark_canvas.create_image(icon_w / 2, icon_h / 2, image=self.dark_imgtk)
@@ -797,17 +785,18 @@ class WelcomeWindow(tk.Toplevel):
         radio_dark = ttk.Radiobutton(self.radio_frame2,
                                      text=_('Dark Theme'),
                                      variable=self.theme_radio_var,
-                                     value=1,
-                                     style='welcome.TRadiobutton',
-                                     command=on_button)
+                                     value=1)
         radio_dark.pack(side='top', pady=2)
+
+        if get_config('theme') == 'dark':
+            self.theme_radio_var.set(1)
 
     def page_2(self):
         self.active_page = 2
-        self.radio_frame1 = tk.Frame(self, bg='white')
+        self.radio_frame1 = tk.Frame(self)
         self.radio_frame1.pack(side='left', padx=(30, 0), pady=5)
 
-        self.list_canvas = tk.Canvas(self.radio_frame1, width=50, height=50, bg='white', bd=0, highlightthickness=0)
+        self.list_canvas = tk.Canvas(self.radio_frame1, width=50, height=50, bd=0, highlightthickness=0)
         img = Image.open("asset/list.png").resize((50, 50))
 
         self.list_imgtk = ImageTk.PhotoImage(img)
@@ -821,13 +810,13 @@ class WelcomeWindow(tk.Toplevel):
                                      style='welcome.TRadiobutton')
         radio_list.pack(side='top', pady=2)
 
-        tk.Label(self.radio_frame1, justify='left', bg='white',
+        tk.Label(self.radio_frame1, justify='left',
                  text=_("Display accounts\nin vertical list")).pack(side='bottom', pady=5)
 
-        self.radio_frame2 = tk.Frame(self, bg='white')
+        self.radio_frame2 = tk.Frame(self)
         self.radio_frame2.pack(side='right', padx=(0, 30), pady=5)
 
-        self.grid_canvas = tk.Canvas(self.radio_frame2, width=50, height=50, bg='white', bd=0, highlightthickness=0)
+        self.grid_canvas = tk.Canvas(self.radio_frame2, width=50, height=50, bd=0, highlightthickness=0)
         img = Image.open("asset/grid.png").resize((50, 50))
 
         self.grid_imgtk = ImageTk.PhotoImage(img)
@@ -841,14 +830,17 @@ class WelcomeWindow(tk.Toplevel):
                                      style='welcome.TRadiobutton')
         radio_grid.pack(side='top', pady=2)
 
-        tk.Label(self.radio_frame2, justify='left', bg='white',
+        tk.Label(self.radio_frame2, justify='left',
                  text=_('Display accounts\nin 3 x n grid')).pack(side='bottom', pady=5)
+
+        if get_config('ui_mode') == 'grid':
+            self.ui_radio_var.set(1)
 
     def page_3(self):
         self.active_page = 3
         self.top_label['text'] = _('Steam restart behaviour')
 
-        self.radio_frame1 = tk.Frame(self, bg='white')
+        self.radio_frame1 = tk.Frame(self)
         self.radio_frame1.pack(side='top', padx=20, pady=(4, 10), fill='x')
 
         radio_normal = ttk.Radiobutton(self.radio_frame1,
@@ -858,10 +850,10 @@ class WelcomeWindow(tk.Toplevel):
                                        style='welcome.TRadiobutton')
         radio_normal.pack(side='top', anchor='w', pady=2)
 
-        tk.Label(self.radio_frame1, justify='left', bg='white',
+        tk.Label(self.radio_frame1, justify='left',
                  text=_("In normal mode, you restart Steam\nby clicking 'Restart Steam' button.")).pack(side='left', pady=5)
 
-        self.radio_frame2 = tk.Frame(self, bg='white')
+        self.radio_frame2 = tk.Frame(self)
         self.radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
 
         radio_express = ttk.Radiobutton(self.radio_frame2,
@@ -871,14 +863,14 @@ class WelcomeWindow(tk.Toplevel):
                                         style='welcome.TRadiobutton')
         radio_express.pack(side='top', anchor='w', pady=2)
 
-        tk.Label(self.radio_frame2, justify='left', bg='white',
+        tk.Label(self.radio_frame2, justify='left',
                  text=_('In express mode, Steam will be automatically\nrestarted when you change account.')).pack(side='left', pady=5)
 
     def page_4(self):
         self.active_page = 4
         self.top_label['text'] = _('Other settings')
 
-        self.softshutdown_frame = tk.Frame(self, bg='white')
+        self.softshutdown_frame = tk.Frame(self)
         self.softshutdown_frame.pack(fill='x', side='top', padx=(14, 0), pady=(4, 0))
 
         self.soft_chkb = ttk.Checkbutton(self.softshutdown_frame,
@@ -889,9 +881,9 @@ class WelcomeWindow(tk.Toplevel):
         self.soft_chkb.state(['selected'])
 
         self.soft_chkb.pack(side='top', anchor='w')
-        tk.Label(self.softshutdown_frame, text=_('Shutdown Steam instead of killing Steam process'), bg='white').pack(side='top', anchor='w')
+        tk.Label(self.softshutdown_frame, text=_('Shutdown Steam instead of killing Steam process')).pack(side='top', anchor='w')
 
-        self.autoexit_frame = tk.Frame(self, bg='white')
+        self.autoexit_frame = tk.Frame(self)
         self.autoexit_frame.pack(fill='x', side='top', padx=(14, 0), pady=15)
 
         self.autoexit_chkb = ttk.Checkbutton(self.autoexit_frame,
@@ -902,9 +894,9 @@ class WelcomeWindow(tk.Toplevel):
         self.autoexit_chkb.state(['selected'])
 
         self.autoexit_chkb.pack(side='top', anchor='w')
-        tk.Label(self.autoexit_frame, text=_('Exit app automatically after restarting Steam'), bg='white').pack(side='top', anchor='w')
+        tk.Label(self.autoexit_frame, text=_('Exit app automatically after restarting Steam')).pack(side='top', anchor='w')
 
-        self.avatar_frame = tk.Frame(self, bg='white')
+        self.avatar_frame = tk.Frame(self)
         self.avatar_frame.pack(fill='x', side='top', padx=(14, 0))
 
         self.avatar_chkb = ttk.Checkbutton(self.avatar_frame,
@@ -918,7 +910,7 @@ class WelcomeWindow(tk.Toplevel):
             self.avatar_chkb.state(['disabled'])
 
         self.avatar_chkb.pack(side='top', anchor='w')
-        tk.Label(self.avatar_frame, text=_('Show avatars in account list'), bg='white').pack(side='top', anchor='w')
+        tk.Label(self.avatar_frame, text=_('Show avatars in account list')).pack(side='top', anchor='w')
 
     def page_5(self):
         self.active_page = 5
@@ -933,7 +925,7 @@ class WelcomeWindow(tk.Toplevel):
         self.shortcut_chkb.pack(side='bottom', pady=(3, 0))
 
         # tkinter doesn't like three quotes string, so... yeah.
-        self.finish_label = tk.Label(self, bg='white',
+        self.finish_label = tk.Label(self,
                                      text=_("Add or import accounts via Menu.\nRight click on accounts to see more options.\n\nYou can change settings in Menu > Settings\nif you don't like the settings you just set.\n\nPlease read GitHub README's How to use-4\nif you are using this app for first time.\n\nYou can open GitHub repo via Menu > About."))
         self.finish_label.pack(expand=True, fill='both')
 
@@ -972,7 +964,7 @@ class ToolTipWindow(object):
         self.win.wm_overrideredirect(True)
 
         label = tk.Label(self.win, text=self.text, justify='left',
-                         background='white', relief='solid', borderwidth=1)
+                         relief='solid', borderwidth=1)
         label.pack(ipadx=1)
 
         if self.center:
@@ -1005,10 +997,9 @@ def ask_steam_dir():
 
 
 def steamid_window(master, username, steamid64, geometry):
-    steamid_window = tk.Toplevel(master, bg='white')
-    steamid_window.geometry()
-    steamid_window.title('SteamID')
+    steamid_window = tk.Toplevel(master)
     steamid_window.geometry(geometry)
+    steamid_window.title('SteamID')
     steamid_window.bind('<Escape>', lambda event: steamid_window.destroy())
     steamid_window.resizable(False, False)
     steamid_window.focus()
