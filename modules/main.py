@@ -873,7 +873,7 @@ class MainApp(tk.Tk):
 
         aboutwindow = tk.Toplevel(self)
         aboutwindow.title(_('About'))
-        aboutwindow.geometry(self.popup_geometry(370, height))
+        aboutwindow.geometry(self.popup_geometry(380, height))
         aboutwindow.resizable(False, False)
         aboutwindow.focus()
         aboutwindow.bind('<Escape>', lambda event: aboutwindow.destroy())
