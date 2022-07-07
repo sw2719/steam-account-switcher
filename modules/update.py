@@ -292,13 +292,13 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
 
                 update_frame.destroy()
 
-                update_frame = tk.Frame(master, bg='white')
-                tk.Frame(update_frame, bg='grey').pack(fill='x', pady=(0, 2))
+                update_frame = tk.Frame(master, bg=get_color('bottomframe'))
+                tk.Frame(update_frame).pack(fill='x', pady=(0, 2))
+                tk.Frame(update_frame, bg='grey').pack(fill='x')
                 update_frame.pack(side='bottom', fill='x')
 
-                update_label = tk.Label(update_frame,
-                                        text=f'Client: {cl_ver_str} / Server: {sv_version} / {update_code} / Click to open UI',
-                                        bg='white')
+                update_label = tk.Label(update_frame, bg=get_color('bottomframe'),
+                                        text=f'Client: {cl_ver_str} / Server: {sv_version} / {update_code} / Click to open UI')
                 update_label.pack(side='bottom')
 
                 update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version,

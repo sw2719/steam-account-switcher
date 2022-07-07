@@ -5,7 +5,7 @@ from modules.config import first_run
 from modules.update import start_checkupdate
 from modules.main import MainApp
 
-VERSION = '2.7.1'
+VERSION = '2.8'
 BRANCH = 'master'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml' % BRANCH)
 

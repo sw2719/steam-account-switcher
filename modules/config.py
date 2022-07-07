@@ -3,6 +3,7 @@ import locale
 import gettext
 from ruamel.yaml import YAML
 from modules.errormsg import error_msg
+import darkdetect
 
 SYS_LOCALE = locale.getdefaultlocale()[0]
 
@@ -40,21 +41,23 @@ valid_values = {
          'dark']
 }
 
-DEFAULT_CONFIG = {'locale': DEFAULT_LOCALE,
-                  'try_soft_shutdown': 'true',
-                  'autoexit': 'true',
-                  'mode': 'normal',
-                  'show_avatar': 'true',
-                  'steam_path': 'reg',
-                  'last_pos': '200/100',
-                  'ui_mode': 'list',
-                  'theme': 'light'}
+default_cfg = {'locale': DEFAULT_LOCALE,
+               'try_soft_shutdown': 'true',
+               'autoexit': 'true',
+               'mode': 'normal',
+               'show_avatar': 'true',
+               'steam_path': 'reg',
+               'last_pos': '200/100',
+               'ui_mode': 'list',
+               'theme': 'light'}
 
+if darkdetect.isDark():
+    default_cfg['theme'] = 'dark'
 
 def reset_config():
     '''Initialize config.txt with default values'''
     with open('config.yml', 'w') as cfg:
-        yaml.dump(DEFAULT_CONFIG, cfg)
+        yaml.dump(default_cfg, cfg)
 
 
 if not os.path.isfile('config.yml'):
@@ -78,11 +81,11 @@ for key, value in valid_values.items():
         if test_dict[key] not in valid_values[key] and key not in ('steam_path', 'last_pos'):
             invalid = True
             print(f'Config {key} has invalid value "{test_dict[key]}"')
-            test_dict[key] = DEFAULT_CONFIG[key]
+            test_dict[key] = default_cfg[key]
     except KeyError:
         invalid = True
         print(f'Config {key} is missing. Creating one with default value..')
-        test_dict[key] = DEFAULT_CONFIG[key]
+        test_dict[key] = default_cfg[key]
 
 if invalid:
     with open('config.yml', 'w') as cfg:
