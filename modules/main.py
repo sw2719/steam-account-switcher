@@ -320,7 +320,7 @@ class MainApp(tk.Tk):
         configwindow.title('')
 
         x, y = self.get_window_pos()
-        configwindow.geometry(self.popup_geometry(250, 165))
+        configwindow.geometry(self.popup_geometry(250, 180))
         configwindow.resizable(False, False)
         configwindow.bind('<Escape>', lambda event: configwindow.destroy())
 
@@ -867,9 +867,9 @@ class MainApp(tk.Tk):
         '''Open about window'''
 
         if LOCALE == 'fr_FR':
-            height = 200
+            height = 210
         else:
-            height = 180
+            height = 190
 
         aboutwindow = tk.Toplevel(self)
         aboutwindow.title(_('About'))
