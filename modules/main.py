@@ -960,7 +960,7 @@ class MainApp(tk.Tk):
             msgbox.showinfo(_('No Accounts'),
                             _("There's no account added."))
             return
-        refreshwindow = tk.Toplevel(self, bg='white')
+        refreshwindow = tk.Toplevel(self)
         refreshwindow.title(_("Refresh"))
         refreshwindow.geometry(self.popup_geometry(230, 320))
         refreshwindow.resizable(False, False)
@@ -973,10 +973,10 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
-        bottomframe_rm = tk.Frame(refreshwindow, bg='white')
+        bottomframe_rm = tk.Frame(refreshwindow)
         bottomframe_rm.pack(side='bottom')
 
-        removelabel = tk.Label(refreshwindow, text=_('Select accounts to refresh.'), bg='white')
+        removelabel = tk.Label(refreshwindow, text=_('Select accounts to refresh.'))
         removelabel.pack(side='top', padx=5, pady=5)
 
         def close():
@@ -985,8 +985,8 @@ class MainApp(tk.Tk):
         def onFrameConfigure(canvas):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
-        canvas = tk.Canvas(refreshwindow, borderwidth=0, highlightthickness=0, bg='white')
-        check_frame = tk.Frame(canvas, bg='white')
+        canvas = tk.Canvas(refreshwindow, borderwidth=0, highlightthickness=0)
+        check_frame = tk.Frame(canvas)
         scroll_bar = ttk.Scrollbar(refreshwindow,
                                    orient="vertical",
                                    command=canvas.yview)
@@ -1008,15 +1008,11 @@ class MainApp(tk.Tk):
 
         check_dict = {}
 
-        s = ttk.Style()
-        s.configure('check.TCheckbutton', background='white')
-
         for v in accounts:
             tk_var = tk.IntVar()
             checkbutton = ttk.Checkbutton(check_frame,
                                           text=v,
-                                          variable=tk_var,
-                                          style='check.TCheckbutton')
+                                          variable=tk_var)
             checkbutton.bind("<MouseWheel>", _on_mousewheel)
             checkbutton.pack(side='top', padx=2, anchor='w')
             check_dict[v] = tk_var
@@ -1037,7 +1033,7 @@ class MainApp(tk.Tk):
             msgbox.showinfo('', _('Accounts with expired autologin token will show login prompt.') + '\n\n' +
                                 _('Close the prompt or login to continue the process.'))  # NOQA
 
-            popup = tk.Toplevel(self, bg='white')
+            popup = tk.Toplevel(self)
             popup.title('')
             popup.geometry(self.popup_geometry(180, 100))
             popup.resizable(False, False)
@@ -1048,8 +1044,8 @@ class MainApp(tk.Tk):
             popup_uservar = tk.StringVar()
             popup_uservar.set('---------')
 
-            popup_label = tk.Label(popup, textvariable=popup_var, bg='white')
-            popup_user = tk.Label(popup, textvariable=popup_uservar, bg='white')
+            popup_label = tk.Label(popup, textvariable=popup_var)
+            popup_user = tk.Label(popup, textvariable=popup_uservar)
 
             popup_label.pack(pady=17)
             popup_user.pack()
@@ -1100,7 +1096,8 @@ class MainApp(tk.Tk):
         refresh_ok = ttk.Button(bottomframe_rm,
                                 text=_('Refresh'),
                                 command=refreshuser,
-                                width=9)
+                                width=9,
+                                style="Accent.TButton")
 
         refresh_cancel.pack(side='left', padx=5, pady=3)
         refresh_ok.pack(side='left', padx=5, pady=3)
