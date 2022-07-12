@@ -13,9 +13,6 @@ STEAM is a trademark of Valve Corporation.
 
 This app has no affiliation with Steam and Valve.
 
-# Important Notice
-Currently I'm not adding new things to this program since A. it has everything that I need and B. it works. But any bug report or suggestion is welcome.
-
 # Features
 * Switch between your accounts with just few clicks.
 
