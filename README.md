@@ -27,7 +27,7 @@ This app has no affiliation with Steam and Valve.
 * Auto-updating is built-in, and it's fast. (Unless GitHub's server is having a hard time..)
 
 # Requirements (for executable release)
-* Windows Operating System
+* Windows 8.1 or newer
   - 64-bit is no longer required since version 2.7.
 * Steam installed correctly
 * Visual C++ Redistributable for Visual Studio 2015 or 2017
