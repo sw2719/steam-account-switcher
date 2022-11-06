@@ -12,9 +12,8 @@ import queue as q
 import traceback
 import sv_ttk
 from time import sleep
-from ruamel.yaml import YAML
 from PIL import Image, ImageTk
-from modules.account import acc_getlist, acc_getdict, fetch_loginusers, loginusers_accountnames, loginusers_steamid, \
+from modules.account import AccountManager, loginusers_accountnames, loginusers_steamid, \
     loginusers_personanames, check_autologin_availability
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE
@@ -25,8 +24,6 @@ from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, Simple
     ToolTipWindow, ask_steam_dir, get_color
 from modules.avatar import download_avatar
 from modules.errormsg import error_msg
-
-yaml = YAML()
 
 LOCALE = get_config('locale')
 
@@ -109,8 +106,7 @@ class MainApp(tk.Tk):
         sys.stdout = std_out
         sys.stderr = std_err
 
-        self.accounts = acc_getlist()
-        self.acc_dict = acc_getdict()
+        self.accounts = AccountManager()
         self.demo_mode = False
         self.BUNDLE = bundle
         self.after_update = after_update
@@ -333,11 +329,7 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
-        i = self.accounts.index(username)
-        try:
-            custom_name = self.acc_dict[i]['customname']
-        except KeyError:
-            custom_name = ''
+        custom_name = self.accounts.get_customname(username)
 
         button_frame = tk.Frame(configwindow)
         button_frame.pack(side='bottom', pady=3)
@@ -403,17 +395,15 @@ class MainApp(tk.Tk):
         def ok(username):
             if name_entry.get().strip() and radio_var.get() == 1:
                 input_name = name_entry.get()
-                self.acc_dict[i]['customname'] = input_name
+                self.accounts.set_customname(username, input_name)
                 print(f"Using custom name '{input_name}' for '{username}'.")
             elif radio_var.get() == 1:
                 msgbox.showwarning(_('Info'), _('Enter a custom name to use.'), parent=configwindow)
                 return
             else:
-                if self.acc_dict[i].pop('customname', None):
-                    print(f"Custom name for '{username}' has been removed.")
+                self.accounts.remove_customname(username)
+                print(f"Custom name for '{username}' has been removed.")
 
-            with open('accounts.yml', 'w', encoding='utf-8') as f:
-                yaml.dump(self.acc_dict, f)
             self.refresh()
             configwindow.destroy()
 
@@ -450,21 +440,11 @@ class MainApp(tk.Tk):
         if get_config('mode') == 'express':
             self.exit_after_restart()
 
-    def remove_user(self, target):
-        '''Write accounts to accounts.yml except the
-        one which user wants to delete'''
-        if msgbox.askyesno(_('Confirm'), _('Are you sure want to remove account %s?') % target):
-            acc_dict = acc_getdict()
-            accounts = acc_getlist()
-            dump_dict = {}
+    def remove_user(self, username):
+        if msgbox.askyesno(_('Confirm'), _('Are you sure want to remove account %s?') % username):
+            print(f'Removing {username}...')
+            self.accounts.remove(username)
 
-            print(f'Removing {target}...')
-            for username in accounts:
-                if username != target:
-                    dump_dict[len(dump_dict)] = acc_dict[accounts.index(username)]
-
-            with open('accounts.yml', 'w') as acc:
-                yaml.dump(dump_dict, acc)
             self.refresh()
 
     def draw_button(self):
@@ -534,7 +514,7 @@ class MainApp(tk.Tk):
                                        orient="vertical",
                                        command=canvas.yview)
 
-            for index, username in enumerate(self.accounts):
+            for index, username in enumerate(self.accounts.list):
                 steam64_list = loginusers_steamid()
                 account_name = loginusers_accountnames()
                 persona_name = loginusers_personanames()
@@ -544,27 +524,23 @@ class MainApp(tk.Tk):
                 else:
                     i = None
 
-                try:
-                    acc_index = self.accounts.index(username)
-                    profilename = self.acc_dict[acc_index]['customname']
+                profilename = self.accounts.get_customname(username)
 
-                except KeyError:  # No custom name set
-                    if i is not None:  # i could be 0 so we can't use if i:
+                if not profilename:
+                    if i is not None:
                         profilename = persona_name[i]
                     else:
                         profilename = _('N/A')
 
-                finally:
-                    if i is not None:  # i could be 0 so we can't use if i:
-                        steam64 = steam64_list[i]
-                        image = steam64
-                    else:
-                        steam64 = None
-                        image = 'default'
+                if i is not None:
+                    steam64 = steam64_list[i]
+                    image = steam64
+                else:
+                    steam64 = None
+                    image = 'default'
 
                     profilename = profilename[:30]
 
-                # We have to make a menu for every account! Sounds ridiculous? Me too.
                 if SYS_LOCALE == 'ko_KR':
                     menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
                     menu_dict[username] = tk.Menu(self, tearoff=0, font=menu_font)
@@ -575,7 +551,7 @@ class MainApp(tk.Tk):
                                                 command=lambda name=username: self.button_func(name))
                 menu_dict[username].add_separator()
 
-                if i is not None:  # i could be 0 so we can't use if i:
+                if i is not None:
                     menu_dict[username].add_command(label=_('Open profile in browser'),
                                                     command=lambda steamid64=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steamid64}'))
                     menu_dict[username].add_command(label=_('Open screenshots folder'),
@@ -612,14 +588,16 @@ class MainApp(tk.Tk):
                 else:
                     self.button_dict[username].grid(row=row, column=column, padx=10, pady=(9, 0))
 
-            buttonframe.grid_propagate(0)
+            buttonframe.grid_propagate(False)
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
 
-            if len(self.accounts) % 3 == 0:
-                h = 109 * (len(self.accounts) // 3)
+            accounts_count = len(self.accounts.list)
+
+            if accounts_count % 3 == 0:
+                h = 109 * (accounts_count // 3)
             else:
-                h = 109 * (len(self.accounts) // 3 + 1)
+                h = 109 * (accounts_count // 3 + 1)
 
             canvas.create_window((0, 0), height=h + 9, width=295, window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
@@ -693,7 +671,7 @@ class MainApp(tk.Tk):
                                        orient="vertical",
                                        command=canvas.yview)
 
-            for username in self.accounts:
+            for username in self.accounts.list:
                 steam64_list = loginusers_steamid()
                 account_name = loginusers_accountnames()
                 persona_name = loginusers_personanames()
@@ -703,27 +681,23 @@ class MainApp(tk.Tk):
                 else:
                     i = None
 
-                try:
-                    acc_index = self.accounts.index(username)
-                    profilename = self.acc_dict[acc_index]['customname']
+                profilename = self.accounts.get_customname(username)
 
-                except KeyError:  # No custom name set
-                    if i is not None:  # i could be 0 so we can't use if i:
+                if not profilename:
+                    if i is not None:
                         profilename = persona_name[i]
                     else:
-                        profilename = _('Profile name not available')
+                        profilename = _('N/A')
 
-                finally:
-                    if i is not None:  # i could be 0 so we can't use if i:
-                        steam64 = steam64_list[i]
-                        image = steam64
-                    else:
-                        steam64 = None
-                        image = 'default'
+                if i is not None:
+                    steam64 = steam64_list[i]
+                    image = steam64
+                else:
+                    steam64 = None
+                    image = 'default'
 
                     profilename = profilename[:30]
 
-                # We have to make a menu for every account! Sounds ridiculous? Me too.
                 if SYS_LOCALE == 'ko_KR':
                     menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
                     menu_dict[username] = tk.Menu(self, tearoff=0, font=menu_font)
@@ -768,7 +742,7 @@ class MainApp(tk.Tk):
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
-            h = 49 * len(self.accounts)
+            h = 49 * len(self.accounts.list)
             canvas.create_window((0, 0), height=h, width=295, window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
@@ -791,9 +765,6 @@ class MainApp(tk.Tk):
 
     def refresh(self, no_frame=False):
         '''Refresh main window widgets'''
-        self.accounts = acc_getlist()
-        self.acc_dict = acc_getdict()
-
         if not no_frame:
             self.no_user_frame.destroy()
             self.button_frame.destroy()
@@ -835,7 +806,7 @@ class MainApp(tk.Tk):
         else:
             self.restartbutton_text.set(_('Restart Steam'))
 
-        print('Menu refreshed with %s account(s)' % len(self.accounts))
+        print('Menu refreshed')
 
     def update_avatar(self, steamid_list=None, no_ui=False):
         label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg=self['bg'], fg=get_color('text'))
@@ -959,7 +930,7 @@ class MainApp(tk.Tk):
 
     def refreshwindow(self):
         '''Open remove accounts window'''
-        accounts = acc_getlist()
+        accounts = self.accounts.list
         if not accounts:
             msgbox.showinfo(_('No Accounts'),
                             _("There's no account added."))
@@ -1108,9 +1079,6 @@ class MainApp(tk.Tk):
 
     def addwindow(self):
         '''Open add accounts window'''
-        accounts = acc_getlist()
-        acc_dict = acc_getdict()
-
         steamid_list = []
         account_names = []
 
@@ -1147,31 +1115,18 @@ class MainApp(tk.Tk):
             pass
 
         def adduser(userinput):
-            '''Write accounts from user's input to accounts.yml
-            :param userinput: Account names to add
-            '''
-            nonlocal acc_dict
             dl_list = []
 
             if userinput.strip():
                 name_buffer = userinput.split("/")
                 accounts_to_add = [name.strip() for name in name_buffer if name.strip()]
 
-                for name_to_write in accounts_to_add:
-                    if name_to_write not in accounts:
-                        acc_dict[len(acc_dict)] = {'accountname': name_to_write}
-
-                        if name_to_write in account_names:
-                            dl_list.append(steamid_list[account_names.index(name_to_write)])
-
-                    else:
-                        print(f'Account {name_to_write} already exists!')
+                existing_accounts = self.accounts.add_multiple_accounts(accounts_to_add)
+                if existing_accounts:
+                    for existing_account in existing_accounts:
                         msgbox.showinfo(_('Duplicate Alert'),
                                         _('Account %s already exists.')
-                                        % name_to_write)
-                with open('accounts.yml', 'w') as acc:
-                    yaml = YAML()
-                    yaml.dump(acc_dict, acc)
+                                        % existing_account)
 
                 if dl_list and get_config('show_avatar') == 'true':
                     button_addcancel.destroy()
@@ -1207,13 +1162,11 @@ class MainApp(tk.Tk):
 
     def importwindow(self):
         '''Open import accounts window'''
-        accounts = acc_getlist()
-        acc_dict = acc_getdict()
         steam64_list = loginusers_steamid()
         account_name = loginusers_accountnames()
         persona_name = loginusers_personanames()
 
-        if set(account_name).issubset(set(acc_getlist())):
+        if set(account_name).issubset(set(self.accounts.list)):
             msgbox.showinfo(_('Info'), _("There's no account left to import."))
             return
 
@@ -1272,7 +1225,7 @@ class MainApp(tk.Tk):
         checkbox_dict = {}
 
         for index, username in enumerate(account_name):
-            if username not in accounts:
+            if username not in self.accounts.list:
                 int_var = tk.IntVar()
                 checkbutton = ttk.Checkbutton(check_frame,
                                               text=username + f' ({persona_name[index]})',
@@ -1283,17 +1236,16 @@ class MainApp(tk.Tk):
                 checkbox_dict[username] = int_var
 
         def import_user():
-            nonlocal acc_dict
             dl_list = []
+            accounts_to_add = []
 
             for key, value in checkbox_dict.items():
                 if value.get() == 1:
-                    acc_dict[len(acc_dict)] = {'accountname': key}
+                    accounts_to_add.append(key)
                     dl_list.append(steam64_list[account_name.index(key)])
 
-            with open('accounts.yml', 'w') as acc:
-                yaml = YAML()
-                yaml.dump(acc_dict, acc)
+            if accounts_to_add:
+                self.accounts.add_multiple_accounts(accounts_to_add)
 
             if get_config('show_avatar') == 'true':
                 canvas.destroy()
@@ -1326,9 +1278,7 @@ class MainApp(tk.Tk):
 
     def orderwindow(self):
         '''Open order change window'''
-        accounts = acc_getlist()
-
-        if not accounts:
+        if not self.accounts:
             msgbox.showinfo(_('No Accounts'),
                             _("There's no account added."))
             return
@@ -1375,7 +1325,7 @@ class MainApp(tk.Tk):
         lb.bind("<MouseWheel>", _on_mousewheel)
         lb.pack(side='left')
 
-        for i, v in enumerate(accounts):
+        for i, v in enumerate(self.accounts.list):
             lb.insert(i, v)
 
         lb.select_set(0)
@@ -1400,24 +1350,10 @@ class MainApp(tk.Tk):
             lb.select_set(i-1)
 
         def apply():
-            acc_dict = acc_getdict()
             order = lb.get(0, tk.END)
             print('New order is', order)
 
-            buffer_dict = {}
-
-            for item in acc_dict.items():
-                i = order.index(item[1]['accountname'])
-                buffer_dict[i] = item[1]
-
-            dump_dict = {}
-
-            for x in range(len(buffer_dict)):
-                dump_dict[x] = buffer_dict[x]
-
-            with open('accounts.yml', 'w') as acc:
-                yaml = YAML()
-                yaml.dump(dump_dict, acc)
+            self.accounts.change_dict_order(order)
             self.refresh()
 
         def close():

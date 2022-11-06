@@ -1,40 +1,163 @@
 import os
 import re
+import json
 from modules.config import get_config
 from modules.reg import fetch_reg
 from ruamel.yaml import YAML
 import vdf
 
-yaml = YAML()
 
-if not os.path.isfile('accounts.yml'):
-    acc = open('accounts.yml', 'w')
-    acc.close()
+def pprint(*args, **kwargs):
+    print('[account]', *args, **kwargs)
 
 
-def acc_getlist():
-    with open('accounts.yml', 'r', encoding='utf-8') as acc:
-        acc_dict = yaml.load(acc)
+def convert():
+    yaml = YAML()
+    with open('accounts.yml', 'r', encoding='utf-8') as f:
+        original = yaml.load(f)
 
-    accounts = []
-    if acc_dict:
-        for x in range(len(acc_dict)):  # to preserve the order
-            try:
-                cur_dict = acc_dict[x]
-                accounts.append(cur_dict['accountname'])
-            except KeyError:
-                break
-    return accounts
+    with open('accounts.json', 'w', encoding='utf-8') as f:
+        json.dump(original, f, indent=4)
+
+    #os.remove('accounts.yml')
+    pprint('Converted accounts.yml to accounts.json')
 
 
-def acc_getdict():
-    with open('accounts.yml', 'r', encoding='utf-8') as acc:
-        acc_dict = yaml.load(acc)
-    if not acc_dict:
-        acc_dict = {}
+if not os.path.isfile('accounts.json'):
+    with open('accounts.json', 'w', encoding='utf-8') as f:
+        json.dump({}, f, indent=4)
 
-    return acc_dict
 
+class AccountManager:
+    def __init__(self):
+        try:
+            with open('accounts.json', 'r', encoding='utf-8') as acc:
+                self.acc_dict = json.load(acc)
+        except (json.decoder.JSONDecodeError, FileNotFoundError):
+            with open('accounts.json', 'w', encoding='utf-8') as f:
+                self.acc_dict = {}
+                json.dump(self.acc_dict, f, indent=4)
+
+    @property
+    def list(self):
+        accounts = []
+
+        for x in range(len(self.acc_dict)):
+            accounts.append(self.acc_dict[str(x)]['accountname'])
+
+        return accounts
+
+    @property
+    def dict(self):
+        return self.acc_dict
+
+    def __bool__(self):
+        return bool(self.acc_dict)
+
+    def _find_account_index(self, accountname):
+        for x in range(len(self.acc_dict)):
+            if self.acc_dict[str(x)]['accountname'] == accountname:
+                return str(x)
+
+    def update_dict_numbers(self):
+        new_dict = {}
+        buffer = []
+
+        for value in self.acc_dict.values():
+            buffer.append(value)
+
+        for index, value in enumerate(buffer):
+            new_dict[str(index)] = value
+
+        self.acc_dict = new_dict
+
+    def add(self, accountname, password=None, save=True):
+        if accountname in self.list:
+            pprint(f'Account {accountname} already exists!')
+            return False
+
+        self.acc_dict[len(self.acc_dict)] = {'accountname': accountname,
+                                             'password': password}
+        pprint(f'Added account: {accountname}')
+        if save:
+            self._save_json()
+        return True
+
+    def add_multiple_accounts(self, account_list):
+        existing = []
+        for account in account_list:
+            if not self.add(account, save=False):
+                existing.append(account)
+
+        self._save_json()
+        return existing
+
+    def remove(self, accountname, save=True):
+        i = self._find_account_index(accountname)
+        del self.acc_dict[i]
+        pprint(f'Removed account: {accountname}')
+
+        if save:
+            self._save_json()
+
+    def remove_multiple_accounts(self, account_list):
+        for account in account_list:
+            self.remove(account, save=False)
+
+        self._save_json()
+
+    def set_password(self, accountname, password):
+        i = self._find_account_index(accountname)
+        self.acc_dict[i]['password'] = password
+
+        self._save_json()
+
+    def remove_password(self, accountname):
+        i = self._find_account_index(accountname)
+        del self.acc_dict[i]['password']
+
+        self._save_json()
+
+    def get_customname(self, accountname):
+        i = self._find_account_index(accountname)
+        try:
+            return self.acc_dict[i]['customname']
+        except KeyError:
+            return None
+
+    def set_customname(self, accountname, customname):
+        i = self._find_account_index(accountname)
+        self.acc_dict[i]['customname'] = customname
+
+        self._save_json()
+
+    def remove_customname(self, accountname):
+        i = self._find_account_index(accountname)
+        del self.acc_dict[i]['customname']
+
+        self._save_json()
+
+    def change_dict_order(self, order_list):
+        buffer_dict = {}
+
+        for account in self.acc_dict.values():
+            i = order_list.index(account['accountname'])
+            buffer_dict[i] = account
+
+        new_dict = {}
+
+        for x in range(len(buffer_dict)):
+            new_dict[x] = buffer_dict[x]
+
+        self.acc_dict = new_dict
+        self._save_json()
+
+    def _save_json(self):
+        self.update_dict_numbers()
+        with open('accounts.json', 'w', encoding='utf-8') as f:
+            json.dump(self.acc_dict, f, indent=4)
+
+        pprint('Saved accounts.json')
 
 def fetch_loginusers():
     """
@@ -109,3 +232,7 @@ def check_autologin_availability(username):
             continue
 
     return False
+
+
+if os.path.isfile('accounts.yml'):
+    convert()
