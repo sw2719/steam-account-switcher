@@ -143,3 +143,4 @@ updater/updater.exe
 setup_c.py
 .idea/
 manifest.xml
+salt
