@@ -5,7 +5,7 @@ from modules.config import first_run
 from modules.update import start_checkupdate
 from modules.main import MainApp
 
-VERSION = '2.8'
+VERSION = '3.0'
 BRANCH = 'master'
 URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml' % BRANCH)
 
@@ -45,8 +45,4 @@ else:
 root = MainApp(VERSION, URL, BUNDLE, std_out, std_err, after_update)
 root.after(100, lambda: start_checkupdate(root, VERSION, URL, BUNDLE))
 
-if first_run or after_update:
-    root.after(200, root.welcomewindow)
-
-print('Init complete.')
 root.mainloop()
