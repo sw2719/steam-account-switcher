@@ -54,12 +54,9 @@ def launch_updater():
 
 def test():
     print('Listing current config...')
-    print('locale:', get_config('locale'))
-    print('autoexit:', get_config('autoexit'))
-    print('mode:', get_config('mode'))
-    print('try_soft_shutdown:', get_config('try_soft_shutdown'))
-    print('show_avatar:', get_config('show_avatar'))
-    print('steam_path:', get_config('steam_path'))
+
+    for key, value in get_config('all').items():
+        print(key, value, sep=': ')
 
     print('Checking registry...')
     for key in ('AutoLoginUser', 'SteamExe', 'SteamPath', 'pid', 'ActiveUser'):
