@@ -23,7 +23,7 @@ Currently I'm not adding new things to this program since A. it has everything t
 
 * Restarting Steam with single click.
 
-* Unlike some other programs, your passwords are **NOT** required. Only uses your usernames.
+* Optional password vault feature. Your passwords are encrypted and stored in a file. You can use them to log in to your accounts without entering them manually.
 
 * Auto-importing your Steam accounts. Do more clicking, less typing.
 
@@ -61,7 +61,7 @@ Currently I'm not adding new things to this program since A. it has everything t
 * I have a request! / I found a bug!
   - Bug reports and requests are always welcome. Please submit an issue.
 
-* Some of the elements in settings are missing!
+* Some elements in settings are missing!
   - Delete config.yml and launch application again.
 
 # Source code information
@@ -70,3 +70,4 @@ Currently I'm not adding new things to this program since A. it has everything t
 * Do not run updater.py in python interpreter. It's designed to run only in frozen environment.
 * Use requirements.txt to install dependencies.
 * Source code is written in English. Translation to other languages is done with gettext.
+* Executable releases use modified version of sv-ttk. You might find some UI issues if you run the program in Python interpreter.
