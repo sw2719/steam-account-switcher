@@ -17,13 +17,14 @@ from modules.account import AccountManager, loginusers_accountnames, loginusers_
     loginusers_personanames, check_autologin_availability
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE, first_run
-from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, \
+from modules.util import steam_running, StoppableThread, raise_exception, test, get_center_pos, \
     launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update, update_frame_color
 from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, \
     ToolTipWindow, ask_steam_dir, get_color
 from modules.avatar import download_avatar
 from modules.errormsg import error_msg
+from modules.steamid import steam64_to_32
 
 LOCALE = get_config('locale')
 
@@ -537,6 +538,18 @@ class MainApp(tk.Tk):
 
             self.refresh()
 
+    def open_screenshot(steamid64, steam_path=get_config('steam_path')):
+        if steam_path == 'reg':
+            steam_path = fetch_reg('steampath')
+
+        if '/' in steam_path:
+            steam_path = steam_path.replace('/', '\\')
+
+        if os.path.isdir(f'{steam_path}\\userdata\\{steam64_to_32(steamid64)}\\760\\remote'):
+            os.startfile(f'{steam_path}\\userdata\\{steam64_to_32(steamid64)}\\760\\remote')
+        else:
+            msgbox.showinfo(_('No screenshots directory'), _('No screenshots directory was found for this account.'))
+
     def draw_button(self):
         if get_config('ui_mode') == 'list':
             self.draw_button_list()
@@ -645,14 +658,14 @@ class MainApp(tk.Tk):
                     menu_dict[username].add_command(label=_('Open profile in browser'),
                                                     command=lambda steamid64=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steamid64}'))
                     menu_dict[username].add_command(label=_('Open screenshots folder'),
-                                                    command=lambda steamid64=steam64: open_screenshot(steamid64))
-                    menu_dict[username].add_command(label=_('View SteamID'),
+                                                    command=lambda steamid64=steam64: self.open_screenshot(steamid64))
+                    menu_dict[username].add_command(label=_('Account info'),
                                                     command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.popup_geometry(270, 240)))
                     menu_dict[username].add_command(label=_('Update avatar'),
                                                     command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
                     menu_dict[username].add_separator()
 
-                menu_dict[username].add_command(label=_("Name settings"),
+                menu_dict[username].add_command(label=_("Account settings"),
                                                 command=lambda name=username, pname=profilename: self.configwindow(name))
                 menu_dict[username].add_command(label=_("Delete"),
                                                 command=lambda name=username: self.remove_user(name))
@@ -1496,7 +1509,7 @@ class MainApp(tk.Tk):
 
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(self.popup_geometry(width, 500))  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 600))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 

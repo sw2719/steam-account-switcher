@@ -4,6 +4,7 @@ import os
 import zipfile as zf
 import sys
 import winshell
+from tkinter import messagebox as msgbox
 from modules.reg import fetch_reg
 from modules.config import get_config
 from modules.steamid import steam64_to_32
@@ -118,13 +119,3 @@ def steam_running():
             return False
     except psutil.NoSuchProcess:
         return False
-
-
-def open_screenshot(steamid64, steam_path=get_config('steam_path')):
-    if steam_path == 'reg':
-        steam_path = fetch_reg('steampath')
-
-    if '/' in steam_path:
-        steam_path = steam_path.replace('/', '\\')
-
-    os.startfile(f'{steam_path}\\userdata\\{steam64_to_32(steamid64)}\\760\\remote')
