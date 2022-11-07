@@ -1,10 +1,15 @@
 import os
-import re
 import json
+import vdf
+import base64
+import win32con, win32api
+from ruamel.yaml import YAML
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.fernet import InvalidToken
 from modules.config import get_config
 from modules.reg import fetch_reg
-from ruamel.yaml import YAML
-import vdf
 
 
 def pprint(*args, **kwargs):
@@ -16,6 +21,11 @@ def convert():
     with open('accounts.yml', 'r', encoding='utf-8') as f:
         original = yaml.load(f)
 
+    new_dict = {}
+
+    for x in range(len(original)):
+        new_dict[str(x)] = original[x]
+
     with open('accounts.json', 'w', encoding='utf-8') as f:
         json.dump(original, f, indent=4)
 
@@ -23,27 +33,102 @@ def convert():
     pprint('Converted accounts.yml to accounts.json')
 
 
-if not os.path.isfile('accounts.json'):
-    with open('accounts.json', 'w', encoding='utf-8') as f:
-        json.dump({}, f, indent=4)
-
-
 class AccountManager:
-    def __init__(self):
+    def __init__(self, password=None):
         try:
-            with open('accounts.json', 'r', encoding='utf-8') as acc:
-                self.acc_dict = json.load(acc)
-        except (json.decoder.JSONDecodeError, FileNotFoundError):
-            with open('accounts.json', 'w', encoding='utf-8') as f:
+            with open('accounts.json', 'r', encoding='utf-8') as f:
+                self.acc_dict = json.load(f)
+        except json.decoder.JSONDecodeError:
+            if get_config('encryption'):
+                if password is None:
+                    raise ValueError('Password is required to decrypt accounts.json')
+                else:
+                    with open('salt', 'rb') as f:
+                        salt = f.read()
+
+                    kdf = PBKDF2HMAC(
+                        algorithm=hashes.SHA256(),
+                        length=32,
+                        salt=salt,
+                        iterations=600000,
+                    )
+
+                    key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+                    self.fernet = Fernet(key)
+
+                    with open('accounts.json', 'rb') as f:
+                        secret = self.fernet.decrypt(f.read())
+                        self.acc_dict = json.loads(secret.decode('utf-8'))
+                        pprint('Decrypted accounts.json successfully')
+            else:
                 self.acc_dict = {}
-                json.dump(self.acc_dict, f, indent=4)
+                self._reset_json()
+
+        except FileNotFoundError:
+            self._reset_json()
+
+    @staticmethod
+    def verify_password(password):
+        with open('salt', 'rb') as f:
+            salt = f.read()
+
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=600000,
+        )
+
+        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+        fernet = Fernet(key)
+
+        try:
+            with open('accounts.json', 'rb') as f:
+                secret = fernet.decrypt(f.read())
+                json.loads(secret.decode('utf-8'))
+                return True
+        except (InvalidToken, json.decoder.JSONDecodeError):
+            return False
+
+    @staticmethod
+    def _reset_json():
+        with open('accounts.json', 'w', encoding='utf-8') as f:
+            json.dump({}, f, indent=4)
+
+    @staticmethod
+    def create_encrypted_json_file(password):
+        with open('salt', 'wb') as f:
+            salt = os.urandom(16)
+            f.write(salt)
+            win32api.SetFileAttributes('salt', win32con.FILE_ATTRIBUTE_HIDDEN)
+
+        if os.path.isfile('accounts.json'):
+            with open('accounts.json', 'r') as f:
+                d = json.load(f)
+        else:
+            d = {}
+
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=600000,
+        )
+
+        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+        fernet = Fernet(key)
+
+        with open('accounts.json', 'wb') as f:
+            enc_dict = fernet.encrypt(json.dumps(d).encode())
+            f.write(enc_dict)
 
     @property
     def list(self):
         accounts = []
 
-        for x in range(len(self.acc_dict)):
-            accounts.append(self.acc_dict[str(x)]['accountname'])
+        if self.acc_dict:
+            for x in range(len(self.acc_dict)):
+                accounts.append(self.acc_dict[str(x)]['accountname'])
 
         return accounts
 
@@ -76,8 +161,7 @@ class AccountManager:
             pprint(f'Account {accountname} already exists!')
             return False
 
-        self.acc_dict[len(self.acc_dict)] = {'accountname': accountname,
-                                             'password': password}
+        self.acc_dict[str(len(self.acc_dict))] = {'accountname': accountname}
         pprint(f'Added account: {accountname}')
         if save:
             self._save_json()
@@ -123,7 +207,7 @@ class AccountManager:
         try:
             return self.acc_dict[i]['customname']
         except KeyError:
-            return None
+            return ''
 
     def set_customname(self, accountname, customname):
         i = self._find_account_index(accountname)
@@ -154,10 +238,17 @@ class AccountManager:
 
     def _save_json(self):
         self.update_dict_numbers()
-        with open('accounts.json', 'w', encoding='utf-8') as f:
-            json.dump(self.acc_dict, f, indent=4)
+
+        if get_config('encryption') == 'true':
+            with open('accounts.json', 'wb') as f:
+                enc_dict = self.fernet.encrypt(json.dumps(self.acc_dict).encode())
+                f.write(enc_dict)
+        else:
+            with open('accounts.json', 'w', encoding='utf-8') as f:
+                json.dump(self.acc_dict, f, indent=4)
 
         pprint('Saved accounts.json')
+
 
 def fetch_loginusers():
     """
