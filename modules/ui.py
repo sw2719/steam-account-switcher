@@ -9,11 +9,13 @@ import gettext
 import colour
 import json
 import sv_ttk
+import re
 from PIL import Image, ImageTk
-from modules.config import get_config, config_write_value, config_write_dict
+from modules.config import get_config, config_write_value, config_write_dict, missing_values
 from ruamel.yaml import YAML
 from modules.util import check_steam_dir, create_shortcut
 from modules.steamid import steam64_to_3, steam64_to_32, steam64_to_2
+from modules.account import AccountManager
 
 
 yaml = YAML()
@@ -31,11 +33,10 @@ with open('theme.json') as theme_json:
 
 
 def get_color(key):
-    theme = get_config('theme')
     try:
-        if theme == 'light':
+        if sv_ttk.get_theme() == 'light':
             return COLOR_LIGHT[key]
-        elif theme == 'dark':
+        else:
             return COLOR_DARK[key]
 
     except KeyError:
@@ -599,8 +600,17 @@ class WelcomeWindow(tk.Toplevel):
         self.top_font = tkfont.Font(weight=tkfont.BOLD, size=17, family='Arial')
         self.title_font = tkfont.Font(weight=tkfont.BOLD, size=23, family='Arial')
 
-        self.ok_button = ttk.Button(self, text=_('OK'), command=self.ok)
-        self.ok_button.pack(side='bottom', padx=3, pady=3, fill='x')
+        self.button_frame = ttk.Frame(self)
+        self.button_frame.pack(side='bottom', fill='x')
+
+        self.button_frame.rowconfigure(0, weight=1)
+        self.button_frame.columnconfigure(0, weight=1)
+        self.button_frame.columnconfigure(1, weight=1)
+
+        self.ok_button = ttk.Button(self.button_frame, text=_('Next'), command=self.ok, width=10)
+        self.ok_button.grid(row=0, column=1, sticky='e', padx=3, pady=3)
+
+        self.back_button = ttk.Button(self.button_frame, text=_('Back'), command=self.back, width=10)
 
         self.title_label = tk.Label(self, text=_('Update complete'), font=self.title_font)
 
@@ -613,12 +623,76 @@ class WelcomeWindow(tk.Toplevel):
         self.title_label.pack(expand=True, pady=1)
         self.welcome_label.pack(expand=True, pady=1)
 
+        self.encryption = False
+        self.password = False
+
+        self.encryption_already_enabled = get_config('encryption')
+
         self.focus_force()
         self.grab_set()
 
+        self.required_pages = []
+
+        if after_update and missing_values:
+            if 'theme' in missing_values:
+                self.required_pages.append(1)
+            if 'ui_mode' in missing_values:
+                self.required_pages.append(2)
+            if 'mode' in missing_values:
+                self.required_pages.append(3)
+            if 'password' in missing_values or 'encryption' in missing_values:
+                self.required_pages.append(4)
+            if 'try_soft_shutdown' in missing_values or 'autoexit' in missing_values or 'show_avatar' in missing_values:
+                self.required_pages.append(5)
+
     def on_window_close(self):
-        os.remove('config.yml')
+        os.remove('config.json')
         sys.exit(0)
+
+    def back(self):
+        if self.active_page == 2:
+            self.radio_frame1.destroy()
+            self.radio_frame2.destroy()
+            self.back_button.grid_forget()
+            self.page_1()
+            self.focus()
+
+        elif self.active_page == 3:
+            self.radio_frame1.destroy()
+            self.radio_frame2.destroy()
+            self.page_2()
+            self.focus()
+
+        elif self.active_page == 4:
+            self.innerframe.destroy()
+            self.page_3()
+            self.focus()
+
+        elif self.active_page == 'pw1':
+            self.innerframe.destroy()
+            self.ok_button['state'] = 'normal'
+            self.page_4()
+            self.focus()
+
+        elif self.active_page == 'pw2':
+            self.innerframe.destroy()
+            self.password_page()
+            self.focus()
+
+        elif self.active_page == 5:
+            self.softshutdown_frame.destroy()
+            self.autoexit_frame.destroy()
+            self.avatar_frame.destroy()
+
+            if self.encryption == 'true':
+                self.password_page()
+            else:
+                self.page_4()
+            self.focus()
+
+        elif self.active_page == 6:
+            self.innerframe.destroy()
+            self.page_5()
 
     def ok(self):
         if self.active_page == 0:
@@ -630,9 +704,9 @@ class WelcomeWindow(tk.Toplevel):
             self.focus()
 
         elif self.active_page == 1:
-            if self.theme_radio_var.get() == 0:
+            if sv_ttk.get_theme() == 'light':
                 self.theme = 'light'
-            elif self.theme_radio_var.get() == 1:
+            else:
                 self.theme = 'dark'
 
             self.radio_frame1.destroy()
@@ -664,6 +738,37 @@ class WelcomeWindow(tk.Toplevel):
             self.focus()
 
         elif self.active_page == 4:
+            if 'selected' in self.password_chkb.state():
+                self.password = 'true'
+            else:
+                self.password = 'false'
+
+            if 'selected' in self.encryption_chkb.state():
+                self.encryption = 'true'
+            else:
+                self.encryption = 'false'
+
+            self.innerframe.destroy()
+
+            if self.encryption == 'true':
+                self.password_page()
+            else:
+                self.page_5()
+            self.focus()
+
+        elif self.active_page == 'pw1':
+            self.innerframe.destroy()
+            self.password_confirm_page()
+            self.focus()
+
+        elif self.active_page == 'pw2':
+            self.pw = self.pw_var.get()
+            del self.pw_var
+            self.innerframe.destroy()
+            self.page_5()
+            self.focus()
+
+        elif self.active_page == 5:
             if 'selected' in self.soft_chkb.state():
                 self.soft_shutdown = 'true'
             else:
@@ -683,17 +788,17 @@ class WelcomeWindow(tk.Toplevel):
             self.autoexit_frame.destroy()
             self.avatar_frame.destroy()
 
-            self.save()
-            self.page_5()
+            self.page_6()
             self.focus()
 
-        elif self.active_page == 5:
+        elif self.active_page == 6:
             if 'selected' in self.shortcut_chkb.state():
                 create_shortcut()
 
             self.ok_button['text'] = _('Please wait...')
             self.ok_button['state'] = 'disabled'
             self.focus()
+            self.save()
             self.destroy()
 
     def page_1(self):
@@ -742,7 +847,7 @@ class WelcomeWindow(tk.Toplevel):
                                      command=sv_ttk.use_dark_theme)
         radio_dark.pack(side='top', pady=2)
 
-        if get_config('theme') == 'dark':
+        if sv_ttk.get_theme() == 'dark':
             self.theme_radio_var.set(1)
 
     def page_2(self):
@@ -750,6 +855,7 @@ class WelcomeWindow(tk.Toplevel):
         self.radio_frame1 = tk.Frame(self)
         self.radio_frame1.pack(side='left', padx=(30, 0), pady=5)
         self.list_canvas = tk.Canvas(self.radio_frame1, width=50, height=50, bd=0, highlightthickness=0)
+        self.back_button.grid(row=0, column=0, sticky='w', padx=3, pady=3)
 
         if not self.theme_radio_var.get():
             img_list = Image.open("asset/list.png").resize((50, 50))
@@ -796,7 +902,10 @@ class WelcomeWindow(tk.Toplevel):
 
     def page_3(self):
         self.active_page = 3
-        self.top_label['text'] = _('Steam restart behaviour')
+        self.top_label['text'] = _('Steam restart mode')
+
+        if get_config('mode') == 'express':
+            self.mode_radio_var.set(1)
 
         self.radio_frame1 = tk.Frame(self)
         self.radio_frame1.pack(side='top', padx=20, pady=(4, 10), fill='x')
@@ -826,6 +935,193 @@ class WelcomeWindow(tk.Toplevel):
 
     def page_4(self):
         self.active_page = 4
+        self.top_label['text'] = _('Password Vault')
+
+        self.innerframe = ttk.Frame(self)
+        self.innerframe.pack(side='top', padx=0, pady=(0, 8), fill='both', expand=True)
+
+        password_frame = ttk.Frame(self.innerframe)
+        password_frame.pack(side='top', fill='x', pady=5)
+
+        self.password_chkb = ttk.Checkbutton(password_frame, text=_('Use Password Vault'), style='Switch.TCheckbutton')
+        self.password_chkb.pack(pady=(8, 0))
+
+        ttk.Label(password_frame,
+                  text=_('Enable to store Steam passwords.\n\n') +
+                       _('Please keep your accounts data secure\n') +
+                       _('even if they are encrypted.'),
+                  justify=tk.CENTER).pack(side='top', pady=(2, 0))
+
+        encryption_frame = ttk.Frame(self.innerframe)
+        encryption_frame.pack(side='top', fill='x', pady=5)
+
+        self.encryption_chkb = ttk.Checkbutton(encryption_frame, text=_('Encrypt accounts data'), style='Switch.TCheckbutton')
+        self.encryption_chkb.pack(pady=(8, 0))
+
+        def on_password_check():
+            if self.password_chkb.instate(['selected']):
+                self.encryption_chkb.state(['selected'])
+            else:
+                self.encryption_chkb.state(['!selected'])
+
+        def on_encryption_check():
+            if self.password_chkb.instate(['selected']) and not self.encryption_chkb.instate(['selected']):
+                if not msgbox.askyesno(_('Warning'), _('Are you sure you REALLY want to disable encryption?') + '\n' +
+                                       _("Your accounts' passwords will be saved in plain text!")):
+                    self.encryption_chkb.state(['selected'])
+
+        self.password_chkb['command'] = on_password_check
+        self.encryption_chkb['command'] = on_encryption_check
+
+        ttk.Label(encryption_frame,
+                  text=_('Enable to encrypt accounts data with a password.') + '\n' +
+                       _('STRONGLY recommended when using Password Vault.') + '\n' +
+                       _('Uses AES-128-CBC-HMAC-SHA256.'), justify=tk.CENTER).pack(pady=(2, 0))
+
+        if self.password == 'true':
+            self.password_chkb.state(['selected'])
+        if self.encryption == 'true':
+            self.encryption_chkb.state(['selected'])
+
+    def password_page(self):
+        self.active_page = 'pw1'
+        self.top_label['text'] = _('Password Vault')
+        self.pw_var = tk.StringVar()
+        self.ok_button['state'] = 'disabled'
+
+        self.innerframe = ttk.Frame(self)
+        self.innerframe.pack(side='top', padx=0, pady=(0, 0), fill='both', expand=True)
+
+        def check_pw(sv):
+            nonlocal prompt
+
+            pw = sv.get()
+
+            conditions = re.search('[a-zA-Z]', pw) and re.search('[0-9]', pw) and len(pw) >= 8 and pw.strip() == pw
+
+            if conditions:
+                prompt['foreground'] = get_color('autologin_text_avail')
+                self.ok_button['state'] = 'normal'
+            else:
+                prompt['foreground'] = ''
+                self.ok_button['state'] = 'disabled'
+
+        ttk.Label(self.innerframe,
+                  text=_('Enter a password to use for encryption.') + '\n' +
+                       _('You will have to enter it every time you open the app.') + '\n' +
+                       _('The more complex it is, the better.'),
+                  justify=tk.CENTER).pack(pady=(2, 0))
+
+        ttk.Label(self.innerframe,
+                  text=_('Keep in mind that if you forget it,') + '\n' +
+                       _('you have to reset the accounts data!'),
+                  justify=tk.CENTER, foreground='red').pack(pady=(6, 0))
+
+        entry_frame = ttk.Frame(self.innerframe)
+        entry_frame.pack(side=tk.BOTTOM, fill=tk.X)
+
+        pw_entry = ttk.Entry(entry_frame, show="⬤", justify=tk.CENTER, textvariable=self.pw_var)
+        pw_entry.pack(side=tk.LEFT, padx=(3, 0), fill=tk.X, expand=True)
+        #pw_entry.bind('<Return>', self.ok)
+        pw_entry.focus()
+
+        self.pw_var.trace("w", lambda name, index, mode, sv=self.pw_var: check_pw(sv))
+
+        check_var = tk.IntVar()
+
+        checkbutton = ttk.Checkbutton(entry_frame,
+                                      text=_('Show'),
+                                      variable=check_var,
+                                      style='Toggle.TButton')
+        checkbutton.pack(side=tk.RIGHT, padx=3)
+
+        def on_show_checkbutton():
+            if check_var.get():
+                pw_entry['show'] = ''
+                checkbutton['text'] = _('Hide')
+            else:
+                pw_entry['show'] = '⬤'
+                checkbutton['text'] = _('Show')
+
+        checkbutton['command'] = on_show_checkbutton
+
+        prompt = ttk.Label(self.innerframe, text=_('At least 8 characters\nIncludes alphabets and numbers\nNo spaces\n(Special characters are allowed)'),
+                           justify=tk.CENTER)
+        prompt.pack(side=tk.BOTTOM, padx=3, pady=3)
+
+        def on_return(e):
+            if 'disabled' not in self.ok_button.state():
+                self.ok()
+
+        pw_entry.bind('<Return>',  on_return)
+
+    def password_confirm_page(self):
+        self.active_page = 'pw2'
+        self.top_label['text'] = 'Password Vault'
+        pw_var = tk.StringVar()
+        self.ok_button['state'] = 'disabled'
+
+        self.innerframe = ttk.Frame(self)
+        self.innerframe.pack(side='top', padx=0, pady=(0, 0), fill='both', expand=True)
+
+        def check_pw(sv):
+            nonlocal prompt
+
+            pw = sv.get()
+
+            if pw == self.pw_var.get():
+                prompt['foreground'] = get_color('autologin_text_avail')
+                prompt['text'] = _('Passwords match!')
+                self.ok_button['state'] = 'normal'
+            else:
+                prompt['foreground'] = ''
+                prompt['text'] = _('Passwords do not match')
+                self.ok_button['state'] = 'disabled'
+
+        ttk.Label(self.innerframe,
+                  text=_('Enter a password once again to confirm.'),
+                  justify=tk.CENTER).pack(pady=(2, 0))
+
+        entry_frame = ttk.Frame(self.innerframe)
+        entry_frame.pack(side=tk.BOTTOM, fill=tk.X)
+
+        pw_entry = ttk.Entry(entry_frame, show="⬤", justify=tk.CENTER, textvariable=pw_var)
+        pw_entry.pack(side=tk.LEFT, padx=(3, 0), fill=tk.X, expand=True)
+        #pw_entry.bind('<Return>', self.ok)
+        pw_entry.focus()
+
+        pw_var.trace("w", lambda name, index, mode, sv=pw_var: check_pw(sv))
+
+        check_var = tk.IntVar()
+
+        checkbutton = ttk.Checkbutton(entry_frame,
+                                      text=_('Show'),
+                                      variable=check_var,
+                                      style='Toggle.TButton')
+        checkbutton.pack(side=tk.RIGHT, padx=3)
+
+        def on_show_checkbutton():
+            if check_var.get():
+                pw_entry['show'] = ''
+                checkbutton['text'] = _('Hide')
+            else:
+                pw_entry['show'] = '⬤'
+                checkbutton['text'] = _('Show')
+
+        checkbutton['command'] = on_show_checkbutton
+
+        prompt = ttk.Label(self.innerframe, text=_('Passwords do not match'),
+                           justify=tk.CENTER)
+        prompt.pack(side=tk.BOTTOM, padx=3, pady=3)
+
+        def on_return(e):
+            if 'disabled' not in self.ok_button.state():
+                self.ok()
+
+        pw_entry.bind('<Return>', on_return)
+
+    def page_5(self):
+        self.active_page = 5
         self.top_label['text'] = _('Other settings')
 
         self.softshutdown_frame = tk.Frame(self)
@@ -839,7 +1135,7 @@ class WelcomeWindow(tk.Toplevel):
         self.soft_chkb.state(['selected'])
 
         self.soft_chkb.pack(side='top', anchor='w')
-        tk.Label(self.softshutdown_frame, text=_('Shutdown Steam instead of killing Steam process')).pack(side='top', anchor='w')
+        ttk.Label(self.softshutdown_frame, text=_('Shutdown Steam instead of killing Steam process')).pack(side='top', anchor='w')
 
         self.autoexit_frame = tk.Frame(self)
         self.autoexit_frame.pack(fill='x', side='top', padx=(14, 0), pady=15)
@@ -852,7 +1148,7 @@ class WelcomeWindow(tk.Toplevel):
         self.autoexit_chkb.state(['selected'])
 
         self.autoexit_chkb.pack(side='top', anchor='w')
-        tk.Label(self.autoexit_frame, text=_('Exit app automatically after restarting Steam')).pack(side='top', anchor='w')
+        ttk.Label(self.autoexit_frame, text=_('Exit app automatically after restarting Steam')).pack(side='top', anchor='w')
 
         self.avatar_frame = tk.Frame(self)
         self.avatar_frame.pack(fill='x', side='top', padx=(14, 0))
@@ -868,13 +1164,16 @@ class WelcomeWindow(tk.Toplevel):
             self.avatar_chkb.state(['disabled'])
 
         self.avatar_chkb.pack(side='top', anchor='w')
-        tk.Label(self.avatar_frame, text=_('Show avatars in account list')).pack(side='top', anchor='w')
+        ttk.Label(self.avatar_frame, text=_('Show avatars in account list')).pack(side='top', anchor='w')
 
-    def page_5(self):
-        self.active_page = 5
+    def page_6(self):
+        self.active_page = 6
         self.top_label['text'] = _('Good to go!')
 
-        self.shortcut_chkb = ttk.Checkbutton(self,
+        self.innerframe = ttk.Frame(self)
+        self.innerframe.pack(fill='both', expand=True)
+
+        self.shortcut_chkb = ttk.Checkbutton(self.innerframe,
                                              text=_('Create a desktop shortcut'),
                                              style='welcome.TCheckbutton')
         self.shortcut_chkb.state(['!alternate'])
@@ -883,7 +1182,7 @@ class WelcomeWindow(tk.Toplevel):
         self.shortcut_chkb.pack(side='bottom', pady=(3, 0))
 
         # tkinter doesn't like three quotes string, so... yeah.
-        self.finish_label = tk.Label(self,
+        self.finish_label = tk.Label(self.innerframe,
                                      text=_("Add or import accounts via Menu.\nRight click on accounts to see more options.\n\nYou can change settings in Menu > Settings\nif you don't like the settings you just set.\n\nPlease read GitHub README's How to use-4\nif you are using this app for first time.\n\nYou can open GitHub repo via Menu > About."))
         self.finish_label.pack(expand=True, fill='both')
 
@@ -896,9 +1195,12 @@ class WelcomeWindow(tk.Toplevel):
                      'last_pos': get_config('last_pos'),
                      'steam_path': get_config('steam_path'),
                      'ui_mode': self.ui_mode,
-                     'theme': self.theme}
+                     'theme': self.theme,
+                     'password': self.password,
+                     'encryption': self.encryption}
 
         config_write_dict(dump_dict)
+        AccountManager.create_encrypted_json_file(self.pw)
 
 
 class ToolTipWindow(object):
