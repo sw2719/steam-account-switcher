@@ -16,7 +16,7 @@ from PIL import Image, ImageTk
 from modules.account import AccountManager, loginusers_accountnames, loginusers_steamid, \
     loginusers_personanames, check_autologin_availability
 from modules.reg import fetch_reg, setkey
-from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE
+from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE, first_run
 from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, \
     launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update, update_frame_color
@@ -106,10 +106,12 @@ class MainApp(tk.Tk):
         sys.stdout = std_out
         sys.stderr = std_err
 
-        self.accounts = AccountManager()
+        self.accounts = None
         self.demo_mode = False
         self.BUNDLE = bundle
         self.after_update = after_update
+        self.version = version
+        self.url = url
 
         tk.Tk.__init__(self)
 
@@ -136,6 +138,91 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
+        self.bold_font = tkfont.Font(weight=tkfont.BOLD, size=16, family='Arial')
+
+        lock_img = Image.open('asset/lock.png').resize((80, 80))
+        self.lock_imgtk = ImageTk.PhotoImage(lock_img)
+
+        lock_white_img = Image.open('asset/lock_white.png').resize((80, 80))
+        self.lock_white_imgtk = ImageTk.PhotoImage(lock_white_img)
+
+        if first_run or after_update:
+            self.welcomewindow()
+        elif get_config('encryption'):
+            self.lockscreen()
+        else:
+            self.accounts = AccountManager()
+            self.main_menu()
+
+    def lockscreen(self):
+        frame = ttk.Frame(self)
+        pw_var = tk.StringVar()
+        pw_var.trace("w", lambda name, index, mode, sv=pw_var: entry_check(sv))
+
+        def check_pw():
+            nonlocal frame
+
+            if AccountManager.verify_password(pw_var.get()):
+                self.accounts = AccountManager(password=pw_var.get())
+                frame.destroy()
+                self.main_menu()
+            else:
+                prompt['text'] = _('Incorrect password. Try again.')
+                prompt['foreground'] = get_color('autologin_text_unavail')
+                pw_var.set('')
+
+        button_frame = tk.Frame(frame)
+        exit_button = ttk.Button(button_frame, text='Exit', command=sys.exit)
+        exit_button.grid(row=0, column=0, padx=(0, 1.5))
+        unlock_button = ttk.Button(button_frame,
+                                   text='Unlock (Enter)',
+                                   state='disabled',
+                                   command=check_pw,
+                                   style='Accent.TButton')
+        unlock_button.grid(row=0, column=1, padx=(1.5, 0))
+        button_frame.grid_rowconfigure(0, weight=1)
+        button_frame.pack(side=tk.BOTTOM, padx=3, pady=3)
+
+        def entry_check(sv):
+            if sv.get():
+                unlock_button['state'] = 'normal'
+            else:
+                unlock_button['state'] = 'disabled'
+
+        pw_entry = ttk.Entry(frame, show="⬤", justify=tk.CENTER, textvariable=pw_var)
+        pw_entry.pack(side=tk.BOTTOM, padx=3, fill=tk.X)
+        pw_entry.bind('<Return>', lambda e: check_pw())
+        pw_entry.focus()
+
+        check_var = tk.IntVar()
+
+        def check_command():
+            if check_var.get():
+                pw_entry['show'] = ''
+            else:
+                pw_entry['show'] = '⬤'
+
+        checkbutton = ttk.Checkbutton(frame,
+                                      text=_('See password'),
+                                      variable=check_var,
+                                      command=check_command)
+        checkbutton.pack(side=tk.BOTTOM, padx=3, pady=3)
+
+        lock_icon = tk.Canvas(frame, width=300, height=200, bd=0, highlightthickness=0)
+
+        if get_config('theme') == 'light':
+            lock_icon.create_image(150, 100, image=self.lock_imgtk)
+        else:
+            lock_icon.create_image(150, 100, image=self.lock_white_imgtk)
+        lock_icon.pack(expand=True, fill=tk.BOTH)
+
+        ttk.Label(frame, text='Welcome', font=self.bold_font).pack()
+        prompt = ttk.Label(frame, text='Enter master password to unlock.')
+        prompt.pack(expand=True, pady=5)
+        frame.pack(fill='both', expand=True)
+        self.update_idletasks()
+
+    def main_menu(self):
         if not test():
             ask_steam_dir()
 
@@ -163,7 +250,7 @@ class MainApp(tk.Tk):
         menu.add_command(label=_("Send feedback"),
                          command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher/issues'))
         menu.add_command(label=_("About"),
-                         command=lambda: self.about(version))
+                         command=lambda: self.about(self.version))
 
         menubar.add_cascade(label=_("Menu"), menu=menu)
         self.config(menu=menubar)
@@ -171,13 +258,13 @@ class MainApp(tk.Tk):
         if not self.BUNDLE:
             debug_menu = tk.Menu(menubar, tearoff=0)
             debug_menu.add_command(label='Check for updates with debug mode',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, self.BUNDLE, debug=True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, self.url, self.BUNDLE, debug=True)))
             debug_menu.add_command(label='Check for updates without debug mode',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, self.url, True)))
             debug_menu.add_command(label='Check for updates (Force update available)',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, '1.0', url, True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, '1.0', self.url, True)))
             debug_menu.add_command(label='Check for updates (Raise error)',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True, exception=True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, self.url, True, exception=True)))
             debug_menu.add_command(label="Download avatar images",
                                    command=download_avatar)
             debug_menu.add_command(label="Open initial setup",
@@ -189,7 +276,7 @@ class MainApp(tk.Tk):
             debug_menu.add_command(label="Raise exception",
                                    command=raise_exception)
             debug_menu.add_command(label="Open about window with copyright notice",
-                                   command=lambda: self.about(version, force_copyright=True))
+                                   command=lambda: self.about(self.version, force_copyright=True))
             debug_menu.add_command(label="Launch updater (update.zip required)",
                                    command=launch_updater)
             debug_menu.add_command(label="Create shortcut",
@@ -304,14 +391,17 @@ class MainApp(tk.Tk):
         else:
             window = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), self.after_update, debug)
 
+        def after_init():
+            if get_config('encryption') == 'true':
+                self.lockscreen()
+            else:
+                self.main_menu()
+            self.update_idletasks()
+            self.deiconify()
+
         def event_function(event):
             if str(event.widget) == '.!welcomewindow':
-                if self.accounts:
-                    self.update_avatar()
-
-                self.refresh()
-                self.update_idletasks()
-                self.deiconify()
+                after_init()
 
         window.bind('<Destroy>', event_function)
 
@@ -708,7 +798,7 @@ class MainApp(tk.Tk):
                                                 command=lambda name=username: self.button_func(name))
                 menu_dict[username].add_separator()
 
-                if i is not None:  # i could be 0 so we can't use if i:
+                if i is not None:
                     menu_dict[username].add_command(label=_('Open profile in browser'),
                                                     command=lambda steamid64=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steamid64}'))
                     menu_dict[username].add_command(label=_('Open screenshots folder'),
