@@ -67,6 +67,8 @@ class AccountManager:
         except FileNotFoundError:
             self._reset_json()
 
+        pprint('AccountManager initialized')
+
     @staticmethod
     def verify_password(password):
         with open('salt', 'rb') as f:
@@ -94,6 +96,39 @@ class AccountManager:
     def _reset_json():
         with open('accounts.json', 'w', encoding='utf-8') as f:
             json.dump({}, f, indent=4)
+
+    @staticmethod
+    def generate_salt():
+        salt = os.urandom(16)
+        with open('salt', 'wb') as f:
+            f.write(salt)
+
+        return salt
+
+    def set_password(self, password):
+        salt = self.generate_salt()
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=600000,
+        )
+
+        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+        self.fernet = Fernet(key)
+
+        with open('accounts.json', 'wb') as f:
+            enc_dict = self.fernet.encrypt(json.dumps(self.acc_dict).encode())
+            f.write(enc_dict)
+            pprint('Changed password')
+
+    def disable_encryption(self):
+        with open('accounts.json', 'w', encoding='utf-8') as f:
+            json.dump(self.acc_dict, f, indent=4)
+
+            os.remove('salt')
+            pprint('Disabled encryption')
+
 
     @staticmethod
     def create_encrypted_json_file(password):

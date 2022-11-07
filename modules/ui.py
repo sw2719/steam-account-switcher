@@ -26,11 +26,6 @@ t = gettext.translation('steamswitcher',
                         fallback=True)
 _ = t.gettext
 
-with open('theme.json') as theme_json:
-    theme_dict = json.loads(theme_json.read())
-    COLOR_LIGHT = theme_dict['light']
-    COLOR_DARK = theme_dict['dark']
-
 
 def get_color(key):
     try:
@@ -985,7 +980,7 @@ class WelcomeWindow(tk.Toplevel):
 
     def password_page(self):
         self.active_page = 'pw1'
-        self.top_label['text'] = _('Password Vault')
+        self.top_label['text'] = _('Set Password')
         self.pw_var = tk.StringVar()
         self.ok_button['state'] = 'disabled'
 
@@ -1014,7 +1009,7 @@ class WelcomeWindow(tk.Toplevel):
 
         ttk.Label(self.innerframe,
                   text=_('Keep in mind that if you forget it,') + '\n' +
-                       _('you have to reset the accounts data!'),
+                       _('you will have to reset the accounts data!'),
                   justify=tk.CENTER, foreground='red').pack(pady=(6, 0))
 
         entry_frame = ttk.Frame(self.innerframe)
@@ -1057,7 +1052,7 @@ class WelcomeWindow(tk.Toplevel):
 
     def password_confirm_page(self):
         self.active_page = 'pw2'
-        self.top_label['text'] = 'Password Vault'
+        self.top_label['text'] = _('Confirm Password')
         pw_var = tk.StringVar()
         self.ok_button['state'] = 'disabled'
 
@@ -1075,12 +1070,12 @@ class WelcomeWindow(tk.Toplevel):
                 self.ok_button['state'] = 'normal'
             else:
                 prompt['foreground'] = ''
-                prompt['text'] = _('Passwords do not match')
+                prompt['text'] = _('Passwords do not match.')
                 self.ok_button['state'] = 'disabled'
 
         ttk.Label(self.innerframe,
-                  text=_('Enter a password once again to confirm.'),
-                  justify=tk.CENTER).pack(pady=(2, 0))
+                  text=_('Enter the same password once again to confirm.'),
+                  justify=tk.CENTER).pack(pady=(5, 0))
 
         entry_frame = ttk.Frame(self.innerframe)
         entry_frame.pack(side=tk.BOTTOM, fill=tk.X)
@@ -1277,3 +1272,269 @@ def steamid_window(master, username, steamid64, geometry):
     ReadonlyEntryWithLabel(steamid_window, 'SteamID64', steamid64).pack(pady=(6, 0), fill='x')
     ReadonlyEntryWithLabel(steamid_window, 'SteamID2', steam64_to_2(steamid64)).pack(pady=(6, 0), fill='x')
     ReadonlyEntryWithLabel(steamid_window, 'SteamID3', steam64_to_3(steamid64)).pack(pady=(6, 0), fill='x')
+
+
+class ManageEncryptionWindow(tk.Toplevel):
+    def __init__(self, geometry, acm):
+        super().__init__()
+        self.geometry(geometry)
+        self.title(_('Encryption Settings'))
+        self.resizable(False, False)
+        self.active_page = None
+        self.upper_frame = tk.Frame(self)
+        self.upper_frame.pack(side='top', fill='x')
+        self.top_font = tkfont.Font(weight=tkfont.BOLD, size=17, family='Arial')
+        self.value_font = tkfont.Font(weight=tkfont.NORMAL, size=12, family='Arial')
+        self.top_label = tk.Label(self.upper_frame, font=self.top_font)
+        self.top_label.pack(side='left', padx=(10, 0), pady=10)
+        self.acm = acm
+
+        self.main_window()
+
+    def main_window(self):
+        self.active_page = 'main'
+        self.top_label['text'] = _('Encryption Settings')
+        self.bottomframe = ttk.Frame(self)
+        self.bottomframe.pack(side='bottom')
+
+        self.bottomframe.rowconfigure(0, weight=1)
+        self.bottomframe.columnconfigure(0, weight=1)
+        self.bottomframe.columnconfigure(1, weight=1)
+
+        self.close_button = ttk.Button(self.bottomframe, text=_('Close'), command=self.destroy)
+        self.close_button.grid(row=0, column=0, pady=3, padx=3)
+
+        self.innerframe = ttk.Frame(self)
+        self.innerframe.pack(side='top', padx=0, pady=(0, 8), fill='both', expand=True)
+
+        encryption_frame = ttk.Frame(self.innerframe)
+        encryption_frame.pack(side='top', fill='x', pady=5)
+
+        self.encryption_status = ttk.Label(encryption_frame, font=self.value_font)
+        self.encryption_status.pack(pady=(8, 0))
+
+        self.encryption_button = ttk.Button(self.bottomframe)
+        self.encryption_button.grid(row=0, column=1, padx=(0, 3))
+
+        self.change_password_button = ttk.Button(self.bottomframe, text=_('Change Password'))
+
+        if get_config('encryption') == 'true':
+            self.encryption_status.config(text=_('Encryption is enabled.'), foreground=get_color('autologin_text_avail'))
+            self.encryption_button.config(text=_('Disable Encryption'), command=self.disable_encryption)
+            self.change_password_button.grid(row=0, column=2, padx=(0, 3))
+            self.change_password_button['command'] = self.ok
+            self.bottomframe.columnconfigure(2, weight=1)
+        else:
+            self.encryption_status.config(text=_('Encryption is disabled.'), foreground=get_color('autologin_text_unavail'))
+            self.encryption_button.config(text=_('Enable Encryption'), style='Accent.TButton', command=self.ok)
+
+            ttk.Label(self.innerframe,
+                      text=_('Enable to encrypt accounts data with a password.') + '\n' +
+                           _('STRONGLY recommended when using Password Vault.') + '\n' +
+                           _('Uses AES-128-CBC-HMAC-SHA256.'), justify=tk.CENTER).pack(expand=True)
+
+    def back(self):
+        if self.active_page == 'pw1':
+            self.innerframe.destroy()
+            del self.pw_var
+            self.main_window()
+        elif self.active_page == 'pw2':
+            self.innerframe.destroy()
+            self.password_page()
+
+    def disable_encryption(self):
+        if msgbox.askyesno(_('Disable Encryption'), _('Are you sure you want to disable encryption?'), parent=self):
+            config_write_value('encryption', 'false')
+            self.acm.disable_encryption()
+            self.bottomframe.destroy()
+            self.innerframe.destroy()
+            self.main_window()
+
+    def ok(self):
+        if self.active_page == 'main':
+            self.bottomframe.destroy()
+            self.innerframe.destroy()
+            self.password_page()
+        elif self.active_page == 'pw1':
+            self.innerframe.destroy()
+            self.active_page = 'pw2'
+            self.password_confirm_page()
+        elif self.active_page == 'pw2':
+            pw = self.pw_var.get()
+            AccountManager.create_encrypted_json_file(pw)
+            config_write_value('encryption', 'true')
+            self.innerframe.destroy()
+            self.main_window()
+            del self.pw_var
+
+    def password_page(self):
+        self.active_page = 'pw1'
+        self.top_label['text'] = _('Set Password')
+        self.pw_var = tk.StringVar()
+
+        self.innerframe = ttk.Frame(self)
+        self.innerframe.pack(side='top', padx=0, pady=0, fill='both', expand=True)
+
+        password_button_frame = ttk.Frame(self.innerframe)
+        password_button_frame.pack(side='bottom')
+        ok_button = ttk.Button(password_button_frame, text=_('OK (Enter)'), command=self.ok, style='Accent.TButton', state='disabled')
+        cancel_button = ttk.Button(password_button_frame, text=_('Cancel'), command=self.back)
+
+        cancel_button.grid(row=0, column=0, padx=3, pady=3)
+        ok_button.grid(row=0, column=1, padx=(0, 3), pady=3)
+
+        def check_pw(sv):
+            nonlocal prompt
+
+            pw = sv.get()
+            conditions = re.search('[a-zA-Z]', pw) and re.search('[0-9]', pw) and len(pw) >= 8 and pw.strip() == pw
+
+            if conditions:
+                prompt['foreground'] = get_color('autologin_text_avail')
+                ok_button['state'] = 'normal'
+            else:
+                prompt['foreground'] = ''
+                ok_button['state'] = 'disabled'
+
+        ttk.Label(self.innerframe,
+                  text=_('Enter a password to use for encryption.') + '\n' +
+                       _('You will have to enter it every time you open the app.') + '\n' +
+                       _('The more complex it is, the better.'),
+                  justify=tk.CENTER).pack(pady=(2, 0))
+
+        ttk.Label(self.innerframe,
+                  text=_('Keep in mind that if you forget it,') + '\n' +
+                       _('you will have to reset the accounts data!'),
+                  justify=tk.CENTER, foreground='red').pack(pady=(6, 0))
+
+        entry_frame = ttk.Frame(self.innerframe)
+        entry_frame.pack(side=tk.BOTTOM, fill=tk.X)
+
+        pw_entry = ttk.Entry(entry_frame, show="⬤", justify=tk.CENTER, textvariable=self.pw_var)
+        pw_entry.pack(side=tk.LEFT, padx=(3, 0), fill=tk.X, expand=True)
+        pw_entry.focus()
+
+        self.pw_var.trace("w", lambda name, index, mode, sv=self.pw_var: check_pw(sv))
+
+        check_var = tk.IntVar()
+
+        checkbutton = ttk.Checkbutton(entry_frame,
+                                      text=_('Show'),
+                                      variable=check_var,
+                                      style='Toggle.TButton')
+        checkbutton.pack(side=tk.RIGHT, padx=3)
+
+        def on_show_checkbutton():
+            if check_var.get():
+                pw_entry['show'] = ''
+                checkbutton['text'] = _('Hide')
+            else:
+                pw_entry['show'] = '⬤'
+                checkbutton['text'] = _('Show')
+
+        checkbutton['command'] = on_show_checkbutton
+
+        prompt = ttk.Label(self.innerframe, text=_('At least 8 characters\nIncludes alphabets and numbers\nNo spaces\n(Special characters are allowed)'),
+                           justify=tk.CENTER)
+        prompt.pack(side=tk.BOTTOM, padx=3, pady=3)
+
+        def on_return(e):
+            if 'disabled' not in ok_button.state():
+                self.ok()
+
+        pw_entry.bind('<Return>', on_return)
+
+    def password_confirm_page(self):
+        self.active_page = 'pw2'
+        self.top_label['text'] = _('Confirm Password')
+        pw_var = tk.StringVar()
+
+        self.innerframe = ttk.Frame(self)
+        self.innerframe.pack(side='top', padx=0, pady=0, fill='both', expand=True)
+
+        password_button_frame = ttk.Frame(self.innerframe)
+        password_button_frame.pack(side='bottom')
+        confirm_button = ttk.Button(password_button_frame, text=_('Confirm (Enter)'), style='Accent.TButton',
+                                    state='disabled', command=self.ok)
+        cancel_button = ttk.Button(password_button_frame, text=_('Back'), command=self.back)
+
+        cancel_button.grid(row=0, column=0, padx=3, pady=3)
+        confirm_button.grid(row=0, column=1, padx=(0, 3), pady=3)
+
+        def check_pw(sv):
+            nonlocal prompt
+
+            pw = sv.get()
+
+            if pw == self.pw_var.get():
+                prompt['foreground'] = get_color('autologin_text_avail')
+                prompt['text'] = _('Passwords match!')
+                confirm_button['state'] = 'normal'
+            else:
+                prompt['foreground'] = ''
+                prompt['text'] = _('Passwords do not match.')
+                confirm_button['state'] = 'disabled'
+
+        ttk.Label(self.innerframe,
+                  text=_('Enter the same password once again to confirm.'),
+                  justify=tk.CENTER).pack(pady=(5, 0))
+
+        entry_frame = ttk.Frame(self.innerframe)
+        entry_frame.pack(side=tk.BOTTOM, fill=tk.X)
+
+        pw_entry = ttk.Entry(entry_frame, show="⬤", justify=tk.CENTER, textvariable=pw_var)
+        pw_entry.pack(side=tk.LEFT, padx=(3, 0), fill=tk.X, expand=True)
+        #pw_entry.bind('<Return>', self.ok)
+        pw_entry.focus()
+
+        pw_var.trace("w", lambda name, index, mode, sv=pw_var: check_pw(sv))
+
+        check_var = tk.IntVar()
+
+        checkbutton = ttk.Checkbutton(entry_frame,
+                                      text=_('Show'),
+                                      variable=check_var,
+                                      style='Toggle.TButton')
+        checkbutton.pack(side=tk.RIGHT, padx=3)
+
+        def on_show_checkbutton():
+            if check_var.get():
+                pw_entry['show'] = ''
+                checkbutton['text'] = _('Hide')
+            else:
+                pw_entry['show'] = '⬤'
+                checkbutton['text'] = _('Show')
+
+        checkbutton['command'] = on_show_checkbutton
+
+        prompt = ttk.Label(self.innerframe, text=_('Passwords do not match'),
+                           justify=tk.CENTER)
+        prompt.pack(side=tk.BOTTOM, padx=3, pady=3)
+
+        def on_return(e):
+            if 'disabled' not in confirm_button.state():
+                self.ok()
+
+        pw_entry.bind('<Return>', on_return)
+
+if __name__ == '__main__':
+    with open('../theme.json') as theme_json:
+        theme_dict = json.loads(theme_json.read())
+        COLOR_LIGHT = theme_dict['light']
+        COLOR_DARK = theme_dict['dark']
+
+    def open_window():
+        window = ManageEncryptionWindow('320x300+600+300')
+
+    root = tk.Tk()
+    root.title('Test UI')
+    root.geometry('300x300')
+    root.resizable(False, False)
+    sv_ttk.use_light_theme()
+    root.after(1000, open_window)
+    root.mainloop()
+else:
+    with open('theme.json') as theme_json:
+        theme_dict = json.loads(theme_json.read())
+        COLOR_LIGHT = theme_dict['light']
+        COLOR_DARK = theme_dict['dark']

@@ -11,6 +11,7 @@ import sys
 import queue as q
 import traceback
 import sv_ttk
+import datetime
 from time import sleep
 from PIL import Image, ImageTk
 from modules.account import AccountManager, loginusers_accountnames, loginusers_steamid, \
@@ -21,7 +22,7 @@ from modules.util import steam_running, StoppableThread, raise_exception, test, 
     launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update, update_frame_color
 from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, \
-    ToolTipWindow, ask_steam_dir, get_color
+    ToolTipWindow, ask_steam_dir, get_color, ManageEncryptionWindow
 from modules.avatar import download_avatar
 from modules.errormsg import error_msg
 from modules.steamid import steam64_to_32
@@ -149,7 +150,7 @@ class MainApp(tk.Tk):
 
         if first_run or after_update:
             self.welcomewindow()
-        elif get_config('encryption'):
+        elif get_config('encryption') == 'true':
             self.lockscreen()
         else:
             self.accounts = AccountManager()
@@ -815,7 +816,7 @@ class MainApp(tk.Tk):
                     menu_dict[username].add_command(label=_('Open profile in browser'),
                                                     command=lambda steamid64=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steamid64}'))
                     menu_dict[username].add_command(label=_('Open screenshots folder'),
-                                                    command=lambda steamid64=steam64: open_screenshot(steamid64))
+                                                    command=lambda steamid64=steam64: self.open_screenshot(steamid64))
                     menu_dict[username].add_command(label=_('View SteamID'),
                                                     command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.popup_geometry(270, 240)))
                     menu_dict[username].add_command(label=_('Update avatar'),
@@ -956,6 +957,8 @@ class MainApp(tk.Tk):
         aboutwindow.focus()
         aboutwindow.bind('<Escape>', lambda event: aboutwindow.destroy())
 
+        year = str(datetime.datetime.today().year)
+
         try:
             aboutwindow.iconbitmap('asset/icon.ico')
         except tk.TclError:
@@ -963,16 +966,16 @@ class MainApp(tk.Tk):
 
         about_disclaimer = tk.Label(aboutwindow,
                                     text=_('Warning: The developer of this application is not responsible for\n' +
-                                           'data loss or any other damage from the use of this app.'))
+                                           'any incident or damage occurred by using this app.'))
         about_steam_trademark = tk.Label(aboutwindow,
                                          text=_('STEAM is a registered trademark of Valve Corporation.'))
         if self.BUNDLE or force_copyright:
             copyright_label = tk.Label(aboutwindow,
-                                        text='Copyright (c) 2022 sw2719 | All Rights Reserved' + '\n' +
+                                        text=f'Copyright (c) {year} sw2719 | All Rights Reserved' + '\n' +
                                              'Read copyright notice for details')
         else:
             copyright_label = tk.Label(aboutwindow,
-                                       text='Copyright (c) 2022 sw2719 | All Rights Reserved' + '\n' +
+                                       text=f'Copyright (c) {year} sw2719 | All Rights Reserved' + '\n' +
                                             'Read LICENSE file for details')
         ver = tk.Label(aboutwindow,
                        text='Steam Account Switcher | Version ' + version)
@@ -1509,7 +1512,7 @@ class MainApp(tk.Tk):
 
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(self.popup_geometry(width, 600))  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 560))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
@@ -1707,7 +1710,7 @@ class MainApp(tk.Tk):
         soft_chkb.pack(side='left')
 
         autoexit_frame = tk.Frame(settingswindow)
-        autoexit_frame.pack(fill='x', side='top', padx=12, pady=(5, 0))
+        autoexit_frame.pack(fill='x', side='top', padx=12, pady=5)
 
         autoexit_chkb = ttk.Checkbutton(autoexit_frame, style="Switch.TCheckbutton",
                                         text=_('Exit app after Steam is restarted'))
@@ -1720,6 +1723,36 @@ class MainApp(tk.Tk):
             autoexit_chkb.state(['!selected'])
 
         autoexit_chkb.pack(side='left')
+
+        password_frame = tk.Frame(settingswindow)
+        password_frame.pack(fill='x', side='top', padx=12, pady=5)
+
+        password_chkb = ttk.Checkbutton(password_frame, style="Switch.TCheckbutton",
+                                        text=_('Use Password Vault'))
+
+        password_chkb.state(['!alternate'])
+
+        if config_dict['password'] == 'true':
+            password_chkb.state(['selected'])
+        else:
+            password_chkb.state(['!selected'])
+
+        password_chkb.pack(side='left')
+
+        def open_manage_encryption_window():
+            enc_window = ManageEncryptionWindow(self.popup_geometry(320, 300, multiplier=2), self.accounts)
+
+            def event_function(event):
+                if str(event.widget) == '.!manageencryptionwindow':
+                    settingswindow.grab_set()
+
+            enc_window.bind('<Destroy>', event_function)
+            enc_window.grab_set()
+
+        manage_encryption_button = ttk.Button(settingswindow,
+                                              text=_('Manage Encryption Settings'),
+                                              command=open_manage_encryption_window)
+        manage_encryption_button.pack(side='bottom', fill='x', padx=3)
 
         def close():
             settingswindow.destroy()
@@ -1762,6 +1795,11 @@ class MainApp(tk.Tk):
             else:
                 avatar = 'false'
 
+            if 'selected' in password_chkb.state():
+                password = 'true'
+            else:
+                password = 'false'
+
             config_dict = {'locale': locale[locale_cb.current()],
                            'autoexit': autoexit,
                            'mode': mode,
@@ -1770,7 +1808,9 @@ class MainApp(tk.Tk):
                            'last_pos': get_config('last_pos'),
                            'steam_path': get_config('steam_path'),
                            'ui_mode': ui_mode,
-                           'theme': theme}
+                           'theme': theme,
+                           'password': password,
+                           'encryption': get_config('encryption')}
 
             config_write_dict(config_dict)
 
