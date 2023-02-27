@@ -88,24 +88,28 @@ class AccountManager:
             with open('accounts.json', 'rb') as f:
                 secret = fernet.decrypt(f.read())
                 json.loads(secret.decode('utf-8'))
+                pprint('Password authentication successful')
                 return True
         except (InvalidToken, json.decoder.JSONDecodeError):
+            pprint('Password authentication failed.')
             return False
 
     @staticmethod
     def _reset_json():
         with open('accounts.json', 'w', encoding='utf-8') as f:
             json.dump({}, f, indent=4)
+        pprint('New account.json created')
 
     @staticmethod
     def generate_salt():
         salt = os.urandom(16)
         with open('salt', 'wb') as f:
             f.write(salt)
+        pprint('Generated salt')
 
         return salt
 
-    def set_password(self, password):
+    def set_master_password(self, password):
         salt = self.generate_salt()
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -128,7 +132,6 @@ class AccountManager:
 
             os.remove('salt')
             pprint('Disabled encryption')
-
 
     @staticmethod
     def create_encrypted_json_file(password):
@@ -157,6 +160,8 @@ class AccountManager:
             enc_dict = fernet.encrypt(json.dumps(d).encode())
             f.write(enc_dict)
 
+        pprint('Created encrypted accounts.json')
+
     @property
     def list(self):
         accounts = []
@@ -178,6 +183,8 @@ class AccountManager:
         for x in range(len(self.acc_dict)):
             if self.acc_dict[str(x)]['accountname'] == accountname:
                 return str(x)
+        else:
+            return None
 
     def update_dict_numbers(self):
         new_dict = {}
@@ -232,10 +239,20 @@ class AccountManager:
         self._save_json()
 
     def remove_password(self, accountname):
-        i = self._find_account_index(accountname)
-        del self.acc_dict[i]['password']
+        try:
+            i = self._find_account_index(accountname)
+            del self.acc_dict[i]['password']
 
-        self._save_json()
+            self._save_json()
+        except KeyError:
+            pass
+
+    def get_password(self, accountname):
+        i = self._find_account_index(accountname)
+        try:
+            return self.acc_dict[i]['password']
+        except KeyError:
+            return None
 
     def get_customname(self, accountname):
         i = self._find_account_index(accountname)
@@ -251,10 +268,13 @@ class AccountManager:
         self._save_json()
 
     def remove_customname(self, accountname):
-        i = self._find_account_index(accountname)
-        del self.acc_dict[i]['customname']
+        try:
+            i = self._find_account_index(accountname)
+            del self.acc_dict[i]['customname']
 
-        self._save_json()
+            self._save_json()
+        except KeyError:
+            pass
 
     def change_dict_order(self, order_list):
         buffer_dict = {}

@@ -407,23 +407,23 @@ class MainApp(tk.Tk):
 
         window.bind('<Destroy>', event_function)
 
-    def configwindow(self, username):
-        configwindow = tk.Toplevel(self)
-        configwindow.title('')
+    def account_settings_window(self, username):
+        account_settings_window = tk.Toplevel(self)
+        account_settings_window.title('')
 
         x, y = self.get_window_pos()
-        configwindow.geometry(self.popup_geometry(250, 180))
-        configwindow.resizable(False, False)
-        configwindow.bind('<Escape>', lambda event: configwindow.destroy())
+        account_settings_window.geometry(self.popup_geometry(250, 300))
+        account_settings_window.resizable(False, False)
+        account_settings_window.bind('<Escape>', lambda event: account_settings_window.destroy())
 
         try:
-            configwindow.iconbitmap('asset/icon.ico')
+            account_settings_window.iconbitmap('asset/icon.ico')
         except tk.TclError:
             pass
 
         custom_name = self.accounts.get_customname(username)
 
-        button_frame = tk.Frame(configwindow)
+        button_frame = tk.Frame(account_settings_window)
         button_frame.pack(side='bottom', pady=3)
 
         ok_button = ttk.Button(button_frame, text=_('OK'))
@@ -431,46 +431,46 @@ class MainApp(tk.Tk):
 
         cancel_button = ttk.Button(button_frame,
                                    text=_('Cancel'),
-                                   command=configwindow.destroy)
+                                   command=account_settings_window.destroy)
         cancel_button.pack(side='left', padx=1.5)
 
-        top_label = tk.Label(configwindow, text=_('Select name settings\nfor %s') % username)
-        top_label.pack(side='top', pady=(4, 3))
+        top_label = tk.Label(account_settings_window, text=_('Settings for %s') % username)
+        top_label.pack(side='top', pady=(8, 3))
 
-        radio_frame1 = tk.Frame(configwindow)
-        radio_frame1.pack(side='top', padx=20, pady=(4, 2), fill='x')
-        radio_frame2 = tk.Frame(configwindow)
-        radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
-        radio_var = tk.IntVar()
+        radio_frame1 = tk.Frame(account_settings_window)
+        radio_frame1.pack(side='top', padx=(10, 0), pady=(12, 2), fill='x')
+        radio_frame2 = tk.Frame(account_settings_window)
+        radio_frame2.pack(side='top', padx=(10, 0), pady=(0, 3), fill='x')
+        custom_name_var = tk.IntVar()
 
         if custom_name.strip():
-            radio_var.set(1)
+            custom_name_var.set(1)
         else:
-            radio_var.set(0)
+            custom_name_var.set(0)
 
         radio_default = ttk.Radiobutton(radio_frame1,
                                         text=_('Use profile name if available'),
-                                        variable=radio_var,
+                                        variable=custom_name_var,
                                         value=0)
         radio_custom = ttk.Radiobutton(radio_frame2,
                                        text=_('Use custom name'),
-                                       variable=radio_var,
+                                       variable=custom_name_var,
                                        value=1)
 
         radio_default.pack(side='left', pady=2)
         radio_custom.pack(side='left', pady=2)
 
-        entry_frame = tk.Frame(configwindow)
-        entry_frame.pack(side='bottom', pady=(1, 4))
+        name_entry_frame = tk.Frame(account_settings_window)
+        name_entry_frame.pack(side='top', pady=4, fill='x')
 
-        name_entry = ttk.Entry(entry_frame, width=27)
+        name_entry = ttk.Entry(name_entry_frame, justify=tk.CENTER)
         name_entry.insert(0, custom_name)
-        name_entry.pack()
+        name_entry.pack(fill='x', padx=8)
 
-        configwindow.grab_set()
-        configwindow.focus()
+        account_settings_window.grab_set()
+        account_settings_window.focus()
 
-        if radio_var.get() == 0:
+        if custom_name_var.get() == 0:
             name_entry['state'] = 'disabled'
 
         def reset_entry():
@@ -484,27 +484,75 @@ class MainApp(tk.Tk):
         radio_default['command'] = reset_entry
         radio_custom['command'] = enable_entry
 
-        def ok(username):
-            if name_entry.get().strip() and radio_var.get() == 1:
-                input_name = name_entry.get()
-                self.accounts.set_customname(username, input_name)
-                print(f"Using custom name '{input_name}' for '{username}'.")
-            elif radio_var.get() == 1:
-                msgbox.showwarning(_('Info'), _('Enter a custom name to use.'), parent=configwindow)
-                return
-            else:
-                self.accounts.remove_customname(username)
-                print(f"Custom name for '{username}' has been removed.")
+        save_password_var = tk.IntVar()
 
-            self.refresh()
-            configwindow.destroy()
+        save_password_frame = ttk.Frame(account_settings_window)
+        save_password_frame.pack(side='top', padx=(10, 0), pady=(12, 4), fill='x')
+
+        save_password_chkb = ttk.Checkbutton(save_password_frame,
+                                          text=_('Save password'),
+                                          variable=save_password_var)
+
+        save_password_chkb['state'] = '!alternate'
+
+        set_password = self.accounts.get_password(username)
+
+        save_password_chkb.pack(side='left', pady=2)
+
+        password_entry_frame = tk.Frame(account_settings_window)
+        password_entry_frame.pack(side='top', pady=4, fill='x')
+
+        password_entry = ttk.Entry(password_entry_frame, justify=tk.CENTER, show='⬤')
+        password_entry.pack(fill='x', padx=8)
+
+        if set_password:
+            save_password_var.set(1)
+            password_entry.insert(0, set_password)
+        else:
+            password_entry['state'] = 'disabled'
+
+        def on_password_checkbox():
+            if save_password_var.get() == 1:
+                password_entry['state'] = 'normal'
+                password_entry.focus()
+            else:
+                password_entry.delete(0, 'end')
+                password_entry['state'] = 'disabled'
+
+        save_password_chkb['command'] = on_password_checkbox
+
+        def ok(username):
+            if custom_name_var.get() == 1 and not name_entry.get().strip():
+                if save_password_var.get() == 1 and not password_entry.get().strip():
+                    msgbox.showwarning(_('Info'), _('Enter a custom profile name and a account password.'),
+                                       parent=account_settings_window)
+                else:
+                    msgbox.showwarning(_('Info'), _('Enter a custom profile name.'),
+                                       parent=account_settings_window)
+            elif save_password_var.get() == 1 and not password_entry.get().strip():
+                msgbox.showwarning(_('Info'), _('Enter a account password.'),
+                                   parent=account_settings_window)
+
+            else:
+                if custom_name_var.get():
+                    self.accounts.set_customname(username, name_entry.get())
+                else:
+                    self.accounts.remove_customname(username)
+
+                if save_password_var.get():
+                    self.accounts.set_password(username, password_entry.get())
+                else:
+                    self.accounts.remove_password(username)
+
+                self.refresh()
+                account_settings_window.destroy()
 
         def enterkey(event):
             ok(username)
 
-        configwindow.bind('<Return>', enterkey)
+        account_settings_window.bind('<Return>', enterkey)
         ok_button['command'] = lambda username=username: ok(username)
-        configwindow.wait_window()
+        account_settings_window.wait_window()
 
     def button_func(self, username):
         current_user = fetch_reg('AutoLoginUser')
@@ -667,7 +715,7 @@ class MainApp(tk.Tk):
                     menu_dict[username].add_separator()
 
                 menu_dict[username].add_command(label=_("Account settings"),
-                                                command=lambda name=username, pname=profilename: self.configwindow(name))
+                                                command=lambda name=username, pname=profilename: self.account_settings_window(name))
                 menu_dict[username].add_command(label=_("Delete"),
                                                 command=lambda name=username: self.remove_user(name))
 
@@ -823,8 +871,8 @@ class MainApp(tk.Tk):
                                                     command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
                     menu_dict[username].add_separator()
 
-                menu_dict[username].add_command(label=_("Name settings"),
-                                                command=lambda name=username, pname=profilename: self.configwindow(name))
+                menu_dict[username].add_command(label=_("Account settings"),
+                                                command=lambda name=username, pname=profilename: self.account_settings_window(name))
                 menu_dict[username].add_command(label=_("Delete"),
                                                 command=lambda name=username: self.remove_user(name))
 
@@ -1512,7 +1560,7 @@ class MainApp(tk.Tk):
 
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(self.popup_geometry(width, 560))  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 530))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
@@ -1724,21 +1772,6 @@ class MainApp(tk.Tk):
 
         autoexit_chkb.pack(side='left')
 
-        password_frame = tk.Frame(settingswindow)
-        password_frame.pack(fill='x', side='top', padx=12, pady=5)
-
-        password_chkb = ttk.Checkbutton(password_frame, style="Switch.TCheckbutton",
-                                        text=_('Use Password Vault'))
-
-        password_chkb.state(['!alternate'])
-
-        if config_dict['password'] == 'true':
-            password_chkb.state(['selected'])
-        else:
-            password_chkb.state(['!selected'])
-
-        password_chkb.pack(side='left')
-
         def open_manage_encryption_window():
             enc_window = ManageEncryptionWindow(self.popup_geometry(320, 300, multiplier=2), self.accounts)
 
@@ -1795,11 +1828,6 @@ class MainApp(tk.Tk):
             else:
                 avatar = 'false'
 
-            if 'selected' in password_chkb.state():
-                password = 'true'
-            else:
-                password = 'false'
-
             config_dict = {'locale': locale[locale_cb.current()],
                            'autoexit': autoexit,
                            'mode': mode,
@@ -1809,7 +1837,6 @@ class MainApp(tk.Tk):
                            'steam_path': get_config('steam_path'),
                            'ui_mode': ui_mode,
                            'theme': theme,
-                           'password': password,
                            'encryption': get_config('encryption')}
 
             config_write_dict(config_dict)
@@ -1858,6 +1885,23 @@ class MainApp(tk.Tk):
         '''Restart Steam client and exit application.
         If autoexit is disabled, app won't exit.'''
         label_var = tk.StringVar()
+
+        if get_config('steam_path') == 'reg':
+            r_path = fetch_reg('SteamExe')
+            r_path_items = r_path.split('/')
+        else:
+            r_path = get_config('steam_path') + '\\Steam.exe'
+            r_path_items = r_path.split('\\')
+
+        path_items = []
+        for item in r_path_items:
+            if ' ' in item:
+                path_items.append(f'"{item}"')
+            else:
+                path_items.append(item)
+
+        steam_exe = "\\".join(path_items)
+        print('Steam.exe path:', steam_exe)
 
         def forcequit():
             print('Hard shutdown mode')
@@ -1908,47 +1952,31 @@ class MainApp(tk.Tk):
                 forcequit()
             elif get_config('try_soft_shutdown') == 'true':
                 print('Soft shutdown mode')
-
-                if get_config('steam_path') == 'reg':
-                    r_path = fetch_reg('SteamExe')
-                    r_path_items = r_path.split('/')
-                else:
-                    r_path = get_config('steam_path') + '\\Steam.exe'
-                    r_path_items = r_path.split('\\')
-
-                path_items = []
-                for item in r_path_items:
-                    if ' ' in item:
-                        path_items.append(f'"{item}"')
-                    else:
-                        path_items.append(item)
-
-                steam_exe = "\\".join(path_items)
-                print('Steam.exe path:', steam_exe)
                 subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                                creationflags=0x08000000, check=True)
                 print('Shutdown command sent. Waiting for Steam...')
 
+            checker_task = None
+
             def steam_checker():
                 nonlocal queue
-                sleep(1)
-                while True:
-                    if t.stopped():
-                        break
-                    if steam_running():
-                        sleep(1)
-                        continue
-                    else:
-                        queue.put(1)
-                        break
+                nonlocal thread
+
+                if thread.stopped():
+                    return
+                if steam_running():
+                    self.after(1000, steam_checker)
+                else:
+                    queue.put(1)
+                    return
 
             def cancel():
-                t.stop()
+                thread.stop()
                 cleanup()
                 return
 
-            t = StoppableThread(target=steam_checker)
-            t.start()
+            thread = StoppableThread(target=steam_checker)
+            thread.start()
             cancel_button.update_command(cancel)
         else:
             queue.put(1)
@@ -1958,20 +1986,118 @@ class MainApp(tk.Tk):
         def launch_steam():
             nonlocal queue
             nonlocal counter
+            nonlocal thread
 
-            try:
-                queue.get_nowait()
-                label_var.set(_('Launching Steam...'))
-                self.update()
-
-                print('Launching Steam...')
-                subprocess.run("start steam://open/main",
-                               shell=True, check=True)
-
+            def after_steam_start():
                 if get_config('autoexit') == 'true':
                     self.exit_app()
                 elif not refresh_override:
                     cleanup()
+
+            try:
+                queue.get_nowait()
+                queue = q.Queue()
+
+                label_var.set(_('Launching Steam...'))
+                self.update()
+
+                print('Launching Steam...')
+
+                username = fetch_reg('AutoLoginUser')
+                password = self.accounts.get_password(username)
+
+                if password:
+                    def active_user_checker():
+                        nonlocal queue
+                        nonlocal active_user_thread
+
+                        if active_user_thread.stopped():
+                            return
+                        elif not fetch_reg('ActiveUser'):
+                            print('Waiting for Steam log in...')
+                            self.after(1000, active_user_checker)
+                        else:
+                            queue.put(1)
+                            return
+
+                    def login_with_pw():
+                        nonlocal active_user_thread
+                        print('Logging in with PW')
+                        self.after_cancel(active_user_waiter)
+                        active_user_thread.stop()
+
+                        subprocess.run(f"start {steam_exe} -shutdown", shell=True,
+                                       creationflags=0x08000000, check=True)
+                        print('Shutdown command sent. Waiting for Steam...')
+
+                        def steam_checker():
+                            nonlocal queue
+                            nonlocal thread
+
+                            if thread.stopped():
+                                return
+                            if steam_running():
+                                self.after(1000, steam_checker)
+                            else:
+                                queue.put(1)
+                                return
+
+                        thread = StoppableThread(target=steam_checker)
+                        thread.start()
+
+                        def callback():
+                            print('Starting Steam with login arguments...')
+                            subprocess.run(f"start {steam_exe} -login {username} {password}",
+                                           shell=True, check=True)
+                            after_steam_start()
+
+                        def waiter():
+                            try:
+                                queue.get_nowait()
+                                self.after(1000, callback)
+                            except q.Empty:
+                                self.after(1000, waiter)
+
+                        thread = StoppableThread(target=steam_checker)
+                        thread.start()
+
+                    def cancel():
+                        self.after_cancel(active_user_waiter)
+                        after_steam_start()
+
+                    subprocess.run("start steam://open/main",
+                                   shell=True, check=True)
+
+                    active_user_thread = StoppableThread(target=active_user_checker)
+                    active_user_thread.start()
+                    label_var.set(_('Waiting for log in...'))
+
+                    force_button.update_command(login_with_pw)
+                    force_button.update_text(_('Login with saved password\n(Steam Guard required)'))
+                    force_button.enable()
+
+                    cancel_button.update_command(cancel)
+                    cancel_button.enable()
+
+                    active_user_waiter = None
+
+                    def waiter():
+                        nonlocal active_user_waiter
+
+                        try:
+                            queue.get_nowait()
+                            after_steam_start()
+                        except q.Empty:
+                            active_user_waiter = self.after(1000, waiter)
+
+                    active_user_waiter = self.after(1000, waiter)
+
+
+                else:
+                    subprocess.run("start steam://open/main",
+                                   shell=True, check=True)
+                    after_steam_start()
+
             except q.Empty:
                 counter += 1
                 if counter == 10:

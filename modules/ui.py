@@ -544,11 +544,20 @@ class SimpleButton:
     def update_command(self, command):
         self.command = command
 
+    def update_text(self, text):
+        self.button_text.config(text=text)
+
     def pack(self, **kw):
         self.frame.pack(**kw)
 
     def grid(self, **kw):
         self.frame.grid(**kw)
+
+    def pack_forget(self):
+        self.frame.pack_forget()
+
+    def grid_forget(self):
+        self.frame.grid_forget()
 
 
 class ReadonlyEntryWithLabel:
@@ -733,11 +742,6 @@ class WelcomeWindow(tk.Toplevel):
             self.focus()
 
         elif self.active_page == 4:
-            if 'selected' in self.password_chkb.state():
-                self.password = 'true'
-            else:
-                self.password = 'false'
-
             if 'selected' in self.encryption_chkb.state():
                 self.encryption = 'true'
             else:
@@ -930,22 +934,10 @@ class WelcomeWindow(tk.Toplevel):
 
     def page_4(self):
         self.active_page = 4
-        self.top_label['text'] = _('Password Vault')
+        self.top_label['text'] = _('Encryption Settings')
 
         self.innerframe = ttk.Frame(self)
         self.innerframe.pack(side='top', padx=0, pady=(0, 8), fill='both', expand=True)
-
-        password_frame = ttk.Frame(self.innerframe)
-        password_frame.pack(side='top', fill='x', pady=5)
-
-        self.password_chkb = ttk.Checkbutton(password_frame, text=_('Use Password Vault'), style='Switch.TCheckbutton')
-        self.password_chkb.pack(pady=(8, 0))
-
-        ttk.Label(password_frame,
-                  text=_('Enable to store Steam passwords.\n\n') +
-                       _('Please keep your accounts data secure\n') +
-                       _('even if they are encrypted.'),
-                  justify=tk.CENTER).pack(side='top', pady=(2, 0))
 
         encryption_frame = ttk.Frame(self.innerframe)
         encryption_frame.pack(side='top', fill='x', pady=5)
@@ -953,28 +945,11 @@ class WelcomeWindow(tk.Toplevel):
         self.encryption_chkb = ttk.Checkbutton(encryption_frame, text=_('Encrypt accounts data'), style='Switch.TCheckbutton')
         self.encryption_chkb.pack(pady=(8, 0))
 
-        def on_password_check():
-            if self.password_chkb.instate(['selected']):
-                self.encryption_chkb.state(['selected'])
-            else:
-                self.encryption_chkb.state(['!selected'])
-
-        def on_encryption_check():
-            if self.password_chkb.instate(['selected']) and not self.encryption_chkb.instate(['selected']):
-                if not msgbox.askyesno(_('Warning'), _('Are you sure you REALLY want to disable encryption?') + '\n' +
-                                       _("Your accounts' passwords will be saved in plain text!")):
-                    self.encryption_chkb.state(['selected'])
-
-        self.password_chkb['command'] = on_password_check
-        self.encryption_chkb['command'] = on_encryption_check
-
         ttk.Label(encryption_frame,
                   text=_('Enable to encrypt accounts data with a password.') + '\n' +
-                       _('STRONGLY recommended when using Password Vault.') + '\n' +
+                       _('STRONGLY recommended when using Password Saving feature.') + '\n' +
                        _('Uses AES-128-CBC-HMAC-SHA256.'), justify=tk.CENTER).pack(pady=(2, 0))
 
-        if self.password == 'true':
-            self.password_chkb.state(['selected'])
         if self.encryption == 'true':
             self.encryption_chkb.state(['selected'])
 
@@ -1191,7 +1166,6 @@ class WelcomeWindow(tk.Toplevel):
                      'steam_path': get_config('steam_path'),
                      'ui_mode': self.ui_mode,
                      'theme': self.theme,
-                     'password': self.password,
                      'encryption': self.encryption}
 
         config_write_dict(dump_dict)
@@ -1361,7 +1335,7 @@ class ManageEncryptionWindow(tk.Toplevel):
             self.password_confirm_page()
         elif self.active_page == 'pw2':
             pw = self.pw_var.get()
-            AccountManager.create_encrypted_json_file(pw)
+            self.acm.set_master_password(pw)
             config_write_value('encryption', 'true')
             self.innerframe.destroy()
             self.main_window()

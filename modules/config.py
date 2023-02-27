@@ -45,9 +45,6 @@ valid_values = {
     'theme':
         ['light',
          'dark'],
-    'password':
-        ['true',
-         'false'],
     'encryption':
         ['true',
          'false']
@@ -71,7 +68,6 @@ default_cfg = {'locale': DEFAULT_LOCALE,
                'last_pos': f'{x_coordinate}/{y_coordinate}',
                'ui_mode': 'list',
                'theme': 'light',
-               'password': 'false',
                'encryption': 'false'}
 
 if darkdetect.isDark():
@@ -179,7 +175,6 @@ def config_write_value(key, value):
                    'steam_path': get_config('steam_path'),
                    'ui_mode': get_config('ui_mode'),
                    'theme': get_config('theme'),
-                   'password': get_config('password'),
                    'encryption': get_config('encryption')}
 
     config_dict[key] = value
