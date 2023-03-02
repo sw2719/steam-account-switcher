@@ -78,11 +78,14 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
             pass
 
         button_frame = tk.Frame(updatewindow)
-        button_frame.pack(side=tk.BOTTOM, pady=3, fill='x')
+        button_frame.pack(side=tk.BOTTOM, pady=3)
 
         cancel_button = ttk.Button(button_frame, text=_('Cancel'),
                                    command=updatewindow.destroy)
-        update_button = ttk.Button(button_frame, width=28, text=_('Update now'))
+        update_button = ttk.Button(button_frame, text=_('Update now'))
+
+        button_frame.columnconfigure(0, weight=1)
+        button_frame.columnconfigure(1, weight=1)
 
         text_frame = tk.Frame(updatewindow)
         text_frame.pack(side=tk.TOP, pady=3)
@@ -207,12 +210,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
             downloader.start()
 
         update_button['command'] = lambda: start_update()
-        if LOCALE == 'fr_FR':
-            padx_int = 80
-        else:
-            padx_int = 110
-        cancel_button.pack(side='left', padx=(padx_int, 0))
-        update_button.pack(side='right', padx=(0, padx_int))
+        cancel_button.grid(row=0, column=0, padx=(0, 3))
+        update_button.grid(row=0, column=1)
 
     queue = q.Queue()
 
