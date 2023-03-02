@@ -186,7 +186,16 @@ class MainApp(tk.Tk):
         button_frame.pack(side=tk.BOTTOM, padx=3, pady=3)
 
         def entry_check(sv):
-            if sv.get():
+            pw = sv.get()
+            try:
+                last_ch = pw[-1]
+                if last_ch == ' ':
+                    sv.set(pw[:-1])
+                    return
+            except IndexError:
+                pass
+
+            if pw:
                 unlock_button['state'] = 'normal'
             else:
                 unlock_button['state'] = 'disabled'

@@ -967,6 +967,14 @@ class WelcomeWindow(tk.Toplevel):
 
             pw = sv.get()
 
+            try:
+                last_ch = pw[-1]
+                if last_ch == ' ':
+                    sv.set(pw[:-1])
+                    return
+            except IndexError:
+                pass
+
             conditions = re.search('[a-zA-Z]', pw) and re.search('[0-9]', pw) and len(pw) >= 8 and pw.strip() == pw
 
             if conditions:
@@ -992,7 +1000,12 @@ class WelcomeWindow(tk.Toplevel):
 
         pw_entry = ttk.Entry(entry_frame, show="⬤", justify=tk.CENTER, textvariable=self.pw_var)
         pw_entry.pack(side=tk.LEFT, padx=(3, 0), fill=tk.X, expand=True)
-        #pw_entry.bind('<Return>', self.ok)
+
+        pw_entry.bind('<Control-x>', lambda e: 'break')
+        pw_entry.bind('<Control-c>', lambda e: 'break')
+        pw_entry.bind('<Control-v>', lambda e: 'break')
+        pw_entry.bind('<Button-3>', lambda e: 'break')
+
         pw_entry.focus()
 
         self.pw_var.trace("w", lambda name, index, mode, sv=self.pw_var: check_pw(sv))
@@ -1039,6 +1052,14 @@ class WelcomeWindow(tk.Toplevel):
 
             pw = sv.get()
 
+            try:
+                last_ch = pw[-1]
+                if last_ch == ' ':
+                    sv.set(pw[:-1])
+                    return
+            except IndexError:
+                pass
+
             if pw == self.pw_var.get():
                 prompt['foreground'] = get_color('autologin_text_avail')
                 prompt['text'] = _('Passwords match!')
@@ -1057,7 +1078,12 @@ class WelcomeWindow(tk.Toplevel):
 
         pw_entry = ttk.Entry(entry_frame, show="⬤", justify=tk.CENTER, textvariable=pw_var)
         pw_entry.pack(side=tk.LEFT, padx=(3, 0), fill=tk.X, expand=True)
-        #pw_entry.bind('<Return>', self.ok)
+
+        pw_entry.bind('<Control-x>', lambda e: 'break')
+        pw_entry.bind('<Control-c>', lambda e: 'break')
+        pw_entry.bind('<Control-v>', lambda e: 'break')
+        pw_entry.bind('<Button-3>', lambda e: 'break')
+
         pw_entry.focus()
 
         pw_var.trace("w", lambda name, index, mode, sv=pw_var: check_pw(sv))
@@ -1304,7 +1330,7 @@ class ManageEncryptionWindow(tk.Toplevel):
 
             ttk.Label(self.innerframe,
                       text=_('Enable to encrypt accounts data with a password.') + '\n' +
-                           _('STRONGLY recommended when using Password Vault.') + '\n' +
+                           _('STRONGLY recommended when using Password saving.') + '\n' +
                            _('Uses AES-128-CBC-HMAC-SHA256.'), justify=tk.CENTER).pack(expand=True)
 
     def back(self):
@@ -1361,6 +1387,15 @@ class ManageEncryptionWindow(tk.Toplevel):
             nonlocal prompt
 
             pw = sv.get()
+
+            try:
+                last_ch = pw[-1]
+                if last_ch == ' ':
+                    sv.set(pw[:-1])
+                    return
+            except IndexError:
+                pass
+
             conditions = re.search('[a-zA-Z]', pw) and re.search('[0-9]', pw) and len(pw) >= 8 and pw.strip() == pw
 
             if conditions:
@@ -1385,6 +1420,10 @@ class ManageEncryptionWindow(tk.Toplevel):
         entry_frame.pack(side=tk.BOTTOM, fill=tk.X)
 
         pw_entry = ttk.Entry(entry_frame, show="⬤", justify=tk.CENTER, textvariable=self.pw_var)
+        pw_entry.bind('<Control-x>', lambda e: 'break')
+        pw_entry.bind('<Control-c>', lambda e: 'break')
+        pw_entry.bind('<Control-v>', lambda e: 'break')
+        pw_entry.bind('<Button-3>', lambda e: 'break')
         pw_entry.pack(side=tk.LEFT, padx=(3, 0), fill=tk.X, expand=True)
         pw_entry.focus()
 
@@ -1408,7 +1447,7 @@ class ManageEncryptionWindow(tk.Toplevel):
 
         checkbutton['command'] = on_show_checkbutton
 
-        prompt = ttk.Label(self.innerframe, text=_('At least 8 characters\nIncludes alphabets and numbers\nNo spaces\n(Special characters are allowed)'),
+        prompt = ttk.Label(self.innerframe, text=_('At least 8 characters\nMust contain at least one alphabet and a number'),
                            justify=tk.CENTER)
         prompt.pack(side=tk.BOTTOM, padx=3, pady=3)
 
@@ -1440,13 +1479,21 @@ class ManageEncryptionWindow(tk.Toplevel):
 
             pw = sv.get()
 
+            try:
+                last_ch = pw[-1]
+                if last_ch == ' ':
+                    sv.set(pw[:-1])
+                    return
+            except IndexError:
+                pass
+
             if pw == self.pw_var.get():
                 prompt['foreground'] = get_color('autologin_text_avail')
                 prompt['text'] = _('Passwords match!')
                 confirm_button['state'] = 'normal'
             else:
                 prompt['foreground'] = ''
-                prompt['text'] = _('Passwords do not match.')
+                prompt['text'] = _('Passwords do not match')
                 confirm_button['state'] = 'disabled'
 
         ttk.Label(self.innerframe,
@@ -1458,7 +1505,10 @@ class ManageEncryptionWindow(tk.Toplevel):
 
         pw_entry = ttk.Entry(entry_frame, show="⬤", justify=tk.CENTER, textvariable=pw_var)
         pw_entry.pack(side=tk.LEFT, padx=(3, 0), fill=tk.X, expand=True)
-        #pw_entry.bind('<Return>', self.ok)
+        pw_entry.bind('<Control-x>', lambda e: 'break')
+        pw_entry.bind('<Control-c>', lambda e: 'break')
+        pw_entry.bind('<Control-v>', lambda e: 'break')
+        pw_entry.bind('<Button-3>', lambda e: 'break')
         pw_entry.focus()
 
         pw_var.trace("w", lambda name, index, mode, sv=pw_var: check_pw(sv))
