@@ -4,10 +4,8 @@ import os
 import zipfile as zf
 import sys
 import winshell
-from tkinter import messagebox as msgbox
 from modules.reg import fetch_reg
-from modules.config import get_config
-from modules.steamid import steam64_to_32
+from modules.config import get_config, config_write_value
 
 
 class StoppableThread(threading.Thread):
@@ -22,7 +20,10 @@ class StoppableThread(threading.Thread):
         return self._stop.isSet()
 
 
-def check_steam_dir():
+def check_steam_dir(force_reg=False):
+    if force_reg:
+        return os.path.isfile(fetch_reg('SteamPath') + '\\Steam.exe')
+
     if get_config('steam_path') == 'reg' and os.path.isfile(fetch_reg('SteamPath') + '\\Steam.exe'):
         return True
     elif os.path.isfile(get_config('steam_path') + '\\Steam.exe'):
@@ -54,16 +55,13 @@ def launch_updater():
 
 
 def test():
-    print('Listing current config...')
+    print('Verifying Steam.exe location...')
 
-    for key, value in get_config('all').items():
-        print(key, value, sep=': ')
+    if check_steam_dir(force_reg=True) and get_config('steam_path') != 'reg':
+        print('SteamPath registry key is valid but config is not set to use it')
+        print('Setting config to use registry key')
+        config_write_value('steam_path', 'reg')
 
-    print('Checking registry...')
-    for key in ('AutoLoginUser', 'SteamExe', 'SteamPath', 'pid', 'ActiveUser'):
-        print(f'{key}:', fetch_reg(key))
-
-    print('Checking Steam.exe location...')
     if check_steam_dir() and get_config('steam_path') == 'reg':
         print('Steam located at', fetch_reg('steampath'))
     elif check_steam_dir():
