@@ -93,10 +93,10 @@ class AccountManager:
             with open('accounts.json', 'rb') as f:
                 secret = fernet.decrypt(f.read())
                 json.loads(secret.decode('utf-8'))
-                pprint('Password authentication successful')
+                pprint('Password authentication success')
                 return True
         except (InvalidToken, json.decoder.JSONDecodeError):
-            pprint('Password authentication failed.')
+            pprint('Password authentication fail')
             return False
 
     @staticmethod
@@ -129,7 +129,7 @@ class AccountManager:
         with open('accounts.json', 'wb') as f:
             enc_dict = self.fernet.encrypt(json.dumps(self.acc_dict).encode())
             f.write(enc_dict)
-            pprint('Changed password')
+            pprint('Set master password')
 
     def disable_encryption(self):
         with open('accounts.json', 'w', encoding='utf-8') as f:
