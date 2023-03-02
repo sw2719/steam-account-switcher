@@ -205,7 +205,7 @@ class MainApp(tk.Tk):
                 pw_entry['show'] = '⬤'
 
         checkbutton = ttk.Checkbutton(frame,
-                                      text=_('See password'),
+                                      text=_('Show password'),
                                       variable=check_var,
                                       command=check_command)
         checkbutton.pack(side=tk.BOTTOM, padx=3, pady=3)
@@ -412,7 +412,7 @@ class MainApp(tk.Tk):
         account_settings_window.title('')
 
         x, y = self.get_window_pos()
-        account_settings_window.geometry(self.popup_geometry(250, 300))
+        account_settings_window.geometry(self.popup_geometry(250, 270))
         account_settings_window.resizable(False, False)
         account_settings_window.bind('<Escape>', lambda event: account_settings_window.destroy())
 
@@ -487,7 +487,7 @@ class MainApp(tk.Tk):
         save_password_var = tk.IntVar()
 
         save_password_frame = ttk.Frame(account_settings_window)
-        save_password_frame.pack(side='top', padx=(10, 0), pady=(12, 4), fill='x')
+        save_password_frame.pack(side='top', padx=(10, 0), pady=(12, 3), fill='x')
 
         save_password_chkb = ttk.Checkbutton(save_password_frame,
                                           text=_('Save password'),
@@ -497,10 +497,10 @@ class MainApp(tk.Tk):
 
         set_password = self.accounts.get_password(username)
 
-        save_password_chkb.pack(side='left', pady=2)
+        save_password_chkb.pack(side='left')
 
         password_entry_frame = tk.Frame(account_settings_window)
-        password_entry_frame.pack(side='top', pady=4, fill='x')
+        password_entry_frame.pack(side='top', pady=(2, 0), fill='x')
 
         password_entry = ttk.Entry(password_entry_frame, justify=tk.CENTER, show='⬤')
         password_entry.pack(fill='x', padx=8)
@@ -1913,7 +1913,7 @@ class MainApp(tk.Tk):
         self.button_frame.destroy()
         hide_update()
         self.bottomframe.pack_forget()
-        button_frame = tk.Frame(self, bg=self['bg'])
+        button_frame = tk.Frame(self, bg=get_color('upperframe'))
         button_frame.pack(side='bottom', fill='x')
         cancel_button = SimpleButton(button_frame,
                                      text=_('Cancel'))
@@ -1928,7 +1928,7 @@ class MainApp(tk.Tk):
             force_button.enable()
 
         cancel_button.pack(side='bottom', padx=3, pady=3, fill='x')
-        force_button.pack(side='bottom', padx=3, fill='x')
+        force_button.pack(side='bottom', padx=3, pady=(3,0), fill='x')
 
         label_var = tk.StringVar()
         label_var.set(_('Initializing...'))
