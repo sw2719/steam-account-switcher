@@ -979,7 +979,7 @@ class MainApp(tk.Tk):
             account_name = loginusers_accountnames()
 
             for index, steamid in enumerate(steam64_list):
-                if account_name[index] in self.accounts:
+                if account_name[index] in self.accounts.list:
                     dl_list.append(steamid)
 
         download_avatar(dl_list)
@@ -1945,6 +1945,8 @@ class MainApp(tk.Tk):
         self.update()
         queue = q.Queue()
 
+        # This is absolute spaghetti... Really need to rewrite it someday.
+
         if steam_running():
             label_var.set(_('Waiting for Steam to exit...'))
 
@@ -2029,21 +2031,22 @@ class MainApp(tk.Tk):
                         subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                                        creationflags=0x08000000, check=True)
                         print('Shutdown command sent. Waiting for Steam...')
+                        label_var.set(_('Waiting for Steam to exit...'))
 
                         def steam_checker():
                             nonlocal queue
                             nonlocal thread
+                            print('Steam check called')
 
                             if thread.stopped():
                                 return
                             if steam_running():
+                                print('Steam running')
                                 self.after(1000, steam_checker)
                             else:
+                                print('Steam exited')
                                 queue.put(1)
                                 return
-
-                        thread = StoppableThread(target=steam_checker)
-                        thread.start()
 
                         def callback():
                             print('Starting Steam with login arguments...')
@@ -2060,6 +2063,8 @@ class MainApp(tk.Tk):
 
                         thread = StoppableThread(target=steam_checker)
                         thread.start()
+
+                        self.after(1000, waiter)
 
                     def cancel():
                         self.after_cancel(active_user_waiter)
