@@ -776,6 +776,12 @@ class WelcomeWindow(tk.Toplevel):
                 self.password_page()
             else:
                 self.page_5()
+
+                if self.after_update:
+                    self.ok_button['text'] = _('Finish')
+                else:
+                    self.ok_button['text'] = _('Next')
+
                 self.focus()
 
         elif self.active_page == 'pw1':
@@ -818,6 +824,7 @@ class WelcomeWindow(tk.Toplevel):
             if self.after_update:
                 self.save()
                 self.destroy()
+                return
             else:
                 self.ok_button['text'] = _('Finish')
                 self.page_6()
@@ -1004,7 +1011,7 @@ class WelcomeWindow(tk.Toplevel):
             self.encryption_chkb.state(['selected'])
 
         if self.encryption_already_enabled == 'true':
-            encryption_info['text'] = "Encryption is already enabled.\nClick 'Next' to continue."
+            encryption_info['text'] = _("Encryption is already enabled.\nClick 'Next' to continue.")
             self.encryption_chkb.state(['disabled'])
 
     def password_page(self):
