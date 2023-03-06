@@ -44,7 +44,7 @@ class AccountManager:
             with open('accounts.json', 'r', encoding='utf-8') as f:
                 self.acc_dict = json.load(f)
         except json.decoder.JSONDecodeError:
-            if get_config('encryption'):
+            if get_config('encryption') == 'true':
                 if password is None:
                     raise ValueError('Password is required to decrypt accounts.json')
                 else:
