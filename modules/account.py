@@ -67,10 +67,10 @@ class AccountManager:
                         pprint('Decrypted accounts.json successfully')
             else:
                 self.acc_dict = {}
-                self._reset_json()
+                self.reset_json()
 
         except FileNotFoundError:
-            self._reset_json()
+            self.reset_json()
 
         pprint('AccountManager initialized')
 
@@ -100,7 +100,7 @@ class AccountManager:
             return False
 
     @staticmethod
-    def _reset_json():
+    def reset_json():
         with open('accounts.json', 'w', encoding='utf-8') as f:
             json.dump({}, f, indent=4)
         pprint('New account.json created')
@@ -143,7 +143,6 @@ class AccountManager:
         with open('salt', 'wb') as f:
             salt = os.urandom(16)
             f.write(salt)
-            win32api.SetFileAttributes('salt', win32con.FILE_ATTRIBUTE_HIDDEN)
 
         if os.path.isfile('accounts.json'):
             with open('accounts.json', 'r') as f:

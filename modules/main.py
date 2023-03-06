@@ -104,7 +104,7 @@ def legacy_restart(silent=True):
 
 class MainApp(tk.Tk):
     '''Main application'''
-    def __init__(self, version, url, bundle, std_out, std_err, after_update):
+    def __init__(self, version, bundle, std_out, std_err, after_update):
         sys.stdout = std_out
         sys.stderr = std_err
 
@@ -113,7 +113,6 @@ class MainApp(tk.Tk):
         self.BUNDLE = bundle
         self.after_update = after_update
         self.version = version
-        self.url = url
 
         tk.Tk.__init__(self)
 
@@ -149,7 +148,7 @@ class MainApp(tk.Tk):
         self.lock_white_imgtk = ImageTk.PhotoImage(lock_white_img)
 
         if first_run or after_update:
-            self.welcomewindow()
+            self.open_welcomewindow()
         elif get_config('encryption') == 'true':
             self.lockscreen()
         else:
@@ -157,6 +156,32 @@ class MainApp(tk.Tk):
             self.main_menu()
 
     def lockscreen(self):
+        def reset_accounts_data():
+            if msgbox.askyesno(_('Reset accounts data'),
+                               _('This will reset all accounts data.\nThis action cannot be undone.') + '\n\n' +
+                               _('Are you sure?')):
+                AccountManager.reset_json()
+                config_write_value('encryption', 'false')
+                self.accounts = AccountManager()
+                self.config(menu='')
+                frame.destroy()
+                self.main_menu()
+
+        menubar = tk.Menu(self)
+
+        if SYS_LOCALE == 'ko_KR':
+            menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
+            menu = tk.Menu(menubar, tearoff=0, font=menu_font)
+        else:
+            menu = tk.Menu(menubar, tearoff=0)
+
+        menu.add_command(label=_('Reset accounts data'),
+                         command=reset_accounts_data)
+        menu.add_separator()
+        menu.add_command(label=_('Exit'), command=self.exit_app)
+        menubar.add_cascade(label=_('Menu'), menu=menu)
+        self.config(menu=menubar)
+
         frame = ttk.Frame(self)
         pw_var = tk.StringVar()
         pw_var.trace("w", lambda name, index, mode, sv=pw_var: entry_check(sv))
@@ -167,6 +192,7 @@ class MainApp(tk.Tk):
             if AccountManager.verify_password(pw_var.get()):
                 self.accounts = AccountManager(password=pw_var.get())
                 frame.destroy()
+                self.config(menu='')
                 self.main_menu()
             else:
                 prompt['text'] = _('Incorrect password. Try again.')
@@ -174,10 +200,10 @@ class MainApp(tk.Tk):
                 pw_var.set('')
 
         button_frame = tk.Frame(frame)
-        exit_button = ttk.Button(button_frame, text='Exit', command=sys.exit)
+        exit_button = ttk.Button(button_frame, text=_('Exit'), command=sys.exit)
         exit_button.grid(row=0, column=0, padx=(0, 1.5))
         unlock_button = ttk.Button(button_frame,
-                                   text='Unlock (Enter)',
+                                   text=_('Unlock (Enter)'),
                                    state='disabled',
                                    command=check_pw,
                                    style='Accent.TButton')
@@ -227,8 +253,8 @@ class MainApp(tk.Tk):
             lock_icon.create_image(150, 100, image=self.lock_white_imgtk)
         lock_icon.pack(expand=True, fill=tk.BOTH)
 
-        ttk.Label(frame, text='Welcome', font=self.bold_font).pack()
-        prompt = ttk.Label(frame, text='Enter master password to unlock.')
+        ttk.Label(frame, text=_('Welcome'), font=self.bold_font).pack()
+        prompt = ttk.Label(frame, text=_('Enter master password to unlock.'))
         prompt.pack(expand=True, pady=5)
         frame.pack(fill='both', expand=True)
         self.update_idletasks()
@@ -269,19 +295,19 @@ class MainApp(tk.Tk):
         if not self.BUNDLE:
             debug_menu = tk.Menu(menubar, tearoff=0)
             debug_menu.add_command(label='Check for updates with debug mode',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, self.url, self.BUNDLE, debug=True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, self.BUNDLE, debug=True)))
             debug_menu.add_command(label='Check for updates without debug mode',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, self.url, True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, True)))
             debug_menu.add_command(label='Check for updates (Force update available)',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, '1.0', self.url, True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, '1.0', True)))
             debug_menu.add_command(label='Check for updates (Raise error)',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, self.url, True, exception=True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, True, exception=True)))
             debug_menu.add_command(label="Download avatar images",
                                    command=download_avatar)
             debug_menu.add_command(label="Open initial setup",
-                                   command=lambda: self.welcomewindow(debug=True))
+                                   command=lambda: self.open_welcomewindow(debug=True))
             debug_menu.add_command(label="Open initial setup with after_update True",
-                                   command=lambda: self.welcomewindow(debug=True, update_override=True))
+                                   command=lambda: self.open_welcomewindow(debug=True, update_override=True))
             debug_menu.add_command(label="Toggle demo mode",
                                    command=self.toggle_demo)
             debug_menu.add_command(label="Raise exception",
@@ -360,6 +386,8 @@ class MainApp(tk.Tk):
 
         self.draw_button()
 
+        self.after(100, lambda: start_checkupdate(self, self.version, self.BUNDLE))
+
     def report_callback_exception(self, exc, val, tb):
         if self.BUNDLE:
             msgbox.showerror(_('Unhandled Exception'),
@@ -394,27 +422,36 @@ class MainApp(tk.Tk):
 
         self.refresh()
 
-    def welcomewindow(self, debug=False, update_override=False):
+    def open_welcomewindow(self, debug=False, update_override=False):
         self.withdraw()
 
         if update_override:
-            window = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), True, debug)
+            welcomewindow = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), True, debug)
         else:
-            window = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), self.after_update, debug)
+            welcomewindow = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), self.after_update, debug)
 
-        def after_init():
-            if get_config('encryption') == 'true':
-                self.lockscreen()
-            else:
+        def after_init(pw):
+            if get_config('encryption') == 'true' and not update_override:
+                if pw:
+                    self.accounts = AccountManager(pw)
+                    self.main_menu()
+                else:
+                     self.lockscreen()
+            elif not debug:
                 self.main_menu()
+            else:
+                self.refresh()
             self.update_idletasks()
             self.deiconify()
 
         def event_function(event):
+            nonlocal welcomewindow
             if str(event.widget) == '.!welcomewindow':
-                after_init()
+                pw = welcomewindow.pw
+                del welcomewindow
+                after_init(pw)
 
-        window.bind('<Destroy>', event_function)
+        welcomewindow.bind('<Destroy>', event_function)
 
     def account_settings_window(self, username):
         account_settings_window = tk.Toplevel(self)
@@ -596,7 +633,7 @@ class MainApp(tk.Tk):
 
             self.refresh()
 
-    def open_screenshot(steamid64, steam_path=get_config('steam_path')):
+    def open_screenshot(self, steamid64, steam_path=get_config('steam_path')):
         if steam_path == 'reg':
             steam_path = fetch_reg('steampath')
 
@@ -1569,7 +1606,7 @@ class MainApp(tk.Tk):
 
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(self.popup_geometry(width, 530))  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 520))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
@@ -1812,10 +1849,12 @@ class MainApp(tk.Tk):
 
             if theme_radio_var.get() == 1:
                 theme = 'dark'
-                sv_ttk.use_dark_theme()
+                if sv_ttk.get_theme() != 'dark':
+                    sv_ttk.use_dark_theme()
             else:
                 theme = 'light'
-                sv_ttk.use_light_theme()
+                if sv_ttk.get_theme() != 'light':
+                    sv_ttk.use_light_theme()
 
             if mode_radio_var.get() == 1:
                 mode = 'express'
@@ -1855,8 +1894,8 @@ class MainApp(tk.Tk):
                     self.update_avatar(no_ui=True)
 
             if current_locale != locale[locale_cb.current()]:
-                self.after(100, lambda: msgbox.showinfo(_('Locale has been changed'),
-                                                        _('Restart app to apply new locale settings.')))
+                self.after(100, lambda: msgbox.showinfo(_('Language has been changed'),
+                                                        _('Restart app to apply new language settings.')))
                 current_locale = locale[locale_cb.current()]
 
             self.refresh()
@@ -2063,17 +2102,17 @@ class MainApp(tk.Tk):
                                            shell=True, check=True)
                             after_steam_start()
 
-                        def waiter():
+                        def pw_waiter():
                             try:
                                 queue.get_nowait()
                                 self.after(1000, callback)
                             except q.Empty:
-                                self.after(1000, waiter)
+                                self.after(1000, pw_waiter)
 
                         thread = StoppableThread(target=steam_checker)
                         thread.start()
 
-                        self.after(1000, waiter)
+                        self.after(1000, pw_waiter)
 
                     def cancel():
                         self.after_cancel(active_user_waiter)
@@ -2087,7 +2126,7 @@ class MainApp(tk.Tk):
                     label_var.set(_('Waiting for log in...'))
 
                     force_button.update_command(login_with_pw)
-                    force_button.update_text(_('Login with saved password\n(Steam Guard required)'))
+                    force_button.update_text(_('Login with saved password'))
                     force_button.enable()
 
                     cancel_button.update_command(cancel)

@@ -585,6 +585,8 @@ class WelcomeWindow(tk.Toplevel):
         self.geometry(geometry)
         self.resizable(False, False)
 
+        self.after_update = after_update
+
         if not debug:
             self.protocol("WM_DELETE_WINDOW", self.on_window_close)
 
@@ -605,30 +607,27 @@ class WelcomeWindow(tk.Toplevel):
         self.title_font = tkfont.Font(weight=tkfont.BOLD, size=23, family='Arial')
 
         self.button_frame = ttk.Frame(self)
-        self.button_frame.pack(side='bottom', fill='x')
+        self.button_frame.pack(side='bottom', fill='x', padx=3, pady=3)
 
         self.button_frame.rowconfigure(0, weight=1)
         self.button_frame.columnconfigure(0, weight=1)
         self.button_frame.columnconfigure(1, weight=1)
+        self.button_frame.columnconfigure(2, weight=1)
+
+        self.back_button = ttk.Button(self.button_frame, text=_('Exit'), command=self.back, width=10)
+        self.back_button.grid(row=0, column=0, sticky='w')
+
+        self.page_label = ttk.Label(self.button_frame, text='0/6')
+        self.page_label.grid(row=0, column=1, sticky='s', padx=3, pady=(0, 10))
+
+        if self.after_update:
+            self.page_label['text'] = '0/5'
 
         self.ok_button = ttk.Button(self.button_frame, text=_('Next'), command=self.ok, width=10)
-        self.ok_button.grid(row=0, column=1, sticky='e', padx=3, pady=3)
-
-        self.back_button = ttk.Button(self.button_frame, text=_('Back'), command=self.back, width=10)
-
-        self.title_label = tk.Label(self, text=_('Update complete'), font=self.title_font)
-
-        if after_update:
-            self.title_label['text'] = _('Update complete')
-        else:
-            self.title_label['text'] = _('Welcome')
-
-        self.welcome_label = tk.Label(self, text=_('Click OK to continue.'))
-        self.title_label.pack(expand=True, pady=1)
-        self.welcome_label.pack(expand=True, pady=1)
+        self.ok_button.grid(row=0, column=2, sticky='e')
 
         self.encryption = False
-        self.password = False
+        self.pw = None
 
         self.encryption_already_enabled = get_config('encryption')
 
@@ -637,7 +636,8 @@ class WelcomeWindow(tk.Toplevel):
 
         self.required_pages = []
 
-        if after_update and missing_values:
+        # TODO: Actually use this and show user only required pages
+        if self.after_update and missing_values:
             if 'theme' in missing_values:
                 self.required_pages.append(1)
             if 'ui_mode' in missing_values:
@@ -649,15 +649,26 @@ class WelcomeWindow(tk.Toplevel):
             if 'try_soft_shutdown' in missing_values or 'autoexit' in missing_values or 'show_avatar' in missing_values:
                 self.required_pages.append(5)
 
+        self.page_0()
+
     def on_window_close(self):
         os.remove('config.json')
         sys.exit(0)
 
     def back(self):
-        if self.active_page == 2:
+        if self.active_page == 0:
+            self.on_window_close()
+
+        elif self.active_page == 1:
+            self.top_label.destroy()
             self.radio_frame1.destroy()
             self.radio_frame2.destroy()
-            self.back_button.grid_forget()
+            self.page_0()
+            self.focus()
+
+        elif self.active_page == 2:
+            self.radio_frame1.destroy()
+            self.radio_frame2.destroy()
             self.page_1()
             self.focus()
 
@@ -674,13 +685,15 @@ class WelcomeWindow(tk.Toplevel):
 
         elif self.active_page == 'pw1':
             self.innerframe.destroy()
-            self.ok_button['state'] = 'normal'
             self.page_4()
+            self.ok_button['state'] = 'normal'
+            self.ok_button['text'] = _('Next')
             self.focus()
 
         elif self.active_page == 'pw2':
             self.innerframe.destroy()
             self.password_page()
+            self.ok_button['text'] = _('Next (Enter)')
             self.focus()
 
         elif self.active_page == 5:
@@ -692,11 +705,19 @@ class WelcomeWindow(tk.Toplevel):
                 self.password_page()
             else:
                 self.page_4()
+                self.ok_button['text'] = _('Next')
             self.focus()
 
         elif self.active_page == 6:
             self.innerframe.destroy()
+            self.ok_button['text'] = _('Next')
             self.page_5()
+
+        if type(self.active_page) == int:
+            if self.after_update:
+                self.page_label['text'] = str(self.active_page) + '/5'
+            else:
+                self.page_label['text'] = str(self.active_page) + '/6'
 
     def ok(self):
         if self.active_page == 0:
@@ -704,6 +725,7 @@ class WelcomeWindow(tk.Toplevel):
             self.welcome_label.destroy()
             self.top_label = tk.Label(self.upper_frame, font=self.top_font)
             self.top_label.pack(side='left', padx=(10, 0), pady=10)
+            self.back_button['text'] = _('Back')
             self.page_1()
             self.focus()
 
@@ -750,21 +772,27 @@ class WelcomeWindow(tk.Toplevel):
             self.innerframe.destroy()
 
             if self.encryption == 'true':
+                self.ok_button['text'] = _('Next (Enter)')
                 self.password_page()
             else:
                 self.page_5()
-            self.focus()
+                self.focus()
 
         elif self.active_page == 'pw1':
             self.innerframe.destroy()
             self.password_confirm_page()
-            self.focus()
+            self.ok_button['text'] = _('Confirm (Enter)')
 
         elif self.active_page == 'pw2':
             self.pw = self.pw_var.get()
             del self.pw_var
             self.innerframe.destroy()
             self.page_5()
+
+            if self.after_update:
+                self.ok_button['text'] = _('Finish')
+            else:
+                self.ok_button['text'] = _('Next')
             self.focus()
 
         elif self.active_page == 5:
@@ -787,8 +815,13 @@ class WelcomeWindow(tk.Toplevel):
             self.autoexit_frame.destroy()
             self.avatar_frame.destroy()
 
-            self.page_6()
-            self.focus()
+            if self.after_update:
+                self.save()
+                self.destroy()
+            else:
+                self.ok_button['text'] = _('Finish')
+                self.page_6()
+                self.focus()
 
         elif self.active_page == 6:
             if 'selected' in self.shortcut_chkb.state():
@@ -799,16 +832,31 @@ class WelcomeWindow(tk.Toplevel):
             self.focus()
             self.save()
             self.destroy()
+            return
+
+        if type(self.active_page) == int:
+            if self.after_update:
+                self.page_label['text'] = str(self.active_page) + '/5'
+            else:
+                self.page_label['text'] = str(self.active_page) + '/6'
+
+    def page_0(self):
+        self.active_page = 0
+        self.title_label = tk.Label(self, text=_('Welcome'), font=self.title_font)
+
+        if self.after_update:
+            self.title_label['text'] = _('Update complete')
+
+        self.welcome_label = tk.Label(self, text=_("Click 'Next' to continue."))
+        self.back_button['text'] = _('Exit')
+        self.title_label.pack(expand=True, pady=1)
+        self.welcome_label.pack(expand=True, pady=1)
 
     def page_1(self):
         self.active_page = 1
         self.top_label['text'] = _('UI Appearance')
         self.bottomframe = tk.Frame(self)
         self.bottomframe.pack(side='bottom', fill='x')
-
-        self.dark_alert = tk.Label(self.bottomframe,
-                                   text=' ')
-        self.dark_alert.pack(side='bottom', pady=(0, 4), fill='x')
 
         icon_w = 60
         icon_h = 96
@@ -851,10 +899,10 @@ class WelcomeWindow(tk.Toplevel):
 
     def page_2(self):
         self.active_page = 2
+        self.top_label['text'] = _('UI Appearance')
         self.radio_frame1 = tk.Frame(self)
         self.radio_frame1.pack(side='left', padx=(30, 0), pady=5)
         self.list_canvas = tk.Canvas(self.radio_frame1, width=50, height=50, bd=0, highlightthickness=0)
-        self.back_button.grid(row=0, column=0, sticky='w', padx=3, pady=3)
 
         if not self.theme_radio_var.get():
             img_list = Image.open("asset/list.png").resize((50, 50))
@@ -940,18 +988,24 @@ class WelcomeWindow(tk.Toplevel):
         self.innerframe.pack(side='top', padx=0, pady=(0, 8), fill='both', expand=True)
 
         encryption_frame = ttk.Frame(self.innerframe)
-        encryption_frame.pack(side='top', fill='x', pady=5)
+        encryption_frame.pack(side='top', fill='y', expand=True, pady=5)
 
         self.encryption_chkb = ttk.Checkbutton(encryption_frame, text=_('Encrypt accounts data'), style='Switch.TCheckbutton')
         self.encryption_chkb.pack(pady=(8, 0))
 
-        ttk.Label(encryption_frame,
-                  text=_('Enable to encrypt accounts data with a password.') + '\n' +
-                       _('STRONGLY recommended when using Password Saving feature.') + '\n' +
-                       _('Uses AES-128-CBC-HMAC-SHA256.'), justify=tk.CENTER).pack(pady=(2, 0))
+        encryption_info = ttk.Label(encryption_frame,
+                                    text=_('Enable to encrypt accounts data with a password.') + '\n' +
+                                         _('STRONGLY recommended when using Password Saving.') + '\n' +
+                                         _('Uses AES-128-CBC-HMAC-SHA256.'),
+                                    justify=tk.CENTER)
+        encryption_info.pack(expand=True, fill='both')
 
         if self.encryption == 'true':
             self.encryption_chkb.state(['selected'])
+
+        if self.encryption_already_enabled == 'true':
+            encryption_info['text'] = "Encryption is already enabled.\nClick 'Next' to continue."
+            self.encryption_chkb.state(['disabled'])
 
     def password_page(self):
         self.active_page = 'pw1'
@@ -960,7 +1014,7 @@ class WelcomeWindow(tk.Toplevel):
         self.ok_button['state'] = 'disabled'
 
         self.innerframe = ttk.Frame(self)
-        self.innerframe.pack(side='top', padx=0, pady=(0, 0), fill='both', expand=True)
+        self.innerframe.pack(side='top', fill='both', expand=True)
 
         def check_pw(sv):
             nonlocal prompt
@@ -1028,7 +1082,7 @@ class WelcomeWindow(tk.Toplevel):
 
         checkbutton['command'] = on_show_checkbutton
 
-        prompt = ttk.Label(self.innerframe, text=_('At least 8 characters\nIncludes alphabets and numbers\nNo spaces\n(Special characters are allowed)'),
+        prompt = ttk.Label(self.innerframe, text=_('At least 8 characters\nMust contain at least one alphabet and a number'),
                            justify=tk.CENTER)
         prompt.pack(side=tk.BOTTOM, padx=3, pady=3)
 
@@ -1043,6 +1097,7 @@ class WelcomeWindow(tk.Toplevel):
         self.top_label['text'] = _('Confirm Password')
         pw_var = tk.StringVar()
         self.ok_button['state'] = 'disabled'
+        self.ok_button['text'] = _('Confirm (Enter)')
 
         self.innerframe = ttk.Frame(self)
         self.innerframe.pack(side='top', padx=0, pady=(0, 0), fill='both', expand=True)
@@ -1066,7 +1121,7 @@ class WelcomeWindow(tk.Toplevel):
                 self.ok_button['state'] = 'normal'
             else:
                 prompt['foreground'] = ''
-                prompt['text'] = _('Passwords do not match.')
+                prompt['text'] = _('Passwords do not match')
                 self.ok_button['state'] = 'disabled'
 
         ttk.Label(self.innerframe,
@@ -1195,7 +1250,9 @@ class WelcomeWindow(tk.Toplevel):
                      'encryption': self.encryption}
 
         config_write_dict(dump_dict)
-        AccountManager.create_encrypted_json_file(self.pw)
+
+        if self.encryption == 'true' and not self.encryption_already_enabled == 'true':
+            AccountManager.create_encrypted_json_file(self.pw)
 
 
 class ToolTipWindow(object):
@@ -1283,11 +1340,14 @@ class ManageEncryptionWindow(tk.Toplevel):
         self.active_page = None
         self.upper_frame = tk.Frame(self)
         self.upper_frame.pack(side='top', fill='x')
-        self.top_font = tkfont.Font(weight=tkfont.BOLD, size=17, family='Arial')
-        self.value_font = tkfont.Font(weight=tkfont.NORMAL, size=12, family='Arial')
-        self.top_label = tk.Label(self.upper_frame, font=self.top_font)
+        self.top_font = tkfont.Font(weight=tkfont.BOLD, size=17)
+        self.value_font = tkfont.Font(weight=tkfont.BOLD, size=13)
+        self.top_label = ttk.Label(self.upper_frame, font=self.top_font)
         self.top_label.pack(side='left', padx=(10, 0), pady=10)
         self.acm = acm
+
+        self.focus()
+        self.grab_set()
 
         self.main_window()
 
@@ -1301,7 +1361,7 @@ class ManageEncryptionWindow(tk.Toplevel):
         self.bottomframe.columnconfigure(0, weight=1)
         self.bottomframe.columnconfigure(1, weight=1)
 
-        self.close_button = ttk.Button(self.bottomframe, text=_('Close'), command=self.destroy)
+        self.close_button = ttk.Button(self.bottomframe, text=_('Close'), command=self.destroy, style='Accent.TButton')
         self.close_button.grid(row=0, column=0, pady=3, padx=3)
 
         self.innerframe = ttk.Frame(self)
@@ -1319,14 +1379,20 @@ class ManageEncryptionWindow(tk.Toplevel):
         self.change_password_button = ttk.Button(self.bottomframe, text=_('Change Password'))
 
         if get_config('encryption') == 'true':
-            self.encryption_status.config(text=_('Encryption is enabled.'), foreground=get_color('autologin_text_avail'))
+            self.encryption_status.config(text=_('Encryption is enabled'), foreground=get_color('autologin_text_avail'))
             self.encryption_button.config(text=_('Disable Encryption'), command=self.disable_encryption)
             self.change_password_button.grid(row=0, column=2, padx=(0, 3))
             self.change_password_button['command'] = self.ok
             self.bottomframe.columnconfigure(2, weight=1)
+
+            ttk.Label(self.innerframe,
+                      text=_('Your accounts data is encrypted.'),
+                      justify=tk.CENTER).pack(expand=True)
+
+
         else:
-            self.encryption_status.config(text=_('Encryption is disabled.'), foreground=get_color('autologin_text_unavail'))
-            self.encryption_button.config(text=_('Enable Encryption'), style='Accent.TButton', command=self.ok)
+            self.encryption_status.config(text=_('Encryption is disabled'), foreground=get_color('autologin_text_unavail'))
+            self.encryption_button.config(text=_('Enable Encryption'), command=self.ok)
 
             ttk.Label(self.innerframe,
                       text=_('Enable to encrypt accounts data with a password.') + '\n' +

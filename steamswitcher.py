@@ -7,7 +7,6 @@ from modules.main import MainApp
 
 VERSION = '3.0'
 BRANCH = 'master'
-URL = ('https://raw.githubusercontent.com/sw2719/steam-account-switcher/%s/version.yml' % BRANCH)
 
 print('Launch arguments:', sys.argv)
 
@@ -42,7 +41,6 @@ else:
     std_out = sys.__stdout__
     std_err = sys.__stderr__
 
-root = MainApp(VERSION, URL, BUNDLE, std_out, std_err, after_update)
-root.after(100, lambda: start_checkupdate(root, VERSION, URL, BUNDLE))
+root = MainApp(VERSION, BUNDLE, std_out, std_err, after_update)
 
 root.mainloop()
