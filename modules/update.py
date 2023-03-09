@@ -264,7 +264,6 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
 
             pprint('Latest version is', latest_version)
             pprint('Program version is', cl_ver_str)
-            print(latest_changelog)
 
             latest = version.parse(latest_version)
             current = version.parse(cl_ver_str)
