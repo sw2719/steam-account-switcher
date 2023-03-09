@@ -14,6 +14,7 @@ import sv_ttk
 import datetime
 from time import sleep
 from PIL import Image, ImageTk
+import win32clipboard
 from modules.account import AccountManager, loginusers_accountnames, loginusers_steamid, \
     loginusers_personanames, check_autologin_availability, set_loginusers_value, remember_password_disabled
 from modules.reg import fetch_reg, setkey
@@ -471,7 +472,7 @@ class MainApp(tk.Tk):
         button_frame = tk.Frame(account_settings_window)
         button_frame.pack(side='bottom', pady=3)
 
-        ok_button = ttk.Button(button_frame, text=_('OK'))
+        ok_button = ttk.Button(button_frame, text=_('OK'), style='Accent.TButton')
         ok_button.pack(side='right', padx=1.5)
 
         cancel_button = ttk.Button(button_frame,
@@ -564,7 +565,11 @@ class MainApp(tk.Tk):
                                         justify='center',
                                         foreground=get_color('autologin_text_unavail'))
 
+        window_larger = False
+
         def on_password_checkbox():
+            nonlocal window_larger
+
             if save_password_var.get() == 1:
                 password_entry['state'] = 'normal'
                 checkbutton['state'] = 'normal'
@@ -575,6 +580,7 @@ class MainApp(tk.Tk):
                         f'+{str(account_settings_window.winfo_x())}+{str(account_settings_window.winfo_y())}'
                     )
                     password_warn_label.pack(side='bottom', pady=(0, 3))
+                    window_larger = True
 
                 password_entry.focus()
             else:
@@ -582,12 +588,13 @@ class MainApp(tk.Tk):
                 password_entry['state'] = 'disabled'
                 checkbutton['state'] = 'disabled'
 
-                if get_config('encryption') == 'false':
+                if get_config('encryption') == 'false' and window_larger:
                     account_settings_window.geometry(
                         f'{str(account_settings_window.winfo_width())}x{str(account_settings_window.winfo_height() - 35)}'
                         f'+{str(account_settings_window.winfo_x())}+{str(account_settings_window.winfo_y())}'
                     )
                     password_warn_label.pack_forget()
+                    window_larger = False
 
         save_password_chkb['command'] = on_password_checkbox
 
@@ -639,6 +646,15 @@ class MainApp(tk.Tk):
 
         account_settings_window.bind('<Return>', enterkey)
         ok_button['command'] = lambda username=username: ok(username)
+
+        if save_password_var.get() == 1 and get_config('encryption') == 'false':
+            account_settings_window.geometry(
+                f'{str(account_settings_window.winfo_width())}x{str(account_settings_window.winfo_height() + 35)}'
+                f'+{str(account_settings_window.winfo_x())}+{str(account_settings_window.winfo_y())}'
+            )
+            password_warn_label.pack(side='bottom', pady=(0, 3))
+            window_larger = True
+
         account_settings_window.wait_window()
 
     def button_func(self, username):
@@ -2086,7 +2102,16 @@ class MainApp(tk.Tk):
             nonlocal counter
             nonlocal thread
 
+            password_copied = False
+
             def after_steam_start():
+                nonlocal password_copied
+
+                if password_copied:
+                    win32clipboard.OpenClipboard()
+                    win32clipboard.EmptyClipboard()
+                    win32clipboard.CloseClipboard()
+
                 if get_config('autoexit') == 'true':
                     self.exit_app()
                 elif not refresh_override:
@@ -2118,51 +2143,19 @@ class MainApp(tk.Tk):
                             queue.put(1)
                             return
 
-                    def login_with_pw():
-                        nonlocal active_user_thread
-                        print('Logging in with PW')
-                        self.after_cancel(active_user_waiter)
-                        active_user_thread.stop()
-                        force_button.pack_forget()
-
-                        subprocess.run(f"start {steam_exe} -shutdown", shell=True,
-                                       creationflags=0x08000000, check=True)
-                        print('Shutdown command sent. Waiting for Steam...')
-                        label_var.set(_('Waiting for Steam to exit...'))
-
-                        def steam_checker():
-                            nonlocal queue
-                            nonlocal thread
-
-                            if thread.stopped():
-                                return
-                            if steam_running():
-                                self.after(1000, steam_checker)
-                            else:
-                                queue.put(1)
-                                return
-
-                        def callback():
-                            print('Starting Steam with login arguments...')
-                            subprocess.run(f"start {steam_exe} -login {username} {password}",
-                                           shell=True, check=True)
-                            after_steam_start()
-
-                        def pw_waiter():
-                            try:
-                                queue.get_nowait()
-                                self.after(1000, callback)
-                            except q.Empty:
-                                self.after(1000, pw_waiter)
-
-                        thread = StoppableThread(target=steam_checker)
-                        thread.start()
-
-                        self.after(1000, pw_waiter)
-
                     def cancel():
                         self.after_cancel(active_user_waiter)
                         after_steam_start()
+
+                    def copy_pw():
+                        nonlocal password_copied
+
+                        password_copied = True
+
+                        win32clipboard.OpenClipboard()
+                        win32clipboard.EmptyClipboard()
+                        win32clipboard.SetClipboardText(self.accounts.get_password(self.user_var.get()))
+                        win32clipboard.CloseClipboard()
 
                     subprocess.run("start steam://open/main",
                                    shell=True, check=True)
@@ -2171,8 +2164,8 @@ class MainApp(tk.Tk):
                     active_user_thread.start()
                     label_var.set(_('Waiting for log in...'))
 
-                    force_button.update_command(login_with_pw)
-                    force_button.update_text(_('Login with saved password'))
+                    force_button.update_command(copy_pw)
+                    force_button.update_text(_('Copy password'))
                     force_button.enable()
 
                     cancel_button.update_command(cancel)
