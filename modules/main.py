@@ -15,7 +15,7 @@ import datetime
 from time import sleep
 from PIL import Image, ImageTk
 from modules.account import AccountManager, loginusers_accountnames, loginusers_steamid, \
-    loginusers_personanames, check_autologin_availability
+    loginusers_personanames, check_autologin_availability, set_loginusers_value, remember_password_disabled
 from modules.reg import fetch_reg, setkey
 from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE, first_run
 from modules.util import steam_running, StoppableThread, raise_exception, test, get_center_pos, \
@@ -457,7 +457,6 @@ class MainApp(tk.Tk):
         account_settings_window = tk.Toplevel(self)
         account_settings_window.title('')
 
-        x, y = self.get_window_pos()
         account_settings_window.geometry(self.popup_geometry(250, 270))
         account_settings_window.resizable(False, False)
         account_settings_window.bind('<Escape>', lambda event: account_settings_window.destroy())
@@ -511,7 +510,7 @@ class MainApp(tk.Tk):
 
         name_entry = ttk.Entry(name_entry_frame, justify=tk.CENTER)
         name_entry.insert(0, custom_name)
-        name_entry.pack(fill='x', padx=8)
+        name_entry.pack(fill='x', padx=3)
 
         account_settings_window.grab_set()
         account_settings_window.focus()
@@ -549,23 +548,65 @@ class MainApp(tk.Tk):
         password_entry_frame.pack(side='top', pady=(2, 0), fill='x')
 
         password_entry = ttk.Entry(password_entry_frame, justify=tk.CENTER, show='⬤')
-        password_entry.pack(fill='x', padx=8)
+        password_entry.pack(side='left', fill='x', expand=True, padx=(3, 3))
+
+        show_var = tk.IntVar()
+
+        checkbutton = ttk.Checkbutton(password_entry_frame,
+                                      text=_('Show'),
+                                      variable=show_var,
+                                      style='Toggle.TButton')
+        checkbutton.pack(side=tk.RIGHT, padx=(0, 3))
+
+        password_warn_label = ttk.Label(account_settings_window,
+                                        text=_('Warning: Encryption is disabled.\n'
+                                               'Password will be stored in plain text!'),
+                                        justify='center',
+                                        foreground=get_color('autologin_text_unavail'))
+
+        def on_password_checkbox():
+            if save_password_var.get() == 1:
+                password_entry['state'] = 'normal'
+                checkbutton['state'] = 'normal'
+
+                if get_config('encryption') == 'false':
+                    account_settings_window.geometry(
+                        f'{str(account_settings_window.winfo_width())}x{str(account_settings_window.winfo_height() + 35)}'
+                        f'+{str(account_settings_window.winfo_x())}+{str(account_settings_window.winfo_y())}'
+                    )
+                    password_warn_label.pack(side='bottom', pady=(0, 3))
+
+                password_entry.focus()
+            else:
+                password_entry.delete(0, 'end')
+                password_entry['state'] = 'disabled'
+                checkbutton['state'] = 'disabled'
+
+                if get_config('encryption') == 'false':
+                    account_settings_window.geometry(
+                        f'{str(account_settings_window.winfo_width())}x{str(account_settings_window.winfo_height() - 35)}'
+                        f'+{str(account_settings_window.winfo_x())}+{str(account_settings_window.winfo_y())}'
+                    )
+                    password_warn_label.pack_forget()
+
+        save_password_chkb['command'] = on_password_checkbox
+
+        def on_show_checkbutton():
+            if show_var.get():
+                password_entry['show'] = ''
+                checkbutton['text'] = _('Hide')
+            else:
+                password_entry['show'] = '⬤'
+                checkbutton['text'] = _('Show')
+
+        checkbutton['command'] = on_show_checkbutton
 
         if set_password:
             save_password_var.set(1)
             password_entry.insert(0, set_password)
         else:
             password_entry['state'] = 'disabled'
-
-        def on_password_checkbox():
-            if save_password_var.get() == 1:
-                password_entry['state'] = 'normal'
-                password_entry.focus()
-            else:
-                password_entry.delete(0, 'end')
-                password_entry['state'] = 'disabled'
-
-        save_password_chkb['command'] = on_password_checkbox
+            checkbutton['state'] = 'disabled'
 
         def ok(username):
             if custom_name_var.get() == 1 and not name_entry.get().strip():
@@ -940,7 +981,7 @@ class MainApp(tk.Tk):
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
-            h = 49 * len(self.accounts.list)
+            h = 47 * len(self.accounts.list)
             canvas.create_window((0, 0), height=h, width=295, window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
@@ -1929,9 +1970,15 @@ class MainApp(tk.Tk):
         bottomframe_set.grid_columnconfigure(2, weight=1)
         bottomframe_set.grid_rowconfigure(0, weight=1)
 
-    def exit_after_restart(self, refresh_override=False, silent=True):
+    def exit_after_restart(self, refresh_override=False):
         '''Restart Steam client and exit application.
         If autoexit is disabled, app won't exit.'''
+        if remember_password_disabled(self.user_var.get()):
+            if msgbox.askyesno(_('Remember Password Disabled'),
+                               _('Remember Password is disabled for this account.\n'
+                                 'Do you want to enable it now?')):
+                set_loginusers_value(self.user_var.get(), 'RememberPassword', '1')
+
         label_var = tk.StringVar()
 
         if get_config('steam_path') == 'reg':
@@ -1960,6 +2007,7 @@ class MainApp(tk.Tk):
         self.no_user_frame.destroy()
         self.button_frame.destroy()
         hide_update()
+        self.unbind('<MouseWheel>')
         self.bottomframe.pack_forget()
         button_frame = tk.Frame(self, bg=get_color('upperframe'))
         button_frame.pack(side='bottom', fill='x')
@@ -2075,6 +2123,7 @@ class MainApp(tk.Tk):
                         print('Logging in with PW')
                         self.after_cancel(active_user_waiter)
                         active_user_thread.stop()
+                        force_button.pack_forget()
 
                         subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                                        creationflags=0x08000000, check=True)
@@ -2084,15 +2133,12 @@ class MainApp(tk.Tk):
                         def steam_checker():
                             nonlocal queue
                             nonlocal thread
-                            print('Steam check called')
 
                             if thread.stopped():
                                 return
                             if steam_running():
-                                print('Steam running')
                                 self.after(1000, steam_checker)
                             else:
-                                print('Steam exited')
                                 queue.put(1)
                                 return
 

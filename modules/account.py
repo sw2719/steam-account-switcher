@@ -110,7 +110,7 @@ class AccountManager:
         salt = os.urandom(16)
         with open('salt', 'wb') as f:
             f.write(salt)
-        pprint('Generated salt')
+        pprint('Generated new salt')
 
         return salt
 
@@ -183,6 +183,13 @@ class AccountManager:
     def __bool__(self):
         return bool(self.acc_dict)
 
+    def saved_password_exists(self):
+        for account in self.acc_dict.values():
+            if 'password' in account:
+                return True
+        else:
+            return False
+
     def _find_account_index(self, accountname):
         for x in range(len(self.acc_dict)):
             if self.acc_dict[str(x)]['accountname'] == accountname:
@@ -239,6 +246,7 @@ class AccountManager:
     def set_password(self, accountname, password):
         i = self._find_account_index(accountname)
         self.acc_dict[i]['password'] = password
+        pprint(f"Saved {accountname}'s password")
 
         self._save_json()
 
@@ -246,6 +254,7 @@ class AccountManager:
         try:
             i = self._find_account_index(accountname)
             del self.acc_dict[i]['password']
+            pprint(f"Removed {accountname}'s password")
 
             self._save_json()
         except KeyError:
@@ -309,11 +318,7 @@ class AccountManager:
         pprint('Saved accounts.json')
 
 
-def fetch_loginusers():
-    """
-    Returns the contents of loginusers.vdf as dict
-    :returns: dict
-    """
+def get_loginusers_path():
     if get_config('steam_path') == 'reg':
         steam_path = fetch_reg('steampath')
     else:
@@ -322,7 +327,15 @@ def fetch_loginusers():
     if '/' in steam_path:
         steam_path = steam_path.replace('/', '\\')
 
-    vdf_file = os.path.join(steam_path, 'config', 'loginusers.vdf')
+    return os.path.join(steam_path, 'config', 'loginusers.vdf')
+
+
+def fetch_loginusers():
+    """
+    Returns the contents of loginusers.vdf as dict
+    :returns: dict
+    """
+    vdf_file = get_loginusers_path()
 
     try:
         with open(vdf_file, 'r', encoding='utf-8') as vdf_file:
@@ -384,5 +397,35 @@ def check_autologin_availability(username):
     return False
 
 
-if os.path.isfile('accounts.yml'):
+def remember_password_disabled(username):
+    """
+    Checks if the username has the remember password option enabled
+    :param username: str
+    :returns: bool
+    """
+    loginusers_dict = fetch_loginusers()
+
+    for user in loginusers_dict['users'].values():
+        if user['AccountName'] == username:
+            return user['RememberPassword'] == '0'
+
+    return False
+
+
+def set_loginusers_value(username, key, value):
+    loginusers_dict = fetch_loginusers()
+    vdf_file = get_loginusers_path()
+
+    for user in loginusers_dict['users'].values():
+        if user['AccountName'] == username:
+            user[key] = value
+            pprint(f"{username}'s {key} set to {value}")
+            return True
+    else:
+        return False
+
+
+if __name__ == '__main__':
+    print(fetch_loginusers())
+elif os.path.isfile('accounts.yml'):
     convert()
