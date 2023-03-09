@@ -2178,7 +2178,7 @@ class MainApp(tk.Tk):
 
                     active_user_thread = StoppableThread(target=active_user_checker)
                     active_user_thread.start()
-                    label_var.set(_('Waiting for log in...\nPress Ctrl+V to paste password.'))
+                    label_var.set(_('Waiting for log in...\n\nPress Ctrl+V to paste password.'))
                     print('Log in checker thread has been started.')
 
                     force_button.pack_forget()
