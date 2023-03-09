@@ -1328,7 +1328,7 @@ def steamid_window(master, username, steamid64, geometry):
     except tk.TclError:
         pass
 
-    close_button = ttk.Button(steamid_window, text=_('Close'), command=steamid_window.destroy)
+    close_button = ttk.Button(steamid_window, text=_('Close'), command=steamid_window.destroy, style='Accent.TButton')
     close_button.pack(side='bottom', pady=(0, 3))
 
     ReadonlyEntryWithLabel(steamid_window, _('Username'), username).pack(pady=(6, 0), fill='x')
@@ -1416,7 +1416,12 @@ class ManageEncryptionWindow(tk.Toplevel):
             self.password_page()
 
     def disable_encryption(self):
-        if msgbox.askyesno(_('Disable Encryption'), _('Are you sure you want to disable encryption?'), parent=self):
+        if self.acm.saved_password_exists:
+            confirm = msgbox.askyesno(_('Disable Encryption'), _('Are you sure you want to disable encryption?\n'
+                                                                 'Your saved passwords will be stored in plain text!'), parent=self)
+        else:
+            confirm = msgbox.askyesno(_('Disable Encryption'), _('Are you sure you want to disable encryption?'), parent=self)
+        if confirm:
             config_write_value('encryption', 'false')
             self.acm.disable_encryption()
             self.bottomframe.destroy()
