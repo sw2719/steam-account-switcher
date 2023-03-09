@@ -15,6 +15,7 @@ import datetime
 from time import sleep
 from PIL import Image, ImageTk
 import win32clipboard
+from pynput import keyboard
 from modules.account import AccountManager, loginusers_accountnames, loginusers_steamid, \
     loginusers_personanames, check_autologin_availability, set_loginusers_value, remember_password_disabled
 from modules.reg import fetch_reg, setkey
@@ -2102,16 +2103,7 @@ class MainApp(tk.Tk):
             nonlocal counter
             nonlocal thread
 
-            password_copied = False
-
             def after_steam_start():
-                nonlocal password_copied
-
-                if password_copied:
-                    win32clipboard.OpenClipboard()
-                    win32clipboard.EmptyClipboard()
-                    win32clipboard.CloseClipboard()
-
                 if get_config('autoexit') == 'true':
                     self.exit_app()
                 elif not refresh_override:
@@ -2137,47 +2129,75 @@ class MainApp(tk.Tk):
                         if active_user_thread.stopped():
                             return
                         elif not fetch_reg('ActiveUser'):
-                            print('Waiting for Steam log in...')
                             self.after(1000, active_user_checker)
                         else:
                             queue.put(1)
+                            print('Steam log-in success')
                             return
 
                     def cancel():
+                        nonlocal listener
+
                         self.after_cancel(active_user_waiter)
+                        listener.stop()
                         after_steam_start()
 
-                    def copy_pw():
-                        nonlocal password_copied
+                    def for_canonical(f):
+                        return lambda k: f(listener.canonical(k))
 
-                        password_copied = True
+                    clipboard_eraser_task = None
+
+                    def copy_pw():
+                        nonlocal clipboard_eraser_task
 
                         win32clipboard.OpenClipboard()
                         win32clipboard.EmptyClipboard()
                         win32clipboard.SetClipboardText(self.accounts.get_password(self.user_var.get()))
                         win32clipboard.CloseClipboard()
 
+                        if clipboard_eraser_task:
+                            self.after_cancel(clipboard_eraser_task)
+                        clipboard_eraser_task = self.after(1000, empty_clipboard)
+
+                    def empty_clipboard():
+                        win32clipboard.OpenClipboard()
+                        win32clipboard.EmptyClipboard()
+                        win32clipboard.CloseClipboard()
+
+                    hotkey = keyboard.HotKey(
+                        keyboard.HotKey.parse('<ctrl>+v'),
+                        copy_pw)
+
+                    listener = keyboard.Listener(
+                        on_press=for_canonical(hotkey.press),
+                        on_release=for_canonical(hotkey.release))
+                    listener.start()
+
                     subprocess.run("start steam://open/main",
                                    shell=True, check=True)
 
                     active_user_thread = StoppableThread(target=active_user_checker)
                     active_user_thread.start()
-                    label_var.set(_('Waiting for log in...'))
+                    label_var.set(_('Waiting for log in...\nPress Ctrl+V to paste password.'))
+                    print('Log in checker thread has been started.')
 
-                    force_button.update_command(copy_pw)
-                    force_button.update_text(_('Copy password'))
-                    force_button.enable()
+                    force_button.pack_forget()
 
                     cancel_button.update_command(cancel)
                     cancel_button.enable()
+
+                    if get_config('autoexit') == 'true':
+                        cancel_button.update_text(_('Exit'))
 
                     active_user_waiter = None
 
                     def waiter():
                         nonlocal active_user_waiter
+                        nonlocal listener
 
                         try:
                             queue.get_nowait()
+                            listener.stop()
                             after_steam_start()
                         except q.Empty:
                             active_user_waiter = self.after(1000, waiter)
