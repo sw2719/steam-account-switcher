@@ -15,8 +15,8 @@ import shutil
 
 locale_buf = locale.getdefaultlocale()
 LOCALE = locale_buf[0]
-DIRS_TO_DELETE = ('.vs', 'tcl', 'tk')
-FILES_TO_DELETE = ('libcrypto-1_1.dll', 'libssl-1_1.dll', 'tcl86t.dll', 'tk86t.dll', 'python37.dll', 'python38.dll')
+DIRS_TO_DELETE = ('.vs', 'tcl', 'tk', 'asset', 'lib', 'locale')
+FILES_TO_DELETE = ('libcrypto-1_1.dll', 'libssl-1_1.dll', 'tcl86t.dll', 'tk86t.dll', 'python37.dll', 'python38.dll', 'python3.dll', 'theme.json')
 
 
 def pprint(content):
@@ -99,16 +99,19 @@ for name in os.listdir(os.getcwd()):
     if name in DIRS_TO_DELETE:
         try:
             shutil.rmtree(name)
+            pprint('Deleted a directory: ' + name)
         except OSError:
             pass
     elif name in FILES_TO_DELETE:
         try:
             os.remove(name)
+            pprint('Deleted a file: ' + name)
         except OSError:
             pass
 
 while True:
     try:
+        pprint('Extracting...')
         f.extractall(members=(member for member in f.namelist() if 'updater' not in member))
         break
     except OSError:
