@@ -1185,6 +1185,9 @@ class WelcomeWindow(tk.Toplevel):
         self.soft_chkb.state(['!alternate'])
         self.soft_chkb.state(['selected'])
 
+        if self.soft_shutdown == 'false':
+            self.soft_chkb.state(['!selected'])
+
         self.soft_chkb.pack(side='top', anchor='w')
         ttk.Label(self.softshutdown_frame, text=_('Shutdown Steam instead of killing Steam process')).pack(side='top', anchor='w')
 
@@ -1197,6 +1200,9 @@ class WelcomeWindow(tk.Toplevel):
 
         self.autoexit_chkb.state(['!alternate'])
         self.autoexit_chkb.state(['selected'])
+
+        if self.autoexit == 'false':
+            self.autoexit_chkb.state(['!selected'])
 
         self.autoexit_chkb.pack(side='top', anchor='w')
         ttk.Label(self.autoexit_frame, text=_('Exit app automatically after restarting Steam')).pack(side='top', anchor='w')
@@ -1213,6 +1219,8 @@ class WelcomeWindow(tk.Toplevel):
 
         if self.ui_mode == 'grid':
             self.avatar_chkb.state(['disabled'])
+        elif self.avatar == 'false':
+            self.avatar_chkb.state(['!selected'])
 
         self.avatar_chkb.pack(side='top', anchor='w')
         ttk.Label(self.avatar_frame, text=_('Show avatars in account list')).pack(side='top', anchor='w')
