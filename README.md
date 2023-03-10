@@ -32,8 +32,7 @@ This app has no affiliation with Steam and Valve.
 * Steam installed correctly
 * Visual C++ Redistributable for Visual Studio 2015 or 2017
   - Chances are it's already installed, but if it isn't, you can download it below.
-  - [Download for 32-bit](https://aka.ms/vs/16/release/vc_redist.x32.exe)
-  - [Download for 64-bit](https://aka.ms/vs/16/release/vc_redist.x64.exe)
+  - [Download](https://aka.ms/vs/16/release/vc_redist.x32.exe)
 
 # How to use
 1. Unpack the archive to desired folder
