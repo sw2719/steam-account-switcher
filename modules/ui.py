@@ -626,21 +626,28 @@ class WelcomeWindow(tk.Toplevel):
         self.ok_button = ttk.Button(self.button_frame, text=_('Next'), command=self.ok, width=10)
         self.ok_button.grid(row=0, column=2, sticky='e')
 
-        self.soft_shutdown = get_config('try_soft_shutdown')
-        self.autoexit = get_config('autoexit')
-        self.mode = get_config('mode')
-        self.avatar = get_config('show_avatar')
-        self.ui_mode = get_config('ui_mode')
-        self.theme = get_config('theme')
-        self.encryption = get_config('encryption')
-
+        self.encryption = False
         self.pw = None
 
         self.encryption_already_enabled = get_config('encryption')
-        self.skip = False
 
         self.focus_force()
         self.grab_set()
+
+        self.required_pages = []
+
+        # TODO: Actually use this and show user only required pages
+        if self.after_update and missing_values:
+            if 'theme' in missing_values:
+                self.required_pages.append(1)
+            if 'ui_mode' in missing_values:
+                self.required_pages.append(2)
+            if 'mode' in missing_values:
+                self.required_pages.append(3)
+            if 'password' in missing_values or 'encryption' in missing_values:
+                self.required_pages.append(4)
+            if 'try_soft_shutdown' in missing_values or 'autoexit' in missing_values or 'show_avatar' in missing_values:
+                self.required_pages.append(5)
 
         self.page_0()
 
@@ -673,11 +680,7 @@ class WelcomeWindow(tk.Toplevel):
 
         elif self.active_page == 4:
             self.innerframe.destroy()
-
-            if self.skip:
-                self.page_0()
-            else:
-                self.page_3()
+            self.page_3()
             self.focus()
 
         elif self.active_page == 'pw1':
@@ -723,16 +726,7 @@ class WelcomeWindow(tk.Toplevel):
             self.top_label = tk.Label(self.upper_frame, font=self.top_font)
             self.top_label.pack(side='left', padx=(10, 0), pady=10)
             self.back_button['text'] = _('Back')
-
-            if self.skip:
-                if self.after_update:
-                    self.save()
-                    self.destroy()
-                    return
-                else:
-                    self.page_4()
-            else:
-                self.page_1()
+            self.page_1()
             self.focus()
 
         elif self.active_page == 1:
@@ -780,8 +774,6 @@ class WelcomeWindow(tk.Toplevel):
             if self.encryption == 'true':
                 self.ok_button['text'] = _('Next (Enter)')
                 self.password_page()
-            elif self.skip:
-                self.page_6()
             else:
                 self.page_5()
 
@@ -802,10 +794,7 @@ class WelcomeWindow(tk.Toplevel):
             del self.pw_var
             self.innerframe.destroy()
             self.unbind('<Return>')
-            if self.skip:
-                self.page_6()
-            else:
-                self.page_5()
+            self.page_5()
 
             if self.after_update:
                 self.ok_button['text'] = _('Finish')
@@ -846,6 +835,7 @@ class WelcomeWindow(tk.Toplevel):
             if 'selected' in self.shortcut_chkb.state():
                 create_shortcut()
 
+            self.ok_button['text'] = _('Please wait...')
             self.ok_button['state'] = 'disabled'
             self.focus()
             self.save()
@@ -860,30 +850,15 @@ class WelcomeWindow(tk.Toplevel):
 
     def page_0(self):
         self.active_page = 0
-        self.skip = False
-
         self.title_label = tk.Label(self, text=_('Welcome'), font=self.title_font)
 
         if self.after_update:
             self.title_label['text'] = _('Update complete')
 
-        self.welcome_label = ttk.Label(self, text=_("To use default settings, click 'Use default settings'.\n"
-                                                    "To personalize, click 'Personalize'"))
-
-        self.welcome_back_label = ttk.Label(self, text=_("To skip, click 'Use current settings'.\n"
-                                                         "To review settings, click 'Review'"))
-
+        self.welcome_label = tk.Label(self, text=_("Click 'Next' to continue."))
         self.back_button['text'] = _('Exit')
-        self.ok_button['text'] = _('Personalize')
         self.title_label.pack(expand=True, pady=1)
         self.welcome_label.pack(expand=True, pady=1)
-
-        def skip():
-            self.skip = True
-            self.ok()
-
-        self.skip_button = ttk.Button(self, text=_('Use default settings'), style='Accent.TButton', command=skip)
-        self.skip_button.pack(fill='x', padx=3)
 
     def page_1(self):
         self.active_page = 1
