@@ -119,7 +119,6 @@ class MainApp(tk.Tk):
         tk.Tk.__init__(self)
 
         sv_ttk.set_theme(get_config('theme'))
-        self['bg'] = get_color('window_background')
         self.title(_("Account Switcher"))
 
         self.window_width = 310
@@ -169,6 +168,7 @@ class MainApp(tk.Tk):
                 frame.destroy()
                 self.main_menu()
 
+        self['bg'] = get_color('window_background')
         menubar = tk.Menu(self)
 
         if SYS_LOCALE == 'ko_KR':
@@ -270,6 +270,7 @@ class MainApp(tk.Tk):
         if not test():
             ask_steam_dir()
 
+        self['bg'] = get_color('window_background')
         menubar = tk.Menu(self)
 
         if SYS_LOCALE == 'ko_KR':
