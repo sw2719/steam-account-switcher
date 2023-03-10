@@ -70,6 +70,7 @@ class AccountManager:
                 self.reset_json()
 
         except FileNotFoundError:
+            self.acc_dict = {}
             self.reset_json()
 
         pprint('AccountManager initialized')
