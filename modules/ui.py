@@ -1055,7 +1055,7 @@ class WelcomeWindow(tk.Toplevel):
         ttk.Label(self.innerframe,
                   text=_('Keep in mind that if you forget it,') + '\n' +
                        _('you will have to reset the accounts data!'),
-                  justify=tk.CENTER, foreground='red').pack(pady=(6, 0))
+                  justify=tk.CENTER, foreground=get_color('autologin_text_unavail')).pack(pady=(6, 0))
 
         entry_frame = ttk.Frame(self.innerframe)
         entry_frame.pack(side=tk.BOTTOM, fill=tk.X)
