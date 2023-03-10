@@ -684,6 +684,7 @@ class WelcomeWindow(tk.Toplevel):
             self.focus()
 
         elif self.active_page == 'pw1':
+            self.unbind('<Return>')
             self.innerframe.destroy()
             self.page_4()
             self.ok_button['state'] = 'normal'
@@ -694,7 +695,6 @@ class WelcomeWindow(tk.Toplevel):
             self.innerframe.destroy()
             self.password_page()
             self.ok_button['text'] = _('Next (Enter)')
-            self.focus()
 
         elif self.active_page == 5:
             self.softshutdown_frame.destroy()
@@ -793,6 +793,7 @@ class WelcomeWindow(tk.Toplevel):
             self.pw = self.pw_var.get()
             del self.pw_var
             self.innerframe.destroy()
+            self.unbind('<Return>')
             self.page_5()
 
             if self.after_update:
