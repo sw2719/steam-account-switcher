@@ -191,11 +191,16 @@ class MainApp(tk.Tk):
         def check_pw():
             nonlocal frame
 
-            if AccountManager.verify_password(pw_var.get()):
+            password_match = AccountManager.verify_password(pw_var.get())
+
+            if password_match:
                 self.accounts = AccountManager(password=pw_var.get())
                 frame.destroy()
                 self.config(menu='')
                 self.main_menu()
+            elif password_match is None:
+                prompt['text'] = _('Salt is missing.\nRestore it or reset accounts data.')
+                prompt['foreground'] = get_color('autologin_text_unavail')
             else:
                 prompt['text'] = _('Incorrect password. Try again.')
                 prompt['foreground'] = get_color('autologin_text_unavail')
@@ -256,7 +261,7 @@ class MainApp(tk.Tk):
         lock_icon.pack(expand=True, fill=tk.BOTH)
 
         ttk.Label(frame, text=_('Welcome'), font=self.bold_font).pack()
-        prompt = ttk.Label(frame, text=_('Enter master password to unlock.'))
+        prompt = ttk.Label(frame, text=_('Enter master password to unlock.'), justify='center')
         prompt.pack(expand=True, pady=5)
         frame.pack(fill='both', expand=True)
         self.update_idletasks()
