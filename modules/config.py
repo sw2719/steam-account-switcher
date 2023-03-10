@@ -83,7 +83,7 @@ def convert():
     with open('config.json', 'w', encoding='utf-8') as f:
         json.dump(cfg, f, indent=4)
 
-    #os.remove('config.yml')
+    os.remove('config.yml')
     pprint('Converted config.yml to config.json')
 
 def reset_config():
