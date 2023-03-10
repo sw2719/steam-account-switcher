@@ -440,6 +440,7 @@ class MainApp(tk.Tk):
                 else:
                      self.lockscreen()
             elif not debug:
+                self.accounts = AccountManager()
                 self.main_menu()
             else:
                 self.refresh()
@@ -2124,11 +2125,8 @@ class MainApp(tk.Tk):
                 if password:
                     def active_user_checker():
                         nonlocal queue
-                        nonlocal active_user_thread
 
-                        if active_user_thread.stopped():
-                            return
-                        elif not fetch_reg('ActiveUser'):
+                        if not fetch_reg('ActiveUser'):
                             self.after(1000, active_user_checker)
                         else:
                             queue.put(1)
@@ -2138,6 +2136,7 @@ class MainApp(tk.Tk):
                     def cancel():
                         nonlocal listener
 
+                        self.after_cancel(active_user_checker_thread)
                         self.after_cancel(active_user_waiter)
                         listener.stop()
                         after_steam_start()
@@ -2176,10 +2175,10 @@ class MainApp(tk.Tk):
                     subprocess.run("start steam://open/main",
                                    shell=True, check=True)
 
-                    active_user_thread = StoppableThread(target=active_user_checker)
-                    active_user_thread.start()
+                    active_user_checker_thread = self.after(3000, active_user_checker)
+
                     label_var.set(_('Waiting for log in...\n\nPress Ctrl+V to paste password.'))
-                    print('Log in checker thread has been started.')
+                    print('Log in checker thread will start in 3 seconds.')
 
                     force_button.pack_forget()
 
