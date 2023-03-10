@@ -16,7 +16,7 @@ import shutil
 locale_buf = locale.getdefaultlocale()
 LOCALE = locale_buf[0]
 DIRS_TO_DELETE = ('.vs', 'tcl', 'tk', 'asset', 'lib', 'locale')
-FILES_TO_DELETE = ('libcrypto-1_1.dll', 'libssl-1_1.dll', 'tcl86t.dll', 'tk86t.dll', 'python37.dll', 'python38.dll', 'python3.dll', 'theme.json')
+FILES_TO_DELETE = ('libcrypto-1_1.dll', 'libssl-1_1.dll', 'tcl86t.dll', 'tk86t.dll', 'python37.dll', 'python38.dll', 'theme.json')
 
 
 def pprint(content):
