@@ -623,31 +623,23 @@ class WelcomeWindow(tk.Toplevel):
         if self.after_update:
             self.page_label['text'] = '0/5'
 
-        self.ok_button = ttk.Button(self.button_frame, text=_('Next'), command=self.ok, width=10)
+        self.ok_button = ttk.Button(self.button_frame, text=_('Next'), command=self.ok, width=10, style='Accent.TButton')
         self.ok_button.grid(row=0, column=2, sticky='e')
 
-        self.encryption = False
+        self.soft_shutdown = get_config('try_soft_shutdown')
+        self.autoexit = get_config('autoexit')
+        self.mode = get_config('mode')
+        self.avatar = get_config('show_avatar')
+        self.ui_mode = get_config('ui_mode')
+        self.theme = get_config('theme')
+        self.encryption = get_config('encryption')
+
         self.pw = None
 
         self.encryption_already_enabled = get_config('encryption')
 
         self.focus_force()
         self.grab_set()
-
-        self.required_pages = []
-
-        # TODO: Actually use this and show user only required pages
-        if self.after_update and missing_values:
-            if 'theme' in missing_values:
-                self.required_pages.append(1)
-            if 'ui_mode' in missing_values:
-                self.required_pages.append(2)
-            if 'mode' in missing_values:
-                self.required_pages.append(3)
-            if 'password' in missing_values or 'encryption' in missing_values:
-                self.required_pages.append(4)
-            if 'try_soft_shutdown' in missing_values or 'autoexit' in missing_values or 'show_avatar' in missing_values:
-                self.required_pages.append(5)
 
         self.page_0()
 
