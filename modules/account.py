@@ -2,7 +2,6 @@ import os
 import json
 import vdf
 import base64
-import win32con, win32api
 from ruamel.yaml import YAML
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
@@ -77,8 +76,11 @@ class AccountManager:
 
     @staticmethod
     def verify_password(password):
-        with open('salt', 'rb') as f:
-            salt = f.read()
+        try:
+            with open('salt', 'rb') as f:
+                salt = f.read()
+        except FileNotFoundError:
+            return None
 
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
