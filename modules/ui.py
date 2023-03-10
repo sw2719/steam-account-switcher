@@ -1417,7 +1417,7 @@ class ManageEncryptionWindow(tk.Toplevel):
             self.password_page()
 
     def disable_encryption(self):
-        if self.acm.saved_password_exists:
+        if self.acm.saved_password_exists():
             confirm = msgbox.askyesno(_('Disable Encryption'), _('Are you sure you want to disable encryption?\n'
                                                                  'Your saved passwords will be stored in plain text!'), parent=self)
         else:
