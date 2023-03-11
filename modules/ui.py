@@ -1038,7 +1038,7 @@ class WelcomeWindow(tk.Toplevel):
             except IndexError:
                 pass
 
-            conditions = re.search('[a-zA-Z]', pw) and re.search('[0-9]', pw) and len(pw) >= 8 and pw.strip() == pw
+            conditions = len(pw) >= 4 and pw.strip() == pw
 
             if conditions:
                 prompt['foreground'] = get_color('autologin_text_avail')
