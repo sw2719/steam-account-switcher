@@ -14,19 +14,21 @@ STEAM is a trademark of Valve Corporation.
 This app has no affiliation with Steam and Valve.
 
 # Important Notice
-Currently I'm not adding new things to this program since A. it has everything that I need and B. it works. But any bug report or suggestion is welcome.
+
+There won't be new major release for this program since v3.0.
+This is due to Steam client now having built-in account switching feature.
+Only fixes for bugs and critical issues will be provided from now on.
+
+It just doesn't make sense to keep updating this ancient spaghetti code anyway.
+
 
 # Features
 * Switch between your accounts with just few clicks.
-
 * No more entering ID, password and Steam Guard code every time you login to another account.
-
 * Restarting Steam with single click.
-
-* Optional password vault feature. Your passwords are encrypted and stored in a file. You can use them to log in to your accounts without entering them manually.
-
+* Accounts data encryption feature.
+* Optional password saving feature. You can use them to log in to your accounts without entering them manually.
 * Auto-importing your Steam accounts. Do more clicking, less typing.
-
 * Auto-updating is built-in, and it's fast. (Unless GitHub's server is having a hard time..)
 
 # Requirements (for executable release)
@@ -62,7 +64,7 @@ Currently I'm not adding new things to this program since A. it has everything t
   - Bug reports and requests are always welcome. Please submit an issue.
 
 * Some elements in settings are missing!
-  - Delete config.yml and launch application again.
+  - Delete config file and launch application again.
 
 # Source code information
 * All other branches except master are considered as acitve-development branch and might have issues, bugs, WIP features, or might not just work at all.
