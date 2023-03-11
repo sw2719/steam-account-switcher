@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-11 15:35+0900\n"
-"PO-Revision-Date: 2023-03-11 15:35+0900\n"
+"POT-Creation-Date: 2023-03-11 16:18+0900\n"
+"PO-Revision-Date: 2023-03-11 16:18+0900\n"
 "Last-Translator: QuentiumYT\n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -178,7 +178,7 @@ msgstr "OK"
 
 #: modules/main.py:489 modules/main.py:1335 modules/main.py:1422
 #: modules/main.py:1534 modules/main.py:1636 modules/main.py:1981
-#: modules/main.py:2041 modules/ui.py:1473 modules/update.py:93
+#: modules/main.py:2041 modules/ui.py:1474 modules/update.py:93
 #: modules/update.py:144
 msgid "Cancel"
 msgstr "Annuler"
@@ -201,8 +201,8 @@ msgid "Save password"
 msgstr "Enregistrer le mot de passe"
 
 #: modules/main.py:567 modules/main.py:617 modules/ui.py:1079
-#: modules/ui.py:1090 modules/ui.py:1158 modules/ui.py:1169 modules/ui.py:1527
-#: modules/ui.py:1538 modules/ui.py:1611 modules/ui.py:1622
+#: modules/ui.py:1090 modules/ui.py:1157 modules/ui.py:1168 modules/ui.py:1528
+#: modules/ui.py:1539 modules/ui.py:1611 modules/ui.py:1622
 msgid "Show"
 msgstr "Montrer"
 
@@ -214,7 +214,7 @@ msgstr ""
 "Avertissement : Le chiffrement est désactivé.\n"
 "Le mot de passe sera stocké en texte brut !"
 
-#: modules/main.py:614 modules/ui.py:1087 modules/ui.py:1166 modules/ui.py:1535
+#: modules/main.py:614 modules/ui.py:1087 modules/ui.py:1165 modules/ui.py:1536
 #: modules/ui.py:1619
 msgid "Hide"
 msgstr "Cacher"
@@ -277,7 +277,7 @@ msgstr "Informations de compte"
 msgid "Update avatar"
 msgstr "Mettre à jour l'avatar"
 
-#: modules/main.py:830
+#: modules/main.py:830 modules/main.py:987
 msgid "Profile name/Password"
 msgstr "Nom du profil/mot de passe"
 
@@ -292,10 +292,6 @@ msgstr "Aucun compte ajouté"
 #: modules/main.py:981
 msgid "View SteamID"
 msgstr "Voir le SteamID"
-
-#: modules/main.py:987
-msgid "Account settings"
-msgstr "Paramètres du compte"
 
 #: modules/main.py:1077 modules/main.py:1405 modules/main.py:1526
 msgid "Please wait while downloading avatars..."
@@ -320,8 +316,8 @@ msgstr "STEAM est une marque déposée de Valve Corporation."
 msgid "Copyright notice"
 msgstr "Avis de droit d'auteur"
 
-#: modules/main.py:1157 modules/main.py:1172 modules/ui.py:1341
-#: modules/ui.py:1382
+#: modules/main.py:1157 modules/main.py:1172 modules/ui.py:1340
+#: modules/ui.py:1381
 msgid "Close"
 msgstr "Fermer"
 
@@ -431,7 +427,7 @@ msgstr "Mode grille"
 msgid "Display accounts in 3 x n grid."
 msgstr "Affichez les comptes dans une grille 3 x n."
 
-#: modules/main.py:1770 modules/ui.py:1223
+#: modules/main.py:1770 modules/ui.py:1222
 msgid "Show avatar images"
 msgstr "Afficher les images d'avatar"
 
@@ -459,11 +455,11 @@ msgstr "Mode Express (redémarrage automatique de Steam)"
 msgid "Automatically restart Steam when autologin account is changed."
 msgstr "Redémarrez automatiquement Steam lorsque le compte est modifié."
 
-#: modules/main.py:1862 modules/ui.py:1191
+#: modules/main.py:1862 modules/ui.py:1190
 msgid "Try to soft shutdown Steam client"
 msgstr "Essayez d'arrêter en douceur le client Steam"
 
-#: modules/main.py:1877 modules/ui.py:1207
+#: modules/main.py:1877 modules/ui.py:1206
 msgid "Exit app after Steam is restarted"
 msgstr "Quitter l'app au redémarrage de Steam"
 
@@ -558,7 +554,7 @@ msgstr "Précédent"
 msgid "Finish"
 msgstr "Finir"
 
-#: modules/ui.py:790 modules/ui.py:1109 modules/ui.py:1562
+#: modules/ui.py:790 modules/ui.py:1108 modules/ui.py:1562
 msgid "Confirm (Enter)"
 msgstr "Confirmer (Enter)"
 
@@ -622,7 +618,7 @@ msgstr ""
 "En mode express, Steam sera automatiquement\n"
 "redémarré lorsque vous changez de compte."
 
-#: modules/ui.py:993 modules/ui.py:1355 modules/ui.py:1373
+#: modules/ui.py:993 modules/ui.py:1354 modules/ui.py:1372
 msgid "Encryption Settings"
 msgstr "Paramètres de chiffrement"
 
@@ -630,7 +626,7 @@ msgstr "Paramètres de chiffrement"
 msgid "Encrypt accounts data"
 msgstr "Crypter les données des comptes"
 
-#: modules/ui.py:1005 modules/ui.py:1419
+#: modules/ui.py:1005 modules/ui.py:1420
 msgid "Enable to encrypt accounts data with a password."
 msgstr "Activer pour chiffrer les données des comptes avec un mot de passe."
 
@@ -640,7 +636,7 @@ msgstr ""
 "FORTEMENT recommandé lors de l'utilisation de l'enregistrement du mot de "
 "passe."
 
-#: modules/ui.py:1007 modules/ui.py:1421
+#: modules/ui.py:1007 modules/ui.py:1422
 msgid "Uses AES-128-CBC-HMAC-SHA256."
 msgstr "Utilise AES-128-CBC-HMAC-SHA256."
 
@@ -652,81 +648,77 @@ msgstr ""
 "Le cryptage est déjà activé.\n"
 "Cliquer sur Suivant pour continuer."
 
-#: modules/ui.py:1021 modules/ui.py:1464
+#: modules/ui.py:1021 modules/ui.py:1465
 msgid "Set Password"
 msgstr "Définir le mot de passe"
 
-#: modules/ui.py:1051 modules/ui.py:1501
+#: modules/ui.py:1051 modules/ui.py:1502
 msgid "Enter a password to use for encryption."
 msgstr "Entrez un mot de passe à utiliser pour le cryptage."
 
-#: modules/ui.py:1052 modules/ui.py:1502
+#: modules/ui.py:1052 modules/ui.py:1503
 msgid "You will have to enter it every time you open the app."
 msgstr "Vous devrez le saisir à chaque fois que vous ouvrirez l'application."
 
-#: modules/ui.py:1053 modules/ui.py:1503
+#: modules/ui.py:1053 modules/ui.py:1504
 msgid "The more complex it is, the better."
 msgstr "Plus c'est complexe, mieux c'est."
 
-#: modules/ui.py:1057 modules/ui.py:1507
+#: modules/ui.py:1057 modules/ui.py:1508
 msgid "Keep in mind that if you forget it,"
 msgstr "Gardez à l'esprit que si vous l'oubliez,"
 
-#: modules/ui.py:1058 modules/ui.py:1508
+#: modules/ui.py:1058 modules/ui.py:1509
 msgid "you will have to reset the accounts data!"
 msgstr "vous devrez réinitialiser les données des comptes !"
 
-#: modules/ui.py:1094 modules/ui.py:1542
-msgid ""
-"At least 8 characters\n"
-"Must contain at least one alphabet and a number"
-msgstr ""
-"Au moins 8 caractères\n"
-"Doit contenir au moins un alphabet et un chiffre"
+#: modules/ui.py:1094 modules/ui.py:1543
+msgid "At least 4 characters"
+msgstr "Au moins 4 caractères"
 
-#: modules/ui.py:1106 modules/ui.py:1554
+#: modules/ui.py:1105 modules/ui.py:1554
 msgid "Confirm Password"
 msgstr "Confirmez le mot de passe"
 
-#: modules/ui.py:1129 modules/ui.py:1584
+#: modules/ui.py:1128 modules/ui.py:1584
 msgid "Passwords match!"
 msgstr "Les mots de passe correspondent !"
 
-#: modules/ui.py:1133 modules/ui.py:1173 modules/ui.py:1588 modules/ui.py:1626
+#: modules/ui.py:1132 modules/ui.py:1172 modules/ui.py:1588 modules/ui.py:1626
 msgid "Passwords do not match"
 msgstr "Les mots de passe ne correspondent pas"
 
-#: modules/ui.py:1137 modules/ui.py:1592
+#: modules/ui.py:1136 modules/ui.py:1592
 msgid "Enter the same password once again to confirm."
 msgstr "Saisissez à nouveau le même mot de passe pour confirmer."
 
-#: modules/ui.py:1185
+#: modules/ui.py:1184
 msgid "Other settings"
 msgstr "Autres réglages"
 
-#: modules/ui.py:1201
+#: modules/ui.py:1200
 msgid "Shutdown Steam instead of killing Steam process"
 msgstr "Arrêtez Steam au lieu de terminer le processus Steam"
 
-#: modules/ui.py:1217
+#: modules/ui.py:1216
 msgid "Exit app automatically after restarting Steam"
 msgstr "Quittez l'app automatiquement après le redémarrage"
 
-#: modules/ui.py:1235
+#: modules/ui.py:1234
 msgid "Show avatars in account list"
 msgstr "Afficher les avatars dans la liste des comptes"
 
-#: modules/ui.py:1239
+#: modules/ui.py:1238
 msgid "Good to go!"
 msgstr "Tout est bon !"
 
-#: modules/ui.py:1245
+#: modules/ui.py:1244
 msgid "Create a desktop shortcut"
 msgstr "Créer un raccourci sur le bureau"
 
 # Due to UI size, line length is limited.
 # UI test is required after translation.
-#: modules/ui.py:1254
+#: modules/ui.py:1253
 msgid ""
 "Add or import accounts via Menu.\n"
 "Right click on accounts to see more options.\n"
@@ -750,69 +742,69 @@ msgstr ""
 "\n"
 "Vous pouvez ouvrir le repo GitHub via Menu > À propos."
 
-#: modules/ui.py:1312
+#: modules/ui.py:1311
 msgid "Steam directory invalid"
 msgstr "Répertoire Steam invalide"
 
-#: modules/ui.py:1312
+#: modules/ui.py:1311
 msgid "Could not locate Steam directory."
 msgstr "Impossible de localiser le répertoire Steam."
 
-#: modules/ui.py:1313
+#: modules/ui.py:1312
 msgid "Please select Steam directory manually."
 msgstr "Veuillez sélectionner le répertoire Steam manuellement."
 
-#: modules/ui.py:1322
+#: modules/ui.py:1321
 msgid "Warning"
 msgstr "Avertissement"
 
-#: modules/ui.py:1323
+#: modules/ui.py:1322
 msgid "Steam directory is invalid."
 msgstr "Le répertoire Steam n'est pas valide."
 
-#: modules/ui.py:1324
+#: modules/ui.py:1323
 msgid "Try again."
 msgstr "Veuillez réessayer."
 
-#: modules/ui.py:1344
+#: modules/ui.py:1343
 msgid "Username"
 msgstr "Nom personnalisé"
 
-#: modules/ui.py:1345
+#: modules/ui.py:1344
 msgid "Friend code"
 msgstr "Code ami"
 
-#: modules/ui.py:1395
+#: modules/ui.py:1394
 msgid "Change Password"
 msgstr "Changer le mot de passe"
 
-#: modules/ui.py:1398
+#: modules/ui.py:1397
 msgid "Encryption is enabled"
 msgstr "Le chiffrement est activé"
 
-#: modules/ui.py:1399 modules/ui.py:1434 modules/ui.py:1437
+#: modules/ui.py:1398 modules/ui.py:1435 modules/ui.py:1438
 msgid "Disable Encryption"
 msgstr "Désactiver le chiffrement"
 
-#: modules/ui.py:1408
+#: modules/ui.py:1409
 msgid "Your accounts data is encrypted."
 msgstr "Les données de vos comptes sont cryptées."
 
-#: modules/ui.py:1413
+#: modules/ui.py:1414
 msgid "Encryption is disabled"
 msgstr "Le chiffrement est désactivé"
 
-#: modules/ui.py:1414
+#: modules/ui.py:1415
 msgid "Enable Encryption"
 msgstr "Activer le chiffrement"
 
-#: modules/ui.py:1420
+#: modules/ui.py:1421
 msgid "STRONGLY recommended when using Password saving."
 msgstr ""
 "FORTEMENT recommandé lors de l'utilisation de l'enregistrement du mot de "
 "passe."
 
-#: modules/ui.py:1434
+#: modules/ui.py:1435
 msgid ""
 "Are you sure you want to disable encryption?\n"
 "Your saved passwords will be stored in plain text!"
@@ -820,11 +812,11 @@ msgstr ""
 "Voulez-vous vraiment désactiver le cryptage ?\n"
 "Vos mots de passe enregistrés seront stockés en texte brut !"
 
-#: modules/ui.py:1437
+#: modules/ui.py:1438
 msgid "Are you sure you want to disable encryption?"
 msgstr "Voulez-vous vraiment désactiver le cryptage ?"
 
-#: modules/ui.py:1472
+#: modules/ui.py:1473
 msgid "OK (Enter)"
 msgstr "OK (Enter)"
 
@@ -883,6 +875,16 @@ msgstr ""
 #: modules/update.py:400
 msgid "Too many requests. Try again later."
 msgstr "Trop de demandes. Réessayez plus tard."
+
+#~ msgid "Account settings"
+#~ msgstr "Paramètres du compte"
+
+#~ msgid ""
+#~ "At least 8 characters\n"
+#~ "Must contain at least one alphabet and a number"
+#~ msgstr ""
+#~ "Au moins 8 caractères\n"
+#~ "Doit contenir au moins un alphabet et un chiffre"
 
 #, python-format
 #~ msgid ""

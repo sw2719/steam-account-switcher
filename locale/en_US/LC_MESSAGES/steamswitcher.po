@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2023-03-11 15:35+0900\n"
-"PO-Revision-Date: 2023-03-11 15:35+0900\n"
+"POT-Creation-Date: 2023-03-11 16:17+0900\n"
+"PO-Revision-Date: 2023-03-11 16:17+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
@@ -163,7 +163,7 @@ msgid "OK"
 msgstr "OK"
 
 #: main.py:489 main.py:1335 main.py:1422 main.py:1534 main.py:1636 main.py:1981
-#: main.py:2041 ui.py:1473 update.py:93 update.py:144
+#: main.py:2041 ui.py:1474 update.py:93 update.py:144
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -184,8 +184,8 @@ msgstr "Use custom name"
 msgid "Save password"
 msgstr "Save password"
 
-#: main.py:567 main.py:617 ui.py:1079 ui.py:1090 ui.py:1158 ui.py:1169
-#: ui.py:1527 ui.py:1538 ui.py:1611 ui.py:1622
+#: main.py:567 main.py:617 ui.py:1079 ui.py:1090 ui.py:1157 ui.py:1168
+#: ui.py:1528 ui.py:1539 ui.py:1611 ui.py:1622
 msgid "Show"
 msgstr "Show"
 
@@ -197,7 +197,7 @@ msgstr ""
 "Warning: Encryption is disabled.\n"
 "Password will be stored in plain text!"
 
-#: main.py:614 ui.py:1087 ui.py:1166 ui.py:1535 ui.py:1619
+#: main.py:614 ui.py:1087 ui.py:1165 ui.py:1536 ui.py:1619
 msgid "Hide"
 msgstr "Hide"
 
@@ -258,7 +258,7 @@ msgstr "Account info"
 msgid "Update avatar"
 msgstr "Update avatar"
 
-#: main.py:830
+#: main.py:830 main.py:987
 msgid "Profile name/Password"
 msgstr "Profile name/Password"
 
@@ -273,10 +273,6 @@ msgstr "No accounts added"
 #: main.py:981
 msgid "View SteamID"
 msgstr "View SteamID"
-
-#: main.py:987
-msgid "Account settings"
-msgstr "Account settings"
 
 #: main.py:1077 main.py:1405 main.py:1526
 msgid "Please wait while downloading avatars..."
@@ -298,7 +294,7 @@ msgstr "STEAM is a registered trademark of Valve Corporation."
 msgid "Copyright notice"
 msgstr "Copyright notice"
 
-#: main.py:1157 main.py:1172 ui.py:1341 ui.py:1382
+#: main.py:1157 main.py:1172 ui.py:1340 ui.py:1381
 msgid "Close"
 msgstr "Close"
 
@@ -407,7 +403,7 @@ msgstr "Grid Mode"
 msgid "Display accounts in 3 x n grid."
 msgstr "Display accounts in 3 x n grid."
 
-#: main.py:1770 ui.py:1223
+#: main.py:1770 ui.py:1222
 msgid "Show avatar images"
 msgstr "Show avatar images"
 
@@ -435,11 +431,11 @@ msgstr "Express Mode (Auto-restart Steam)"
 msgid "Automatically restart Steam when autologin account is changed."
 msgstr "Automatically restart Steam when autologin account is changed."
 
-#: main.py:1862 ui.py:1191
+#: main.py:1862 ui.py:1190
 msgid "Try to soft shutdown Steam client"
 msgstr "Try to soft shutdown Steam client"
 
-#: main.py:1877 ui.py:1207
+#: main.py:1877 ui.py:1206
 msgid "Exit app after Steam is restarted"
 msgstr "Exit app after Steam is restarted"
 
@@ -533,7 +529,7 @@ msgstr "Back"
 msgid "Finish"
 msgstr "Finish"
 
-#: ui.py:790 ui.py:1109 ui.py:1562
+#: ui.py:790 ui.py:1108 ui.py:1562
 msgid "Confirm (Enter)"
 msgstr "Confirm (Enter)"
 
@@ -597,7 +593,7 @@ msgstr ""
 "In express mode, Steam will be automatically\n"
 "restarted when you change account."
 
-#: ui.py:993 ui.py:1355 ui.py:1373
+#: ui.py:993 ui.py:1354 ui.py:1372
 msgid "Encryption Settings"
 msgstr "Encryption Settings"
 
@@ -605,7 +601,7 @@ msgstr "Encryption Settings"
 msgid "Encrypt accounts data"
 msgstr "Encrypt accounts data"
 
-#: ui.py:1005 ui.py:1419
+#: ui.py:1005 ui.py:1420
 msgid "Enable to encrypt accounts data with a password."
 msgstr "Enable to encrypt accounts data with a password."
 
@@ -613,7 +609,7 @@ msgstr "Enable to encrypt accounts data with a password."
 msgid "STRONGLY recommended when using Password Saving."
 msgstr "STRONGLY recommended when using Password Saving."
 
-#: ui.py:1007 ui.py:1421
+#: ui.py:1007 ui.py:1422
 msgid "Uses AES-128-CBC-HMAC-SHA256."
 msgstr "Uses AES-128-CBC-HMAC-SHA256."
 
@@ -625,79 +621,75 @@ msgstr ""
 "Encryption is already enabled.\n"
 "Click 'Next' to continue."
 
-#: ui.py:1021 ui.py:1464
+#: ui.py:1021 ui.py:1465
 msgid "Set Password"
 msgstr "Set Password"
 
-#: ui.py:1051 ui.py:1501
+#: ui.py:1051 ui.py:1502
 msgid "Enter a password to use for encryption."
 msgstr "Enter a password to use for encryption."
 
-#: ui.py:1052 ui.py:1502
+#: ui.py:1052 ui.py:1503
 msgid "You will have to enter it every time you open the app."
 msgstr "You will have to enter it every time you open the app."
 
-#: ui.py:1053 ui.py:1503
+#: ui.py:1053 ui.py:1504
 msgid "The more complex it is, the better."
 msgstr "The more complex it is, the better."
 
-#: ui.py:1057 ui.py:1507
+#: ui.py:1057 ui.py:1508
 msgid "Keep in mind that if you forget it,"
 msgstr "Keep in mind that if you forget it,"
 
-#: ui.py:1058 ui.py:1508
+#: ui.py:1058 ui.py:1509
 msgid "you will have to reset the accounts data!"
 msgstr "you will have to reset the accounts data!"
 
-#: ui.py:1094 ui.py:1542
-msgid ""
-"At least 8 characters\n"
-"Must contain at least one alphabet and a number"
-msgstr ""
-"At least 8 characters\n"
-"Must contain at least one alphabet and a number"
+#: ui.py:1094 ui.py:1543
+msgid "At least 4 characters"
+msgstr "At least 4 characters"
 
-#: ui.py:1106 ui.py:1554
+#: ui.py:1105 ui.py:1554
 msgid "Confirm Password"
 msgstr "Confirm Password"
 
-#: ui.py:1129 ui.py:1584
+#: ui.py:1128 ui.py:1584
 msgid "Passwords match!"
 msgstr "Passwords match!"
 
-#: ui.py:1133 ui.py:1173 ui.py:1588 ui.py:1626
+#: ui.py:1132 ui.py:1172 ui.py:1588 ui.py:1626
 msgid "Passwords do not match"
 msgstr "Passwords do not match"
 
-#: ui.py:1137 ui.py:1592
+#: ui.py:1136 ui.py:1592
 msgid "Enter the same password once again to confirm."
 msgstr "Enter the same password once again to confirm."
 
-#: ui.py:1185
+#: ui.py:1184
 msgid "Other settings"
 msgstr "Other settings"
 
-#: ui.py:1201
+#: ui.py:1200
 msgid "Shutdown Steam instead of killing Steam process"
 msgstr "Shutdown Steam instead of killing Steam process"
 
-#: ui.py:1217
+#: ui.py:1216
 msgid "Exit app automatically after restarting Steam"
 msgstr "Exit app automatically after restarting Steam"
 
-#: ui.py:1235
+#: ui.py:1234
 msgid "Show avatars in account list"
 msgstr "Show avatars in account list"
 
-#: ui.py:1239
+#: ui.py:1238
 msgid "Good to go!"
 msgstr "Good to go!"
 
-#: ui.py:1245
+#: ui.py:1244
 msgid "Create a desktop shortcut"
 msgstr "Create a desktop shortcut"
 
-#: ui.py:1254
+#: ui.py:1253
 msgid ""
 "Add or import accounts via Menu.\n"
 "Right click on accounts to see more options.\n"
@@ -721,67 +713,67 @@ msgstr ""
 "\n"
 "You can open GitHub repo via Menu > About."
 
-#: ui.py:1312
+#: ui.py:1311
 msgid "Steam directory invalid"
 msgstr "Steam directory invalid"
 
-#: ui.py:1312
+#: ui.py:1311
 msgid "Could not locate Steam directory."
 msgstr "Could not locate Steam directory."
 
-#: ui.py:1313
+#: ui.py:1312
 msgid "Please select Steam directory manually."
 msgstr "Please select Steam directory manually."
 
-#: ui.py:1322
+#: ui.py:1321
 msgid "Warning"
 msgstr "Warning"
 
-#: ui.py:1323
+#: ui.py:1322
 msgid "Steam directory is invalid."
 msgstr "Steam directory is invalid."
 
-#: ui.py:1324
+#: ui.py:1323
 msgid "Try again."
 msgstr "Try again."
 
-#: ui.py:1344
+#: ui.py:1343
 msgid "Username"
 msgstr "Username"
 
-#: ui.py:1345
+#: ui.py:1344
 msgid "Friend code"
 msgstr "Friend code"
 
-#: ui.py:1395
+#: ui.py:1394
 msgid "Change Password"
 msgstr "Change Password"
 
-#: ui.py:1398
+#: ui.py:1397
 msgid "Encryption is enabled"
 msgstr "Encryption is enabled"
 
-#: ui.py:1399 ui.py:1434 ui.py:1437
+#: ui.py:1398 ui.py:1435 ui.py:1438
 msgid "Disable Encryption"
 msgstr "Disable Encryption"
 
-#: ui.py:1408
+#: ui.py:1409
 msgid "Your accounts data is encrypted."
 msgstr "Your accounts data is encrypted."
 
-#: ui.py:1413
+#: ui.py:1414
 msgid "Encryption is disabled"
 msgstr "Encryption is disabled"
 
-#: ui.py:1414
+#: ui.py:1415
 msgid "Enable Encryption"
 msgstr "Enable Encryption"
 
-#: ui.py:1420
+#: ui.py:1421
 msgid "STRONGLY recommended when using Password saving."
 msgstr "STRONGLY recommended when using Password saving."
 
-#: ui.py:1434
+#: ui.py:1435
 msgid ""
 "Are you sure you want to disable encryption?\n"
 "Your saved passwords will be stored in plain text!"
@@ -789,11 +781,11 @@ msgstr ""
 "Are you sure you want to disable encryption?\n"
 "Your saved passwords will be stored in plain text!"
 
-#: ui.py:1437
+#: ui.py:1438
 msgid "Are you sure you want to disable encryption?"
 msgstr "Are you sure you want to disable encryption?"
 
-#: ui.py:1472
+#: ui.py:1473
 msgid "OK (Enter)"
 msgstr "OK (Enter)"
 
@@ -850,6 +842,16 @@ msgstr "Failed checking for updates. Click here to try again."
 #: update.py:400
 msgid "Too many requests. Try again later."
 msgstr "Too many requests. Try again later."
+
+#~ msgid "Account settings"
+#~ msgstr "Account settings"
+
+#~ msgid ""
+#~ "At least 8 characters\n"
+#~ "Must contain at least one alphabet and a number"
+#~ msgstr ""
+#~ "At least 8 characters\n"
+#~ "Must contain at least one alphabet and a number"
 
 #~ msgid "Toggle auto-login"
 #~ msgstr "Toggle auto-login"
