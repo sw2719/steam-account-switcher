@@ -827,7 +827,7 @@ class MainApp(tk.Tk):
                                                     command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
                     menu_dict[username].add_separator()
 
-                menu_dict[username].add_command(label=_("Account settings"),
+                menu_dict[username].add_command(label=_("Profile name/Password"),
                                                 command=lambda name=username, pname=profilename: self.account_settings_window(name))
                 menu_dict[username].add_command(label=_("Delete"),
                                                 command=lambda name=username: self.remove_user(name))
@@ -984,7 +984,7 @@ class MainApp(tk.Tk):
                                                     command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
                     menu_dict[username].add_separator()
 
-                menu_dict[username].add_command(label=_("Account settings"),
+                menu_dict[username].add_command(label=_("Profile name/Password"),
                                                 command=lambda name=username, pname=profilename: self.account_settings_window(name))
                 menu_dict[username].add_command(label=_("Delete"),
                                                 command=lambda name=username: self.remove_user(name))
