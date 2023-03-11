@@ -997,7 +997,7 @@ class WelcomeWindow(tk.Toplevel):
                                     text=_('Enable to encrypt accounts data with a password.') + '\n' +
                                          _('STRONGLY recommended when using Password Saving.') + '\n' +
                                          _('Uses AES-128-CBC-HMAC-SHA256.'),
-                                    justify=tk.CENTER)
+                                    justify=tk.CENTER, wraplength=315)
         encryption_info.pack(expand=True, fill='both')
 
         if self.encryption == 'true':
@@ -1042,12 +1042,12 @@ class WelcomeWindow(tk.Toplevel):
                   text=_('Enter a password to use for encryption.') + '\n' +
                        _('You will have to enter it every time you open the app.') + '\n' +
                        _('The more complex it is, the better.'),
-                  justify=tk.CENTER).pack(pady=(2, 0))
+                  justify=tk.CENTER, wraplength=315).pack(pady=(2, 0))
 
         ttk.Label(self.innerframe,
                   text=_('Keep in mind that if you forget it,') + '\n' +
                        _('you will have to reset the accounts data!'),
-                  justify=tk.CENTER, foreground=get_color('autologin_text_unavail')).pack(pady=(6, 0))
+                  justify=tk.CENTER, foreground=get_color('autologin_text_unavail'), wraplength=315).pack(pady=(6, 0))
 
         entry_frame = ttk.Frame(self.innerframe)
         entry_frame.pack(side=tk.BOTTOM, fill=tk.X)
@@ -1126,7 +1126,7 @@ class WelcomeWindow(tk.Toplevel):
 
         ttk.Label(self.innerframe,
                   text=_('Enter the same password once again to confirm.'),
-                  justify=tk.CENTER).pack(pady=(5, 0))
+                  justify=tk.CENTER, wraplength=315).pack(pady=(5, 0))
 
         entry_frame = ttk.Frame(self.innerframe)
         entry_frame.pack(side=tk.BOTTOM, fill=tk.X)
