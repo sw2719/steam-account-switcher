@@ -1091,8 +1091,7 @@ class WelcomeWindow(tk.Toplevel):
 
         checkbutton['command'] = on_show_checkbutton
 
-        prompt = ttk.Label(self.innerframe, text=_('At least 8 characters\nMust contain at least one alphabet and a number'),
-                           justify=tk.CENTER)
+        prompt = ttk.Label(self.innerframe, text=_('At least 4 characters'), justify=tk.CENTER)
         prompt.pack(side=tk.BOTTOM, padx=3, pady=3)
 
         def on_return(e):
@@ -1490,7 +1489,7 @@ class ManageEncryptionWindow(tk.Toplevel):
             except IndexError:
                 pass
 
-            conditions = re.search('[a-zA-Z]', pw) and re.search('[0-9]', pw) and len(pw) >= 8 and pw.strip() == pw
+            conditions = len(pw) >= 4 and pw.strip() == pw
 
             if conditions:
                 prompt['foreground'] = get_color('autologin_text_avail')
@@ -1541,8 +1540,7 @@ class ManageEncryptionWindow(tk.Toplevel):
 
         checkbutton['command'] = on_show_checkbutton
 
-        prompt = ttk.Label(self.innerframe, text=_('At least 8 characters\nMust contain at least one alphabet and a number'),
-                           justify=tk.CENTER)
+        prompt = ttk.Label(self.innerframe, text=_('At least 4 characters'), justify=tk.CENTER)
         prompt.pack(side=tk.BOTTOM, padx=3, pady=3)
 
         def on_return(e):
