@@ -26,7 +26,7 @@ changelog_en: |
 
   • Added app-wide light/dark theme.
   
-  • App now detects system light/dark mode and defaults to corresponding theme on first launch.
+  • App now detects system light/dark mode and defaults to a corresponding theme on first launch.
   
   • After update, previous setting values are used if possible in initial setup.
   

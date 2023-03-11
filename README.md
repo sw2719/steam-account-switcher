@@ -21,7 +21,6 @@ Only fixes for bugs and critical issues will be provided from now on.
 
 It just doesn't make sense to keep updating this ancient spaghetti code anyway.
 
-
 # Features
 * Switch between your accounts with just few clicks.
 * No more entering ID, password and Steam Guard code every time you login to another account.
@@ -32,13 +31,12 @@ It just doesn't make sense to keep updating this ancient spaghetti code anyway.
 * Auto-updating is built-in, and it's fast. (Unless GitHub's server is having a hard time..)
 
 # Requirements (for executable release)
-* Windows Operating System
+* Windows 8.1 or newer
   - 64-bit is no longer required since version 2.7.
 * Steam installed correctly
 * Visual C++ Redistributable for Visual Studio 2015 or 2017
   - Chances are it's already installed, but if it isn't, you can download it below.
-  - [Download for 32-bit](https://aka.ms/vs/16/release/vc_redist.x32.exe)
-  - [Download for 64-bit](https://aka.ms/vs/16/release/vc_redist.x64.exe)
+  - [Download](https://aka.ms/vs/16/release/vc_redist.x32.exe)
 
 # How to use
 1. Unpack the archive to desired folder
