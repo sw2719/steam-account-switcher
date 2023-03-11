@@ -19,7 +19,7 @@ from pynput import keyboard
 from modules.account import AccountManager, loginusers_accountnames, loginusers_steamid, \
     loginusers_personanames, check_autologin_availability, set_loginusers_value, remember_password_disabled
 from modules.reg import fetch_reg, setkey
-from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE, first_run
+from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE, first_run, missing_values
 from modules.util import steam_running, StoppableThread, raise_exception, test, get_center_pos, \
     launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update, update_frame_color
@@ -148,7 +148,9 @@ class MainApp(tk.Tk):
         lock_white_img = Image.open('asset/lock_white.png').resize((80, 80))
         self.lock_white_imgtk = ImageTk.PhotoImage(lock_white_img)
 
-        if first_run or after_update:
+        if first_run:
+            self.open_welcomewindow()
+        elif missing_values and after_update:
             self.open_welcomewindow()
         elif get_config('encryption') == 'true':
             self.lockscreen()
@@ -1661,7 +1663,7 @@ class MainApp(tk.Tk):
         last_config = config_dict
 
         if LOCALE == 'fr_FR':
-            width = 330
+            width = 340
             ui_padx = 70
             theme_padx = 50
         else:
