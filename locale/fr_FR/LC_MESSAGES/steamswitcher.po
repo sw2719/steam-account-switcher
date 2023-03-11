@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-10 22:38+0900\n"
-"PO-Revision-Date: 2023-03-10 22:39+0900\n"
+"PO-Revision-Date: 2023-03-11 14:20+0900\n"
 "Last-Translator: QuentiumYT\n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -56,13 +56,15 @@ msgstr "Changement de compte"
 
 #: modules/main.py:162 modules/main.py:180
 msgid "Reset accounts data"
-msgstr ""
+msgstr "Réinitialiser les données des comptes"
 
 #: modules/main.py:163
 msgid ""
 "This will reset all accounts data.\n"
 "This action cannot be undone."
 msgstr ""
+"Cela réinitialisera toutes les données des comptes.\n"
+"Cette action ne peut pas être annulée."
 
 #: modules/main.py:164
 msgid "Are you sure?"
@@ -82,18 +84,20 @@ msgid ""
 "Salt is missing.\n"
 "Restore it or reset accounts data."
 msgstr ""
+"Le sel manque.\n"
+"Restaurez-le ou réinitialisez les données des comptes."
 
 #: modules/main.py:205
 msgid "Incorrect password. Try again."
-msgstr ""
+msgstr "Mot de passe incorrect. Essayer à nouveau."
 
 #: modules/main.py:213
 msgid "Unlock (Enter)"
-msgstr ""
+msgstr "Déverrouiller (Enter)"
 
 #: modules/main.py:250
 msgid "Show password"
-msgstr ""
+msgstr "Montrer le mot de passe"
 
 #: modules/main.py:263 modules/ui.py:853
 msgid "Welcome"
@@ -101,7 +105,7 @@ msgstr "Bienvenue"
 
 #: modules/main.py:264
 msgid "Enter master password to unlock."
-msgstr ""
+msgstr "Saisir le mot de passe principal pour déverrouiller."
 
 #: modules/main.py:281
 msgid "Import accounts from Steam"
@@ -162,11 +166,11 @@ msgstr "Connexion automatique non disponible"
 
 #: modules/main.py:400
 msgid "Unhandled Exception"
-msgstr ""
+msgstr "Exception non-gérée"
 
 #: modules/main.py:401
 msgid "Please contact the developer if the issue persists."
-msgstr ""
+msgstr "Veuillez contacter le développeur si le problème persiste."
 
 #: modules/main.py:482 modules/main.py:1631 modules/main.py:1972
 msgid "OK"
@@ -194,24 +198,26 @@ msgstr "Utiliser un nom personnalisé"
 
 #: modules/main.py:546
 msgid "Save password"
-msgstr ""
+msgstr "Enregistrer le mot de passe"
 
 #: modules/main.py:564 modules/main.py:614 modules/ui.py:1078
 #: modules/ui.py:1089 modules/ui.py:1157 modules/ui.py:1168 modules/ui.py:1514
 #: modules/ui.py:1525 modules/ui.py:1598 modules/ui.py:1609
 msgid "Show"
-msgstr ""
+msgstr "Montrer"
 
 #: modules/main.py:570
 msgid ""
 "Warning: Encryption is disabled.\n"
 "Password will be stored in plain text!"
 msgstr ""
+"Avertissement : Le chiffrement est désactivé.\n"
+"Le mot de passe sera stocké en texte brut !"
 
 #: modules/main.py:611 modules/ui.py:1086 modules/ui.py:1165 modules/ui.py:1522
 #: modules/ui.py:1606
 msgid "Hide"
-msgstr ""
+msgstr "Cacher"
 
 #: modules/main.py:628 modules/main.py:631 modules/main.py:634
 #: modules/main.py:1434
@@ -220,15 +226,15 @@ msgstr "Informations"
 
 #: modules/main.py:628
 msgid "Enter a custom profile name and a account password."
-msgstr ""
+msgstr "Entrez un nom de profil personnalisé et un mot de passe de compte."
 
 #: modules/main.py:631
 msgid "Enter a custom profile name."
-msgstr ""
+msgstr "Entrez un nom de profil personnalisé."
 
 #: modules/main.py:634
 msgid "Enter a account password."
-msgstr ""
+msgstr "Entrez un mot de passe de compte."
 
 #: modules/main.py:694
 msgid "Confirm"
@@ -241,11 +247,11 @@ msgstr "Voulez-vous vraiment supprimer le compte %s ?"
 
 #: modules/main.py:710
 msgid "No screenshots directory"
-msgstr ""
+msgstr "Pas de répertoire de captures d'écran"
 
 #: modules/main.py:710
 msgid "No screenshots directory was found for this account."
-msgstr ""
+msgstr "Aucun répertoire de captures d'écran n'a été trouvé pour ce compte."
 
 #: modules/main.py:795 modules/main.py:952
 msgid "N/A"
@@ -265,7 +271,7 @@ msgstr "Ouvrir le dossier des captures d'écran"
 
 #: modules/main.py:821
 msgid "Account info"
-msgstr ""
+msgstr "Informations de compte"
 
 #: modules/main.py:823 modules/main.py:980
 msgid "Update avatar"
@@ -459,7 +465,7 @@ msgstr "Quitter l'app au redémarrage de Steam"
 
 #: modules/main.py:1896
 msgid "Manage Encryption Settings"
-msgstr ""
+msgstr "Gérer les paramètres de chiffrement"
 
 #: modules/main.py:1957
 msgid "Do you want to download avatar images now?"
@@ -479,13 +485,15 @@ msgstr "Appliquer"
 
 #: modules/main.py:2000
 msgid "Remember Password Disabled"
-msgstr ""
+msgstr "Mémoriser le mot de passe désactivé"
 
 #: modules/main.py:2001
 msgid ""
 "Remember Password is disabled for this account.\n"
 "Do you want to enable it now?"
 msgstr ""
+"Mémoriser le mot de passe est désactivé pour ce compte.\n"
+"Voulez-vous l'activer maintenant ?"
 
 #: modules/main.py:2040
 msgid "Force quit Steam"
@@ -505,6 +513,9 @@ msgid ""
 "\n"
 "Press Ctrl+V to paste password."
 msgstr ""
+"En attente de connexion...\n"
+"\n"
+"Appuyez sur Ctrl+V pour coller le mot de passe."
 
 #: modules/reg.py:32 modules/reg.py:52
 msgid "Registry Error"
@@ -529,19 +540,19 @@ msgstr "Configuration initiale"
 #: modules/ui.py:626 modules/ui.py:691 modules/ui.py:708 modules/ui.py:713
 #: modules/ui.py:783 modules/ui.py:802
 msgid "Next"
-msgstr ""
+msgstr "Suivant"
 
 #: modules/ui.py:697 modules/ui.py:775
 msgid "Next (Enter)"
-msgstr ""
+msgstr "Suivant (Enter)"
 
 #: modules/ui.py:728 modules/ui.py:1551
 msgid "Back"
-msgstr ""
+msgstr "Précédent"
 
 #: modules/ui.py:781 modules/ui.py:800 modules/ui.py:830
 msgid "Finish"
-msgstr ""
+msgstr "Finir"
 
 #: modules/ui.py:790 modules/ui.py:1108 modules/ui.py:1549
 msgid "Confirm (Enter)"
@@ -609,75 +620,81 @@ msgstr ""
 
 #: modules/ui.py:993 modules/ui.py:1346 modules/ui.py:1364
 msgid "Encryption Settings"
-msgstr ""
+msgstr "Paramètres de chiffrement"
 
 #: modules/ui.py:1001
 msgid "Encrypt accounts data"
-msgstr ""
+msgstr "Crypter les données des comptes"
 
 #: modules/ui.py:1005 modules/ui.py:1406
 msgid "Enable to encrypt accounts data with a password."
-msgstr ""
+msgstr "Activer pour chiffrer les données des comptes avec un mot de passe."
 
 #: modules/ui.py:1006
 msgid "STRONGLY recommended when using Password Saving."
 msgstr ""
+"FORTEMENT recommandé lors de l'utilisation de l'enregistrement du mot de "
+"passe."
 
 #: modules/ui.py:1007 modules/ui.py:1408
 msgid "Uses AES-128-CBC-HMAC-SHA256."
-msgstr ""
+msgstr "Utilise AES-128-CBC-HMAC-SHA256."
 
 #: modules/ui.py:1015
 msgid ""
 "Encryption is already enabled.\n"
 "Click 'Next' to continue."
 msgstr ""
+"Le cryptage est déjà activé.\n"
+"Cliquer sur Suivant pour continuer."
 
 #: modules/ui.py:1020 modules/ui.py:1451
 msgid "Set Password"
-msgstr ""
+msgstr "Définir le mot de passe"
 
 #: modules/ui.py:1050 modules/ui.py:1488
 msgid "Enter a password to use for encryption."
-msgstr ""
+msgstr "Entrez un mot de passe à utiliser pour le cryptage."
 
 #: modules/ui.py:1051 modules/ui.py:1489
 msgid "You will have to enter it every time you open the app."
-msgstr ""
+msgstr "Vous devrez le saisir à chaque fois que vous ouvrirez l'application."
 
 #: modules/ui.py:1052 modules/ui.py:1490
 msgid "The more complex it is, the better."
-msgstr ""
+msgstr "Plus c'est complexe, mieux c'est."
 
 #: modules/ui.py:1056 modules/ui.py:1494
 msgid "Keep in mind that if you forget it,"
-msgstr ""
+msgstr "Gardez à l'esprit que si vous l'oubliez,"
 
 #: modules/ui.py:1057 modules/ui.py:1495
 msgid "you will have to reset the accounts data!"
-msgstr ""
+msgstr "vous devrez réinitialiser les données des comptes !"
 
 #: modules/ui.py:1093 modules/ui.py:1529
 msgid ""
 "At least 8 characters\n"
 "Must contain at least one alphabet and a number"
 msgstr ""
+"Au moins 8 caractères\n"
+"Doit contenir au moins un alphabet et un chiffre"
 
 #: modules/ui.py:1105 modules/ui.py:1541
 msgid "Confirm Password"
-msgstr ""
+msgstr "Confirmez le mot de passe"
 
 #: modules/ui.py:1128 modules/ui.py:1571
 msgid "Passwords match!"
-msgstr ""
+msgstr "Les mots de passe correspondent !"
 
 #: modules/ui.py:1132 modules/ui.py:1172 modules/ui.py:1575 modules/ui.py:1613
 msgid "Passwords do not match"
-msgstr ""
+msgstr "Les mots de passe ne correspondent pas"
 
 #: modules/ui.py:1136 modules/ui.py:1579
 msgid "Enter the same password once again to confirm."
-msgstr ""
+msgstr "Saisissez à nouveau le même mot de passe pour confirmer."
 
 #: modules/ui.py:1184
 msgid "Other settings"
@@ -763,45 +780,49 @@ msgstr "Code ami"
 
 #: modules/ui.py:1387
 msgid "Change Password"
-msgstr ""
+msgstr "Changer le mot de passe"
 
 #: modules/ui.py:1390
 msgid "Encryption is enabled"
-msgstr ""
+msgstr "Le chiffrement est activé"
 
 #: modules/ui.py:1391 modules/ui.py:1421 modules/ui.py:1424
 msgid "Disable Encryption"
-msgstr ""
+msgstr "Désactiver le chiffrement"
 
 #: modules/ui.py:1397
 msgid "Your accounts data is encrypted."
-msgstr ""
+msgstr "Les données de vos comptes sont cryptées."
 
 #: modules/ui.py:1402
 msgid "Encryption is disabled"
-msgstr ""
+msgstr "Le chiffrement est désactivé"
 
 #: modules/ui.py:1403
 msgid "Enable Encryption"
-msgstr ""
+msgstr "Activer le chiffrement"
 
 #: modules/ui.py:1407
 msgid "STRONGLY recommended when using Password saving."
 msgstr ""
+"FORTEMENT recommandé lors de l'utilisation de l'enregistrement du mot de "
+"passe."
 
 #: modules/ui.py:1421
 msgid ""
 "Are you sure you want to disable encryption?\n"
 "Your saved passwords will be stored in plain text!"
 msgstr ""
+"Voulez-vous vraiment désactiver le cryptage ?\n"
+"Vos mots de passe enregistrés seront stockés en texte brut !"
 
 #: modules/ui.py:1424
 msgid "Are you sure you want to disable encryption?"
-msgstr ""
+msgstr "Voulez-vous vraiment désactiver le cryptage ?"
 
 #: modules/ui.py:1459
 msgid "OK (Enter)"
-msgstr ""
+msgstr "OK (Enter)"
 
 #: modules/update.py:80
 msgid "Update"
@@ -821,6 +842,8 @@ msgid ""
 "Couldn't delete existing update file.\n"
 "Please delete it manually and try again."
 msgstr ""
+"Impossible de supprimer le fichier de mise à jour existant.\n"
+"Veuillez le supprimer manuellement et réessayer."
 
 #: modules/update.py:144
 msgid "Are you sure to cancel?"
@@ -855,7 +878,7 @@ msgstr ""
 
 #: modules/update.py:400
 msgid "Too many requests. Try again later."
-msgstr ""
+msgstr "Trop de demandes. Réessayez plus tard."
 
 #, python-format
 #~ msgid ""

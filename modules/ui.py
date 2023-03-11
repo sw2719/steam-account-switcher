@@ -1366,12 +1366,11 @@ class ManageEncryptionWindow(tk.Toplevel):
         self.bottomframe.pack(side='bottom')
 
         self.bottomframe.rowconfigure(0, weight=1)
+        self.bottomframe.rowconfigure(1, weight=1)
         self.bottomframe.columnconfigure(0, weight=1)
         self.bottomframe.columnconfigure(1, weight=1)
 
         self.close_button = ttk.Button(self.bottomframe, text=_('Close'), command=self.destroy, style='Accent.TButton')
-        self.close_button.grid(row=0, column=0, pady=3, padx=3)
-
         self.innerframe = ttk.Frame(self)
         self.innerframe.pack(side='top', padx=0, pady=(0, 8), fill='both', expand=True)
 
@@ -1393,6 +1392,9 @@ class ManageEncryptionWindow(tk.Toplevel):
             self.change_password_button['command'] = self.ok
             self.bottomframe.columnconfigure(2, weight=1)
 
+            if get_config('locale') == 'fr_FR':
+                self.close_button.grid(row=1, column=1, pady=(0, 3), padx=3, columnspan=2, sticky='nesw')
+
             ttk.Label(self.innerframe,
                       text=_('Your accounts data is encrypted.'),
                       justify=tk.CENTER).pack(expand=True)
@@ -1402,10 +1404,12 @@ class ManageEncryptionWindow(tk.Toplevel):
             self.encryption_status.config(text=_('Encryption is disabled'), foreground=get_color('autologin_text_unavail'))
             self.encryption_button.config(text=_('Enable Encryption'), command=self.ok)
 
+            self.close_button.grid(row=0, column=0, pady=3, padx=3)
+
             ttk.Label(self.innerframe,
                       text=_('Enable to encrypt accounts data with a password.') + '\n' +
                            _('STRONGLY recommended when using Password saving.') + '\n' +
-                           _('Uses AES-128-CBC-HMAC-SHA256.'), justify=tk.CENTER).pack(expand=True)
+                           _('Uses AES-128-CBC-HMAC-SHA256.'), justify=tk.CENTER, wraplength=315).pack(expand=True)
 
     def back(self):
         if self.active_page == 'pw1':
@@ -1488,12 +1492,12 @@ class ManageEncryptionWindow(tk.Toplevel):
                   text=_('Enter a password to use for encryption.') + '\n' +
                        _('You will have to enter it every time you open the app.') + '\n' +
                        _('The more complex it is, the better.'),
-                  justify=tk.CENTER).pack(pady=(2, 0))
+                  justify=tk.CENTER, wraplength=315).pack(pady=(2, 0))
 
         ttk.Label(self.innerframe,
                   text=_('Keep in mind that if you forget it,') + '\n' +
                        _('you will have to reset the accounts data!'),
-                  justify=tk.CENTER, foreground='red').pack(pady=(6, 0))
+                  justify=tk.CENTER, foreground=get_color('autologin_text_unavail'), wraplength=315).pack(pady=(6, 0))
 
         entry_frame = ttk.Frame(self.innerframe)
         entry_frame.pack(side=tk.BOTTOM, fill=tk.X)
@@ -1577,7 +1581,7 @@ class ManageEncryptionWindow(tk.Toplevel):
 
         ttk.Label(self.innerframe,
                   text=_('Enter the same password once again to confirm.'),
-                  justify=tk.CENTER).pack(pady=(5, 0))
+                  justify=tk.CENTER, wraplength=315).pack(pady=(5, 0))
 
         entry_frame = ttk.Frame(self.innerframe)
         entry_frame.pack(side=tk.BOTTOM, fill=tk.X)
@@ -1620,24 +1624,7 @@ class ManageEncryptionWindow(tk.Toplevel):
 
         pw_entry.bind('<Return>', on_return)
 
-if __name__ == '__main__':
-    with open('../theme.json') as theme_json:
-        theme_dict = json.loads(theme_json.read())
-        COLOR_LIGHT = theme_dict['light']
-        COLOR_DARK = theme_dict['dark']
-
-    def open_window():
-        window = ManageEncryptionWindow('320x300+600+300')
-
-    root = tk.Tk()
-    root.title('Test UI')
-    root.geometry('300x300')
-    root.resizable(False, False)
-    sv_ttk.use_light_theme()
-    root.after(1000, open_window)
-    root.mainloop()
-else:
-    with open('theme.json') as theme_json:
-        theme_dict = json.loads(theme_json.read())
-        COLOR_LIGHT = theme_dict['light']
-        COLOR_DARK = theme_dict['dark']
+with open('theme.json') as theme_json:
+    theme_dict = json.loads(theme_json.read())
+    COLOR_LIGHT = theme_dict['light']
+    COLOR_DARK = theme_dict['dark']
