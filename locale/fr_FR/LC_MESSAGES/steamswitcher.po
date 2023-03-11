@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-10 22:38+0900\n"
-"PO-Revision-Date: 2023-03-11 14:20+0900\n"
+"PO-Revision-Date: 2023-03-11 15:00+0900\n"
 "Last-Translator: QuentiumYT\n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -145,7 +145,7 @@ msgstr "Déboguer"
 
 #: modules/main.py:340 modules/main.py:1067
 msgid "Restart Steam & Exit"
-msgstr "Redémarrer Steam"
+msgstr "Redémarrer Steam et quittez"
 
 #: modules/main.py:342 modules/main.py:1069
 msgid "Restart Steam"
