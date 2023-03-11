@@ -2132,7 +2132,9 @@ class MainApp(tk.Tk):
                     def active_user_checker():
                         nonlocal queue
 
-                        if not fetch_reg('ActiveUser'):
+                        if not steam_running():
+                            self.after(1000, active_user_checker)
+                        elif not fetch_reg('ActiveUser'):
                             self.after(1000, active_user_checker)
                         else:
                             queue.put(1)
