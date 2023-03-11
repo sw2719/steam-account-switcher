@@ -767,7 +767,7 @@ class WelcomeWindow(tk.Toplevel):
             self.innerframe.destroy()
 
             if self.encryption == 'true':
-                if self.encryption_already_enabled:
+                if self.encryption_already_enabled == 'true':
                     self.page_5()
                     self.ok_button['text'] = _('Next')
                     self.focus()
