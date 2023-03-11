@@ -441,7 +441,7 @@ class MainApp(tk.Tk):
             welcomewindow = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), self.after_update, debug)
 
         def after_init(pw):
-            if get_config('encryption') == 'true' and not update_override:
+            if get_config('encryption') == 'true' and not update_override and not debug:
                 if pw:
                     self.accounts = AccountManager(pw)
                     self.main_menu()

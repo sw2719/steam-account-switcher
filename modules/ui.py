@@ -694,7 +694,10 @@ class WelcomeWindow(tk.Toplevel):
             self.avatar_frame.destroy()
 
             if self.encryption == 'true':
-                self.password_page()
+                if self.encryption_already_enabled:
+                    self.page_4()
+                else:
+                    self.password_page()
             else:
                 self.page_4()
                 self.ok_button['text'] = _('Next')
@@ -764,8 +767,13 @@ class WelcomeWindow(tk.Toplevel):
             self.innerframe.destroy()
 
             if self.encryption == 'true':
-                self.ok_button['text'] = _('Next (Enter)')
-                self.password_page()
+                if self.encryption_already_enabled:
+                    self.page_5()
+                    self.ok_button['text'] = _('Next')
+                    self.focus()
+                else:
+                    self.ok_button['text'] = _('Next (Enter)')
+                    self.password_page()
             else:
                 self.page_5()
 
@@ -862,7 +870,7 @@ class WelcomeWindow(tk.Toplevel):
         icon_h = 96
 
         self.radio_frame1 = tk.Frame(self)
-        self.radio_frame1.pack(side='left', padx=(50, 0), pady=5)
+        self.radio_frame1.pack(side='left', padx=(40, 0), ipadx=5, pady=5)
 
         self.light_canvas = tk.Canvas(self.radio_frame1, width=icon_w, height=icon_h, bd=0, highlightthickness=0)
         img = Image.open("asset/light.png").resize((icon_w, icon_h))
@@ -879,7 +887,7 @@ class WelcomeWindow(tk.Toplevel):
         radio_light.pack(side='top', pady=2)
 
         self.radio_frame2 = tk.Frame(self)
-        self.radio_frame2.pack(side='right', padx=(0, 50), pady=5)
+        self.radio_frame2.pack(side='right', padx=(0, 40), ipadx=5, pady=5)
 
         self.dark_canvas = tk.Canvas(self.radio_frame2, width=icon_w, height=icon_h, bd=0, highlightthickness=0)
         img = Image.open("asset/dark.png").resize((icon_w, icon_h))
@@ -998,7 +1006,6 @@ class WelcomeWindow(tk.Toplevel):
                                          _('STRONGLY recommended when using Password Saving.') + '\n' +
                                          _('Uses AES-128-CBC-HMAC-SHA256.'),
                                     justify=tk.CENTER, wraplength=315)
-        encryption_info.pack(expand=True, fill='both')
 
         if self.encryption == 'true':
             self.encryption_chkb.state(['selected'])
@@ -1006,6 +1013,8 @@ class WelcomeWindow(tk.Toplevel):
         if self.encryption_already_enabled == 'true':
             encryption_info['text'] = _("Encryption is already enabled.\nClick 'Next' to continue.")
             self.encryption_chkb.state(['disabled'])
+
+        encryption_info.pack(expand=True, fill='y')
 
     def password_page(self):
         self.active_page = 'pw1'
