@@ -31,10 +31,19 @@ _ = t.gettext
 update_frame = None
 bundled = True
 
+
+def pprint(*args, **kwargs):
+    print('[update]', *args, **kwargs)
+
+
+class RatelimitedException(BaseException):
+    pass
+
+
 #  Update code is a real mess right now. You have been warned.
 
 
-def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
+def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
     '''Check if application has update'''
     global update_frame
     global update_label
@@ -56,6 +65,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
         tk.Frame(update_frame, bg='grey').pack(fill='x')
         update_frame.pack(side='bottom', fill='x')
         bundled = False
+        master.update()
         return
     else:
         update_frame.pack(side='bottom', fill='x')
@@ -63,7 +73,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
     tk.Frame(update_frame, bg='grey').pack(fill='x')
     master.update()
 
-    def update(sv_version, changelog):
+    def update(sv_version, changelog, zip_url):
         nonlocal debug
 
         updatewindow = tk.Toplevel(master)
@@ -78,11 +88,14 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
             pass
 
         button_frame = tk.Frame(updatewindow)
-        button_frame.pack(side=tk.BOTTOM, pady=3, fill='x')
+        button_frame.pack(side=tk.BOTTOM, pady=3)
 
         cancel_button = ttk.Button(button_frame, text=_('Cancel'),
                                    command=updatewindow.destroy)
-        update_button = ttk.Button(button_frame, width=28, text=_('Update now'))
+        update_button = ttk.Button(button_frame, text=_('Update now'), style='Accent.TButton')
+
+        button_frame.columnconfigure(0, weight=1)
+        button_frame.columnconfigure(1, weight=1)
 
         text_frame = tk.Frame(updatewindow)
         text_frame.pack(side=tk.TOP, pady=3)
@@ -104,12 +117,18 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
             nonlocal update_button
             nonlocal debug
             nonlocal sv_version
+            nonlocal updatewindow
 
             master.withdraw()
             try:
                 os.remove('update.zip')
             except OSError:
-                pass
+                if os.path.isfile('update.zip'):
+                    msgbox.showerror(_('Error'),
+                                     _("Couldn't delete existing update file.\nPlease delete it manually and try again."))
+                    updatewindow.destroy()
+                    master.deiconify()
+                    return
 
             install = True
 
@@ -123,7 +142,10 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
 
             def cancel():
                 if msgbox.askokcancel(_('Cancel'), _('Are you sure to cancel?')):
-                    os._exit(0)
+                    downloader.stop()
+                    updatewindow.destroy()
+                    master.deiconify()
+                    return
 
             # There's no cancel button so we use close button as one instead
             updatewindow.protocol("WM_DELETE_WINDOW", cancel)
@@ -149,17 +171,17 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
             dl_speed.pack(side='right', padx=5)
             master.update()
 
-            dl_url = f'https://github.com/sw2719/steam-account-switcher/releases/download/v{sv_version}/Steam_Account_Switcher_v{sv_version}.zip'
-
             try:
-                r = req.get(dl_url, stream=True)
+                r = req.get(zip_url, stream=True)
                 r.raise_for_status()
                 total_size = int(r.headers.get('content-length'))
                 total_in_MB = round(total_size / 1048576, 1)
             except req.RequestException:
                 msgbox.showerror(_('Error'),
                                  _('Error occured while downloading update.') + '\n\n' + traceback.format_exc())
-                os._exit(1)
+                updatewindow.destroy()
+                master.deiconify()
+                return
 
             if round(total_in_MB, 1).is_integer():
                 total_in_MB = int(total_in_MB)
@@ -202,62 +224,55 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 if perc == 100 and downloader.total_merged == downloader.total_length:
                     launch_updater()
 
-            downloader = Downloader(dl_url, 'update.zip', 8)
+            downloader = Downloader(zip_url, 'update.zip', 8)
             downloader.subscribe(dl_callback)
             downloader.start()
 
         update_button['command'] = lambda: start_update()
-        if LOCALE == 'fr_FR':
-            padx_int = 80
-        else:
-            padx_int = 110
-        cancel_button.pack(side='left', padx=(padx_int, 0))
-        update_button.pack(side='right', padx=(0, padx_int))
+        cancel_button.grid(row=0, column=0, padx=(0, 3))
+        update_button.grid(row=0, column=1)
 
     queue = q.Queue()
 
     def checkupdate():
         '''Fetch version information from GitHub and
         return different update codes'''
-        print('Update check start')
+        pprint('Update check start')
         update = None
         try:
             if exception:
                 raise req.RequestException
-            response = req.get(URL)
-            response.encoding = 'utf-8'
-            text = response.text
-            version_data = yaml.load(text)
-            sv_version_str = str(version_data['version'])
+            with req.get('https://api.github.com/repos/sw2719/steam-account-switcher/releases') as r:
+                if r.status_code == 403:
+                    raise RatelimitedException
+                data = r.json()
 
-            if LOCALE == 'ko_KR':
-                changelog = version_data['changelog_ko']
-            else:
-                changelog = version_data['changelog_en']
+                for release in data:
+                    if not release['prerelease']:
+                        latest = release
+                        break
 
-            try:
-                critical_msg = version_data['msg'][str(cl_ver_str)]
-                if critical_msg:
-                    if LOCALE == 'ko_KR':
-                        msgbox.showinfo(_('Info'),
-                                        critical_msg['ko'])
-                    else:
-                        msgbox.showinfo(_('Info'),
-                                        critical_msg['en'])
-            except (KeyError, TypeError):
-                pass
+                latest_version = latest['tag_name'].replace('v', '')
+                latest_zip = latest['assets'][0]['browser_download_url']
+                latest_changelog = latest['body'].replace('\r', '').split('# ')
 
-            print('Server version is', sv_version_str)
-            print('Client version is', cl_ver_str)
+                # ['', en, ko]
+                if get_config('locale') == 'ko_KR':
+                    latest_changelog = latest_changelog[2].replace('변경사항\n', '')
+                else:
+                    latest_changelog = latest_changelog[1].replace('Changelogs\n', '')
 
-            sv_version = version.parse(sv_version_str)
-            cl_version = version.parse(cl_ver_str)
+            pprint('Latest version is', latest_version)
+            pprint('Program version is', cl_ver_str)
 
-            if sv_version > cl_version:
+            latest = version.parse(latest_version)
+            current = version.parse(cl_ver_str)
+
+            if latest > current:
                 update = 'avail'
-            elif sv_version == cl_version:
+            elif latest == current:
                 update = 'latest'
-            elif sv_version < cl_version:
+            elif latest < current:
                 update = 'dev'
 
         except (req.RequestException, req.ConnectionError,
@@ -266,7 +281,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
             sv_version_str = '0'
             changelog = None
 
-        queue.put((update, sv_version_str, changelog))
+        except RatelimitedException:
+            update = 'ratelimited'
+            sv_version_str = '0'
+            changelog = None
+
+        queue.put((update, latest_version, latest_changelog, latest_zip))
 
     update_code = None
     sv_version = None
@@ -286,9 +306,10 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
             update_code = v[0]
             sv_version = v[1]
             changelog = v[2]
+            zip_url = v[3]
 
             if debug:
-                print('Update debug mode')
+                pprint('Update debug mode')
 
                 update_frame.destroy()
 
@@ -302,14 +323,16 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 update_label.pack(side='bottom')
 
                 update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version,
-                                                                            changelog=changelog))
+                                                                            changelog=changelog,
+                                                                            zip_url=zip_url))
 
                 update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version,
-                                                                            changelog=changelog))
+                                                                            changelog=changelog,
+                                                                            zip_url=zip_url))
                 return
 
             if update_code == 'avail':
-                print('Update Available')
+                pprint('Update Available')
 
                 update_frame.destroy()
 
@@ -322,10 +345,12 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                                         bg=get_color('bottomframe'),
                                         fg=get_color('autologin_text_avail'))
                 update_label.pack(side='bottom')
-                update_label.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog))
-                update_frame.bind('<ButtonRelease-1>', lambda event: update(sv_version=sv_version, changelog=changelog))
+                update_label.bind('<ButtonRelease-1>',
+                                  lambda event: update(sv_version=sv_version, changelog=changelog, zip_url=zip_url))
+                update_frame.bind('<ButtonRelease-1>',
+                                  lambda event: update(sv_version=sv_version, changelog=changelog, zip_url=zip_url))
             elif update_code == 'latest':
-                print('On latest version')
+                pprint('On latest version')
 
                 update_frame.destroy()
 
@@ -333,7 +358,7 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                 tk.Frame(update_frame, bg='grey').pack(fill='x')
                 update_frame.pack(side='bottom', fill='x')
             elif update_code == 'dev':
-                print('Development version')
+                pprint('Development version')
 
                 update_frame.destroy()
 
@@ -346,8 +371,8 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                                         bg=get_color('bottomframe'),
                                         fg=get_color('text'))
                 update_label.pack(side='bottom')
-            else:
-                print('Exception while getting server version')
+            elif update_code == 'error':
+                pprint('Exception while checking for updates')
 
                 update_frame.destroy()
 
@@ -359,8 +384,22 @@ def start_checkupdate(master, cl_ver_str, URL, bundle, debug=False, **kw):
                                         text=_('Failed checking for updates. Click here to try again.'),
                                         bg=get_color('bottomframe'),
                                         fg=get_color('autologin_text_unavail'))
-                update_frame.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, cl_ver_str, URL, bundle, debug=debug))
-                update_label.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, cl_ver_str, URL, bundle, debug=debug))
+                update_frame.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, cl_ver_str, bundle, debug=debug))
+                update_label.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, cl_ver_str, bundle, debug=debug))
+                update_label.pack(side='bottom')
+            elif update_code == 'ratelimited':
+                pprint('GitHub API rate limit exceeded')
+
+                update_frame.destroy()
+
+                update_frame = tk.Frame(master, bg=get_color('bottomframe'))
+                tk.Frame(update_frame, bg='grey').pack(fill='x', pady=(0, 2))
+                update_frame.pack(side='bottom', fill='x')
+
+                update_label = tk.Label(update_frame,
+                                        text=_('Too many requests. Try again later.'),
+                                        bg=get_color('bottomframe'),
+                                        fg=get_color('autologin_text_unavail'))
                 update_label.pack(side='bottom')
         except q.Empty:
             master.after(300, get_output)

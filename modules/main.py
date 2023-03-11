@@ -11,22 +11,23 @@ import sys
 import queue as q
 import traceback
 import sv_ttk
+import datetime
 from time import sleep
-from ruamel.yaml import YAML
 from PIL import Image, ImageTk
-from modules.account import acc_getlist, acc_getdict, fetch_loginusers, loginusers_accountnames, loginusers_steamid, \
-    loginusers_personanames, check_autologin_availability
+import win32clipboard
+from pynput import keyboard
+from modules.account import AccountManager, loginusers_accountnames, loginusers_steamid, \
+    loginusers_personanames, check_autologin_availability, set_loginusers_value, remember_password_disabled
 from modules.reg import fetch_reg, setkey
-from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE
-from modules.util import steam_running, StoppableThread, open_screenshot, raise_exception, test, get_center_pos, \
+from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE, first_run, missing_values
+from modules.util import steam_running, StoppableThread, raise_exception, test, get_center_pos, \
     launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update, update_frame_color
 from modules.ui import DragDropListbox, AccountButton, AccountButtonGrid, SimpleButton, WelcomeWindow, steamid_window, \
-    ToolTipWindow, ask_steam_dir, get_color
+    ToolTipWindow, ask_steam_dir, get_color, ManageEncryptionWindow
 from modules.avatar import download_avatar
 from modules.errormsg import error_msg
-
-yaml = YAML()
+from modules.steamid import steam64_to_32
 
 LOCALE = get_config('locale')
 
@@ -105,20 +106,19 @@ def legacy_restart(silent=True):
 
 class MainApp(tk.Tk):
     '''Main application'''
-    def __init__(self, version, url, bundle, std_out, std_err, after_update):
+    def __init__(self, version, bundle, std_out, std_err, after_update):
         sys.stdout = std_out
         sys.stderr = std_err
 
-        self.accounts = acc_getlist()
-        self.acc_dict = acc_getdict()
+        self.accounts = None
         self.demo_mode = False
         self.BUNDLE = bundle
         self.after_update = after_update
+        self.version = version
 
         tk.Tk.__init__(self)
 
         sv_ttk.set_theme(get_config('theme'))
-        self['bg'] = get_color('window_background')
         self.title(_("Account Switcher"))
 
         self.window_width = 310
@@ -140,9 +140,139 @@ class MainApp(tk.Tk):
         except tk.TclError:
             pass
 
+        self.bold_font = tkfont.Font(weight=tkfont.BOLD, size=16, family='Arial')
+
+        lock_img = Image.open('asset/lock.png').resize((80, 80))
+        self.lock_imgtk = ImageTk.PhotoImage(lock_img)
+
+        lock_white_img = Image.open('asset/lock_white.png').resize((80, 80))
+        self.lock_white_imgtk = ImageTk.PhotoImage(lock_white_img)
+
+        if first_run:
+            self.open_welcomewindow()
+        elif missing_values and after_update:
+            self.open_welcomewindow()
+        elif get_config('encryption') == 'true':
+            self.lockscreen()
+        else:
+            self.accounts = AccountManager()
+            self.main_menu()
+
+    def lockscreen(self):
+        def reset_accounts_data():
+            if msgbox.askyesno(_('Reset accounts data'),
+                               _('This will reset all accounts data.\nThis action cannot be undone.') + '\n\n' +
+                               _('Are you sure?')):
+                AccountManager.reset_json()
+                config_write_value('encryption', 'false')
+                self.accounts = AccountManager()
+                self.config(menu='')
+                frame.destroy()
+                self.main_menu()
+
+        self['bg'] = get_color('window_background')
+        menubar = tk.Menu(self)
+
+        if SYS_LOCALE == 'ko_KR':
+            menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
+            menu = tk.Menu(menubar, tearoff=0, font=menu_font)
+        else:
+            menu = tk.Menu(menubar, tearoff=0)
+
+        menu.add_command(label=_('Reset accounts data'),
+                         command=reset_accounts_data)
+        menu.add_separator()
+        menu.add_command(label=_('Exit'), command=self.exit_app)
+        menubar.add_cascade(label=_('Menu'), menu=menu)
+        self.config(menu=menubar)
+
+        frame = ttk.Frame(self)
+        pw_var = tk.StringVar()
+        pw_var.trace("w", lambda name, index, mode, sv=pw_var: entry_check(sv))
+
+        def check_pw():
+            nonlocal frame
+
+            password_match = AccountManager.verify_password(pw_var.get())
+
+            if password_match:
+                self.accounts = AccountManager(password=pw_var.get())
+                frame.destroy()
+                self.config(menu='')
+                self.main_menu()
+            elif password_match is None:
+                prompt['text'] = _('Salt is missing.\nRestore it or reset accounts data.')
+                prompt['foreground'] = get_color('autologin_text_unavail')
+            else:
+                prompt['text'] = _('Incorrect password. Try again.')
+                prompt['foreground'] = get_color('autologin_text_unavail')
+                pw_var.set('')
+
+        button_frame = tk.Frame(frame)
+        exit_button = ttk.Button(button_frame, text=_('Exit'), command=sys.exit)
+        exit_button.grid(row=0, column=0, padx=(0, 1.5))
+        unlock_button = ttk.Button(button_frame,
+                                   text=_('Unlock (Enter)'),
+                                   state='disabled',
+                                   command=check_pw,
+                                   style='Accent.TButton')
+        unlock_button.grid(row=0, column=1, padx=(1.5, 0))
+        button_frame.grid_rowconfigure(0, weight=1)
+        button_frame.pack(side=tk.BOTTOM, padx=3, pady=3)
+
+        def entry_check(sv):
+            pw = sv.get()
+            try:
+                last_ch = pw[-1]
+                if last_ch == ' ':
+                    sv.set(pw[:-1])
+                    return
+            except IndexError:
+                pass
+
+            if pw:
+                unlock_button['state'] = 'normal'
+            else:
+                unlock_button['state'] = 'disabled'
+
+        pw_entry = ttk.Entry(frame, show="⬤", justify=tk.CENTER, textvariable=pw_var)
+        pw_entry.pack(side=tk.BOTTOM, padx=3, fill=tk.X)
+        pw_entry.bind('<Return>', lambda e: check_pw())
+        pw_entry.focus()
+
+        check_var = tk.IntVar()
+
+        def check_command():
+            if check_var.get():
+                pw_entry['show'] = ''
+            else:
+                pw_entry['show'] = '⬤'
+
+        checkbutton = ttk.Checkbutton(frame,
+                                      text=_('Show password'),
+                                      variable=check_var,
+                                      command=check_command)
+        checkbutton.pack(side=tk.BOTTOM, padx=3, pady=3)
+
+        lock_icon = tk.Canvas(frame, width=300, height=200, bd=0, highlightthickness=0)
+
+        if get_config('theme') == 'light':
+            lock_icon.create_image(150, 100, image=self.lock_imgtk)
+        else:
+            lock_icon.create_image(150, 100, image=self.lock_white_imgtk)
+        lock_icon.pack(expand=True, fill=tk.BOTH)
+
+        ttk.Label(frame, text=_('Welcome'), font=self.bold_font).pack()
+        prompt = ttk.Label(frame, text=_('Enter master password to unlock.'), justify='center')
+        prompt.pack(expand=True, pady=5)
+        frame.pack(fill='both', expand=True)
+        self.update_idletasks()
+
+    def main_menu(self):
         if not test():
             ask_steam_dir()
 
+        self['bg'] = get_color('window_background')
         menubar = tk.Menu(self)
 
         if SYS_LOCALE == 'ko_KR':
@@ -167,7 +297,7 @@ class MainApp(tk.Tk):
         menu.add_command(label=_("Send feedback"),
                          command=lambda: os.startfile('https://github.com/sw2719/steam-account-switcher/issues'))
         menu.add_command(label=_("About"),
-                         command=lambda: self.about(version))
+                         command=lambda: self.about(self.version))
 
         menubar.add_cascade(label=_("Menu"), menu=menu)
         self.config(menu=menubar)
@@ -175,25 +305,25 @@ class MainApp(tk.Tk):
         if not self.BUNDLE:
             debug_menu = tk.Menu(menubar, tearoff=0)
             debug_menu.add_command(label='Check for updates with debug mode',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, self.BUNDLE, debug=True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, self.BUNDLE, debug=True)))
             debug_menu.add_command(label='Check for updates without debug mode',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, True)))
             debug_menu.add_command(label='Check for updates (Force update available)',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, '1.0', url, True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, '1.0', True)))
             debug_menu.add_command(label='Check for updates (Raise error)',
-                                   command=lambda: self.after(10, lambda: start_checkupdate(self, version, url, True, exception=True)))
+                                   command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, True, exception=True)))
             debug_menu.add_command(label="Download avatar images",
                                    command=download_avatar)
             debug_menu.add_command(label="Open initial setup",
-                                   command=lambda: self.welcomewindow(debug=True))
+                                   command=lambda: self.open_welcomewindow(debug=True))
             debug_menu.add_command(label="Open initial setup with after_update True",
-                                   command=lambda: self.welcomewindow(debug=True, update_override=True))
+                                   command=lambda: self.open_welcomewindow(debug=True, update_override=True))
             debug_menu.add_command(label="Toggle demo mode",
                                    command=self.toggle_demo)
             debug_menu.add_command(label="Raise exception",
                                    command=raise_exception)
             debug_menu.add_command(label="Open about window with copyright notice",
-                                   command=lambda: self.about(version, force_copyright=True))
+                                   command=lambda: self.about(self.version, force_copyright=True))
             debug_menu.add_command(label="Launch updater (update.zip required)",
                                    command=launch_updater)
             debug_menu.add_command(label="Create shortcut",
@@ -266,6 +396,8 @@ class MainApp(tk.Tk):
 
         self.draw_button()
 
+        self.after(100, lambda: start_checkupdate(self, self.version, self.BUNDLE))
+
     def report_callback_exception(self, exc, val, tb):
         if self.BUNDLE:
             msgbox.showerror(_('Unhandled Exception'),
@@ -300,93 +432,101 @@ class MainApp(tk.Tk):
 
         self.refresh()
 
-    def welcomewindow(self, debug=False, update_override=False):
+    def open_welcomewindow(self, debug=False, update_override=False):
         self.withdraw()
 
         if update_override:
-            window = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), True, debug)
+            welcomewindow = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), True, debug)
         else:
-            window = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), self.after_update, debug)
+            welcomewindow = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), self.after_update, debug)
+
+        def after_init(pw):
+            if get_config('encryption') == 'true' and not update_override and not debug:
+                if pw:
+                    self.accounts = AccountManager(pw)
+                    self.main_menu()
+                else:
+                     self.lockscreen()
+            elif not debug:
+                self.accounts = AccountManager()
+                self.main_menu()
+            else:
+                self.refresh()
+            self.update_idletasks()
+            self.deiconify()
 
         def event_function(event):
+            nonlocal welcomewindow
             if str(event.widget) == '.!welcomewindow':
-                if self.accounts:
-                    self.update_avatar()
+                pw = welcomewindow.pw
+                del welcomewindow
+                after_init(pw)
 
-                self.refresh()
-                self.update_idletasks()
-                self.deiconify()
+        welcomewindow.bind('<Destroy>', event_function)
 
-        window.bind('<Destroy>', event_function)
+    def account_settings_window(self, username):
+        account_settings_window = tk.Toplevel(self)
+        account_settings_window.title('')
 
-    def configwindow(self, username):
-        configwindow = tk.Toplevel(self)
-        configwindow.title('')
-
-        x, y = self.get_window_pos()
-        configwindow.geometry(self.popup_geometry(250, 180))
-        configwindow.resizable(False, False)
-        configwindow.bind('<Escape>', lambda event: configwindow.destroy())
+        account_settings_window.geometry(self.popup_geometry(250, 270))
+        account_settings_window.resizable(False, False)
+        account_settings_window.bind('<Escape>', lambda event: account_settings_window.destroy())
 
         try:
-            configwindow.iconbitmap('asset/icon.ico')
+            account_settings_window.iconbitmap('asset/icon.ico')
         except tk.TclError:
             pass
 
-        i = self.accounts.index(username)
-        try:
-            custom_name = self.acc_dict[i]['customname']
-        except KeyError:
-            custom_name = ''
+        custom_name = self.accounts.get_customname(username)
 
-        button_frame = tk.Frame(configwindow)
+        button_frame = tk.Frame(account_settings_window)
         button_frame.pack(side='bottom', pady=3)
 
-        ok_button = ttk.Button(button_frame, text=_('OK'))
+        ok_button = ttk.Button(button_frame, text=_('OK'), style='Accent.TButton')
         ok_button.pack(side='right', padx=1.5)
 
         cancel_button = ttk.Button(button_frame,
                                    text=_('Cancel'),
-                                   command=configwindow.destroy)
+                                   command=account_settings_window.destroy)
         cancel_button.pack(side='left', padx=1.5)
 
-        top_label = tk.Label(configwindow, text=_('Select name settings\nfor %s') % username)
-        top_label.pack(side='top', pady=(4, 3))
+        top_label = tk.Label(account_settings_window, text=_('Settings for %s') % username)
+        top_label.pack(side='top', pady=(8, 3))
 
-        radio_frame1 = tk.Frame(configwindow)
-        radio_frame1.pack(side='top', padx=20, pady=(4, 2), fill='x')
-        radio_frame2 = tk.Frame(configwindow)
-        radio_frame2.pack(side='top', padx=20, pady=(0, 3), fill='x')
-        radio_var = tk.IntVar()
+        radio_frame1 = tk.Frame(account_settings_window)
+        radio_frame1.pack(side='top', padx=(10, 0), pady=(12, 2), fill='x')
+        radio_frame2 = tk.Frame(account_settings_window)
+        radio_frame2.pack(side='top', padx=(10, 0), pady=(0, 3), fill='x')
+        custom_name_var = tk.IntVar()
 
         if custom_name.strip():
-            radio_var.set(1)
+            custom_name_var.set(1)
         else:
-            radio_var.set(0)
+            custom_name_var.set(0)
 
         radio_default = ttk.Radiobutton(radio_frame1,
                                         text=_('Use profile name if available'),
-                                        variable=radio_var,
+                                        variable=custom_name_var,
                                         value=0)
         radio_custom = ttk.Radiobutton(radio_frame2,
                                        text=_('Use custom name'),
-                                       variable=radio_var,
+                                       variable=custom_name_var,
                                        value=1)
 
         radio_default.pack(side='left', pady=2)
         radio_custom.pack(side='left', pady=2)
 
-        entry_frame = tk.Frame(configwindow)
-        entry_frame.pack(side='bottom', pady=(1, 4))
+        name_entry_frame = tk.Frame(account_settings_window)
+        name_entry_frame.pack(side='top', pady=4, fill='x')
 
-        name_entry = ttk.Entry(entry_frame, width=27)
+        name_entry = ttk.Entry(name_entry_frame, justify=tk.CENTER)
         name_entry.insert(0, custom_name)
-        name_entry.pack()
+        name_entry.pack(fill='x', padx=3)
 
-        configwindow.grab_set()
-        configwindow.focus()
+        account_settings_window.grab_set()
+        account_settings_window.focus()
 
-        if radio_var.get() == 0:
+        if custom_name_var.get() == 0:
             name_entry['state'] = 'disabled'
 
         def reset_entry():
@@ -400,29 +540,132 @@ class MainApp(tk.Tk):
         radio_default['command'] = reset_entry
         radio_custom['command'] = enable_entry
 
-        def ok(username):
-            if name_entry.get().strip() and radio_var.get() == 1:
-                input_name = name_entry.get()
-                self.acc_dict[i]['customname'] = input_name
-                print(f"Using custom name '{input_name}' for '{username}'.")
-            elif radio_var.get() == 1:
-                msgbox.showwarning(_('Info'), _('Enter a custom name to use.'), parent=configwindow)
-                return
-            else:
-                if self.acc_dict[i].pop('customname', None):
-                    print(f"Custom name for '{username}' has been removed.")
+        save_password_var = tk.IntVar()
 
-            with open('accounts.yml', 'w', encoding='utf-8') as f:
-                yaml.dump(self.acc_dict, f)
-            self.refresh()
-            configwindow.destroy()
+        save_password_frame = ttk.Frame(account_settings_window)
+        save_password_frame.pack(side='top', padx=(10, 0), pady=(12, 3), fill='x')
+
+        save_password_chkb = ttk.Checkbutton(save_password_frame,
+                                          text=_('Save password'),
+                                          variable=save_password_var)
+
+        save_password_chkb['state'] = '!alternate'
+
+        set_password = self.accounts.get_password(username)
+
+        save_password_chkb.pack(side='left')
+
+        password_entry_frame = tk.Frame(account_settings_window)
+        password_entry_frame.pack(side='top', pady=(2, 0), fill='x')
+
+        password_entry = ttk.Entry(password_entry_frame, justify=tk.CENTER, show='⬤')
+        password_entry.pack(side='left', fill='x', expand=True, padx=(3, 3))
+
+        show_var = tk.IntVar()
+
+        checkbutton = ttk.Checkbutton(password_entry_frame,
+                                      text=_('Show'),
+                                      variable=show_var,
+                                      style='Toggle.TButton')
+        checkbutton.pack(side=tk.RIGHT, padx=(0, 3))
+
+        password_warn_label = ttk.Label(account_settings_window,
+                                        text=_('Warning: Encryption is disabled.\n'
+                                               'Password will be stored in plain text!'),
+                                        justify='center',
+                                        foreground=get_color('autologin_text_unavail'))
+
+        window_larger = False
+
+        def on_password_checkbox():
+            nonlocal window_larger
+
+            if save_password_var.get() == 1:
+                password_entry['state'] = 'normal'
+                checkbutton['state'] = 'normal'
+
+                if get_config('encryption') == 'false':
+                    account_settings_window.geometry(
+                        f'{str(account_settings_window.winfo_width())}x{str(account_settings_window.winfo_height() + 35)}'
+                        f'+{str(account_settings_window.winfo_x())}+{str(account_settings_window.winfo_y())}'
+                    )
+                    password_warn_label.pack(side='bottom', pady=(0, 3))
+                    window_larger = True
+
+                password_entry.focus()
+            else:
+                password_entry.delete(0, 'end')
+                password_entry['state'] = 'disabled'
+                checkbutton['state'] = 'disabled'
+
+                if get_config('encryption') == 'false' and window_larger:
+                    account_settings_window.geometry(
+                        f'{str(account_settings_window.winfo_width())}x{str(account_settings_window.winfo_height() - 35)}'
+                        f'+{str(account_settings_window.winfo_x())}+{str(account_settings_window.winfo_y())}'
+                    )
+                    password_warn_label.pack_forget()
+                    window_larger = False
+
+        save_password_chkb['command'] = on_password_checkbox
+
+        def on_show_checkbutton():
+            if show_var.get():
+                password_entry['show'] = ''
+                checkbutton['text'] = _('Hide')
+            else:
+                password_entry['show'] = '⬤'
+                checkbutton['text'] = _('Show')
+
+        checkbutton['command'] = on_show_checkbutton
+
+        if set_password:
+            save_password_var.set(1)
+            password_entry.insert(0, set_password)
+        else:
+            password_entry['state'] = 'disabled'
+            checkbutton['state'] = 'disabled'
+
+        def ok(username):
+            if custom_name_var.get() == 1 and not name_entry.get().strip():
+                if save_password_var.get() == 1 and not password_entry.get().strip():
+                    msgbox.showwarning(_('Info'), _('Enter a custom profile name and a account password.'),
+                                       parent=account_settings_window)
+                else:
+                    msgbox.showwarning(_('Info'), _('Enter a custom profile name.'),
+                                       parent=account_settings_window)
+            elif save_password_var.get() == 1 and not password_entry.get().strip():
+                msgbox.showwarning(_('Info'), _('Enter a account password.'),
+                                   parent=account_settings_window)
+
+            else:
+                if custom_name_var.get():
+                    self.accounts.set_customname(username, name_entry.get())
+                else:
+                    self.accounts.remove_customname(username)
+
+                if save_password_var.get():
+                    self.accounts.set_password(username, password_entry.get())
+                else:
+                    self.accounts.remove_password(username)
+
+                self.refresh()
+                account_settings_window.destroy()
 
         def enterkey(event):
             ok(username)
 
-        configwindow.bind('<Return>', enterkey)
+        account_settings_window.bind('<Return>', enterkey)
         ok_button['command'] = lambda username=username: ok(username)
-        configwindow.wait_window()
+
+        if save_password_var.get() == 1 and get_config('encryption') == 'false':
+            account_settings_window.geometry(
+                f'{str(account_settings_window.winfo_width())}x{str(account_settings_window.winfo_height() + 35)}'
+                f'+{str(account_settings_window.winfo_x())}+{str(account_settings_window.winfo_y())}'
+            )
+            password_warn_label.pack(side='bottom', pady=(0, 3))
+            window_larger = True
+
+        account_settings_window.wait_window()
 
     def button_func(self, username):
         current_user = fetch_reg('AutoLoginUser')
@@ -450,22 +693,24 @@ class MainApp(tk.Tk):
         if get_config('mode') == 'express':
             self.exit_after_restart()
 
-    def remove_user(self, target):
-        '''Write accounts to accounts.yml except the
-        one which user wants to delete'''
-        if msgbox.askyesno(_('Confirm'), _('Are you sure want to remove account %s?') % target):
-            acc_dict = acc_getdict()
-            accounts = acc_getlist()
-            dump_dict = {}
+    def remove_user(self, username):
+        if msgbox.askyesno(_('Confirm'), _('Are you sure want to remove account %s?') % username):
+            print(f'Removing {username}...')
+            self.accounts.remove(username)
 
-            print(f'Removing {target}...')
-            for username in accounts:
-                if username != target:
-                    dump_dict[len(dump_dict)] = acc_dict[accounts.index(username)]
-
-            with open('accounts.yml', 'w') as acc:
-                yaml.dump(dump_dict, acc)
             self.refresh()
+
+    def open_screenshot(self, steamid64, steam_path=get_config('steam_path')):
+        if steam_path == 'reg':
+            steam_path = fetch_reg('steampath')
+
+        if '/' in steam_path:
+            steam_path = steam_path.replace('/', '\\')
+
+        if os.path.isdir(f'{steam_path}\\userdata\\{steam64_to_32(steamid64)}\\760\\remote'):
+            os.startfile(f'{steam_path}\\userdata\\{steam64_to_32(steamid64)}\\760\\remote')
+        else:
+            msgbox.showinfo(_('No screenshots directory'), _('No screenshots directory was found for this account.'))
 
     def draw_button(self):
         if get_config('ui_mode') == 'list':
@@ -534,7 +779,7 @@ class MainApp(tk.Tk):
                                        orient="vertical",
                                        command=canvas.yview)
 
-            for index, username in enumerate(self.accounts):
+            for index, username in enumerate(self.accounts.list):
                 steam64_list = loginusers_steamid()
                 account_name = loginusers_accountnames()
                 persona_name = loginusers_personanames()
@@ -544,27 +789,23 @@ class MainApp(tk.Tk):
                 else:
                     i = None
 
-                try:
-                    acc_index = self.accounts.index(username)
-                    profilename = self.acc_dict[acc_index]['customname']
+                profilename = self.accounts.get_customname(username)
 
-                except KeyError:  # No custom name set
-                    if i is not None:  # i could be 0 so we can't use if i:
+                if not profilename:
+                    if i is not None:
                         profilename = persona_name[i]
                     else:
                         profilename = _('N/A')
 
-                finally:
-                    if i is not None:  # i could be 0 so we can't use if i:
-                        steam64 = steam64_list[i]
-                        image = steam64
-                    else:
-                        steam64 = None
-                        image = 'default'
+                if i is not None:
+                    steam64 = steam64_list[i]
+                    image = steam64
+                else:
+                    steam64 = None
+                    image = 'default'
 
                     profilename = profilename[:30]
 
-                # We have to make a menu for every account! Sounds ridiculous? Me too.
                 if SYS_LOCALE == 'ko_KR':
                     menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
                     menu_dict[username] = tk.Menu(self, tearoff=0, font=menu_font)
@@ -575,19 +816,19 @@ class MainApp(tk.Tk):
                                                 command=lambda name=username: self.button_func(name))
                 menu_dict[username].add_separator()
 
-                if i is not None:  # i could be 0 so we can't use if i:
+                if i is not None:
                     menu_dict[username].add_command(label=_('Open profile in browser'),
                                                     command=lambda steamid64=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steamid64}'))
                     menu_dict[username].add_command(label=_('Open screenshots folder'),
-                                                    command=lambda steamid64=steam64: open_screenshot(steamid64))
-                    menu_dict[username].add_command(label=_('View SteamID'),
+                                                    command=lambda steamid64=steam64: self.open_screenshot(steamid64))
+                    menu_dict[username].add_command(label=_('Account info'),
                                                     command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.popup_geometry(270, 240)))
                     menu_dict[username].add_command(label=_('Update avatar'),
                                                     command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
                     menu_dict[username].add_separator()
 
-                menu_dict[username].add_command(label=_("Name settings"),
-                                                command=lambda name=username, pname=profilename: self.configwindow(name))
+                menu_dict[username].add_command(label=_("Profile name/Password"),
+                                                command=lambda name=username, pname=profilename: self.account_settings_window(name))
                 menu_dict[username].add_command(label=_("Delete"),
                                                 command=lambda name=username: self.remove_user(name))
 
@@ -612,14 +853,16 @@ class MainApp(tk.Tk):
                 else:
                     self.button_dict[username].grid(row=row, column=column, padx=10, pady=(9, 0))
 
-            buttonframe.grid_propagate(0)
+            buttonframe.grid_propagate(False)
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
 
-            if len(self.accounts) % 3 == 0:
-                h = 109 * (len(self.accounts) // 3)
+            accounts_count = len(self.accounts.list)
+
+            if accounts_count % 3 == 0:
+                h = 109 * (accounts_count // 3)
             else:
-                h = 109 * (len(self.accounts) // 3 + 1)
+                h = 109 * (accounts_count // 3 + 1)
 
             canvas.create_window((0, 0), height=h + 9, width=295, window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
@@ -693,7 +936,7 @@ class MainApp(tk.Tk):
                                        orient="vertical",
                                        command=canvas.yview)
 
-            for username in self.accounts:
+            for username in self.accounts.list:
                 steam64_list = loginusers_steamid()
                 account_name = loginusers_accountnames()
                 persona_name = loginusers_personanames()
@@ -703,27 +946,23 @@ class MainApp(tk.Tk):
                 else:
                     i = None
 
-                try:
-                    acc_index = self.accounts.index(username)
-                    profilename = self.acc_dict[acc_index]['customname']
+                profilename = self.accounts.get_customname(username)
 
-                except KeyError:  # No custom name set
-                    if i is not None:  # i could be 0 so we can't use if i:
+                if not profilename:
+                    if i is not None:
                         profilename = persona_name[i]
                     else:
-                        profilename = _('Profile name not available')
+                        profilename = _('N/A')
 
-                finally:
-                    if i is not None:  # i could be 0 so we can't use if i:
-                        steam64 = steam64_list[i]
-                        image = steam64
-                    else:
-                        steam64 = None
-                        image = 'default'
+                if i is not None:
+                    steam64 = steam64_list[i]
+                    image = steam64
+                else:
+                    steam64 = None
+                    image = 'default'
 
                     profilename = profilename[:30]
 
-                # We have to make a menu for every account! Sounds ridiculous? Me too.
                 if SYS_LOCALE == 'ko_KR':
                     menu_font = tkfont.Font(self, size=9, family='맑은 고딕')
                     menu_dict[username] = tk.Menu(self, tearoff=0, font=menu_font)
@@ -734,19 +973,19 @@ class MainApp(tk.Tk):
                                                 command=lambda name=username: self.button_func(name))
                 menu_dict[username].add_separator()
 
-                if i is not None:  # i could be 0 so we can't use if i:
+                if i is not None:
                     menu_dict[username].add_command(label=_('Open profile in browser'),
                                                     command=lambda steamid64=steam64: os.startfile(f'https://steamcommunity.com/profiles/{steamid64}'))
                     menu_dict[username].add_command(label=_('Open screenshots folder'),
-                                                    command=lambda steamid64=steam64: open_screenshot(steamid64))
+                                                    command=lambda steamid64=steam64: self.open_screenshot(steamid64))
                     menu_dict[username].add_command(label=_('View SteamID'),
                                                     command=lambda username=username, steamid64=steam64: steamid_window(self, username, steamid64, self.popup_geometry(270, 240)))
                     menu_dict[username].add_command(label=_('Update avatar'),
                                                     command=lambda steamid64=steam64: self.update_avatar(steamid_list=[steamid64]))
                     menu_dict[username].add_separator()
 
-                menu_dict[username].add_command(label=_("Name settings"),
-                                                command=lambda name=username, pname=profilename: self.configwindow(name))
+                menu_dict[username].add_command(label=_("Profile name/Password"),
+                                                command=lambda name=username, pname=profilename: self.account_settings_window(name))
                 menu_dict[username].add_command(label=_("Delete"),
                                                 command=lambda name=username: self.remove_user(name))
 
@@ -768,7 +1007,7 @@ class MainApp(tk.Tk):
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
-            h = 49 * len(self.accounts)
+            h = 47 * len(self.accounts.list)
             canvas.create_window((0, 0), height=h, width=295, window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
@@ -791,9 +1030,6 @@ class MainApp(tk.Tk):
 
     def refresh(self, no_frame=False):
         '''Refresh main window widgets'''
-        self.accounts = acc_getlist()
-        self.acc_dict = acc_getdict()
-
         if not no_frame:
             self.no_user_frame.destroy()
             self.button_frame.destroy()
@@ -835,7 +1071,7 @@ class MainApp(tk.Tk):
         else:
             self.restartbutton_text.set(_('Restart Steam'))
 
-        print('Menu refreshed with %s account(s)' % len(self.accounts))
+        print('Menu refreshed')
 
     def update_avatar(self, steamid_list=None, no_ui=False):
         label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg=self['bg'], fg=get_color('text'))
@@ -856,7 +1092,7 @@ class MainApp(tk.Tk):
             account_name = loginusers_accountnames()
 
             for index, steamid in enumerate(steam64_list):
-                if account_name[index] in self.accounts:
+                if account_name[index] in self.accounts.list:
                     dl_list.append(steamid)
 
         download_avatar(dl_list)
@@ -882,6 +1118,8 @@ class MainApp(tk.Tk):
         aboutwindow.focus()
         aboutwindow.bind('<Escape>', lambda event: aboutwindow.destroy())
 
+        year = str(datetime.datetime.today().year)
+
         try:
             aboutwindow.iconbitmap('asset/icon.ico')
         except tk.TclError:
@@ -889,16 +1127,16 @@ class MainApp(tk.Tk):
 
         about_disclaimer = tk.Label(aboutwindow,
                                     text=_('Warning: The developer of this application is not responsible for\n' +
-                                           'data loss or any other damage from the use of this app.'))
+                                           'any incident or damage occurred by using this app.'))
         about_steam_trademark = tk.Label(aboutwindow,
                                          text=_('STEAM is a registered trademark of Valve Corporation.'))
         if self.BUNDLE or force_copyright:
             copyright_label = tk.Label(aboutwindow,
-                                        text='Copyright (c) 2022 sw2719 | All Rights Reserved' + '\n' +
+                                        text=f'Copyright (c) {year} sw2719 | All Rights Reserved' + '\n' +
                                              'Read copyright notice for details')
         else:
             copyright_label = tk.Label(aboutwindow,
-                                       text='Copyright (c) 2022 sw2719 | All Rights Reserved' + '\n' +
+                                       text=f'Copyright (c) {year} sw2719 | All Rights Reserved' + '\n' +
                                             'Read LICENSE file for details')
         ver = tk.Label(aboutwindow,
                        text='Steam Account Switcher | Version ' + version)
@@ -959,7 +1197,7 @@ class MainApp(tk.Tk):
 
     def refreshwindow(self):
         '''Open remove accounts window'''
-        accounts = acc_getlist()
+        accounts = self.accounts.list
         if not accounts:
             msgbox.showinfo(_('No Accounts'),
                             _("There's no account added."))
@@ -1108,9 +1346,6 @@ class MainApp(tk.Tk):
 
     def addwindow(self):
         '''Open add accounts window'''
-        accounts = acc_getlist()
-        acc_dict = acc_getdict()
-
         steamid_list = []
         account_names = []
 
@@ -1147,31 +1382,18 @@ class MainApp(tk.Tk):
             pass
 
         def adduser(userinput):
-            '''Write accounts from user's input to accounts.yml
-            :param userinput: Account names to add
-            '''
-            nonlocal acc_dict
             dl_list = []
 
             if userinput.strip():
                 name_buffer = userinput.split("/")
                 accounts_to_add = [name.strip() for name in name_buffer if name.strip()]
 
-                for name_to_write in accounts_to_add:
-                    if name_to_write not in accounts:
-                        acc_dict[len(acc_dict)] = {'accountname': name_to_write}
-
-                        if name_to_write in account_names:
-                            dl_list.append(steamid_list[account_names.index(name_to_write)])
-
-                    else:
-                        print(f'Account {name_to_write} already exists!')
+                existing_accounts = self.accounts.add_multiple_accounts(accounts_to_add)
+                if existing_accounts:
+                    for existing_account in existing_accounts:
                         msgbox.showinfo(_('Duplicate Alert'),
                                         _('Account %s already exists.')
-                                        % name_to_write)
-                with open('accounts.yml', 'w') as acc:
-                    yaml = YAML()
-                    yaml.dump(acc_dict, acc)
+                                        % existing_account)
 
                 if dl_list and get_config('show_avatar') == 'true':
                     button_addcancel.destroy()
@@ -1207,13 +1429,11 @@ class MainApp(tk.Tk):
 
     def importwindow(self):
         '''Open import accounts window'''
-        accounts = acc_getlist()
-        acc_dict = acc_getdict()
         steam64_list = loginusers_steamid()
         account_name = loginusers_accountnames()
         persona_name = loginusers_personanames()
 
-        if set(account_name).issubset(set(acc_getlist())):
+        if set(account_name).issubset(set(self.accounts.list)):
             msgbox.showinfo(_('Info'), _("There's no account left to import."))
             return
 
@@ -1272,7 +1492,7 @@ class MainApp(tk.Tk):
         checkbox_dict = {}
 
         for index, username in enumerate(account_name):
-            if username not in accounts:
+            if username not in self.accounts.list:
                 int_var = tk.IntVar()
                 checkbutton = ttk.Checkbutton(check_frame,
                                               text=username + f' ({persona_name[index]})',
@@ -1283,17 +1503,16 @@ class MainApp(tk.Tk):
                 checkbox_dict[username] = int_var
 
         def import_user():
-            nonlocal acc_dict
             dl_list = []
+            accounts_to_add = []
 
             for key, value in checkbox_dict.items():
                 if value.get() == 1:
-                    acc_dict[len(acc_dict)] = {'accountname': key}
+                    accounts_to_add.append(key)
                     dl_list.append(steam64_list[account_name.index(key)])
 
-            with open('accounts.yml', 'w') as acc:
-                yaml = YAML()
-                yaml.dump(acc_dict, acc)
+            if accounts_to_add:
+                self.accounts.add_multiple_accounts(accounts_to_add)
 
             if get_config('show_avatar') == 'true':
                 canvas.destroy()
@@ -1326,9 +1545,7 @@ class MainApp(tk.Tk):
 
     def orderwindow(self):
         '''Open order change window'''
-        accounts = acc_getlist()
-
-        if not accounts:
+        if not self.accounts:
             msgbox.showinfo(_('No Accounts'),
                             _("There's no account added."))
             return
@@ -1375,7 +1592,7 @@ class MainApp(tk.Tk):
         lb.bind("<MouseWheel>", _on_mousewheel)
         lb.pack(side='left')
 
-        for i, v in enumerate(accounts):
+        for i, v in enumerate(self.accounts.list):
             lb.insert(i, v)
 
         lb.select_set(0)
@@ -1400,24 +1617,10 @@ class MainApp(tk.Tk):
             lb.select_set(i-1)
 
         def apply():
-            acc_dict = acc_getdict()
             order = lb.get(0, tk.END)
             print('New order is', order)
 
-            buffer_dict = {}
-
-            for item in acc_dict.items():
-                i = order.index(item[1]['accountname'])
-                buffer_dict[i] = item[1]
-
-            dump_dict = {}
-
-            for x in range(len(buffer_dict)):
-                dump_dict[x] = buffer_dict[x]
-
-            with open('accounts.yml', 'w') as acc:
-                yaml = YAML()
-                yaml.dump(dump_dict, acc)
+            self.accounts.change_dict_order(order)
             self.refresh()
 
         def close():
@@ -1460,7 +1663,7 @@ class MainApp(tk.Tk):
         last_config = config_dict
 
         if LOCALE == 'fr_FR':
-            width = 330
+            width = 340
             ui_padx = 70
             theme_padx = 50
         else:
@@ -1470,7 +1673,7 @@ class MainApp(tk.Tk):
 
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(self.popup_geometry(width, 500))  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 520))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
@@ -1668,7 +1871,7 @@ class MainApp(tk.Tk):
         soft_chkb.pack(side='left')
 
         autoexit_frame = tk.Frame(settingswindow)
-        autoexit_frame.pack(fill='x', side='top', padx=12, pady=(5, 0))
+        autoexit_frame.pack(fill='x', side='top', padx=12, pady=5)
 
         autoexit_chkb = ttk.Checkbutton(autoexit_frame, style="Switch.TCheckbutton",
                                         text=_('Exit app after Steam is restarted'))
@@ -1681,6 +1884,21 @@ class MainApp(tk.Tk):
             autoexit_chkb.state(['!selected'])
 
         autoexit_chkb.pack(side='left')
+
+        def open_manage_encryption_window():
+            enc_window = ManageEncryptionWindow(self.popup_geometry(320, 300, multiplier=2), self.accounts)
+
+            def event_function(event):
+                if str(event.widget) == '.!manageencryptionwindow':
+                    settingswindow.grab_set()
+
+            enc_window.bind('<Destroy>', event_function)
+            enc_window.grab_set()
+
+        manage_encryption_button = ttk.Button(settingswindow,
+                                              text=_('Manage Encryption Settings'),
+                                              command=open_manage_encryption_window)
+        manage_encryption_button.pack(side='bottom', fill='x', padx=3)
 
         def close():
             settingswindow.destroy()
@@ -1698,10 +1916,12 @@ class MainApp(tk.Tk):
 
             if theme_radio_var.get() == 1:
                 theme = 'dark'
-                sv_ttk.use_dark_theme()
+                if sv_ttk.get_theme() != 'dark':
+                    sv_ttk.use_dark_theme()
             else:
                 theme = 'light'
-                sv_ttk.use_light_theme()
+                if sv_ttk.get_theme() != 'light':
+                    sv_ttk.use_light_theme()
 
             if mode_radio_var.get() == 1:
                 mode = 'express'
@@ -1731,7 +1951,8 @@ class MainApp(tk.Tk):
                            'last_pos': get_config('last_pos'),
                            'steam_path': get_config('steam_path'),
                            'ui_mode': ui_mode,
-                           'theme': theme}
+                           'theme': theme,
+                           'encryption': get_config('encryption')}
 
             config_write_dict(config_dict)
 
@@ -1740,8 +1961,8 @@ class MainApp(tk.Tk):
                     self.update_avatar(no_ui=True)
 
             if current_locale != locale[locale_cb.current()]:
-                self.after(100, lambda: msgbox.showinfo(_('Locale has been changed'),
-                                                        _('Restart app to apply new locale settings.')))
+                self.after(100, lambda: msgbox.showinfo(_('Language has been changed'),
+                                                        _('Restart app to apply new language settings.')))
                 current_locale = locale[locale_cb.current()]
 
             self.refresh()
@@ -1775,10 +1996,33 @@ class MainApp(tk.Tk):
         bottomframe_set.grid_columnconfigure(2, weight=1)
         bottomframe_set.grid_rowconfigure(0, weight=1)
 
-    def exit_after_restart(self, refresh_override=False, silent=True):
+    def exit_after_restart(self, refresh_override=False):
         '''Restart Steam client and exit application.
         If autoexit is disabled, app won't exit.'''
+        if remember_password_disabled(self.user_var.get()):
+            if msgbox.askyesno(_('Remember Password Disabled'),
+                               _('Remember Password is disabled for this account.\n'
+                                 'Do you want to enable it now?')):
+                set_loginusers_value(self.user_var.get(), 'RememberPassword', '1')
+
         label_var = tk.StringVar()
+
+        if get_config('steam_path') == 'reg':
+            r_path = fetch_reg('SteamExe')
+            r_path_items = r_path.split('/')
+        else:
+            r_path = get_config('steam_path') + '\\Steam.exe'
+            r_path_items = r_path.split('\\')
+
+        path_items = []
+        for item in r_path_items:
+            if ' ' in item:
+                path_items.append(f'"{item}"')
+            else:
+                path_items.append(item)
+
+        steam_exe = "\\".join(path_items)
+        print('Steam.exe path:', steam_exe)
 
         def forcequit():
             print('Hard shutdown mode')
@@ -1789,8 +2033,9 @@ class MainApp(tk.Tk):
         self.no_user_frame.destroy()
         self.button_frame.destroy()
         hide_update()
+        self.unbind('<MouseWheel>')
         self.bottomframe.pack_forget()
-        button_frame = tk.Frame(self, bg=self['bg'])
+        button_frame = tk.Frame(self, bg=get_color('upperframe'))
         button_frame.pack(side='bottom', fill='x')
         cancel_button = SimpleButton(button_frame,
                                      text=_('Cancel'))
@@ -1805,7 +2050,7 @@ class MainApp(tk.Tk):
             force_button.enable()
 
         cancel_button.pack(side='bottom', padx=3, pady=3, fill='x')
-        force_button.pack(side='bottom', padx=3, fill='x')
+        force_button.pack(side='bottom', padx=3, pady=(3,0), fill='x')
 
         label_var = tk.StringVar()
         label_var.set(_('Initializing...'))
@@ -1822,6 +2067,8 @@ class MainApp(tk.Tk):
         self.update()
         queue = q.Queue()
 
+        # This is absolute spaghetti... Really need to rewrite it someday.
+
         if steam_running():
             label_var.set(_('Waiting for Steam to exit...'))
 
@@ -1829,47 +2076,31 @@ class MainApp(tk.Tk):
                 forcequit()
             elif get_config('try_soft_shutdown') == 'true':
                 print('Soft shutdown mode')
-
-                if get_config('steam_path') == 'reg':
-                    r_path = fetch_reg('SteamExe')
-                    r_path_items = r_path.split('/')
-                else:
-                    r_path = get_config('steam_path') + '\\Steam.exe'
-                    r_path_items = r_path.split('\\')
-
-                path_items = []
-                for item in r_path_items:
-                    if ' ' in item:
-                        path_items.append(f'"{item}"')
-                    else:
-                        path_items.append(item)
-
-                steam_exe = "\\".join(path_items)
-                print('Steam.exe path:', steam_exe)
                 subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                                creationflags=0x08000000, check=True)
                 print('Shutdown command sent. Waiting for Steam...')
 
+            checker_task = None
+
             def steam_checker():
                 nonlocal queue
-                sleep(1)
-                while True:
-                    if t.stopped():
-                        break
-                    if steam_running():
-                        sleep(1)
-                        continue
-                    else:
-                        queue.put(1)
-                        break
+                nonlocal thread
+
+                if thread.stopped():
+                    return
+                if steam_running():
+                    self.after(1000, steam_checker)
+                else:
+                    queue.put(1)
+                    return
 
             def cancel():
-                t.stop()
+                thread.stop()
                 cleanup()
                 return
 
-            t = StoppableThread(target=steam_checker)
-            t.start()
+            thread = StoppableThread(target=steam_checker)
+            thread.start()
             cancel_button.update_command(cancel)
         else:
             queue.put(1)
@@ -1879,20 +2110,115 @@ class MainApp(tk.Tk):
         def launch_steam():
             nonlocal queue
             nonlocal counter
+            nonlocal thread
 
-            try:
-                queue.get_nowait()
-                label_var.set(_('Launching Steam...'))
-                self.update()
-
-                print('Launching Steam...')
-                subprocess.run("start steam://open/main",
-                               shell=True, check=True)
-
+            def after_steam_start():
                 if get_config('autoexit') == 'true':
                     self.exit_app()
                 elif not refresh_override:
                     cleanup()
+
+            try:
+                queue.get_nowait()
+                queue = q.Queue()
+
+                label_var.set(_('Launching Steam...'))
+                self.update()
+
+                print('Launching Steam...')
+
+                username = fetch_reg('AutoLoginUser')
+                password = self.accounts.get_password(username)
+
+                if password:
+                    def active_user_checker():
+                        nonlocal queue
+
+                        if not steam_running():
+                            self.after(1000, active_user_checker)
+                        elif not fetch_reg('ActiveUser'):
+                            self.after(1000, active_user_checker)
+                        else:
+                            queue.put(1)
+                            print('Steam log-in success')
+                            return
+
+                    def cancel():
+                        nonlocal listener
+
+                        self.after_cancel(active_user_checker_thread)
+                        self.after_cancel(active_user_waiter)
+                        listener.stop()
+                        after_steam_start()
+
+                    def for_canonical(f):
+                        return lambda k: f(listener.canonical(k))
+
+                    clipboard_eraser_task = None
+
+                    def copy_pw():
+                        nonlocal clipboard_eraser_task
+
+                        win32clipboard.OpenClipboard()
+                        win32clipboard.EmptyClipboard()
+                        win32clipboard.SetClipboardText(self.accounts.get_password(self.user_var.get()))
+                        win32clipboard.CloseClipboard()
+
+                        if clipboard_eraser_task:
+                            self.after_cancel(clipboard_eraser_task)
+                        clipboard_eraser_task = self.after(1000, empty_clipboard)
+
+                    def empty_clipboard():
+                        win32clipboard.OpenClipboard()
+                        win32clipboard.EmptyClipboard()
+                        win32clipboard.CloseClipboard()
+
+                    hotkey = keyboard.HotKey(
+                        keyboard.HotKey.parse('<ctrl>+v'),
+                        copy_pw)
+
+                    listener = keyboard.Listener(
+                        on_press=for_canonical(hotkey.press),
+                        on_release=for_canonical(hotkey.release))
+                    listener.start()
+
+                    subprocess.run("start steam://open/main",
+                                   shell=True, check=True)
+
+                    active_user_checker_thread = self.after(3000, active_user_checker)
+
+                    label_var.set(_('Waiting for log in...\n\nPress Ctrl+V to paste password.'))
+                    print('Log in checker thread will start in 3 seconds.')
+
+                    force_button.pack_forget()
+
+                    cancel_button.update_command(cancel)
+                    cancel_button.enable()
+
+                    if get_config('autoexit') == 'true':
+                        cancel_button.update_text(_('Exit'))
+
+                    active_user_waiter = None
+
+                    def waiter():
+                        nonlocal active_user_waiter
+                        nonlocal listener
+
+                        try:
+                            queue.get_nowait()
+                            listener.stop()
+                            after_steam_start()
+                        except q.Empty:
+                            active_user_waiter = self.after(1000, waiter)
+
+                    active_user_waiter = self.after(1000, waiter)
+
+
+                else:
+                    subprocess.run("start steam://open/main",
+                                   shell=True, check=True)
+                    after_steam_start()
+
             except q.Empty:
                 counter += 1
                 if counter == 10:

@@ -47,6 +47,6 @@ def setkey(key_name, value, value_type, path=r"Software\Valve\Steam"):
 
         winreg.SetValueEx(reg_key, key_name, 0, value_type, value)
         winreg.CloseKey(reg_key)
-        print("Changed %s's value to %s" % (key_name, str(value)))
+        print("[reg] Changed %s's value to %s" % (key_name, str(value)))
     except OSError:
         error_msg(_('Registry Error'), _('Failed to change registry value.'))

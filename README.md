@@ -13,17 +13,21 @@ STEAM is a trademark of Valve Corporation.
 
 This app has no affiliation with Steam and Valve.
 
+# Important Notice
+
+There won't be new major release for this program since v3.0.
+This is due to Steam client now having built-in account switching feature.
+Only fixes for bugs and critical issues will be provided from now on.
+
+It just doesn't make sense to keep updating this ancient spaghetti code anyway.
+
 # Features
 * Switch between your accounts with just few clicks.
-
 * No more entering ID, password and Steam Guard code every time you login to another account.
-
 * Restarting Steam with single click.
-
-* Unlike some other programs, your passwords are **NOT** required. Only uses your usernames.
-
+* Accounts data encryption feature.
+* Optional password saving feature. You can use them to log in to your accounts without entering them manually.
 * Auto-importing your Steam accounts. Do more clicking, less typing.
-
 * Auto-updating is built-in, and it's fast. (Unless GitHub's server is having a hard time..)
 
 # Requirements (for executable release)
@@ -57,8 +61,8 @@ This app has no affiliation with Steam and Valve.
 * I have a request! / I found a bug!
   - Bug reports and requests are always welcome. Please submit an issue.
 
-* Some of the elements in settings are missing!
-  - Delete config.yml and launch application again.
+* Some elements in settings are missing!
+  - Delete config file and launch application again.
 
 # Source code information
 * All other branches except master are considered as acitve-development branch and might have issues, bugs, WIP features, or might not just work at all.
@@ -66,3 +70,4 @@ This app has no affiliation with Steam and Valve.
 * Do not run updater.py in python interpreter. It's designed to run only in frozen environment.
 * Use requirements.txt to install dependencies.
 * Source code is written in English. Translation to other languages is done with gettext.
+* Executable releases use modified version of sv-ttk. You might find some UI issues if you run the program in Python interpreter.

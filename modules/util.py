@@ -5,8 +5,7 @@ import zipfile as zf
 import sys
 import winshell
 from modules.reg import fetch_reg
-from modules.config import get_config
-from modules.steamid import steam64_to_32
+from modules.config import get_config, config_write_value
 
 
 class StoppableThread(threading.Thread):
@@ -21,7 +20,10 @@ class StoppableThread(threading.Thread):
         return self._stop.isSet()
 
 
-def check_steam_dir():
+def check_steam_dir(force_reg=False):
+    if force_reg:
+        return os.path.isfile(fetch_reg('SteamPath') + '\\Steam.exe')
+
     if get_config('steam_path') == 'reg' and os.path.isfile(fetch_reg('SteamPath') + '\\Steam.exe'):
         return True
     elif os.path.isfile(get_config('steam_path') + '\\Steam.exe'):
@@ -53,19 +55,13 @@ def launch_updater():
 
 
 def test():
-    print('Listing current config...')
-    print('locale:', get_config('locale'))
-    print('autoexit:', get_config('autoexit'))
-    print('mode:', get_config('mode'))
-    print('try_soft_shutdown:', get_config('try_soft_shutdown'))
-    print('show_avatar:', get_config('show_avatar'))
-    print('steam_path:', get_config('steam_path'))
+    print('Verifying Steam.exe location...')
 
-    print('Checking registry...')
-    for key in ('AutoLoginUser', 'SteamExe', 'SteamPath', 'pid', 'ActiveUser'):
-        print(f'{key}:', fetch_reg(key))
+    if check_steam_dir(force_reg=True) and get_config('steam_path') != 'reg':
+        print('SteamPath registry key is valid but config is not set to use it')
+        print('Setting config to use registry key')
+        config_write_value('steam_path', 'reg')
 
-    print('Checking Steam.exe location...')
     if check_steam_dir() and get_config('steam_path') == 'reg':
         print('Steam located at', fetch_reg('steampath'))
     elif check_steam_dir():
@@ -121,13 +117,3 @@ def steam_running():
             return False
     except psutil.NoSuchProcess:
         return False
-
-
-def open_screenshot(steamid64, steam_path=get_config('steam_path')):
-    if steam_path == 'reg':
-        steam_path = fetch_reg('steampath')
-
-    if '/' in steam_path:
-        steam_path = steam_path.replace('/', '\\')
-
-    os.startfile(f'{steam_path}\\userdata\\{steam64_to_32(steamid64)}\\760\\remote')
