@@ -2,6 +2,8 @@ version: '3.0'
 changelog_en: |
   ----------3.0----------
   
+  • This is a last major release. For more information, check GitHub README.
+  
   • Added password saving functionality.
 
   • Added ability to encrypt accounts data.
@@ -17,6 +19,8 @@ changelog_en: |
   • Tweaked UI.
   
   • Updated initial setup.
+  
+  • Fixed bug which if there's no screenshot directory and user tries to open it, it would throw an error.
 
   ----------2.8----------
 
@@ -258,6 +262,8 @@ changelog_en: |
 changelog_ko: |
     ----------3.0----------
   
+  • 이번 버전 이후로는 기능 업데이트가 제공되지 않습니다. 자세한 사항은 GitHub README를 참조하세요.
+  
   • 비밀번호 저장 기능을 추가했습니다.
 
   • 계정 데이터 암호화 기능을 추가했습니다.
@@ -273,6 +279,8 @@ changelog_ko: |
   • UI를 개선했습니다.
   
   • 초기 설정을 업데이트했습니다.
+  
+  • 스크린샷 폴더가 없는 계정에서 스크린샷 폴더를 열 경우 오류가 발생하던 현상을 수정했습니다.
 
   ----------2.8----------
 
