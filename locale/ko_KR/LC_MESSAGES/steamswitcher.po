@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-11 15:35+0900\n"
-"PO-Revision-Date: 2023-03-11 15:35+0900\n"
+"PO-Revision-Date: 2023-03-11 16:10+0900\n"
 "Last-Translator: sw2719\n"
 "Language-Team: Korean\n"
 "Language: ko_KR\n"
@@ -38,7 +38,7 @@ msgstr "경고"
 
 #: modules/main.py:80
 msgid "After soft shutdown attempt,"
-msgstr "Steam을 종료하려고 하였으나,"
+msgstr "Steam을 종료하려고 시도했으나,"
 
 #: modules/main.py:81
 msgid "Steam appears to be still running."
@@ -61,7 +61,7 @@ msgid ""
 "This will reset all accounts data.\n"
 "This action cannot be undone."
 msgstr ""
-"모든 계정 데이터를 초가화합니다.\n"
+"모든 계정 데이터를 초기화합니다.\n"
 "이 동작은 되돌릴 수 없습니다."
 
 #: modules/main.py:165
