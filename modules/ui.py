@@ -1403,6 +1403,8 @@ class ManageEncryptionWindow(tk.Toplevel):
 
             if get_config('locale') == 'fr_FR':
                 self.close_button.grid(row=1, column=1, pady=(0, 3), padx=3, columnspan=2, sticky='nesw')
+            else:
+                self.close_button.grid(row=0, column=0, pady=3, padx=3)
 
             ttk.Label(self.innerframe,
                       text=_('Your accounts data is encrypted.'),
