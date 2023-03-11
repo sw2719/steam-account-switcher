@@ -20,6 +20,8 @@ def convert():
     with open('accounts.yml', 'r', encoding='utf-8') as f:
         original = yaml.load(f)
 
+    os.remove('accounts.yml')
+
     if not original:
         with open('accounts.json', 'w', encoding='utf-8') as f:
             json.dump({}, f, indent=4)
@@ -33,7 +35,6 @@ def convert():
     with open('accounts.json', 'w', encoding='utf-8') as f:
         json.dump(original, f, indent=4)
 
-    os.remove('accounts.yml')
     pprint('Converted accounts.yml to accounts.json')
 
 
