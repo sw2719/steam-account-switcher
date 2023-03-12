@@ -2,7 +2,7 @@ version: '3.0'
 changelog_en: |
   ----------3.0----------
 
-  • This is a last major release. For more information, check GitHub README.
+  • This is the last release with new features. For more information, check GitHub README.
   
   • Added password saving functionality.
   
