@@ -13,11 +13,10 @@ STEAM is a trademark of Valve Corporation.
 
 This app has no affiliation with Steam and Valve.
 
-# Important Notice
+# Notice about future updates
 
-There won't be new feature added for this program since v3.0.
-This is due to Steam client now having built-in account switching feature.
-Only maintenance and fixes for bugs and critical issues will be provided from now on.
+There won't be new feature added because I ran out of ideas. If you have any suggestion, feel free to submit a request on issues.
+Keep in mind that I can't guarantee that your suggestions will be added 100%.
 
 # Features
 * Switch between your accounts with just few clicks.
