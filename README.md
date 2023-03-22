@@ -41,7 +41,7 @@ Keep in mind that I can't guarantee that your suggestions will be added 100%.
 * Because this program is not code-signed, Windows SmartScreen might pop up. Click 'More info' and then 'Run anyway'.
  
 3. Import accounts from Steam or add them manually via Menu > Add accounts
-* Your account names are saved in accounts.yml located in the same folder where exe file is.
+* Your account names are saved in accounts.json located in the same folder where exe file is.
 
 4. Click one of the buttons to change to desired account.
 * Steam login prompt might appear if you are using this program for the first time. Just check 'Remember password' and login. It will work next time. 
