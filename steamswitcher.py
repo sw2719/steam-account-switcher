@@ -1,11 +1,9 @@
 import sys
 import os
 import shutil
-from modules.config import first_run
-from modules.update import start_checkupdate
 from modules.main import MainApp
 
-VERSION = '3.0'
+VERSION = '3.1'
 BRANCH = 'master'
 
 print('Launch arguments:', sys.argv)

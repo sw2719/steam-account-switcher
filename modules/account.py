@@ -7,7 +7,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import InvalidToken
-from modules.config import get_config
+from modules.config import config_manager as cm
 from modules.reg import fetch_reg
 
 
@@ -44,7 +44,7 @@ class AccountManager:
             with open('accounts.json', 'r', encoding='utf-8') as f:
                 self.acc_dict = json.load(f)
         except json.decoder.JSONDecodeError:
-            if get_config('encryption') == 'true':
+            if cm.get('encryption') == 'true':
                 if password is None:
                     raise ValueError('Password is required to decrypt accounts.json')
                 else:
@@ -311,7 +311,7 @@ class AccountManager:
     def _save_json(self):
         self.update_dict_numbers()
 
-        if get_config('encryption') == 'true':
+        if cm.get('encryption') == 'true':
             with open('accounts.json', 'wb') as f:
                 enc_dict = self.fernet.encrypt(json.dumps(self.acc_dict).encode())
                 f.write(enc_dict)
@@ -323,10 +323,10 @@ class AccountManager:
 
 
 def get_loginusers_path():
-    if get_config('steam_path') == 'reg':
+    if cm.get('steam_path') == 'reg':
         steam_path = fetch_reg('steampath')
     else:
-        steam_path = get_config('steam_path')
+        steam_path = cm.get('steam_path')
 
     if '/' in steam_path:
         steam_path = steam_path.replace('/', '\\')
@@ -335,10 +335,7 @@ def get_loginusers_path():
 
 
 def fetch_loginusers():
-    """
-    Returns the contents of loginusers.vdf as dict
-    :returns: dict
-    """
+    """Returns the contents of loginusers.vdf as dict"""
     vdf_file = get_loginusers_path()
 
     try:

@@ -1,9 +1,9 @@
 import winreg
 import gettext
 from modules.errormsg import error_msg
-from modules.config import get_config
+from modules.config import config_manager as cm
 
-LOCALE = get_config('locale')
+LOCALE = cm.get('locale')
 
 t = gettext.translation('steamswitcher',
                         localedir='locale',

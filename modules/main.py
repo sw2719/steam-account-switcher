@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.font as tkfont
+from copy import copy
 from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox as msgbox
 import gettext
@@ -19,7 +20,7 @@ from pynput import keyboard
 from modules.account import AccountManager, loginusers_accountnames, loginusers_steamid, \
     loginusers_personanames, check_autologin_availability, set_loginusers_value, remember_password_disabled
 from modules.reg import fetch_reg, setkey
-from modules.config import get_config, config_write_dict, config_write_value, SYS_LOCALE, first_run, missing_values
+from modules.config import SYS_LOCALE, config_manager as cm
 from modules.util import steam_running, StoppableThread, raise_exception, test, get_center_pos, \
     launch_updater, create_shortcut
 from modules.update import start_checkupdate, hide_update, show_update, update_frame_color
@@ -29,7 +30,7 @@ from modules.avatar import download_avatar
 from modules.errormsg import error_msg
 from modules.steamid import steam64_to_32
 
-LOCALE = get_config('locale')
+LOCALE = cm.get('locale')
 
 t = gettext.translation('steamswitcher',
                         localedir='locale',
@@ -45,14 +46,14 @@ image4 = None
 
 
 def legacy_restart(silent=True):
-    '''Legacy steam restart function for refresh function.
-    New restarter with threading doesn't seem to work well with refreshing.'''
+    """Legacy steam restart function for refresh function.
+    New restarter with threading doesn't seem to work well with refreshing."""
     try:
         if steam_running():
-            if get_config('steam_path') == 'reg':
+            if cm.get('steam_path') == 'reg':
                 raw_path = fetch_reg('steampath')
             else:
-                raw_path = get_config('steam_path').replace('\\', '/')
+                raw_path = cm.get('steam_path').replace('\\', '/')
             raw_path_items = raw_path.split('/')
             path_items = []
             for item in raw_path_items:
@@ -105,7 +106,7 @@ def legacy_restart(silent=True):
 
 
 class MainApp(tk.Tk):
-    '''Main application'''
+    """Main application"""
     def __init__(self, version, bundle, std_out, std_err, after_update):
         sys.stdout = std_out
         sys.stderr = std_err
@@ -118,7 +119,7 @@ class MainApp(tk.Tk):
 
         tk.Tk.__init__(self)
 
-        sv_ttk.set_theme(get_config('theme'))
+        sv_ttk.set_theme(cm.get('theme'))
         self.title(_("Account Switcher"))
 
         self.window_width = 310
@@ -126,8 +127,8 @@ class MainApp(tk.Tk):
 
         center_x, center_y = get_center_pos(self, self.window_width, self.window_height)
 
-        if get_config('last_pos') != '0/0':
-            pos_x, pos_y = get_config('last_pos').split('/')
+        if cm.get('last_pos') != '0/0':
+            pos_x, pos_y = cm.get('last_pos').split('/')
         else:
             pos_x, pos_y = center_x, center_y
 
@@ -148,11 +149,9 @@ class MainApp(tk.Tk):
         lock_white_img = Image.open('asset/lock_white.png').resize((80, 80))
         self.lock_white_imgtk = ImageTk.PhotoImage(lock_white_img)
 
-        if first_run:
+        if cm.first_run:
             self.open_welcomewindow()
-        elif missing_values and after_update:
-            self.open_welcomewindow()
-        elif get_config('encryption') == 'true':
+        elif cm.get('encryption') == 'true':
             self.lockscreen()
         else:
             self.accounts = AccountManager()
@@ -164,7 +163,7 @@ class MainApp(tk.Tk):
                                _('This will reset all accounts data.\nThis action cannot be undone.') + '\n\n' +
                                _('Are you sure?')):
                 AccountManager.reset_json()
-                config_write_value('encryption', 'false')
+                cm.set('encryption', 'false')
                 self.accounts = AccountManager()
                 self.config(menu='')
                 frame.destroy()
@@ -256,7 +255,7 @@ class MainApp(tk.Tk):
 
         lock_icon = tk.Canvas(frame, width=300, height=200, bd=0, highlightthickness=0)
 
-        if get_config('theme') == 'light':
+        if cm.get('theme') == 'light':
             lock_icon.create_image(150, 100, image=self.lock_imgtk)
         else:
             lock_icon.create_image(150, 100, image=self.lock_white_imgtk)
@@ -339,7 +338,7 @@ class MainApp(tk.Tk):
 
         self.restartbutton_text = tk.StringVar()
 
-        if get_config('autoexit') == 'true':
+        if cm.get('autoexit') == 'true':
             self.restartbutton_text.set(_('Restart Steam & Exit'))
         else:
             self.restartbutton_text.set(_('Restart Steam'))
@@ -421,7 +420,7 @@ class MainApp(tk.Tk):
     def exit_app(self):
         x, y = self.get_window_pos()
         last_pos = f'{x}/{y}'
-        config_write_value('last_pos', last_pos)
+        cm.set('last_pos', last_pos)
         sys.exit(0)
 
     def toggle_demo(self):
@@ -441,7 +440,7 @@ class MainApp(tk.Tk):
             welcomewindow = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), self.after_update, debug)
 
         def after_init(pw):
-            if get_config('encryption') == 'true' and not update_override and not debug:
+            if cm.get('encryption') == 'true' and not update_override and not debug:
                 if pw:
                     self.accounts = AccountManager(pw)
                     self.main_menu()
@@ -584,7 +583,7 @@ class MainApp(tk.Tk):
                 password_entry['state'] = 'normal'
                 checkbutton['state'] = 'normal'
 
-                if get_config('encryption') == 'false':
+                if cm.get('encryption') == 'false':
                     account_settings_window.geometry(
                         f'{str(account_settings_window.winfo_width())}x{str(account_settings_window.winfo_height() + 35)}'
                         f'+{str(account_settings_window.winfo_x())}+{str(account_settings_window.winfo_y())}'
@@ -598,7 +597,7 @@ class MainApp(tk.Tk):
                 password_entry['state'] = 'disabled'
                 checkbutton['state'] = 'disabled'
 
-                if get_config('encryption') == 'false' and window_larger:
+                if cm.get('encryption') == 'false' and window_larger:
                     account_settings_window.geometry(
                         f'{str(account_settings_window.winfo_width())}x{str(account_settings_window.winfo_height() - 35)}'
                         f'+{str(account_settings_window.winfo_x())}+{str(account_settings_window.winfo_y())}'
@@ -657,7 +656,7 @@ class MainApp(tk.Tk):
         account_settings_window.bind('<Return>', enterkey)
         ok_button['command'] = lambda username=username: ok(username)
 
-        if save_password_var.get() == 1 and get_config('encryption') == 'false':
+        if save_password_var.get() == 1 and cm.get('encryption') == 'false':
             account_settings_window.geometry(
                 f'{str(account_settings_window.winfo_width())}x{str(account_settings_window.winfo_height() + 35)}'
                 f'+{str(account_settings_window.winfo_x())}+{str(account_settings_window.winfo_y())}'
@@ -690,7 +689,7 @@ class MainApp(tk.Tk):
 
         self.focus()
 
-        if get_config('mode') == 'express':
+        if cm.get('mode') == 'express':
             self.exit_after_restart()
 
     def remove_user(self, username):
@@ -700,7 +699,7 @@ class MainApp(tk.Tk):
 
             self.refresh()
 
-    def open_screenshot(self, steamid64, steam_path=get_config('steam_path')):
+    def open_screenshot(self, steamid64, steam_path=cm.get('steam_path')):
         if steam_path == 'reg':
             steam_path = fetch_reg('steampath')
 
@@ -713,9 +712,9 @@ class MainApp(tk.Tk):
             msgbox.showinfo(_('No screenshots directory'), _('No screenshots directory was found for this account.'))
 
     def draw_button(self):
-        if get_config('ui_mode') == 'list':
+        if cm.get('ui_mode') == 'list':
             self.draw_button_list()
-        elif get_config('ui_mode') == 'grid':
+        elif cm.get('ui_mode') == 'grid':
             self.draw_button_grid()
 
     def draw_button_grid(self):
@@ -761,7 +760,7 @@ class MainApp(tk.Tk):
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
 
             def _on_mousewheel(event):
-                '''Scroll window on mousewheel input'''
+                """Scroll window on mousewheel input"""
                 widget = event.widget.winfo_containing(event.x_root, event.y_root)
 
                 if 'disabled' not in scroll_bar.state() and '!canvas' in str(widget):
@@ -869,7 +868,7 @@ class MainApp(tk.Tk):
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
 
             def _on_mousewheel(event):
-                '''Scroll window on mousewheel input'''
+                """Scroll window on mousewheel input"""
                 widget = event.widget.winfo_containing(event.x_root, event.y_root)
 
                 if 'disabled' not in scroll_bar.state() and '!canvas' in str(widget):
@@ -919,7 +918,7 @@ class MainApp(tk.Tk):
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
 
             def _on_mousewheel(event):
-                '''Scroll window on mousewheel input'''
+                """Scroll window on mousewheel input"""
                 widget = event.widget.winfo_containing(event.x_root, event.y_root)
 
                 if 'disabled' not in scroll_bar.state() and '!canvas' in str(widget):
@@ -1013,7 +1012,7 @@ class MainApp(tk.Tk):
             canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
 
             def _on_mousewheel(event):
-                '''Scroll window on mousewheel input'''
+                """Scroll window on mousewheel input"""
                 widget = event.widget.winfo_containing(event.x_root, event.y_root)
 
                 if 'disabled' not in scroll_bar.state() and '!canvas' in str(widget):
@@ -1029,7 +1028,7 @@ class MainApp(tk.Tk):
             no_user.pack(pady=(150, 0))
 
     def refresh(self, no_frame=False):
-        '''Refresh main window widgets'''
+        """Refresh main window widgets"""
         if not no_frame:
             self.no_user_frame.destroy()
             self.button_frame.destroy()
@@ -1066,7 +1065,7 @@ class MainApp(tk.Tk):
         self.autolabel['bg'] = get_color('upperframe')
         self.draw_button()
 
-        if get_config('autoexit') == 'true':
+        if cm.get('autoexit') == 'true':
             self.restartbutton_text.set(_('Restart Steam & Exit'))
         else:
             self.restartbutton_text.set(_('Restart Steam'))
@@ -1104,7 +1103,7 @@ class MainApp(tk.Tk):
             show_update()
 
     def about(self, version, force_copyright=False):
-        '''Open about window'''
+        """Open about window"""
 
         if LOCALE == 'fr_FR':
             height = 210
@@ -1196,7 +1195,7 @@ class MainApp(tk.Tk):
             button_copyright.grid(row=0, column=2, padx=2)
 
     def refreshwindow(self):
-        '''Open remove accounts window'''
+        """Open remove accounts window"""
         accounts = self.accounts.list
         if not accounts:
             msgbox.showinfo(_('No Accounts'),
@@ -1240,7 +1239,7 @@ class MainApp(tk.Tk):
         canvas.create_window((4, 4), window=check_frame, anchor="nw")
 
         def _on_mousewheel(event):
-            '''Scroll window on mousewheel input'''
+            """Scroll window on mousewheel input"""
             if 'disabled' not in scroll_bar.state():
                 canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
@@ -1345,7 +1344,7 @@ class MainApp(tk.Tk):
         refresh_ok.pack(side='left', padx=5, pady=3)
 
     def addwindow(self):
-        '''Open add accounts window'''
+        """Open add accounts window"""
         steamid_list = []
         account_names = []
 
@@ -1395,7 +1394,7 @@ class MainApp(tk.Tk):
                                         _('Account %s already exists.')
                                         % existing_account)
 
-                if dl_list and get_config('show_avatar') == 'true':
+                if dl_list and cm.get('show_avatar') == 'true':
                     button_addcancel.destroy()
                     bottomframe_add.destroy()
                     topframe_add.destroy()
@@ -1428,7 +1427,7 @@ class MainApp(tk.Tk):
         button_addcancel.pack(side='bottom', anchor='e', padx=3)
 
     def importwindow(self):
-        '''Open import accounts window'''
+        """Open import accounts window"""
         steam64_list = loginusers_steamid()
         account_name = loginusers_accountnames()
         persona_name = loginusers_personanames()
@@ -1466,7 +1465,7 @@ class MainApp(tk.Tk):
             pass
 
         def onFrameConfigure(canvas):
-            '''Reset the scroll region to encompass the inner frame'''
+            """Reset the scroll region to encompass the inner frame"""
             canvas.configure(scrollregion=canvas.bbox("all"))
 
         canvas = tk.Canvas(importwindow, borderwidth=0, highlightthickness=0)
@@ -1483,7 +1482,7 @@ class MainApp(tk.Tk):
                          canvas=canvas: onFrameConfigure(canvas))
 
         def _on_mousewheel(event):
-            '''Scroll window on mousewheel input'''
+            """Scroll window on mousewheel input"""
             if 'disabled' not in scroll_bar.state():
                 canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
@@ -1514,7 +1513,7 @@ class MainApp(tk.Tk):
             if accounts_to_add:
                 self.accounts.add_multiple_accounts(accounts_to_add)
 
-            if get_config('show_avatar') == 'true':
+            if cm.get('show_avatar') == 'true':
                 canvas.destroy()
                 import_label.destroy()
                 scroll_bar.destroy()
@@ -1544,7 +1543,7 @@ class MainApp(tk.Tk):
         import_ok.pack(side='left', padx=5, pady=3)
 
     def orderwindow(self):
-        '''Open order change window'''
+        """Open order change window"""
         if not self.accounts:
             msgbox.showinfo(_('No Accounts'),
                             _("There's no account added."))
@@ -1586,7 +1585,7 @@ class MainApp(tk.Tk):
         scrollbar["command"] = lb.yview
 
         def _on_mousewheel(event):
-            '''Scroll window on mousewheel input'''
+            """Scroll window on mousewheel input"""
             lb.yview_scroll(int(-1*(event.delta/120)), "units")
 
         lb.bind("<MouseWheel>", _on_mousewheel)
@@ -1653,13 +1652,13 @@ class MainApp(tk.Tk):
         bottomframe.grid_rowconfigure(0, weight=1)
 
     def settingswindow(self):
-        '''Open settings window'''
+        """Open settings window"""
         global image1
         global image2
         global image3
         global image4
 
-        config_dict = get_config('all')
+        config_dict = copy(cm.dict)
         last_config = config_dict
 
         if LOCALE == 'fr_FR':
@@ -1725,7 +1724,7 @@ class MainApp(tk.Tk):
         list_radio_frame = tk.Frame(ui_frame)
         list_radio_frame.pack(side='left', padx=(ui_padx, 0))
 
-        if get_config('theme') == 'light':
+        if cm.get('theme') == 'light':
             list_img = Image.open("asset/list.png").resize((30, 30))
             grid_img = Image.open("asset/grid.png").resize((30, 30))
         else:
@@ -1761,7 +1760,7 @@ class MainApp(tk.Tk):
         radio_grid.pack(side='top', pady=2)
         ToolTipWindow(radio_grid, _('Display accounts in 3 x n grid.'), center=True)
 
-        if get_config('ui_mode') == 'grid':
+        if cm.get('ui_mode') == 'grid':
             ui_radio_var.set(1)
 
         avatar_frame = tk.Frame(settingswindow)
@@ -1828,7 +1827,7 @@ class MainApp(tk.Tk):
                                      style='Settings.TRadiobutton')
         radio_dark.pack(side='top', pady=2)
 
-        if get_config('theme') == 'dark':
+        if cm.get('theme') == 'dark':
             theme_radio_var.set(1)
 
         mode_radio_frame1 = tk.Frame(settingswindow)
@@ -1852,7 +1851,7 @@ class MainApp(tk.Tk):
                                         style='Settings.TRadiobutton')
         radio_express.pack(side='left', pady=2)
         ToolTipWindow(radio_express, _("Automatically restart Steam when autologin account is changed."))
-        if get_config('mode') == 'express':
+        if cm.get('mode') == 'express':
             mode_radio_var.set(1)
 
         softshutdwn_frame = tk.Frame(settingswindow)
@@ -1948,13 +1947,13 @@ class MainApp(tk.Tk):
                            'mode': mode,
                            'try_soft_shutdown': soft_shutdown,
                            'show_avatar': avatar,
-                           'last_pos': get_config('last_pos'),
-                           'steam_path': get_config('steam_path'),
+                           'last_pos': cm.get('last_pos'),
+                           'steam_path': cm.get('steam_path'),
                            'ui_mode': ui_mode,
                            'theme': theme,
-                           'encryption': get_config('encryption')}
+                           'encryption': cm.get('encryption')}
 
-            config_write_dict(config_dict)
+            cm.set_dict(config_dict)
 
             if last_config['show_avatar'] == 'false' and 'selected' in avatar_chkb.state():
                 if msgbox.askyesno('', _('Do you want to download avatar images now?')):
@@ -1997,8 +1996,8 @@ class MainApp(tk.Tk):
         bottomframe_set.grid_rowconfigure(0, weight=1)
 
     def exit_after_restart(self, refresh_override=False):
-        '''Restart Steam client and exit application.
-        If autoexit is disabled, app won't exit.'''
+        """Restart Steam client and exit application.
+        If autoexit is disabled, app won't exit."""
         if remember_password_disabled(self.user_var.get()):
             if msgbox.askyesno(_('Remember Password Disabled'),
                                _('Remember Password is disabled for this account.\n'
@@ -2007,11 +2006,11 @@ class MainApp(tk.Tk):
 
         label_var = tk.StringVar()
 
-        if get_config('steam_path') == 'reg':
+        if cm.get('steam_path') == 'reg':
             r_path = fetch_reg('SteamExe')
             r_path_items = r_path.split('/')
         else:
-            r_path = get_config('steam_path') + '\\Steam.exe'
+            r_path = cm.get('steam_path') + '\\Steam.exe'
             r_path_items = r_path.split('\\')
 
         path_items = []
@@ -2072,9 +2071,9 @@ class MainApp(tk.Tk):
         if steam_running():
             label_var.set(_('Waiting for Steam to exit...'))
 
-            if get_config('try_soft_shutdown') == 'false':
+            if cm.get('try_soft_shutdown') == 'false':
                 forcequit()
-            elif get_config('try_soft_shutdown') == 'true':
+            elif cm.get('try_soft_shutdown') == 'true':
                 print('Soft shutdown mode')
                 subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                                creationflags=0x08000000, check=True)
@@ -2113,7 +2112,7 @@ class MainApp(tk.Tk):
             nonlocal thread
 
             def after_steam_start():
-                if get_config('autoexit') == 'true':
+                if cm.get('autoexit') == 'true':
                     self.exit_app()
                 elif not refresh_override:
                     cleanup()
@@ -2195,7 +2194,7 @@ class MainApp(tk.Tk):
                     cancel_button.update_command(cancel)
                     cancel_button.enable()
 
-                    if get_config('autoexit') == 'true':
+                    if cm.get('autoexit') == 'true':
                         cancel_button.update_text(_('Exit'))
 
                     active_user_waiter = None

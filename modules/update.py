@@ -14,13 +14,13 @@ from time import sleep
 from packaging import version
 from ruamel.yaml import YAML
 from pget.down import Downloader
-from modules.config import get_config
+from modules.config import config_manager as cm
 from modules.errormsg import error_msg
 from modules.ui import get_color
 
 yaml = YAML()
 
-LOCALE = get_config('locale')
+LOCALE = cm.get('locale')
 
 t = gettext.translation('steamswitcher',
                         localedir='locale',
@@ -256,8 +256,10 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
                 latest_zip = latest['assets'][0]['browser_download_url']
                 latest_changelog = latest['body'].replace('\r', '').split('# ')
 
+                print(latest_changelog)
+
                 # ['', en, ko]
-                if get_config('locale') == 'ko_KR':
+                if cm.get('locale') == 'ko_KR':
                     latest_changelog = latest_changelog[2].replace('변경사항\n', '')
                 else:
                     latest_changelog = latest_changelog[1].replace('Changelogs\n', '')
