@@ -1,14 +1,20 @@
 import sys
 import os
 import shutil
+import logging
 from modules.main import MainApp
 
 VERSION = '3.1'
 BRANCH = 'master'
 
-print('Launch arguments:', sys.argv)
+logger = logging.getLogger()
 
-after_update = False
+if '-logfile' in sys.argv:
+    logging.basicConfig(level=logging.INFO, filename='log.txt')
+else:
+    logging.basicConfig(level=logging.INFO)
+
+logger.info(f'Launch arguments: {" ".join(sys.argv)}')
 
 if '-debug' in sys.argv:
     BUNDLE = False
@@ -20,25 +26,16 @@ elif getattr(sys, 'frozen', False):
         except OSError:
             pass
     if os.path.isfile('update.zip'):
-        after_update = True
         try:
             os.remove('update.zip')
         except OSError:
             pass
-    print('Running in a bundle')
+    logger.info('Running in a bundle')
 else:
     BUNDLE = False
-    print('Running in a Python interpreter')
+    logger.info('Running in a Python interpreter')
 
-if '-logfile' in sys.argv:
-    std_out = open('log.txt', 'w', encoding='utf-8')
-    std_err = std_out
-    sys.stdout = std_out
-    sys.stderr = std_out
-else:
-    std_out = sys.__stdout__
-    std_err = sys.__stderr__
 
-root = MainApp(VERSION, BUNDLE, std_out, std_err, after_update)
+root = MainApp(VERSION, BUNDLE)
 
 root.mainloop()

@@ -577,15 +577,13 @@ class ReadonlyEntryWithLabel:
 
 
 class WelcomeWindow(tk.Toplevel):
-    def __init__(self, master, geometry, after_update, debug):
+    def __init__(self, master, geometry, debug):
         self.master = master
         tk.Toplevel.__init__(self, self.master)
         self.title(_('Initial Setup'))
 
         self.geometry(geometry)
         self.resizable(False, False)
-
-        self.after_update = after_update
 
         if not debug:
             self.protocol("WM_DELETE_WINDOW", self.on_window_close)
@@ -619,9 +617,6 @@ class WelcomeWindow(tk.Toplevel):
 
         self.page_label = ttk.Label(self.button_frame, text='0/6')
         self.page_label.grid(row=0, column=1, sticky='s', padx=3, pady=(0, 10))
-
-        if self.after_update:
-            self.page_label['text'] = '0/5'
 
         self.ok_button = ttk.Button(self.button_frame, text=_('Next'), command=self.ok, width=10, style='Accent.TButton')
         self.ok_button.grid(row=0, column=2, sticky='e')
@@ -709,10 +704,7 @@ class WelcomeWindow(tk.Toplevel):
             self.page_5()
 
         if type(self.active_page) == int:
-            if self.after_update:
-                self.page_label['text'] = str(self.active_page) + '/5'
-            else:
-                self.page_label['text'] = str(self.active_page) + '/6'
+            self.page_label['text'] = str(self.active_page) + '/6'
 
     def ok(self):
         if self.active_page == 0:
@@ -776,11 +768,7 @@ class WelcomeWindow(tk.Toplevel):
                     self.password_page()
             else:
                 self.page_5()
-
-                if self.after_update:
-                    self.ok_button['text'] = _('Finish')
-                else:
-                    self.ok_button['text'] = _('Next')
+                self.ok_button['text'] = _('Next')
 
                 self.focus()
 
@@ -795,11 +783,7 @@ class WelcomeWindow(tk.Toplevel):
             self.innerframe.destroy()
             self.unbind('<Return>')
             self.page_5()
-
-            if self.after_update:
-                self.ok_button['text'] = _('Finish')
-            else:
-                self.ok_button['text'] = _('Next')
+            self.ok_button['text'] = _('Next')
             self.focus()
 
         elif self.active_page == 5:
@@ -822,14 +806,9 @@ class WelcomeWindow(tk.Toplevel):
             self.autoexit_frame.destroy()
             self.avatar_frame.destroy()
 
-            if self.after_update:
-                self.save()
-                self.destroy()
-                return
-            else:
-                self.ok_button['text'] = _('Finish')
-                self.page_6()
-                self.focus()
+            self.ok_button['text'] = _('Finish')
+            self.page_6()
+            self.focus()
 
         elif self.active_page == 6:
             if 'selected' in self.shortcut_chkb.state():
@@ -843,18 +822,11 @@ class WelcomeWindow(tk.Toplevel):
             return
 
         if type(self.active_page) == int:
-            if self.after_update:
-                self.page_label['text'] = str(self.active_page) + '/5'
-            else:
-                self.page_label['text'] = str(self.active_page) + '/6'
+            self.page_label['text'] = str(self.active_page) + '/6'
 
     def page_0(self):
         self.active_page = 0
         self.title_label = tk.Label(self, text=_('Welcome'), font=self.title_font)
-
-        if self.after_update:
-            self.title_label['text'] = _('Update complete')
-
         self.welcome_label = tk.Label(self, text=_("Click 'Next' to continue."))
         self.back_button['text'] = _('Exit')
         self.title_label.pack(expand=True, pady=1)

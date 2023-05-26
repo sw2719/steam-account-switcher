@@ -13,6 +13,7 @@ import queue as q
 import traceback
 import sv_ttk
 import datetime
+import logging
 from time import sleep
 from PIL import Image, ImageTk
 import win32clipboard
@@ -30,6 +31,7 @@ from modules.avatar import download_avatar
 from modules.errormsg import error_msg
 from modules.steamid import steam64_to_32
 
+logger = logging.getLogger(__name__)
 LOCALE = cm.get('locale')
 
 t = gettext.translation('steamswitcher',
@@ -62,16 +64,16 @@ def legacy_restart(silent=True):
                 else:
                     path_items.append(item)
             steam_exe = "\\".join(path_items) + '\\steam.exe'
-            print('Steam.exe path:', steam_exe)
+            logger.info(f'Steam.exe path: {steam_exe}')
             subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                            creationflags=0x08000000, check=True)
-            print('Shutdown command sent. Waiting for Steam...')
+            logger.info('Shutdown command sent. Waiting for Steam...')
             sleep(2)
 
             counter = 0
 
             while steam_running():
-                print('Steam is still running after %s seconds' % str(2 + counter))
+                logger.info(f'Steam is still running after {str(2 + counter)} seconds')
                 if counter <= 10:
                     counter += 1
                     sleep(1)
@@ -87,34 +89,30 @@ def legacy_restart(silent=True):
                     else:
                         raise FileNotFoundError
         else:
-            print('Steam is not running.')
+            logger.info('Steam is not running.')
     except (FileNotFoundError, subprocess.CalledProcessError):
-        print('Hard shutdown mode')
+        logger.info('Hard shutdown mode')
         subprocess.run("TASKKILL /F /IM Steam.exe",
                        creationflags=0x08000000, check=True)
-        print('TASKKILL command sent.')
+        logger.info('TASKKILL command sent.')
         sleep(1)
 
     if silent:
-        print('Launching Steam silently...')
+        logger.info('Launching Steam silently...')
         subprocess.run("start steam://open",
                        shell=True, check=True)
     else:
-        print('Launching Steam...')
+        logger.info('Launching Steam...')
         subprocess.run("start steam://open/main",
                        shell=True, check=True)
 
 
 class MainApp(tk.Tk):
     """Main application"""
-    def __init__(self, version, bundle, std_out, std_err, after_update):
-        sys.stdout = std_out
-        sys.stderr = std_err
-
+    def __init__(self, version, bundle):
         self.accounts = None
         self.demo_mode = False
         self.BUNDLE = bundle
-        self.after_update = after_update
         self.version = version
 
         tk.Tk.__init__(self)
@@ -315,8 +313,6 @@ class MainApp(tk.Tk):
                                    command=download_avatar)
             debug_menu.add_command(label="Open initial setup",
                                    command=lambda: self.open_welcomewindow(debug=True))
-            debug_menu.add_command(label="Open initial setup with after_update True",
-                                   command=lambda: self.open_welcomewindow(debug=True, update_override=True))
             debug_menu.add_command(label="Toggle demo mode",
                                    command=self.toggle_demo)
             debug_menu.add_command(label="Raise exception",
@@ -431,21 +427,17 @@ class MainApp(tk.Tk):
 
         self.refresh()
 
-    def open_welcomewindow(self, debug=False, update_override=False):
+    def open_welcomewindow(self, debug=False):
         self.withdraw()
-
-        if update_override:
-            welcomewindow = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), True, debug)
-        else:
-            welcomewindow = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), self.after_update, debug)
+        welcomewindow = WelcomeWindow(self, self.popup_geometry(320, 300, multiplier=2), debug)
 
         def after_init(pw):
-            if cm.get('encryption') == 'true' and not update_override and not debug:
+            if cm.get('encryption') == 'true' and not debug:
                 if pw:
                     self.accounts = AccountManager(pw)
                     self.main_menu()
                 else:
-                     self.lockscreen()
+                    self.lockscreen()
             elif not debug:
                 self.accounts = AccountManager()
                 self.main_menu()
@@ -694,7 +686,6 @@ class MainApp(tk.Tk):
 
     def remove_user(self, username):
         if msgbox.askyesno(_('Confirm'), _('Are you sure want to remove account %s?') % username):
-            print(f'Removing {username}...')
             self.accounts.remove(username)
 
             self.refresh()
@@ -1069,8 +1060,6 @@ class MainApp(tk.Tk):
             self.restartbutton_text.set(_('Restart Steam & Exit'))
         else:
             self.restartbutton_text.set(_('Restart Steam'))
-
-        print('Menu refreshed')
 
     def update_avatar(self, steamid_list=None, no_ui=False):
         label = tk.Label(self, text=_('Please wait while downloading avatars...'), bg=self['bg'], fg=get_color('text'))
@@ -1617,7 +1606,6 @@ class MainApp(tk.Tk):
 
         def apply():
             order = lb.get(0, tk.END)
-            print('New order is', order)
 
             self.accounts.change_dict_order(order)
             self.refresh()
@@ -1672,7 +1660,7 @@ class MainApp(tk.Tk):
 
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
-        settingswindow.geometry(self.popup_geometry(width, 520))  # 260 is original
+        settingswindow.geometry(self.popup_geometry(width, 580))  # 260 is original
         settingswindow.resizable(False, False)
         settingswindow.bind('<Escape>', lambda event: settingswindow.destroy())
 
@@ -1686,17 +1674,15 @@ class MainApp(tk.Tk):
         settingswindow.grab_set()
         settingswindow.focus()
 
-        if LOCALE == 'fr_FR':
-            padx_int = 45
-        elif LOCALE == 'en_US':
-            padx_int = 11
-        else:
-            padx_int = 24
-
         localeframe = tk.Frame(settingswindow)
-        localeframe.pack(side='top', pady=(14, 7), fill='x')
+        localeframe.pack(side='top', pady=(14, 7))
+
+        localeframe.rowconfigure(0, weight=0)
+        localeframe.columnconfigure(0, weight=0)
+        localeframe.columnconfigure(1, weight=0)
+
         locale_label = tk.Label(localeframe, text=_('Language'))
-        locale_label.pack(side='left', padx=(padx_int, 13))
+        locale_label.grid(row=0, column=0, padx=(0, 8))
         locale_cb = ttk.Combobox(localeframe,
                                  state="readonly",
                                  values=['English',  # 0
@@ -1712,7 +1698,7 @@ class MainApp(tk.Tk):
         elif current_locale == 'fr_FR':
             locale_cb.current(2)
 
-        locale_cb.pack(side='left')
+        locale_cb.grid(row=0, column=1)
 
         restart_frame = tk.Frame(settingswindow)
         restart_frame.pack(side='top')
@@ -1884,6 +1870,20 @@ class MainApp(tk.Tk):
 
         autoexit_chkb.pack(side='left')
 
+        options_frame = tk.Frame(settingswindow)
+        options_frame.pack(side='top', padx=10, pady=(7, 0), fill='x')
+
+        options_frame.rowconfigure(0, weight=1)
+        options_frame.rowconfigure(1, weight=1)
+        options_frame.columnconfigure(0, weight=1)
+
+        options_label = tk.Label(options_frame, text=_('Steam launch options'))
+        options_label.grid(row=0, column=0, padx=(0, 0), sticky='w')
+        options_entry = ttk.Entry(options_frame)
+        options_entry.insert(0, cm.get('steam_options'))
+
+        options_entry.grid(row=1, column=0, pady=(5, 0), sticky='ew')
+
         def open_manage_encryption_window():
             enc_window = ManageEncryptionWindow(self.popup_geometry(320, 300, multiplier=2), self.accounts)
 
@@ -1942,6 +1942,11 @@ class MainApp(tk.Tk):
             else:
                 avatar = 'false'
 
+            options = options_entry.get()
+
+            if not options.strip():
+                options = ''
+
             config_dict = {'locale': locale[locale_cb.current()],
                            'autoexit': autoexit,
                            'mode': mode,
@@ -1951,7 +1956,8 @@ class MainApp(tk.Tk):
                            'steam_path': cm.get('steam_path'),
                            'ui_mode': ui_mode,
                            'theme': theme,
-                           'encryption': cm.get('encryption')}
+                           'encryption': cm.get('encryption'),
+                           'steam_options': options}
 
             cm.set_dict(config_dict)
 
@@ -2021,13 +2027,13 @@ class MainApp(tk.Tk):
                 path_items.append(item)
 
         steam_exe = "\\".join(path_items)
-        print('Steam.exe path:', steam_exe)
+        logger.info(f'Steam.exe path: {steam_exe}')
 
         def forcequit():
-            print('Hard shutdown mode')
+            logger.info('Hard shutdown mode')
             subprocess.run("TASKKILL /F /IM Steam.exe",
                            creationflags=0x08000000, check=True)
-            print('TASKKILL command sent.')
+            logger.info('TASKKILL command sent.')
 
         self.no_user_frame.destroy()
         self.button_frame.destroy()
@@ -2074,10 +2080,10 @@ class MainApp(tk.Tk):
             if cm.get('try_soft_shutdown') == 'false':
                 forcequit()
             elif cm.get('try_soft_shutdown') == 'true':
-                print('Soft shutdown mode')
+                logger.info('Soft shutdown mode')
                 subprocess.run(f"start {steam_exe} -shutdown", shell=True,
                                creationflags=0x08000000, check=True)
-                print('Shutdown command sent. Waiting for Steam...')
+                logger.info('Shutdown command sent. Waiting for Steam...')
 
             checker_task = None
 
@@ -2124,7 +2130,7 @@ class MainApp(tk.Tk):
                 label_var.set(_('Launching Steam...'))
                 self.update()
 
-                print('Launching Steam...')
+                logger.info('Launching Steam...')
 
                 username = fetch_reg('AutoLoginUser')
                 password = self.accounts.get_password(username)
@@ -2139,7 +2145,6 @@ class MainApp(tk.Tk):
                             self.after(1000, active_user_checker)
                         else:
                             queue.put(1)
-                            print('Steam log-in success')
                             return
 
                     def cancel():
@@ -2181,13 +2186,17 @@ class MainApp(tk.Tk):
                         on_release=for_canonical(hotkey.release))
                     listener.start()
 
-                    subprocess.run("start steam://open/main",
+                    options = ''
+                    if cm.get('steam_options'):
+                        options = ' ' + cm.get('steam_options')
+
+                    subprocess.run(f"start {steam_exe}{options}",
                                    shell=True, check=True)
 
                     active_user_checker_thread = self.after(3000, active_user_checker)
 
                     label_var.set(_('Waiting for log in...\n\nPress Ctrl+V to paste password.'))
-                    print('Log in checker thread will start in 3 seconds.')
+                    logger.info('Log in checker thread will start in 3 seconds.')
 
                     force_button.pack_forget()
 
@@ -2212,9 +2221,12 @@ class MainApp(tk.Tk):
 
                     active_user_waiter = self.after(1000, waiter)
 
-
                 else:
-                    subprocess.run("start steam://open/main",
+                    options = ''
+                    if cm.get('steam_options'):
+                        options = ' ' + cm.get('steam_options')
+
+                    subprocess.run(f"start {steam_exe}{options}",
                                    shell=True, check=True)
                     after_steam_start()
 

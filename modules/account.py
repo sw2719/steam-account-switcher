@@ -2,6 +2,7 @@ import os
 import json
 import vdf
 import base64
+import logging
 from ruamel.yaml import YAML
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
@@ -10,9 +11,7 @@ from cryptography.fernet import InvalidToken
 from modules.config import config_manager as cm
 from modules.reg import fetch_reg
 
-
-def pprint(*args, **kwargs):
-    print('[account]', *args, **kwargs)
+logger = logging.getLogger(__name__)
 
 
 def convert():
@@ -35,7 +34,7 @@ def convert():
     with open('accounts.json', 'w', encoding='utf-8') as f:
         json.dump(original, f, indent=4)
 
-    pprint('Converted accounts.yml to accounts.json')
+    logger.info('Converted accounts.yml to accounts.json')
 
 
 class AccountManager:
@@ -64,7 +63,7 @@ class AccountManager:
                     with open('accounts.json', 'rb') as f:
                         secret = self.fernet.decrypt(f.read())
                         self.acc_dict = json.loads(secret.decode('utf-8'))
-                        pprint('Decrypted accounts.json successfully')
+                        logger.info('Decrypted accounts.json successfully')
             else:
                 self.acc_dict = {}
                 self.reset_json()
@@ -72,8 +71,6 @@ class AccountManager:
         except FileNotFoundError:
             self.acc_dict = {}
             self.reset_json()
-
-        pprint('AccountManager initialized')
 
     @staticmethod
     def verify_password(password):
@@ -97,24 +94,24 @@ class AccountManager:
             with open('accounts.json', 'rb') as f:
                 secret = fernet.decrypt(f.read())
                 json.loads(secret.decode('utf-8'))
-                pprint('Password authentication success')
+                logger.info('Password authentication success')
                 return True
         except (InvalidToken, json.decoder.JSONDecodeError):
-            pprint('Password authentication fail')
+            logger.info('Password authentication fail')
             return False
 
     @staticmethod
     def reset_json():
         with open('accounts.json', 'w', encoding='utf-8') as f:
             json.dump({}, f, indent=4)
-        pprint('New account.json created')
+        logger.info('New account.json created')
 
     @staticmethod
     def generate_salt():
         salt = os.urandom(16)
         with open('salt', 'wb') as f:
             f.write(salt)
-        pprint('Generated new salt')
+        logger.info('Generated new salt')
 
         return salt
 
@@ -133,14 +130,14 @@ class AccountManager:
         with open('accounts.json', 'wb') as f:
             enc_dict = self.fernet.encrypt(json.dumps(self.acc_dict).encode())
             f.write(enc_dict)
-            pprint('Set master password')
+            logger.info('Set master password')
 
     def disable_encryption(self):
         with open('accounts.json', 'w', encoding='utf-8') as f:
             json.dump(self.acc_dict, f, indent=4)
 
             os.remove('salt')
-            pprint('Disabled encryption')
+            logger.info('Disabled encryption')
 
     @staticmethod
     def create_encrypted_json_file(password):
@@ -168,7 +165,7 @@ class AccountManager:
             enc_dict = fernet.encrypt(json.dumps(d).encode())
             f.write(enc_dict)
 
-        pprint('Created encrypted accounts.json')
+        logger.info('Created encrypted accounts.json')
 
     @property
     def list(self):
@@ -215,11 +212,11 @@ class AccountManager:
 
     def add(self, accountname, password=None, save=True):
         if accountname in self.list:
-            pprint(f'Account {accountname} already exists!')
+            logger.info(f'Account {accountname} already exists!')
             return False
 
         self.acc_dict[str(len(self.acc_dict))] = {'accountname': accountname}
-        pprint(f'Added account: {accountname}')
+        logger.info(f'Added account: {accountname}')
         if save:
             self._save_json()
         return True
@@ -236,7 +233,7 @@ class AccountManager:
     def remove(self, accountname, save=True):
         i = self._find_account_index(accountname)
         del self.acc_dict[i]
-        pprint(f'Removed account: {accountname}')
+        logger.info(f'Removed account: {accountname}')
 
         if save:
             self._save_json()
@@ -250,7 +247,7 @@ class AccountManager:
     def set_password(self, accountname, password):
         i = self._find_account_index(accountname)
         self.acc_dict[i]['password'] = password
-        pprint(f"Saved {accountname}'s password")
+        logger.info(f"Saved {accountname}'s password")
 
         self._save_json()
 
@@ -258,7 +255,7 @@ class AccountManager:
         try:
             i = self._find_account_index(accountname)
             del self.acc_dict[i]['password']
-            pprint(f"Removed {accountname}'s password")
+            logger.info(f"Removed {accountname}'s password")
 
             self._save_json()
         except KeyError:
@@ -319,7 +316,7 @@ class AccountManager:
             with open('accounts.json', 'w', encoding='utf-8') as f:
                 json.dump(self.acc_dict, f, indent=4)
 
-        pprint('Saved accounts.json')
+        logger.info('Saved accounts.json')
 
 
 def get_loginusers_path():
@@ -420,7 +417,7 @@ def set_loginusers_value(username, key, value):
     for user in loginusers_dict['users'].values():
         if user['AccountName'] == username:
             user[key] = value
-            pprint(f"{username}'s {key} set to {value}")
+            logger.info(f"{username}'s {key} set to {value}")
             return True
     else:
         return False

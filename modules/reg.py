@@ -1,8 +1,10 @@
 import winreg
 import gettext
+import logging
 from modules.errormsg import error_msg
 from modules.config import config_manager as cm
 
+logger = logging.getLogger(__name__)
 LOCALE = cm.get('locale')
 
 t = gettext.translation('steamswitcher',
@@ -47,6 +49,6 @@ def setkey(key_name, value, value_type, path=r"Software\Valve\Steam"):
 
         winreg.SetValueEx(reg_key, key_name, 0, value_type, value)
         winreg.CloseKey(reg_key)
-        print("[reg] Changed %s's value to %s" % (key_name, str(value)))
+        logger.debug(f'Set key {key_name} to {value}')
     except OSError:
         error_msg(_('Registry Error'), _('Failed to change registry value.'))

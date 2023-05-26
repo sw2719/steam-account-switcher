@@ -6,10 +6,9 @@ from ruamel.yaml import YAML
 from win32api import GetSystemMetrics
 import darkdetect
 
-
 logger = logging.getLogger(__name__)
 
-SYS_LOCALE = locale.getlocale(locale.LC_COLLATE)[0]
+SYS_LOCALE = locale.getdefaultlocale()[0]
 
 if SYS_LOCALE == 'ko_KR':
     DEFAULT_LOCALE = 'ko_KR'
@@ -73,7 +72,7 @@ CONFIG_DATA = {
         'default': 'false',
         'valid': ['true', 'false']
     },
-    'steam_launch_parameters': {
+    'steam_options': {
         'default': ''
     }
 }
@@ -90,8 +89,12 @@ class ConfigManager:
             with open('config.json') as cfg:
                 self.dict = json.load(cfg)
 
-        except (json.JSONDecodeError, FileNotFoundError):
+        except json.JSONDecodeError:
             self.dict = self.reset_config()
+
+        except FileNotFoundError:
+            self.dict = self.reset_config()
+            self.first_run = True
 
         self.validate()
         logger.info('ConfigManager initialized')
@@ -121,13 +124,12 @@ class ConfigManager:
         invalid = False
 
         for key, value in CONFIG_DATA.items():
-            try:
-                if 'valid' in CONFIG_DATA[key] and self.dict[key] not in CONFIG_DATA[key]['valid']:
-                    invalid = True
-                    logger.info(f'Config {key} has invalid value: {self.dict[key]}')
-                    logger.info('Replacing with a default value...')
-                    self.dict[key] = CONFIG_DATA[key]['default']
-            except KeyError:
+            if 'valid' in CONFIG_DATA[key] and self.dict[key] not in CONFIG_DATA[key]['valid']:
+                invalid = True
+                logger.info(f'Config {key} has invalid value: {self.dict[key]}')
+                logger.info('Replacing with a default value...')
+                self.dict[key] = CONFIG_DATA[key]['default']
+            elif key not in self.dict:
                 invalid = True
                 logger.info(f'Config {key} is missing. Creating one with a default value...')
                 self.dict[key] = CONFIG_DATA[key]['default']
