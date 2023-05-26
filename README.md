@@ -15,7 +15,7 @@ This app has no affiliation with Steam and Valve.
 
 # Notice about future updates
 
-There won't be new feature added because I ran out of ideas. If you have any suggestion, feel free to submit a request on issues.
+There won't be new feature added without your ideas. (This means I have ran out of new ideas) If you have any suggestion, feel free to submit a request on issues.
 Keep in mind that I can't guarantee that your suggestions will be added 100%.
 
 # Features
