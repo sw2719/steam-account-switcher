@@ -746,9 +746,13 @@ class MainApp(tk.Tk):
 
             h = 109 * (12 // 3)
 
-            canvas.create_window((0, 0), height=h + 9, width=295, window=buttonframe, anchor="nw")
+            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
-            canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
+
+            def set_frame_width(event):
+                canvas_width = event.width
+                canvas_height = event.height
+                canvas.itemconfig(canvas_window, width=canvas_width, height=canvas_height)
 
             def _on_mousewheel(event):
                 """Scroll window on mousewheel input"""
@@ -759,6 +763,7 @@ class MainApp(tk.Tk):
 
             buttonframe.bind("<Configure>", lambda event,
                              canvas=canvas: onFrameConfigure(canvas))
+            canvas.bind("<Configure>", set_frame_width)
             self.bind("<MouseWheel>", _on_mousewheel)
 
         elif self.accounts:
@@ -847,16 +852,13 @@ class MainApp(tk.Tk):
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
 
-            accounts_count = len(self.accounts.list)
-
-            if accounts_count % 3 == 0:
-                h = 109 * (accounts_count // 3)
-            else:
-                h = 109 * (accounts_count // 3 + 1)
-
-            canvas.create_window((0, 0), height=h + 9, width=295, window=buttonframe, anchor="nw")
+            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
-            canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
+
+            def set_frame_width(event):
+                canvas_width = event.width
+                canvas_height = event.height
+                canvas.itemconfig(canvas_window, width=canvas_width, height=canvas_height)
 
             def _on_mousewheel(event):
                 """Scroll window on mousewheel input"""
@@ -867,6 +869,7 @@ class MainApp(tk.Tk):
 
             buttonframe.bind("<Configure>", lambda event,
                              canvas=canvas: onFrameConfigure(canvas))
+            canvas.bind("<Configure>", set_frame_width)
             self.bind("<MouseWheel>", _on_mousewheel)
         else:
             self.no_user_frame.pack(side='top', fill='both', expand=True)
@@ -904,9 +907,13 @@ class MainApp(tk.Tk):
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
             h = 49 * 8
-            canvas.create_window((0, 0), height=h, width=310, window=buttonframe, anchor="nw")
+            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
-            canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
+
+            def set_frame_width(event):
+                canvas_width = event.width
+                canvas_height = event.height
+                canvas.itemconfig(canvas_window, width=canvas_width, height=canvas_height)
 
             def _on_mousewheel(event):
                 """Scroll window on mousewheel input"""
@@ -917,6 +924,7 @@ class MainApp(tk.Tk):
 
             buttonframe.bind("<Configure>", lambda event,
                              canvas=canvas: onFrameConfigure(canvas))
+            canvas.bind("<Configure>", set_frame_width)
             self.bind("<MouseWheel>", _on_mousewheel)
         elif self.accounts:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
@@ -998,9 +1006,13 @@ class MainApp(tk.Tk):
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
             h = 47 * len(self.accounts.list)
-            canvas.create_window((0, 0), height=h, width=295, window=buttonframe, anchor="nw")
+            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw")
             canvas.configure(yscrollcommand=scroll_bar.set)
-            canvas.configure(width=self.button_frame.winfo_width(), height=self.button_frame.winfo_height())
+
+            def set_frame_width(event):
+                canvas_width = event.width
+                canvas_height = event.height
+                canvas.itemconfig(canvas_window, width=canvas_width, height=canvas_height)
 
             def _on_mousewheel(event):
                 """Scroll window on mousewheel input"""
@@ -1011,6 +1023,7 @@ class MainApp(tk.Tk):
 
             buttonframe.bind("<Configure>", lambda event,
                              canvas=canvas: onFrameConfigure(canvas))
+            canvas.bind("<Configure>", set_frame_width)
             self.bind("<MouseWheel>", _on_mousewheel)
         else:
             self.no_user_frame.pack(side='top', fill='both', expand=True)
