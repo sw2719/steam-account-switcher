@@ -1890,7 +1890,7 @@ class MainApp(tk.Tk):
         options_frame.rowconfigure(1, weight=1)
         options_frame.columnconfigure(0, weight=1)
 
-        options_label = tk.Label(options_frame, text=_('Steam launch options'))
+        options_label = tk.Label(options_frame, text=_('Steam launch parameters'))
         options_label.grid(row=0, column=0, padx=(0, 0), sticky='w')
         options_entry = ttk.Entry(options_frame)
         options_entry.insert(0, cm.get('steam_options'))

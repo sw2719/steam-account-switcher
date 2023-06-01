@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: steamswitcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-11 16:17+0900\n"
-"PO-Revision-Date: 2023-03-11 16:17+0900\n"
+"POT-Creation-Date: 2023-06-01 14:39+0900\n"
+"PO-Revision-Date: 2023-06-01 14:39+0900\n"
 "Last-Translator: sw2719\n"
 "Language-Team: Korean\n"
 "Language: ko_KR\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.3.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ../../..\n"
 "X-Poedit-SearchPath-0: steamswitcher.py\n"
@@ -23,40 +23,31 @@ msgstr ""
 "X-Poedit-SearchPath-6: modules/main.py\n"
 "X-Poedit-SearchPath-7: modules/util.py\n"
 
-#: modules/config.py:160 modules/update.py:127 modules/update.py:180
-#: modules/update.py:204
-msgid "Error"
-msgstr "오류"
-
-#: modules/config.py:160
-msgid "Could not load config file."
-msgstr "설정 파일을 불러올 수 없습니다."
-
-#: modules/main.py:79
+#: modules/main.py:82
 msgid "Alert"
 msgstr "경고"
 
-#: modules/main.py:80
+#: modules/main.py:83
 msgid "After soft shutdown attempt,"
 msgstr "Steam을 종료하려고 시도했으나,"
 
-#: modules/main.py:81
+#: modules/main.py:84
 msgid "Steam appears to be still running."
 msgstr "Steam이 아직 실행 중인 것 같습니다."
 
-#: modules/main.py:82
+#: modules/main.py:85
 msgid "Click yes to wait more for 10 seconds or no to force-exit Steam."
 msgstr "예를 눌러 10초를 더 기다리거나 아니오를 눌러 강제종료하세요."
 
-#: modules/main.py:122
+#: modules/main.py:121
 msgid "Account Switcher"
 msgstr "Steam 계정 전환기"
 
-#: modules/main.py:163 modules/main.py:182
+#: modules/main.py:160 modules/main.py:179
 msgid "Reset accounts data"
 msgstr "계정 데이터 초기화"
 
-#: modules/main.py:164
+#: modules/main.py:161
 msgid ""
 "This will reset all accounts data.\n"
 "This action cannot be undone."
@@ -64,20 +55,20 @@ msgstr ""
 "모든 계정 데이터를 초기화합니다.\n"
 "이 동작은 되돌릴 수 없습니다."
 
-#: modules/main.py:165
+#: modules/main.py:162
 msgid "Are you sure?"
 msgstr "정말로 초기화하시겠습니까?"
 
-#: modules/main.py:185 modules/main.py:212 modules/main.py:349
-#: modules/main.py:2199 modules/ui.py:617 modules/ui.py:859
+#: modules/main.py:182 modules/main.py:209 modules/main.py:344
+#: modules/main.py:2207 modules/ui.py:615 modules/ui.py:831
 msgid "Exit"
 msgstr "종료"
 
-#: modules/main.py:186 modules/main.py:302
+#: modules/main.py:183 modules/main.py:299
 msgid "Menu"
 msgstr "메뉴"
 
-#: modules/main.py:204
+#: modules/main.py:201
 msgid ""
 "Salt is missing.\n"
 "Restore it or reset accounts data."
@@ -85,126 +76,126 @@ msgstr ""
 "Salt 파일이 없습니다.\n"
 "파일을 복원하거나 계정 데이터를 초기화하세요."
 
-#: modules/main.py:207
+#: modules/main.py:204
 msgid "Incorrect password. Try again."
 msgstr "비밀번호가 틀렸습니다. 다시 시도하세요."
 
-#: modules/main.py:215
+#: modules/main.py:212
 msgid "Unlock (Enter)"
 msgstr "잠금 해제 (Enter)"
 
-#: modules/main.py:252
+#: modules/main.py:249
 msgid "Show password"
 msgstr "비밀번호 보이기"
 
-#: modules/main.py:265 modules/ui.py:853
+#: modules/main.py:262 modules/ui.py:829
 msgid "Welcome"
 msgstr "환영합니다"
 
-#: modules/main.py:266
+#: modules/main.py:263
 msgid "Enter master password to unlock."
 msgstr "마스터 비밀번호를 입력하세요."
 
-#: modules/main.py:284
+#: modules/main.py:281
 msgid "Import accounts from Steam"
 msgstr "Steam에서 계정 가져오기"
 
-#: modules/main.py:286
+#: modules/main.py:283
 msgid "Add accounts"
 msgstr "계정 추가"
 
-#: modules/main.py:288
+#: modules/main.py:285
 msgid "Edit account list"
 msgstr "계정 목록 편집"
 
-#: modules/main.py:290
+#: modules/main.py:287
 msgid "Refresh autologin"
 msgstr "자동로그인 새로고침"
 
-#: modules/main.py:292
+#: modules/main.py:289
 msgid "Update all avatars"
 msgstr "모든 프로필 사진 업데이트"
 
-#: modules/main.py:295 modules/main.py:1675
+#: modules/main.py:292 modules/main.py:1662
 msgid "Settings"
 msgstr "설정"
 
-#: modules/main.py:297
+#: modules/main.py:294
 msgid "Send feedback"
 msgstr "피드백 보내기"
 
-#: modules/main.py:299 modules/main.py:1115
+#: modules/main.py:296 modules/main.py:1103
 msgid "About"
 msgstr "정보"
 
-#: modules/main.py:335
+#: modules/main.py:330
 msgid "Debug"
 msgstr "디버그"
 
-#: modules/main.py:343 modules/main.py:1070
+#: modules/main.py:338 modules/main.py:1060
 msgid "Restart Steam & Exit"
 msgstr "스팀 재시작후 종료"
 
-#: modules/main.py:345 modules/main.py:1072
+#: modules/main.py:340 modules/main.py:1062
 msgid "Restart Steam"
 msgstr "스팀 재시작"
 
-#: modules/main.py:374
+#: modules/main.py:369
 msgid "Current Auto-login user:"
 msgstr "현재 자동로그인 계정:"
 
-#: modules/main.py:386 modules/main.py:683 modules/main.py:1056
-#: modules/main.py:1059
+#: modules/main.py:381 modules/main.py:674 modules/main.py:1046
+#: modules/main.py:1049
 msgid "Auto-login Available"
 msgstr "자동로그인 가능"
 
-#: modules/main.py:389 modules/main.py:686 modules/main.py:1062
+#: modules/main.py:384 modules/main.py:677 modules/main.py:1052
 msgid "Auto-login Unavailable"
 msgstr "자동로그인 불가능"
 
-#: modules/main.py:403
+#: modules/main.py:398
 msgid "Unhandled Exception"
 msgstr "처리되지 않은 예외"
 
-#: modules/main.py:404
+#: modules/main.py:399
 msgid "Please contact the developer if the issue persists."
 msgstr "문제가 지속될 경우 개발자에게 문의하세요."
 
-#: modules/main.py:485 modules/main.py:1634 modules/main.py:1975
+#: modules/main.py:476 modules/main.py:1621 modules/main.py:1980
 msgid "OK"
 msgstr "확인"
 
-#: modules/main.py:489 modules/main.py:1335 modules/main.py:1422
-#: modules/main.py:1534 modules/main.py:1636 modules/main.py:1981
-#: modules/main.py:2041 modules/ui.py:1474 modules/update.py:93
-#: modules/update.py:144
+#: modules/main.py:480 modules/main.py:1323 modules/main.py:1410
+#: modules/main.py:1522 modules/main.py:1623 modules/main.py:1986
+#: modules/main.py:2046 modules/ui.py:1443 modules/update.py:91
+#: modules/update.py:142
 msgid "Cancel"
 msgstr "취소"
 
-#: modules/main.py:493
+#: modules/main.py:484
 #, python-format
 msgid "Settings for %s"
 msgstr "%s 설정"
 
-#: modules/main.py:508
+#: modules/main.py:499
 msgid "Use profile name if available"
 msgstr "가능한 경우 프로필 이름 사용"
 
-#: modules/main.py:512
+#: modules/main.py:503
 msgid "Use custom name"
 msgstr "사용자 지정 이름 사용"
 
-#: modules/main.py:549
+#: modules/main.py:540
 msgid "Save password"
 msgstr "비밀번호 저장"
 
-#: modules/main.py:567 modules/main.py:617 modules/ui.py:1079
-#: modules/ui.py:1090 modules/ui.py:1157 modules/ui.py:1168 modules/ui.py:1528
-#: modules/ui.py:1539 modules/ui.py:1611 modules/ui.py:1622
+#: modules/main.py:558 modules/main.py:608 modules/ui.py:1051
+#: modules/ui.py:1062 modules/ui.py:1129 modules/ui.py:1140 modules/ui.py:1497
+#: modules/ui.py:1508 modules/ui.py:1580 modules/ui.py:1591
 msgid "Show"
 msgstr "보이기"
 
-#: modules/main.py:573
+#: modules/main.py:564
 msgid ""
 "Warning: Encryption is disabled.\n"
 "Password will be stored in plain text!"
@@ -212,90 +203,90 @@ msgstr ""
 "경고: 암호화가 꺼져있습니다.\n"
 "암호가 평문으로 저장됩니다!"
 
-#: modules/main.py:614 modules/ui.py:1087 modules/ui.py:1165 modules/ui.py:1536
-#: modules/ui.py:1619
+#: modules/main.py:605 modules/ui.py:1059 modules/ui.py:1137 modules/ui.py:1505
+#: modules/ui.py:1588
 msgid "Hide"
 msgstr "숨기기"
 
-#: modules/main.py:631 modules/main.py:634 modules/main.py:637
-#: modules/main.py:1437
+#: modules/main.py:622 modules/main.py:625 modules/main.py:628
+#: modules/main.py:1425
 msgid "Info"
 msgstr "정보"
 
-#: modules/main.py:631
+#: modules/main.py:622
 msgid "Enter a custom profile name and a account password."
 msgstr "사용할 이름과 계정 비밀번호를 입력해야 합니다."
 
-#: modules/main.py:634
+#: modules/main.py:625
 msgid "Enter a custom profile name."
 msgstr "사용할 이름을 입력해야 합니다."
 
-#: modules/main.py:637
+#: modules/main.py:628
 msgid "Enter a account password."
 msgstr "계정 비밀번호를 입력해야 합니다."
 
-#: modules/main.py:697
+#: modules/main.py:688
 msgid "Confirm"
 msgstr "확인"
 
-#: modules/main.py:697
+#: modules/main.py:688
 #, python-format
 msgid "Are you sure want to remove account %s?"
 msgstr "정말로 계정 %s을(를) 삭제하시겠습니까?"
 
-#: modules/main.py:713
+#: modules/main.py:703
 msgid "No screenshots directory"
 msgstr "스크린샷 폴더 없음"
 
-#: modules/main.py:713
+#: modules/main.py:703
 msgid "No screenshots directory was found for this account."
 msgstr "이 계정의 스크린샷 폴더를 찾을 수 없습니다."
 
-#: modules/main.py:798 modules/main.py:955
+#: modules/main.py:788 modules/main.py:945
 msgid "N/A"
 msgstr "사용 불가"
 
-#: modules/main.py:815 modules/main.py:972
+#: modules/main.py:805 modules/main.py:962
 msgid "Set as auto-login account"
 msgstr "자동로그인 계정으로 설정"
 
-#: modules/main.py:820 modules/main.py:977
+#: modules/main.py:810 modules/main.py:967
 msgid "Open profile in browser"
 msgstr "브라우저에서 프로필 열기"
 
-#: modules/main.py:822 modules/main.py:979
+#: modules/main.py:812 modules/main.py:969
 msgid "Open screenshots folder"
 msgstr "스크린샷 폴더 열기"
 
-#: modules/main.py:824
+#: modules/main.py:814
 msgid "Account info"
 msgstr "계정 정보"
 
-#: modules/main.py:826 modules/main.py:983
+#: modules/main.py:816 modules/main.py:973
 msgid "Update avatar"
 msgstr "프로필 사진 업데이트"
 
-#: modules/main.py:830 modules/main.py:987
+#: modules/main.py:820 modules/main.py:977
 msgid "Profile name/Password"
 msgstr "프로필 이름/비밀번호"
 
-#: modules/main.py:832 modules/main.py:989
+#: modules/main.py:822 modules/main.py:979
 msgid "Delete"
 msgstr "삭제"
 
-#: modules/main.py:883 modules/main.py:1027
+#: modules/main.py:873 modules/main.py:1017
 msgid "No accounts added"
 msgstr "추가된 계정 없음"
 
-#: modules/main.py:981
+#: modules/main.py:971
 msgid "View SteamID"
 msgstr "SteamID 보기"
 
-#: modules/main.py:1077 modules/main.py:1405 modules/main.py:1526
+#: modules/main.py:1065 modules/main.py:1393 modules/main.py:1514
 msgid "Please wait while downloading avatars..."
 msgstr "프로필 사진을 내려받는 동안 기다려주세요..."
 
-#: modules/main.py:1129
+#: modules/main.py:1117
 msgid ""
 "Warning: The developer of this application is not responsible for\n"
 "any incident or damage occurred by using this app."
@@ -303,185 +294,189 @@ msgstr ""
 "경고: 본 앱의 사용으로 인한 데이터 손실 및 기타 손해 등\n"
 "어떠한 사고나 문제에 대해서 제작자는 책임을 지지 않습니다."
 
-#: modules/main.py:1132
+#: modules/main.py:1120
 msgid "STEAM is a registered trademark of Valve Corporation."
 msgstr "STEAM은 Valve Corporation의 등록 상표입니다."
 
-#: modules/main.py:1146 modules/main.py:1179
+#: modules/main.py:1134 modules/main.py:1167
 msgid "Copyright notice"
 msgstr "저작권 표기"
 
-#: modules/main.py:1157 modules/main.py:1172 modules/ui.py:1340
-#: modules/ui.py:1381
+#: modules/main.py:1145 modules/main.py:1160 modules/ui.py:1309
+#: modules/ui.py:1350
 msgid "Close"
 msgstr "닫기"
 
-#: modules/main.py:1176
+#: modules/main.py:1164
 msgid "GitHub page"
 msgstr "GitHub 페이지"
 
-#: modules/main.py:1202 modules/main.py:1549
+#: modules/main.py:1190 modules/main.py:1537
 msgid "No Accounts"
 msgstr "계정 없음"
 
-#: modules/main.py:1203 modules/main.py:1550
+#: modules/main.py:1191 modules/main.py:1538
 msgid "There's no account added."
 msgstr "추가된 계정이 없습니다."
 
-#: modules/main.py:1206 modules/main.py:1339
+#: modules/main.py:1194 modules/main.py:1327
 msgid "Refresh"
 msgstr "새로고침"
 
-#: modules/main.py:1221
+#: modules/main.py:1209
 msgid "Select accounts to refresh."
 msgstr "새로고침할 계정을 선택하세요."
 
-#: modules/main.py:1275
+#: modules/main.py:1263
 msgid "Accounts with expired autologin token will show login prompt."
 msgstr "이미 만료된 자동로그인 계정인 경우 로그인 창이 표시됩니다."
 
-#: modules/main.py:1276
+#: modules/main.py:1264
 msgid "Close the prompt or login to continue the process."
 msgstr "그럴 경우 로그인 창을 닫거나 로그인하면 됩니다."
 
-#: modules/main.py:1284 modules/main.py:2056
+#: modules/main.py:1272 modules/main.py:2061
 msgid "Initializing..."
 msgstr "초기화 중..."
 
-#: modules/main.py:1300
+#: modules/main.py:1288
 msgid "Switching account..."
 msgstr "계정 변경 중..."
 
-#: modules/main.py:1312
+#: modules/main.py:1300
 msgid "Waiting for Steam..."
 msgstr "Steam을 기다리는 중..."
 
-#: modules/main.py:1325
+#: modules/main.py:1313
 msgid "Do you want to start Steam with previous autologin account?"
 msgstr "이전 자동로그인 계정으로 Steam을 실행하시겠습니까?"
 
-#: modules/main.py:1355 modules/main.py:1419
+#: modules/main.py:1343 modules/main.py:1407
 msgid "Add"
 msgstr "추가"
 
-#: modules/main.py:1371
+#: modules/main.py:1359
 msgid "Enter account(s) to add."
 msgstr "추가할 계정을 입력하세요."
 
-#: modules/main.py:1372
+#: modules/main.py:1360
 msgid "In case of adding multiple accounts,"
 msgstr "다수의 계정을 입력할 경우에는,"
 
-#: modules/main.py:1373
+#: modules/main.py:1361
 msgid "seperate each account with '/' (slash)."
 msgstr "'/'(슬래시)로 구분합니다."
 
-#: modules/main.py:1394
+#: modules/main.py:1382
 msgid "Duplicate Alert"
 msgstr "중복 경고"
 
-#: modules/main.py:1395
+#: modules/main.py:1383
 #, python-format
 msgid "Account %s already exists."
 msgstr "계정 %s은 이미 추가되어 있습니다."
 
-#: modules/main.py:1437
+#: modules/main.py:1425
 msgid "There's no account left to import."
 msgstr "가져올 계정이 없습니다."
 
-#: modules/main.py:1443 modules/main.py:1538
+#: modules/main.py:1431 modules/main.py:1526
 msgid "Import"
 msgstr "가져오기"
 
-#: modules/main.py:1458
+#: modules/main.py:1446
 msgid "Select accounts to import."
 msgstr "가져올 계정들을 선택하세요."
 
-#: modules/main.py:1459
+#: modules/main.py:1447
 msgid "Added accounts don't show up."
 msgstr "이미 추가된 계정은 나타나지 않습니다."
 
-#: modules/main.py:1699
+#: modules/main.py:1684
 msgid "Language"
 msgstr "언어"
 
-#: modules/main.py:1742 modules/ui.py:927
+#: modules/main.py:1727 modules/ui.py:899
 msgid "List Mode"
 msgstr "리스트 모드"
 
-#: modules/main.py:1746
+#: modules/main.py:1731
 msgid "Display accounts in vertical list."
 msgstr "계정을 세로 목록으로 표시합니다."
 
-#: modules/main.py:1758 modules/ui.py:946
+#: modules/main.py:1743 modules/ui.py:918
 msgid "Grid Mode"
 msgstr "그리드 모드"
 
-#: modules/main.py:1762
+#: modules/main.py:1747
 msgid "Display accounts in 3 x n grid."
 msgstr "계정을 3 x n 그리드로 표시합니다."
 
-#: modules/main.py:1770 modules/ui.py:1222
+#: modules/main.py:1755 modules/ui.py:1194
 msgid "Show avatar images"
 msgstr "프로필 사진 표시"
 
-#: modules/main.py:1809 modules/ui.py:883
+#: modules/main.py:1794 modules/ui.py:855
 msgid "Light Theme"
 msgstr "밝은 테마"
 
-#: modules/main.py:1825 modules/ui.py:899
+#: modules/main.py:1810 modules/ui.py:871
 msgid "Dark Theme"
 msgstr "어두운 테마"
 
-#: modules/main.py:1841
+#: modules/main.py:1826
 msgid "Normal Mode (Manually restart Steam)"
 msgstr "일반 모드 (수동 Steam 재시작)"
 
-#: modules/main.py:1846
+#: modules/main.py:1831
 msgid "Restart Steam by clicking on 'Restart Steam' button."
 msgstr "Steam 재시작 버튼을 클릭하여 Steam을 재시작합니다."
 
-#: modules/main.py:1849
+#: modules/main.py:1834
 msgid "Express Mode (Auto-restart Steam)"
 msgstr "익스프레스 모드 (자동 Steam 재시작)"
 
-#: modules/main.py:1854
+#: modules/main.py:1839
 msgid "Automatically restart Steam when autologin account is changed."
 msgstr "자동로그인 계정을 바꿀 때 자동으로 Steam을 재시작합니다."
 
-#: modules/main.py:1862 modules/ui.py:1190
+#: modules/main.py:1847 modules/ui.py:1162
 msgid "Try to soft shutdown Steam client"
 msgstr "스팀 클라이언트 안전 종료"
 
-#: modules/main.py:1877 modules/ui.py:1206
+#: modules/main.py:1862 modules/ui.py:1178
 msgid "Exit app after Steam is restarted"
 msgstr "스팀 재시작시 앱 종료"
 
-#: modules/main.py:1899
+#: modules/main.py:1880
+msgid "Steam launch parameters"
+msgstr "Steam 실행 매개변수"
+
+#: modules/main.py:1898
 msgid "Manage Encryption Settings"
 msgstr "암호화 설정"
 
-#: modules/main.py:1960
+#: modules/main.py:1965
 msgid "Do you want to download avatar images now?"
 msgstr "지금 프로필 사진을 다운로드하시겠습니까?"
 
-#: modules/main.py:1964
+#: modules/main.py:1969
 msgid "Language has been changed"
 msgstr "언어가 변경됨"
 
-#: modules/main.py:1965
+#: modules/main.py:1970
 msgid "Restart app to apply new language settings."
 msgstr "새 언어 설정을 적용하려면 앱을 재시작하세요."
 
-#: modules/main.py:1986
+#: modules/main.py:1991
 msgid "Apply"
 msgstr "적용"
 
-#: modules/main.py:2003
+#: modules/main.py:2008
 msgid "Remember Password Disabled"
 msgstr "비밀번호 기억 꺼짐"
 
-#: modules/main.py:2004
+#: modules/main.py:2009
 msgid ""
 "Remember Password is disabled for this account.\n"
 "Do you want to enable it now?"
@@ -489,19 +484,19 @@ msgstr ""
 "이 계정은 비밀번호 기억이 꺼져있습니다.\n"
 "지금 켜시겠습니까?"
 
-#: modules/main.py:2043
+#: modules/main.py:2048
 msgid "Force quit Steam"
 msgstr "Steam 강제종료"
 
-#: modules/main.py:2073
+#: modules/main.py:2078
 msgid "Waiting for Steam to exit..."
 msgstr "Steam이 종료되기를 기다리는 중..."
 
-#: modules/main.py:2125
+#: modules/main.py:2130
 msgid "Launching Steam..."
 msgstr "Steam을 시작하는 중..."
 
-#: modules/main.py:2190
+#: modules/main.py:2198
 msgid ""
 "Waiting for log in...\n"
 "\n"
@@ -511,19 +506,19 @@ msgstr ""
 "\n"
 "Ctrl + V로 비밀번호를 붙여넣을 수 있습니다."
 
-#: modules/reg.py:32 modules/reg.py:52
+#: modules/reg.py:34 modules/reg.py:54
 msgid "Registry Error"
 msgstr "레지스트리 오류"
 
-#: modules/reg.py:33
+#: modules/reg.py:35
 msgid "Failed to read registry value: "
 msgstr "레지스트리 값을 읽을 수 없습니다: "
 
-#: modules/reg.py:34
+#: modules/reg.py:36
 msgid "Make sure that Steam is installed."
 msgstr "Steam이 설치되어 있는지 확인하세요."
 
-#: modules/reg.py:52
+#: modules/reg.py:54
 msgid "Failed to change registry value."
 msgstr "레지스트리 값을 바꿀 수 없습니다."
 
@@ -531,44 +526,40 @@ msgstr "레지스트리 값을 바꿀 수 없습니다."
 msgid "Initial Setup"
 msgstr "초기 설정"
 
-#: modules/ui.py:626 modules/ui.py:683 modules/ui.py:703 modules/ui.py:708
-#: modules/ui.py:772 modules/ui.py:783 modules/ui.py:802
+#: modules/ui.py:621 modules/ui.py:678 modules/ui.py:698 modules/ui.py:703
+#: modules/ui.py:764 modules/ui.py:771 modules/ui.py:786
 msgid "Next"
 msgstr "다음"
 
-#: modules/ui.py:689 modules/ui.py:775
+#: modules/ui.py:684 modules/ui.py:767
 msgid "Next (Enter)"
 msgstr "다음 (Enter)"
 
-#: modules/ui.py:723 modules/ui.py:1564
+#: modules/ui.py:715 modules/ui.py:1533
 msgid "Back"
 msgstr "뒤로"
 
-#: modules/ui.py:781 modules/ui.py:800 modules/ui.py:830
-msgid "Finish"
-msgstr "완료"
-
-#: modules/ui.py:790 modules/ui.py:1108 modules/ui.py:1562
+#: modules/ui.py:778 modules/ui.py:1080 modules/ui.py:1531
 msgid "Confirm (Enter)"
 msgstr "확인 (Enter)"
 
-#: modules/ui.py:838
+#: modules/ui.py:809
+msgid "Finish"
+msgstr "완료"
+
+#: modules/ui.py:817
 msgid "Please wait..."
 msgstr "잠시 기다려 주세요..."
 
-#: modules/ui.py:856
-msgid "Update complete"
-msgstr "업데이트 완료"
-
-#: modules/ui.py:858
+#: modules/ui.py:830
 msgid "Click 'Next' to continue."
 msgstr "계속하려면 '다음'을 누르세요."
 
-#: modules/ui.py:865 modules/ui.py:910
+#: modules/ui.py:837 modules/ui.py:882
 msgid "UI Appearance"
 msgstr "UI 모양"
 
-#: modules/ui.py:934
+#: modules/ui.py:906
 msgid ""
 "Display accounts\n"
 "in vertical list"
@@ -576,7 +567,7 @@ msgstr ""
 "계정을 세로\n"
 "목록으로 표시"
 
-#: modules/ui.py:953
+#: modules/ui.py:925
 msgid ""
 "Display accounts\n"
 "in 3 x n grid"
@@ -584,15 +575,15 @@ msgstr ""
 "계정을 3 x n\n"
 "그리드로 표시"
 
-#: modules/ui.py:960
+#: modules/ui.py:932
 msgid "Steam restart mode"
 msgstr "Steam 재시작 모드"
 
-#: modules/ui.py:969
+#: modules/ui.py:941
 msgid "Normal Mode"
 msgstr "일반 모드"
 
-#: modules/ui.py:976
+#: modules/ui.py:948
 msgid ""
 "In normal mode, you restart Steam\n"
 "by clicking 'Restart Steam' button."
@@ -600,11 +591,11 @@ msgstr ""
 "일반 모드에서는, 재시작 버튼을 클릭하여\n"
 "Steam을 재시작합니다."
 
-#: modules/ui.py:982
+#: modules/ui.py:954
 msgid "Express Mode"
 msgstr "익스프레스 모드"
 
-#: modules/ui.py:989
+#: modules/ui.py:961
 msgid ""
 "In express mode, Steam will be automatically\n"
 "restarted when you change account."
@@ -612,27 +603,27 @@ msgstr ""
 "익스프레스 모드에서는, 계정을 변경할 시\n"
 "Steam이 자동으로 재시작됩니다."
 
-#: modules/ui.py:993 modules/ui.py:1354 modules/ui.py:1372
+#: modules/ui.py:965 modules/ui.py:1323 modules/ui.py:1341
 msgid "Encryption Settings"
 msgstr "암호화 설정"
 
-#: modules/ui.py:1001
+#: modules/ui.py:973
 msgid "Encrypt accounts data"
 msgstr "계정 데이터 암호화"
 
-#: modules/ui.py:1005 modules/ui.py:1420
+#: modules/ui.py:977 modules/ui.py:1389
 msgid "Enable to encrypt accounts data with a password."
 msgstr "활성화하여 계정 데이터를 암호화하세요."
 
-#: modules/ui.py:1006
+#: modules/ui.py:978
 msgid "STRONGLY recommended when using Password Saving."
 msgstr "비밀번호 저장을 사용할 경우 강력히 권장합니다."
 
-#: modules/ui.py:1007 modules/ui.py:1422
+#: modules/ui.py:979 modules/ui.py:1391
 msgid "Uses AES-128-CBC-HMAC-SHA256."
 msgstr "AES-128-CBC-HMAC-SHA256을 사용합니다."
 
-#: modules/ui.py:1014
+#: modules/ui.py:986
 msgid ""
 "Encryption is already enabled.\n"
 "Click 'Next' to continue."
@@ -640,75 +631,75 @@ msgstr ""
 "암호화가 이미 설정되었습니다.\n"
 "계속하려면 '다음'을 누르세요."
 
-#: modules/ui.py:1021 modules/ui.py:1465
+#: modules/ui.py:993 modules/ui.py:1434
 msgid "Set Password"
 msgstr "비밀번호 설정"
 
-#: modules/ui.py:1051 modules/ui.py:1502
+#: modules/ui.py:1023 modules/ui.py:1471
 msgid "Enter a password to use for encryption."
 msgstr "암호화에 사용할 비밀번호를 입력하세요."
 
-#: modules/ui.py:1052 modules/ui.py:1503
+#: modules/ui.py:1024 modules/ui.py:1472
 msgid "You will have to enter it every time you open the app."
 msgstr "앱을 열 때마다 입력해야 합니다."
 
-#: modules/ui.py:1053 modules/ui.py:1504
+#: modules/ui.py:1025 modules/ui.py:1473
 msgid "The more complex it is, the better."
 msgstr "암호는 복잡할수록 좋습니다."
 
-#: modules/ui.py:1057 modules/ui.py:1508
+#: modules/ui.py:1029 modules/ui.py:1477
 msgid "Keep in mind that if you forget it,"
 msgstr "만약 비밀번호를 잊어버리면,"
 
-#: modules/ui.py:1058 modules/ui.py:1509
+#: modules/ui.py:1030 modules/ui.py:1478
 msgid "you will have to reset the accounts data!"
 msgstr "계정 정보를 초기화해야합니다!"
 
-#: modules/ui.py:1094 modules/ui.py:1543
+#: modules/ui.py:1066 modules/ui.py:1512
 msgid "At least 4 characters"
 msgstr "최소 4자 이상"
 
-#: modules/ui.py:1105 modules/ui.py:1554
+#: modules/ui.py:1077 modules/ui.py:1523
 msgid "Confirm Password"
 msgstr "비밀번호 확인"
 
-#: modules/ui.py:1128 modules/ui.py:1584
+#: modules/ui.py:1100 modules/ui.py:1553
 msgid "Passwords match!"
 msgstr "비밀번호가 일치합니다!"
 
-#: modules/ui.py:1132 modules/ui.py:1172 modules/ui.py:1588 modules/ui.py:1626
+#: modules/ui.py:1104 modules/ui.py:1144 modules/ui.py:1557 modules/ui.py:1595
 msgid "Passwords do not match"
 msgstr "비밀번호가 일치하지 않습니다"
 
-#: modules/ui.py:1136 modules/ui.py:1592
+#: modules/ui.py:1108 modules/ui.py:1561
 msgid "Enter the same password once again to confirm."
 msgstr "확인을 위해 같은 비밀번호를 한 번 더 입력하세요."
 
-#: modules/ui.py:1184
+#: modules/ui.py:1156
 msgid "Other settings"
 msgstr "기타 설정"
 
-#: modules/ui.py:1200
+#: modules/ui.py:1172
 msgid "Shutdown Steam instead of killing Steam process"
 msgstr "Steam 프로세스를 끝내는 대신 안전 종료"
 
-#: modules/ui.py:1216
+#: modules/ui.py:1188
 msgid "Exit app automatically after restarting Steam"
 msgstr "Steam 재시작후 자동으로 앱 종료"
 
-#: modules/ui.py:1234
+#: modules/ui.py:1206
 msgid "Show avatars in account list"
 msgstr "계정 목록에서 프로필 사진 표시"
 
-#: modules/ui.py:1238
+#: modules/ui.py:1210
 msgid "Good to go!"
 msgstr "완료되었습니다!"
 
-#: modules/ui.py:1244
+#: modules/ui.py:1216
 msgid "Create a desktop shortcut"
 msgstr "바탕화면 바로가기 만들기"
 
-#: modules/ui.py:1253
+#: modules/ui.py:1225
 msgid ""
 "Add or import accounts via Menu.\n"
 "Right click on accounts to see more options.\n"
@@ -732,67 +723,67 @@ msgstr ""
 "\n"
 "메뉴 > 정보로 GitHub 저장소를 열 수 있습니다."
 
-#: modules/ui.py:1311
+#: modules/ui.py:1280
 msgid "Steam directory invalid"
 msgstr "스팀 경로 오류"
 
-#: modules/ui.py:1311
+#: modules/ui.py:1280
 msgid "Could not locate Steam directory."
 msgstr "Steam 디렉토리를 찾을 수 없습니다."
 
-#: modules/ui.py:1312
+#: modules/ui.py:1281
 msgid "Please select Steam directory manually."
 msgstr "수동으로 스팀 경로를 선택하세요."
 
-#: modules/ui.py:1321
+#: modules/ui.py:1290
 msgid "Warning"
 msgstr "경고"
 
-#: modules/ui.py:1322
+#: modules/ui.py:1291
 msgid "Steam directory is invalid."
 msgstr "스팀 경로가 올바르지 않습니다."
 
-#: modules/ui.py:1323
+#: modules/ui.py:1292
 msgid "Try again."
 msgstr "다시 시도하세요."
 
-#: modules/ui.py:1343
+#: modules/ui.py:1312
 msgid "Username"
 msgstr "계정이름"
 
-#: modules/ui.py:1344
+#: modules/ui.py:1313
 msgid "Friend code"
 msgstr "친구 코드"
 
-#: modules/ui.py:1394
+#: modules/ui.py:1363
 msgid "Change Password"
 msgstr "비밀번호 변경"
 
-#: modules/ui.py:1397
+#: modules/ui.py:1366
 msgid "Encryption is enabled"
 msgstr "암호화가 켜짐"
 
-#: modules/ui.py:1398 modules/ui.py:1435 modules/ui.py:1438
+#: modules/ui.py:1367 modules/ui.py:1404 modules/ui.py:1407
 msgid "Disable Encryption"
 msgstr "암호화 끄기"
 
-#: modules/ui.py:1409
+#: modules/ui.py:1378
 msgid "Your accounts data is encrypted."
 msgstr "게정 데이터가 암호화되었습니다."
 
-#: modules/ui.py:1414
+#: modules/ui.py:1383
 msgid "Encryption is disabled"
 msgstr "암호화가 꺼짐"
 
-#: modules/ui.py:1415
+#: modules/ui.py:1384
 msgid "Enable Encryption"
 msgstr "암호화 켜기"
 
-#: modules/ui.py:1421
+#: modules/ui.py:1390
 msgid "STRONGLY recommended when using Password saving."
 msgstr "비밀번호 저장을 사용할 경우 강력히 권장합니다."
 
-#: modules/ui.py:1435
+#: modules/ui.py:1404
 msgid ""
 "Are you sure you want to disable encryption?\n"
 "Your saved passwords will be stored in plain text!"
@@ -800,28 +791,32 @@ msgstr ""
 "정말로 암호화를 끄시겠습니까?\n"
 "저장된 비밀번호가 평문으로 저장됩니다!"
 
-#: modules/ui.py:1438
+#: modules/ui.py:1407
 msgid "Are you sure you want to disable encryption?"
 msgstr "정말로 암호화를 끄시겠습니까?"
 
-#: modules/ui.py:1473
+#: modules/ui.py:1442
 msgid "OK (Enter)"
 msgstr "계속 (Enter)"
 
-#: modules/update.py:80
+#: modules/update.py:78
 msgid "Update"
 msgstr "업데이트"
 
-#: modules/update.py:95
+#: modules/update.py:93
 msgid "Update now"
 msgstr "지금 업데이트"
 
-#: modules/update.py:103
+#: modules/update.py:101
 #, python-format
 msgid "New version %s is available."
 msgstr "버전 %s을(를) 다운로드 할 수 있습니다."
 
-#: modules/update.py:128
+#: modules/update.py:125 modules/update.py:178 modules/update.py:202
+msgid "Error"
+msgstr "오류"
+
+#: modules/update.py:126
 msgid ""
 "Couldn't delete existing update file.\n"
 "Please delete it manually and try again."
@@ -829,19 +824,19 @@ msgstr ""
 "이미 존재하는 업데이트 파일을 삭제할 수 없습니다.\n"
 "직접 삭제 후 다시 시도해주세요."
 
-#: modules/update.py:144
+#: modules/update.py:142
 msgid "Are you sure to cancel?"
 msgstr "정말로 취소하시겠습니까?"
 
-#: modules/update.py:181
+#: modules/update.py:179
 msgid "Error occured while downloading update."
 msgstr "업데이트를 다운로드하는 도중 오류가 발생했습니다."
 
-#: modules/update.py:204
+#: modules/update.py:202
 msgid "Couldn't perform automatic update."
 msgstr "자동 업데이트를 수행할 수 없습니다."
 
-#: modules/update.py:205
+#: modules/update.py:203
 msgid "Update manually by extracting update.zip file."
 msgstr "수동으로 진행하려면 update.zip 파일을 직접 압축해제하세요."
 
@@ -861,6 +856,12 @@ msgstr "업데이트 확인 실패. 여기를 클릭하여 재시도하세요."
 #: modules/update.py:400
 msgid "Too many requests. Try again later."
 msgstr "너무 많은 요청. 나중에 다시 시도하세요."
+
+#~ msgid "Could not load config file."
+#~ msgstr "설정 파일을 불러올 수 없습니다."
+
+#~ msgid "Update complete"
+#~ msgstr "업데이트 완료"
 
 #~ msgid "Account settings"
 #~ msgstr "계정 설정"
