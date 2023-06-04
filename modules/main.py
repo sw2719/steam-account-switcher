@@ -1012,7 +1012,7 @@ class MainApp(tk.Tk):
 
             if self.accounts.count >= 7:
                 h -= 1
-    
+
             canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw", height=h)
             canvas.configure(yscrollcommand=scroll_bar.set)
 
