@@ -181,6 +181,10 @@ class AccountManager:
     def dict(self):
         return self.acc_dict
 
+    @property
+    def count(self):
+        return len(self.acc_dict)
+
     def __bool__(self):
         return bool(self.acc_dict)
 
