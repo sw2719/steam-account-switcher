@@ -18,6 +18,8 @@ args = parser.parse_args()
 
 if args.logfile:
     logger.addHandler(logging.FileHandler('log.txt', 'w', 'utf-8'))
+else:
+    logger.addHandler(logging.StreamHandler())
 
 logger.setLevel(args.log_level)
 logger.info(f'Launch arguments: {" ".join(sys.argv)}')
