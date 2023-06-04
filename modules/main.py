@@ -1665,11 +1665,11 @@ class MainApp(tk.Tk):
         if LOCALE == 'fr_FR':
             width = 340
             ui_padx = 70
-            theme_padx = 50
-        else:
-            width = 280
-            ui_padx = 35
             theme_padx = 40
+        else:
+            width = 300
+            ui_padx = 35
+            theme_padx = 30
 
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
@@ -1895,7 +1895,7 @@ class MainApp(tk.Tk):
         options_entry = ttk.Entry(options_frame)
         options_entry.insert(0, cm.get('steam_options'))
 
-        options_entry.grid(row=1, column=0, pady=(5, 0), sticky='ew')
+        options_entry.grid(row=1, column=0, pady=(3, 0), sticky='ew')
 
         def open_manage_encryption_window():
             enc_window = ManageEncryptionWindow(self.popup_geometry(320, 300, multiplier=2), self.accounts)
