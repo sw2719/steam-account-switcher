@@ -92,7 +92,8 @@ class AccountButton:
         self.update_color(init=True)
 
         self.master = master
-        self.frame = tk.Frame(master, borderwidth=3)
+        self.frame = tk.Frame(master, borderwidth=3, height=48)
+        self.frame.pack_propagate(False)
         self.command = command
         self.frame.config(background=self.normal, cursor='hand2')
 
@@ -259,7 +260,7 @@ class AccountButtonGrid:
         self.frame = tk.Frame(master, borderwidth=3, width=84, height=100)
         self.command = command
         self.frame.config(background=self.normal, cursor='hand2')
-        self.frame.pack_propagate(0)
+        self.frame.pack_propagate(False)
 
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release(event))
@@ -1322,6 +1323,7 @@ class ManageEncryptionWindow(tk.Toplevel):
         self.geometry(geometry)
         self.title(_('Encryption Settings'))
         self.resizable(False, False)
+        self.iconbitmap('asset/icon.ico')
         self.active_page = None
         self.upper_frame = tk.Frame(self)
         self.upper_frame.pack(side='top', fill='x')

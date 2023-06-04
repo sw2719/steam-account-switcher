@@ -121,7 +121,7 @@ class MainApp(tk.Tk):
         self.title(_("Account Switcher"))
 
         self.window_width = 310
-        self.window_height = 465
+        self.window_height = 460
 
         center_x, center_y = get_center_pos(self, self.window_width, self.window_height)
 
@@ -309,8 +309,6 @@ class MainApp(tk.Tk):
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, '1.0', True)))
             debug_menu.add_command(label='Check for updates (Raise error)',
                                    command=lambda: self.after(10, lambda: start_checkupdate(self, self.version, True, exception=True)))
-            debug_menu.add_command(label="Download avatar images",
-                                   command=download_avatar)
             debug_menu.add_command(label="Open initial setup",
                                    command=lambda: self.open_welcomewindow(debug=True))
             debug_menu.add_command(label="Toggle demo mode",
@@ -744,15 +742,14 @@ class MainApp(tk.Tk):
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
 
-            h = 109 * (12 // 3)
+            h = 109 * (12 // 3) + 9
 
-            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw")
+            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw", height=h)
             canvas.configure(yscrollcommand=scroll_bar.set)
 
             def set_frame_width(event):
                 canvas_width = event.width
-                canvas_height = event.height
-                canvas.itemconfig(canvas_window, width=canvas_width, height=canvas_height)
+                canvas.itemconfig(canvas_window, width=canvas_width)
 
             def _on_mousewheel(event):
                 """Scroll window on mousewheel input"""
@@ -766,7 +763,7 @@ class MainApp(tk.Tk):
             canvas.bind("<Configure>", set_frame_width)
             self.bind("<MouseWheel>", _on_mousewheel)
 
-        elif self.accounts:
+        elif self.accounts.list:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
             canvas.config(bg=self['bg'])
             buttonframe = tk.Frame(canvas, bg=self['bg'])
@@ -828,7 +825,7 @@ class MainApp(tk.Tk):
                                                 command=lambda name=username: self.remove_user(name))
 
                 def popup(username, event):
-                    menu_dict[username].tk_popup(event.x_root + 86, event.y_root + 13, 0)
+                    menu_dict[username].tk_popup(event.x_root, event.y_root, 0)
 
                 self.button_dict[username] = AccountButtonGrid(buttonframe,
                                                                username=username,
@@ -852,13 +849,19 @@ class MainApp(tk.Tk):
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
 
-            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw")
+            accounts_count = self.accounts.count
+
+            if accounts_count % 3 == 0:
+                h = 109 * (accounts_count // 3) + 9
+            else:
+                h = 109 * (accounts_count // 3 + 1) + 9
+
+            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw", height=h)
             canvas.configure(yscrollcommand=scroll_bar.set)
 
             def set_frame_width(event):
                 canvas_width = event.width
-                canvas_height = event.height
-                canvas.itemconfig(canvas_window, width=canvas_width, height=canvas_height)
+                canvas.itemconfig(canvas_window, width=canvas_width)
 
             def _on_mousewheel(event):
                 """Scroll window on mousewheel input"""
@@ -906,14 +909,13 @@ class MainApp(tk.Tk):
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
-            h = 49 * 8
-            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw")
+            h = (49 * 8) - 1
+            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw", height=h)
             canvas.configure(yscrollcommand=scroll_bar.set)
 
             def set_frame_width(event):
                 canvas_width = event.width
-                canvas_height = event.height
-                canvas.itemconfig(canvas_window, width=canvas_width, height=canvas_height)
+                canvas.itemconfig(canvas_window, width=canvas_width)
 
             def _on_mousewheel(event):
                 """Scroll window on mousewheel input"""
@@ -926,7 +928,7 @@ class MainApp(tk.Tk):
                              canvas=canvas: onFrameConfigure(canvas))
             canvas.bind("<Configure>", set_frame_width)
             self.bind("<MouseWheel>", _on_mousewheel)
-        elif self.accounts:
+        elif self.accounts.list:
             canvas = tk.Canvas(self.button_frame, borderwidth=0, highlightthickness=0)
             canvas.config(bg=self['bg'])
             buttonframe = tk.Frame(canvas)
@@ -1005,14 +1007,13 @@ class MainApp(tk.Tk):
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
-            h = 47 * len(self.accounts.list)
-            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw")
+            h = 49 * len(self.accounts.list) - 1
+            canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw", height=h)
             canvas.configure(yscrollcommand=scroll_bar.set)
 
             def set_frame_width(event):
                 canvas_width = event.width
-                canvas_height = event.height
-                canvas.itemconfig(canvas_window, width=canvas_width, height=canvas_height)
+                canvas.itemconfig(canvas_window, width=canvas_width)
 
             def _on_mousewheel(event):
                 """Scroll window on mousewheel input"""
@@ -1694,7 +1695,7 @@ class MainApp(tk.Tk):
         localeframe.columnconfigure(0, weight=0)
         localeframe.columnconfigure(1, weight=0)
 
-        locale_label = tk.Label(localeframe, text=_('Language'))
+        locale_label = ttk.Label(localeframe, text=_('Language'))
         locale_label.grid(row=0, column=0, padx=(0, 8))
         locale_cb = ttk.Combobox(localeframe,
                                  state="readonly",
@@ -1890,12 +1891,12 @@ class MainApp(tk.Tk):
         options_frame.rowconfigure(1, weight=1)
         options_frame.columnconfigure(0, weight=1)
 
-        options_label = tk.Label(options_frame, text=_('Steam launch parameters'))
+        options_label = ttk.Label(options_frame, text=_('Steam launch parameters'))
         options_label.grid(row=0, column=0, padx=(0, 0), sticky='w')
         options_entry = ttk.Entry(options_frame)
         options_entry.insert(0, cm.get('steam_options'))
 
-        options_entry.grid(row=1, column=0, pady=(3, 0), sticky='ew')
+        options_entry.grid(row=1, column=0, pady=(5, 0), sticky='ew')
 
         def open_manage_encryption_window():
             enc_window = ManageEncryptionWindow(self.popup_geometry(320, 300, multiplier=2), self.accounts)
