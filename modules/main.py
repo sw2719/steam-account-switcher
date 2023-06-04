@@ -1007,7 +1007,12 @@ class MainApp(tk.Tk):
 
             scroll_bar.pack(side="right", fill="y")
             canvas.pack(side="left", fill='both', expand=True)
-            h = 49 * len(self.accounts.list) - 1
+
+            h = 49 * len(self.accounts.list)
+
+            if self.accounts.count >= 7:
+                h -= 1
+    
             canvas_window = canvas.create_window((0, 0), window=buttonframe, anchor="nw", height=h)
             canvas.configure(yscrollcommand=scroll_bar.set)
 
