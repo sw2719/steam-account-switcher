@@ -11,15 +11,20 @@ logger = logging.getLogger()
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-debug', action='store_true', help='Run in debug mode')
-parser.add_argument('-logfile', action='store_true', help='Log to file')
+parser.add_argument('--logfile', action='store_true', help='Log to file')
 parser.add_argument('-l', '--log-level', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help='Set log level')
 
 args = parser.parse_args()
 
+log_format = logging.Formatter("{name} - [{levelname}] - {message}", style="{")
+
 if args.logfile:
-    logger.addHandler(logging.FileHandler('log.txt', 'w', 'utf-8'))
+    handler = logging.FileHandler('log.txt', 'w', 'utf-8')
 else:
-    logger.addHandler(logging.StreamHandler())
+    handler = logging.StreamHandler()
+
+handler.setFormatter(log_format)
+logger.addHandler(handler)
 
 logger.setLevel(args.log_level)
 logger.info(f'Launch arguments: {" ".join(sys.argv)}')
