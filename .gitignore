@@ -144,3 +144,9 @@ setup_c.py
 .idea/
 manifest.xml
 salt
+steamswitcher.build/
+steamswitcher.dist/
+updater/
+updater.build/
+updater.onefile-build/
+updater.dist/
