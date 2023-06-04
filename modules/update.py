@@ -254,8 +254,6 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
                 latest_zip = latest['assets'][0]['browser_download_url']
                 latest_changelog = latest['body'].replace('\r', '').split('# ')
 
-                print(latest_changelog)
-
                 # ['', en, ko]
                 if cm.get('locale') == 'ko_KR':
                     latest_changelog = latest_changelog[2].replace('변경사항\n', '')
@@ -278,13 +276,15 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
         except (req.RequestException, req.ConnectionError,
                 req.Timeout, req.ConnectTimeout):
             update = 'error'
-            sv_version_str = '0'
-            changelog = None
+            latest_version = '0'
+            latest_changelog = None
+            latest_zip = None
 
         except RatelimitedException:
             update = 'ratelimited'
-            sv_version_str = '0'
-            changelog = None
+            latest_version = '0'
+            latest_changelog = None
+            latest_zip = None
 
         queue.put((update, latest_version, latest_changelog, latest_zip))
 
