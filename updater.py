@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 
 
 def exc_hook(type, value, traceback, oldhook=sys.excepthook):
@@ -135,6 +136,8 @@ while True:
 f.close()
 
 if not force:
-    os.execv('Steam Account Switcher.exe', sys.argv)
+    subprocess.Popen('Steam Account Switcher.exe', cwd=os.getcwd())
 else:
     input('Forced update complete. Press Enter to exit...')
+
+sys.exit(0)
