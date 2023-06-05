@@ -1671,11 +1671,9 @@ class MainApp(tk.Tk):
         if LOCALE == 'fr_FR':
             width = 340
             ui_padx = 70
-            theme_padx = 40
         else:
-            width = 300
+            width = 280
             ui_padx = 35
-            theme_padx = 30
 
         settingswindow = tk.Toplevel(self)
         settingswindow.title(_("Settings"))
@@ -1796,11 +1794,11 @@ class MainApp(tk.Tk):
         radio_grid['command'] = on_grid_check
 
         theme_frame = tk.Frame(settingswindow)
-        theme_frame.pack(side='top', pady=(5, 5), fill='x')
+        theme_frame.pack(side='top', pady=(5, 5))
         theme_radio_var = tk.IntVar()
 
         light_radio_frame = tk.Frame(theme_frame)
-        light_radio_frame.pack(side='left', padx=(theme_padx, 0))
+        light_radio_frame.grid(row=0, column=0, padx=(0, 8))
 
         light_canvas = tk.Canvas(light_radio_frame, width=40, height=64, bd=0, highlightthickness=0)
         light_img = Image.open("asset/light.png").resize((40, 64))
@@ -1816,7 +1814,7 @@ class MainApp(tk.Tk):
         radio_light.pack(side='top', pady=2)
 
         dark_radio_frame = tk.Frame(theme_frame)
-        dark_radio_frame.pack(side='right', padx=(0, theme_padx))
+        dark_radio_frame.grid(row=0, column=1, padx=(8, 0))
 
         dark_canvas = tk.Canvas(dark_radio_frame, width=40, height=64, bd=0, highlightthickness=0)
         dark_img = Image.open("asset/dark.png").resize((40, 64))
@@ -1904,7 +1902,7 @@ class MainApp(tk.Tk):
         options_entry.grid(row=1, column=0, pady=(5, 0), sticky='ew')
 
         def open_manage_encryption_window():
-            enc_window = ManageEncryptionWindow(self.popup_geometry(320, 300, multiplier=2), self.accounts)
+            enc_window = ManageEncryptionWindow(self.popup_geometry(340, 300, multiplier=2), self.accounts)
 
             def event_function(event):
                 if str(event.widget) == '.!manageencryptionwindow':
