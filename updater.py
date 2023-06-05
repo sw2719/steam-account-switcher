@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 
 
 def exc_hook(type, value, traceback, oldhook=sys.excepthook):
@@ -13,10 +14,8 @@ import zipfile as zf
 import locale
 import shutil
 
-locale_buf = locale.getdefaultlocale()
-LOCALE = locale_buf[0]
-DIRS_TO_DELETE = ('.vs', 'tcl', 'tk', 'asset', 'lib', 'locale')
-FILES_TO_DELETE = ('libcrypto-1_1.dll', 'libssl-1_1.dll', 'tcl86t.dll', 'tk86t.dll', 'python37.dll', 'python38.dll', 'theme.json')
+LOCALE = locale.getdefaultlocale()[0]
+FILES_TO_PRESERVE = ('config.yml', 'config.json', 'accounts.yml', 'accounts.json', 'salt')
 
 
 def pprint(content):
@@ -29,9 +28,9 @@ def clear():
 
 pprint(f'Launch arguments: {" ".join(sys.argv)}')
 
-if '--force-update' in sys.argv and not getattr(sys, 'frozen', False):
+if '--force-update' in sys.argv:
     force = True
-elif not getattr(sys, 'frozen', False):
+elif "__compiled__" not in globals():
     print()
     pprint("Running on Python interpreter not supported")
     print()
@@ -96,18 +95,20 @@ else:
     pprint('Installing update...')
 
 for name in os.listdir(os.getcwd()):
-    if name in DIRS_TO_DELETE:
-        try:
-            shutil.rmtree(name)
-            pprint('Deleted a directory: ' + name)
-        except OSError:
-            pass
-    elif name in FILES_TO_DELETE:
-        try:
-            os.remove(name)
-            pprint('Deleted a file: ' + name)
-        except OSError:
-            pass
+    if os.path.isdir(os.path.join(os.getcwd(), name)):
+        if name != 'avatar':
+            try:
+                shutil.rmtree(name)
+                pprint('Deleted a directory: ' + name)
+            except OSError:
+                pass
+    elif os.path.isfile(os.path.join(os.getcwd(), name)):
+        if name not in FILES_TO_PRESERVE:
+            try:
+                os.remove(name)
+                pprint('Deleted a file: ' + name)
+            except OSError:
+                pass
 
 while True:
     try:
@@ -135,6 +136,8 @@ while True:
 f.close()
 
 if not force:
-    os.execv('Steam Account Switcher.exe', sys.argv)
+    subprocess.Popen('Steam Account Switcher.exe', cwd=os.getcwd())
 else:
     input('Forced update complete. Press Enter to exit...')
+
+sys.exit(0)

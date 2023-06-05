@@ -4,8 +4,11 @@ import os
 import zipfile as zf
 import sys
 import winshell
+import logging
 from modules.reg import fetch_reg
-from modules.config import get_config, config_write_value
+from modules.config import config_manager as cm
+
+logger = logging.getLogger(__name__)
 
 
 class StoppableThread(threading.Thread):
@@ -17,16 +20,16 @@ class StoppableThread(threading.Thread):
         self._stop.set()
 
     def stopped(self):
-        return self._stop.isSet()
+        return self._stop.is_set()
 
 
 def check_steam_dir(force_reg=False):
     if force_reg:
         return os.path.isfile(fetch_reg('SteamPath') + '\\Steam.exe')
 
-    if get_config('steam_path') == 'reg' and os.path.isfile(fetch_reg('SteamPath') + '\\Steam.exe'):
+    if cm.get('steam_path') == 'reg' and os.path.isfile(fetch_reg('SteamPath') + '\\Steam.exe'):
         return True
-    elif os.path.isfile(get_config('steam_path') + '\\Steam.exe'):
+    elif os.path.isfile(cm.get('steam_path') + '\\Steam.exe'):
         return True
     else:
         return False
@@ -55,19 +58,19 @@ def launch_updater():
 
 
 def test():
-    print('Verifying Steam.exe location...')
+    logger.info('Verifying Steam.exe location...')
 
-    if check_steam_dir(force_reg=True) and get_config('steam_path') != 'reg':
-        print('SteamPath registry key is valid but config is not set to use it')
-        print('Setting config to use registry key')
-        config_write_value('steam_path', 'reg')
+    if check_steam_dir(force_reg=True) and cm.get('steam_path') != 'reg':
+        logger.info('SteamPath registry key is valid but config is not set to use it')
+        logger.info('Setting config to use registry key')
+        cm.set('steam_path', 'reg')
 
-    if check_steam_dir() and get_config('steam_path') == 'reg':
-        print('Steam located at', fetch_reg('steampath'))
+    if cm.get('steam_path') == 'reg' and check_steam_dir():
+        logger.info(f'Steam located at {fetch_reg("steampath")}')
     elif check_steam_dir():
-        print('Steam located at', get_config('steam_path'), '(Manually set)')
+        logger.info(f'Steam located at {cm.get("steam_path")} (Manually set)')
     else:
-        print('Steam directory invalid')
+        logger.info('Steam directory invalid')
         return False
     return True
 

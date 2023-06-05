@@ -11,7 +11,7 @@ import json
 import sv_ttk
 import re
 from PIL import Image, ImageTk
-from modules.config import get_config, config_write_value, config_write_dict, missing_values
+from modules.config import config_manager as cm
 from ruamel.yaml import YAML
 from modules.util import check_steam_dir, create_shortcut
 from modules.steamid import steam64_to_3, steam64_to_32, steam64_to_2
@@ -22,7 +22,7 @@ yaml = YAML()
 
 t = gettext.translation('steamswitcher',
                         localedir='locale',
-                        languages=[get_config('locale')],
+                        languages=[cm.get('locale')],
                         fallback=True)
 _ = t.gettext
 
@@ -92,7 +92,8 @@ class AccountButton:
         self.update_color(init=True)
 
         self.master = master
-        self.frame = tk.Frame(master, borderwidth=3)
+        self.frame = tk.Frame(master, borderwidth=3, height=48)
+        self.frame.pack_propagate(False)
         self.command = command
         self.frame.config(background=self.normal, cursor='hand2')
 
@@ -108,7 +109,7 @@ class AccountButton:
 
         username_font = tkfont.Font(weight=tkfont.BOLD, size=12, family='Arial')
 
-        if get_config('show_avatar') == 'true':
+        if cm.get('show_avatar') == 'true':
             self.avatar = tk.Canvas(self.frame, width=40, height=40, bd=0, highlightthickness=0)
 
             try:
@@ -130,14 +131,14 @@ class AccountButton:
 
         self.acc_label = ttk.Label(self.frame, text=username, font=username_font)
         self.acc_label.config(background=self.normal, foreground=self.text)
-        self.acc_label.pack(anchor='w', padx=(3, 0), pady=(1, 0))
+        self.acc_label.pack(anchor='w', padx=(3, 0), pady=(2, 0))
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.acc_label.bind('<Button-3>', rightcommand)
 
         self.profile_label = ttk.Label(self.frame, text=profilename)
         self.profile_label.config(background=self.normal, foreground=self.text)
-        self.profile_label.pack(anchor='w', padx=(3, 0), pady=(2, 0))
+        self.profile_label.pack(side='bottom', anchor='w', padx=(3, 0), pady=(0, 2))
         self.profile_label.bind('<Button-1>', lambda event: self.__click())
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.profile_label.bind('<Button-3>', rightcommand)
@@ -259,7 +260,7 @@ class AccountButtonGrid:
         self.frame = tk.Frame(master, borderwidth=3, width=84, height=100)
         self.command = command
         self.frame.config(background=self.normal, cursor='hand2')
-        self.frame.pack_propagate(0)
+        self.frame.pack_propagate(False)
 
         self.frame.bind('<Button-1>', lambda event: self.__click())
         self.frame.bind('<ButtonRelease-1>', lambda event: self.__release(event))
@@ -273,7 +274,7 @@ class AccountButtonGrid:
         self.avatar = None
         size = 48
 
-        if get_config('show_avatar') == 'true':
+        if cm.get('show_avatar') == 'true':
             self.avatar = tk.Canvas(self.frame, width=size, height=size, bd=0, highlightthickness=0)
 
             try:
@@ -577,15 +578,13 @@ class ReadonlyEntryWithLabel:
 
 
 class WelcomeWindow(tk.Toplevel):
-    def __init__(self, master, geometry, after_update, debug):
+    def __init__(self, master, geometry, debug):
         self.master = master
         tk.Toplevel.__init__(self, self.master)
         self.title(_('Initial Setup'))
 
         self.geometry(geometry)
         self.resizable(False, False)
-
-        self.after_update = after_update
 
         if not debug:
             self.protocol("WM_DELETE_WINDOW", self.on_window_close)
@@ -620,23 +619,20 @@ class WelcomeWindow(tk.Toplevel):
         self.page_label = ttk.Label(self.button_frame, text='0/6')
         self.page_label.grid(row=0, column=1, sticky='s', padx=3, pady=(0, 10))
 
-        if self.after_update:
-            self.page_label['text'] = '0/5'
-
         self.ok_button = ttk.Button(self.button_frame, text=_('Next'), command=self.ok, width=10, style='Accent.TButton')
         self.ok_button.grid(row=0, column=2, sticky='e')
 
-        self.soft_shutdown = get_config('try_soft_shutdown')
-        self.autoexit = get_config('autoexit')
-        self.mode = get_config('mode')
-        self.avatar = get_config('show_avatar')
-        self.ui_mode = get_config('ui_mode')
-        self.theme = get_config('theme')
-        self.encryption = get_config('encryption')
+        self.soft_shutdown = cm.get('try_soft_shutdown')
+        self.autoexit = cm.get('autoexit')
+        self.mode = cm.get('mode')
+        self.avatar = cm.get('show_avatar')
+        self.ui_mode = cm.get('ui_mode')
+        self.theme = cm.get('theme')
+        self.encryption = cm.get('encryption')
 
         self.pw = None
 
-        self.encryption_already_enabled = get_config('encryption')
+        self.encryption_already_enabled = cm.get('encryption')
 
         self.focus_force()
         self.grab_set()
@@ -709,10 +705,7 @@ class WelcomeWindow(tk.Toplevel):
             self.page_5()
 
         if type(self.active_page) == int:
-            if self.after_update:
-                self.page_label['text'] = str(self.active_page) + '/5'
-            else:
-                self.page_label['text'] = str(self.active_page) + '/6'
+            self.page_label['text'] = str(self.active_page) + '/6'
 
     def ok(self):
         if self.active_page == 0:
@@ -776,11 +769,7 @@ class WelcomeWindow(tk.Toplevel):
                     self.password_page()
             else:
                 self.page_5()
-
-                if self.after_update:
-                    self.ok_button['text'] = _('Finish')
-                else:
-                    self.ok_button['text'] = _('Next')
+                self.ok_button['text'] = _('Next')
 
                 self.focus()
 
@@ -795,11 +784,7 @@ class WelcomeWindow(tk.Toplevel):
             self.innerframe.destroy()
             self.unbind('<Return>')
             self.page_5()
-
-            if self.after_update:
-                self.ok_button['text'] = _('Finish')
-            else:
-                self.ok_button['text'] = _('Next')
+            self.ok_button['text'] = _('Next')
             self.focus()
 
         elif self.active_page == 5:
@@ -822,14 +807,9 @@ class WelcomeWindow(tk.Toplevel):
             self.autoexit_frame.destroy()
             self.avatar_frame.destroy()
 
-            if self.after_update:
-                self.save()
-                self.destroy()
-                return
-            else:
-                self.ok_button['text'] = _('Finish')
-                self.page_6()
-                self.focus()
+            self.ok_button['text'] = _('Finish')
+            self.page_6()
+            self.focus()
 
         elif self.active_page == 6:
             if 'selected' in self.shortcut_chkb.state():
@@ -843,18 +823,11 @@ class WelcomeWindow(tk.Toplevel):
             return
 
         if type(self.active_page) == int:
-            if self.after_update:
-                self.page_label['text'] = str(self.active_page) + '/5'
-            else:
-                self.page_label['text'] = str(self.active_page) + '/6'
+            self.page_label['text'] = str(self.active_page) + '/6'
 
     def page_0(self):
         self.active_page = 0
         self.title_label = tk.Label(self, text=_('Welcome'), font=self.title_font)
-
-        if self.after_update:
-            self.title_label['text'] = _('Update complete')
-
         self.welcome_label = tk.Label(self, text=_("Click 'Next' to continue."))
         self.back_button['text'] = _('Exit')
         self.title_label.pack(expand=True, pady=1)
@@ -952,14 +925,14 @@ class WelcomeWindow(tk.Toplevel):
         tk.Label(self.radio_frame2, justify='left',
                  text=_('Display accounts\nin 3 x n grid')).pack(side='bottom', pady=5)
 
-        if get_config('ui_mode') == 'grid':
+        if cm.get('ui_mode') == 'grid':
             self.ui_radio_var.set(1)
 
     def page_3(self):
         self.active_page = 3
         self.top_label['text'] = _('Steam restart mode')
 
-        if get_config('mode') == 'express':
+        if cm.get('mode') == 'express':
             self.mode_radio_var.set(1)
 
         self.radio_frame1 = tk.Frame(self)
@@ -1254,18 +1227,15 @@ class WelcomeWindow(tk.Toplevel):
         self.finish_label.pack(expand=True, fill='both')
 
     def save(self):
-        dump_dict = {'locale': get_config('locale'),
-                     'try_soft_shutdown': self.soft_shutdown,
-                     'autoexit': self.autoexit,
-                     'mode': self.mode,
-                     'show_avatar': self.avatar,
-                     'last_pos': get_config('last_pos'),
-                     'steam_path': get_config('steam_path'),
-                     'ui_mode': self.ui_mode,
-                     'theme': self.theme,
-                     'encryption': self.encryption}
+        new_config = {'try_soft_shutdown': self.soft_shutdown,
+                      'autoexit': self.autoexit,
+                      'mode': self.mode,
+                      'show_avatar': self.avatar,
+                      'ui_mode': self.ui_mode,
+                      'theme': self.theme,
+                      'encryption': self.encryption}
 
-        config_write_dict(dump_dict)
+        cm.set_dict(new_config)
 
         if self.encryption == 'true' and not self.encryption_already_enabled == 'true':
             AccountManager.create_encrypted_json_file(self.pw)
@@ -1315,7 +1285,7 @@ def ask_steam_dir():
             input_dir = filedialog.askdirectory()
 
             if os.path.isfile(input_dir + '\\Steam.exe') and os.path.isfile(input_dir + '\\config\\loginusers.vdf'):
-                config_write_value('steam_path', input_dir)
+                cm.set('steam_path', input_dir)
                 break
             else:
                 msgbox.showwarning(_('Warning'),
@@ -1353,6 +1323,7 @@ class ManageEncryptionWindow(tk.Toplevel):
         self.geometry(geometry)
         self.title(_('Encryption Settings'))
         self.resizable(False, False)
+        self.iconbitmap('asset/icon.ico')
         self.active_page = None
         self.upper_frame = tk.Frame(self)
         self.upper_frame.pack(side='top', fill='x')
@@ -1393,14 +1364,14 @@ class ManageEncryptionWindow(tk.Toplevel):
 
         self.change_password_button = ttk.Button(self.bottomframe, text=_('Change Password'))
 
-        if get_config('encryption') == 'true':
+        if cm.get('encryption') == 'true':
             self.encryption_status.config(text=_('Encryption is enabled'), foreground=get_color('autologin_text_avail'))
             self.encryption_button.config(text=_('Disable Encryption'), command=self.disable_encryption)
             self.change_password_button.grid(row=0, column=2, padx=(0, 3))
             self.change_password_button['command'] = self.ok
             self.bottomframe.columnconfigure(2, weight=1)
 
-            if get_config('locale') == 'fr_FR':
+            if cm.get('locale') == 'fr_FR':
                 self.close_button.grid(row=1, column=1, pady=(0, 3), padx=3, columnspan=2, sticky='nesw')
             else:
                 self.close_button.grid(row=0, column=0, pady=3, padx=3)
@@ -1437,7 +1408,7 @@ class ManageEncryptionWindow(tk.Toplevel):
         else:
             confirm = msgbox.askyesno(_('Disable Encryption'), _('Are you sure you want to disable encryption?'), parent=self)
         if confirm:
-            config_write_value('encryption', 'false')
+            cm.set('encryption', 'false')
             self.acm.disable_encryption()
             self.bottomframe.destroy()
             self.innerframe.destroy()
@@ -1455,7 +1426,7 @@ class ManageEncryptionWindow(tk.Toplevel):
         elif self.active_page == 'pw2':
             pw = self.pw_var.get()
             self.acm.set_master_password(pw)
-            config_write_value('encryption', 'true')
+            cm.set('encryption', 'true')
             self.innerframe.destroy()
             self.main_window()
             del self.pw_var

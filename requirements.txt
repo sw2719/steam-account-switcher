@@ -6,7 +6,7 @@ Pillow
 pget
 aiohttp
 aiodns
-cchardet
+faust-cchardet
 pywin32
 winshell
 colour

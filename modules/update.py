@@ -10,17 +10,19 @@ import requests as req
 import zipfile as zf
 import sys
 import threading
+import logging
 from time import sleep
 from packaging import version
 from ruamel.yaml import YAML
 from pget.down import Downloader
-from modules.config import get_config
+from modules.config import config_manager as cm
 from modules.errormsg import error_msg
 from modules.ui import get_color
 
+logger = logging.getLogger(__name__)
 yaml = YAML()
 
-LOCALE = get_config('locale')
+LOCALE = cm.get('locale')
 
 t = gettext.translation('steamswitcher',
                         localedir='locale',
@@ -30,10 +32,6 @@ _ = t.gettext
 
 update_frame = None
 bundled = True
-
-
-def pprint(*args, **kwargs):
-    print('[update]', *args, **kwargs)
 
 
 class RatelimitedException(BaseException):
@@ -237,7 +235,7 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
     def checkupdate():
         '''Fetch version information from GitHub and
         return different update codes'''
-        pprint('Update check start')
+        logger.info('Update check start')
         update = None
         try:
             if exception:
@@ -257,13 +255,13 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
                 latest_changelog = latest['body'].replace('\r', '').split('# ')
 
                 # ['', en, ko]
-                if get_config('locale') == 'ko_KR':
+                if cm.get('locale') == 'ko_KR':
                     latest_changelog = latest_changelog[2].replace('변경사항\n', '')
                 else:
                     latest_changelog = latest_changelog[1].replace('Changelogs\n', '')
 
-            pprint('Latest version is', latest_version)
-            pprint('Program version is', cl_ver_str)
+            logger.info(f'Latest version is {latest_version}')
+            logger.info(f'Program version is {cl_ver_str}')
 
             latest = version.parse(latest_version)
             current = version.parse(cl_ver_str)
@@ -278,13 +276,15 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
         except (req.RequestException, req.ConnectionError,
                 req.Timeout, req.ConnectTimeout):
             update = 'error'
-            sv_version_str = '0'
-            changelog = None
+            latest_version = '0'
+            latest_changelog = None
+            latest_zip = None
 
         except RatelimitedException:
             update = 'ratelimited'
-            sv_version_str = '0'
-            changelog = None
+            latest_version = '0'
+            latest_changelog = None
+            latest_zip = None
 
         queue.put((update, latest_version, latest_changelog, latest_zip))
 
@@ -309,7 +309,7 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
             zip_url = v[3]
 
             if debug:
-                pprint('Update debug mode')
+                logger.info('Update debug mode')
 
                 update_frame.destroy()
 
@@ -332,7 +332,7 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
                 return
 
             if update_code == 'avail':
-                pprint('Update Available')
+                logger.info('Update Available')
 
                 update_frame.destroy()
 
@@ -350,7 +350,7 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
                 update_frame.bind('<ButtonRelease-1>',
                                   lambda event: update(sv_version=sv_version, changelog=changelog, zip_url=zip_url))
             elif update_code == 'latest':
-                pprint('On latest version')
+                logger.info('On latest version')
 
                 update_frame.destroy()
 
@@ -358,7 +358,7 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
                 tk.Frame(update_frame, bg='grey').pack(fill='x')
                 update_frame.pack(side='bottom', fill='x')
             elif update_code == 'dev':
-                pprint('Development version')
+                logger.info('Development version')
 
                 update_frame.destroy()
 
@@ -372,7 +372,7 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
                                         fg=get_color('text'))
                 update_label.pack(side='bottom')
             elif update_code == 'error':
-                pprint('Exception while checking for updates')
+                logger.info('Exception while checking for updates')
 
                 update_frame.destroy()
 
@@ -388,7 +388,7 @@ def start_checkupdate(master, cl_ver_str, bundle, debug=False, **kw):
                 update_label.bind('<ButtonRelease-1>', lambda event: start_checkupdate(master, cl_ver_str, bundle, debug=debug))
                 update_label.pack(side='bottom')
             elif update_code == 'ratelimited':
-                pprint('GitHub API rate limit exceeded')
+                logger.info('GitHub API rate limit exceeded')
 
                 update_frame.destroy()
 

@@ -1,17 +1,12 @@
 import os
 import locale
-import gettext
 import json
+import logging
 from ruamel.yaml import YAML
 from win32api import GetSystemMetrics
-from modules.errormsg import error_msg
 import darkdetect
 
-
-def pprint(*args, **kwargs):
-    print('[config]', *args, **kwargs)
-
-
+logger = logging.getLogger(__name__)
 
 SYS_LOCALE = locale.getdefaultlocale()[0]
 
@@ -22,33 +17,10 @@ elif SYS_LOCALE == 'fr_FR':
 else:
     DEFAULT_LOCALE = 'en_US'
 
-valid_values = {
-    'locale':
-        ['ko_KR',
-         'en_US',
-         'fr_FR'],
-    'try_soft_shutdown':
-        ['true',
-         'false'],
-    'autoexit':
-        ['true',
-         'false'],
-    'mode':
-        ['normal',
-         'express'],
-    'show_avatar':
-        ['true',
-         'false'],
-    'ui_mode':
-        ['list',
-         'grid'],
-    'theme':
-        ['light',
-         'dark'],
-    'encryption':
-        ['true',
-         'false']
-}
+if darkdetect.isDark():
+    DEFAULT_THEME = 'dark'
+else:
+    DEFAULT_THEME = 'light'
 
 screen_width = GetSystemMetrics(0)
 screen_height = GetSystemMetrics(1)
@@ -59,125 +31,142 @@ window_height = 465
 x_coordinate = int((screen_width/2) - (window_width/2))
 y_coordinate = int((screen_height/2) - (window_height/2))
 
-default_cfg = {'locale': DEFAULT_LOCALE,
-               'try_soft_shutdown': 'true',
-               'autoexit': 'true',
-               'mode': 'normal',
-               'show_avatar': 'true',
-               'steam_path': 'reg',
-               'last_pos': f'{x_coordinate}/{y_coordinate}',
-               'ui_mode': 'list',
-               'theme': 'light',
-               'encryption': 'false'}
 
-if darkdetect.isDark():
-    default_cfg['theme'] = 'dark'
-
-missing_values = []
-
-def convert():
-    yaml = YAML()
-    with open('config.yml', 'r', encoding='utf-8') as f:
-        cfg = yaml.load(f)
-
-    with open('config.json', 'w', encoding='utf-8') as f:
-        json.dump(cfg, f, indent=4)
-
-    os.remove('config.yml')
-    pprint('Converted config.yml to config.json')
-
-def reset_config():
-    '''Initialize config.txt with default values'''
-    with open('config.json', 'w') as cfg:
-        json.dump(default_cfg, cfg, indent=4)
-
-
-if not os.path.isfile('config.json'):
-    if os.path.isfile('config.yml'):
-        convert()
-        first_run = False
-    else:
-        reset_config()
-        first_run = True
-else:
-    with open('config.json') as cfg:
-        if not cfg.read().strip():
-            reset_config()
-            first_run = True
-        else:
-            first_run = False
-
-with open('config.json', 'r') as cfg:
-    test_dict = json.load(cfg)
-
-invalid = False
-
-for key, value in valid_values.items():
-    try:
-        if test_dict[key] not in valid_values[key] and key not in ('steam_path', 'last_pos'):
-            invalid = True
-            pprint(f'Config {key} has invalid value "{test_dict[key]}"')
-            test_dict[key] = default_cfg[key]
-    except KeyError:
-        invalid = True
-        pprint(f'Config {key} is missing. Creating one with default value..')
-        missing_values.append(key)
-        test_dict[key] = default_cfg[key]
-
-if invalid:
-    with open('config.json', 'w') as cfg:
-        json.dump(test_dict, cfg, indent=4)
-
-with open('config.json', 'r') as cfg:
-    config_dict = json.load(cfg)
-
-    if config_dict['locale'] in ('ko_KR', 'en_US'):
-        LOCALE = config_dict['locale']
-    else:
-        LOCALE = 'en_US'
-
-del cfg
-
-t = gettext.translation('steamswitcher',
-                        localedir='locale',
-                        languages=[LOCALE],
-                        fallback=True)
-_ = t.gettext
+# Why did I not use boolean values and use true and false as strings? I should've never done that...
+CONFIG_DATA = {
+    'locale': {
+        'default': DEFAULT_LOCALE,
+        'valid': ('ko_KR', 'en_US', 'fr_FR')
+    },
+    'try_soft_shutdown': {
+        'default': 'true',
+        'valid': ('true', 'false')
+    },
+    'autoexit': {
+        'default': 'true',
+        'valid': ('true', 'false')
+    },
+    'mode': {
+        'default': 'normal',
+        'valid': ('normal', 'express')
+    },
+    'show_avatar': {
+        'default': 'true',
+        'valid': ('true', 'false')
+    },
+    'steam_path': {
+        'default': 'reg'
+    },
+    'last_pos': {
+        'default': f'{x_coordinate}/{y_coordinate}'
+    },
+    'ui_mode': {
+        'default': 'list',
+        'valid': ('list', 'grid')
+    },
+    'theme': {
+        'default': DEFAULT_THEME,
+        'valid': ('light', 'dark')
+    },
+    'encryption': {
+        'default': 'false',
+        'valid': ('true', 'false')
+    },
+    'steam_options': {
+        'default': ''
+    }
+}
 
 
-def get_config(key):
-    try:
-        with open('config.json', 'r') as cfg:
-            config_dict = json.load(cfg)
+class ConfigManager:
+    def __init__(self):
+        self.first_run = False
 
-        if key == 'all':
-            return config_dict
-        else:
-            return config_dict[key]
+        if os.path.isfile('config.yml'):
+            self.convert()
 
-    except FileNotFoundError:
-        reset_config()
-        error_msg(_('Error'), _('Could not load config file.'))
+        try:
+            with open('config.json') as cfg:
+                self.dict = json.load(cfg)
+
+        except json.JSONDecodeError:
+            logger.info('Resetting config due to invalid JSON file')
+            self.dict = self.reset_config()
+
+        except FileNotFoundError:
+            logger.info('Creating a config file...')
+            self.dict = self.reset_config()
+            self.first_run = True
+
+        self.validate()
+        logger.info('ConfigManager initialized')
+
+    def set_dict(self, dict_: dict) -> None:
+        for key, value in dict_.items():
+            self.dict[key] = value
+
+        self.dump()
+
+    def set(self, key: str, value: str, dump=True) -> None:
+        self.dict[key] = value
+
+        if dump:
+            self.dump()
+
+    def get(self, key: str) -> str:
+        return self.dict[key]
+
+    def dump(self) -> None:
+        with open('config.json', 'w') as f:
+            json.dump(self.dict, f, indent=2)
+        
+        logger.info('Dumped current config dict')
+
+    def validate(self) -> None:
+        invalid = False
+
+        for key, value in CONFIG_DATA.items():
+            if key not in self.dict:
+                invalid = True
+                logger.info(f'Config {key} is missing.')
+                logger.info(f'Creating one with a default value: {CONFIG_DATA[key]["default"]}')
+                self.dict[key] = CONFIG_DATA[key]['default']
+            elif 'valid' in CONFIG_DATA[key] and self.dict[key] not in CONFIG_DATA[key]['valid']:
+                invalid = True
+                logger.info(f'Config {key} has invalid value: {self.dict[key]}')
+                logger.info(f'Replacing with a default value: {CONFIG_DATA[key]["default"]}')
+                self.dict[key] = CONFIG_DATA[key]['default']
+
+            if os.path.isfile('salt') and self.dict['encryption'] == 'false':
+                self.dict['encryption'] = 'true'
+                logger.info('Setting encryption to true due to salt file existing')
+
+        if invalid:
+            self.dump()
+
+    @staticmethod
+    def reset_config() -> dict:
+        """Create a config.json with default values"""
+        with open('config.json', 'w') as cfg:
+            default_cfg = {}
+
+            for key, item in CONFIG_DATA.items():
+                default_cfg[key] = item['default']
+
+            json.dump(default_cfg, cfg, indent=2)
+            return default_cfg
+
+    @staticmethod
+    def convert() -> None:
+        yaml = YAML()
+        with open('config.yml', 'r', encoding='utf-8') as f:
+            cfg = yaml.load(f)
+
+        with open('config.json', 'w', encoding='utf-8') as f:
+            json.dump(cfg, f, indent=2)
+
+        os.remove('config.yml')
+        logger.info('Converted config.yml to config.json')
 
 
-def config_write_dict(config_dict):
-    with open('config.json', 'w') as cfg:
-        json.dump(config_dict, cfg, indent=4)
-
-
-def config_write_value(key, value):
-    config_dict = {'locale': get_config('locale'),
-                   'autoexit': get_config('autoexit'),
-                   'mode': get_config('mode'),
-                   'try_soft_shutdown': get_config('try_soft_shutdown'),
-                   'show_avatar': get_config('show_avatar'),
-                   'last_pos': get_config('last_pos'),
-                   'steam_path': get_config('steam_path'),
-                   'ui_mode': get_config('ui_mode'),
-                   'theme': get_config('theme'),
-                   'encryption': get_config('encryption')}
-
-    config_dict[key] = value
-
-    with open('config.json', 'w') as cfg:
-        json.dump(config_dict, cfg, indent=4)
+config_manager = ConfigManager()
