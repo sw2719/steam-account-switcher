@@ -44,6 +44,7 @@ class AccountManager:
                 self.acc_dict = json.load(f)
         except json.decoder.JSONDecodeError:
             if cm.get('encryption') == 'true':
+                logger.info('Decrypting...')
                 if password is None:
                     raise ValueError('Password is required to decrypt accounts.json')
                 else:
@@ -65,10 +66,12 @@ class AccountManager:
                         self.acc_dict = json.loads(secret.decode('utf-8'))
                         logger.info('Decrypted accounts.json successfully')
             else:
+                logger.info('JSON file is invalid. Creating one...')
                 self.acc_dict = {}
                 self.reset_json()
 
         except FileNotFoundError:
+            logger.info('accounts.json not found. Creating one...')
             self.acc_dict = {}
             self.reset_json()
 
