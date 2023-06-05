@@ -36,23 +36,23 @@ y_coordinate = int((screen_height/2) - (window_height/2))
 CONFIG_DATA = {
     'locale': {
         'default': DEFAULT_LOCALE,
-        'valid': ['ko_KR', 'en_US', 'fr_FR']
+        'valid': ('ko_KR', 'en_US', 'fr_FR')
     },
     'try_soft_shutdown': {
         'default': 'true',
-        'valid': ['true', 'false']
+        'valid': ('true', 'false')
     },
     'autoexit': {
         'default': 'true',
-        'valid': ['true', 'false']
+        'valid': ('true', 'false')
     },
     'mode': {
         'default': 'normal',
-        'valid': ['normal', 'express']
+        'valid': ('normal', 'express')
     },
     'show_avatar': {
         'default': 'true',
-        'valid': ['true', 'false']
+        'valid': ('true', 'false')
     },
     'steam_path': {
         'default': 'reg'
@@ -62,15 +62,15 @@ CONFIG_DATA = {
     },
     'ui_mode': {
         'default': 'list',
-        'valid': ['list', 'grid']
+        'valid': ('list', 'grid')
     },
     'theme': {
         'default': DEFAULT_THEME,
-        'valid': ['light', 'dark']
+        'valid': ('light', 'dark')
     },
     'encryption': {
         'default': 'false',
-        'valid': ['true', 'false']
+        'valid': ('true', 'false')
     },
     'steam_options': {
         'default': ''
@@ -90,9 +90,11 @@ class ConfigManager:
                 self.dict = json.load(cfg)
 
         except json.JSONDecodeError:
+            logger.info('Resetting config due to invalid JSON file')
             self.dict = self.reset_config()
 
         except FileNotFoundError:
+            logger.info('Creating a config file...')
             self.dict = self.reset_config()
             self.first_run = True
 
@@ -124,15 +126,20 @@ class ConfigManager:
         invalid = False
 
         for key, value in CONFIG_DATA.items():
-            if 'valid' in CONFIG_DATA[key] and self.dict[key] not in CONFIG_DATA[key]['valid']:
+            if key not in self.dict:
+                invalid = True
+                logger.info(f'Config {key} is missing.')
+                logger.info(f'Creating one with a default value: {CONFIG_DATA[key]["default"]}')
+                self.dict[key] = CONFIG_DATA[key]['default']
+            elif 'valid' in CONFIG_DATA[key] and self.dict[key] not in CONFIG_DATA[key]['valid']:
                 invalid = True
                 logger.info(f'Config {key} has invalid value: {self.dict[key]}')
-                logger.info('Replacing with a default value...')
+                logger.info(f'Replacing with a default value: {CONFIG_DATA[key]["default"]}')
                 self.dict[key] = CONFIG_DATA[key]['default']
-            elif key not in self.dict:
-                invalid = True
-                logger.info(f'Config {key} is missing. Creating one with a default value...')
-                self.dict[key] = CONFIG_DATA[key]['default']
+
+            if os.path.isfile('salt') and self.dict['encryption'] == 'false':
+                self.dict['encryption'] = 'true'
+                logger.info('Setting encryption to true due to salt file existing')
 
         if invalid:
             self.dump()
