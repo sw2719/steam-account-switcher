@@ -131,14 +131,14 @@ class AccountButton:
 
         self.acc_label = ttk.Label(self.frame, text=username, font=username_font)
         self.acc_label.config(background=self.normal, foreground=self.text)
-        self.acc_label.pack(anchor='w', padx=(3, 0), pady=(1, 0))
+        self.acc_label.pack(anchor='w', padx=(3, 0), pady=(2, 0))
         self.acc_label.bind('<Button-1>', lambda event: self.__click())
         self.acc_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.acc_label.bind('<Button-3>', rightcommand)
 
         self.profile_label = ttk.Label(self.frame, text=profilename)
         self.profile_label.config(background=self.normal, foreground=self.text)
-        self.profile_label.pack(anchor='w', padx=(3, 0), pady=(2, 0))
+        self.profile_label.pack(side='bottom', anchor='w', padx=(3, 0), pady=(0, 2))
         self.profile_label.bind('<Button-1>', lambda event: self.__click())
         self.profile_label.bind('<ButtonRelease-1>', lambda event: self.__release(event))
         self.profile_label.bind('<Button-3>', rightcommand)
