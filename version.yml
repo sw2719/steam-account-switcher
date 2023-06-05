@@ -2,7 +2,7 @@ version: '3.0'
 changelog_en: |
   ----------3.0----------
 
-  • This might be the last release with new features without your suggestions. For more information, check GitHub README.
+  • PSA: To update to v3.1 or higher, you need to update to v3.0 first.
   
   • Added password saving functionality.
   
@@ -262,7 +262,7 @@ changelog_en: |
 changelog_ko: |
   ----------3.0----------
   
-  • 이번 버전 이후로는 기능 업데이트가 제공되지 않을 수도 있습니다. 자세한 사항은 GitHub README를 참조하세요.
+  • 알림: 버전 3.1 이상으로 업데이트하려면 먼저 버전 3.0으로 업데이트해야 합니다.
   
   • 비밀번호 저장 기능을 추가했습니다.
 
