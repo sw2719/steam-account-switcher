@@ -31,8 +31,7 @@ def download_avatar(steamid_list):
         try:
             async with session.get(f'https://steamcommunity.com/profiles/{steamid64}') as r:
                 soup = BeautifulSoup(await r.read(), 'html.parser')
-
-                image_url = soup.select('.playerAvatarAutoSizeInner > img')[0].get('src')
+                image_url = soup.select('.playerAvatarAutoSizeInner > picture > source')[0].get('srcset')
                 logger.info(f'Found image URL for {steamid64}')
 
             async with session.get(image_url) as r:
@@ -49,3 +48,7 @@ def download_avatar(steamid_list):
             await asyncio.gather(*tasks)
 
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    download_avatar([76561198058911545])
