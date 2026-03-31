@@ -1,3 +1,15 @@
+# nuitka-project: --standalone
+# nuitka-project: --enable-plugin=tk-inter
+# nuitka-project: --windows-console-mode=disable
+# nuitka-project: --output-filename="Steam Account Switcher.exe"
+# nuitka-project: --include-data-dir={MAIN_DIRECTORY}/asset=asset
+# nuitka-project: --include-data-files={MAIN_DIRECTORY}/theme.json=theme.json
+# nuitka-project: --include-data-files={MAIN_DIRECTORY}/theme.json=theme.json
+# nuitka-project: --include-data-files={MAIN_DIRECTORY}/locale/en_US/LC_MESSAGES/steamswitcher.mo=locale/en_US/LC_MESSAGES/steamswitcher.mo
+# nuitka-project: --include-data-files={MAIN_DIRECTORY}/locale/ko_KR/LC_MESSAGES/steamswitcher.mo=locale/ko_KR/LC_MESSAGES/steamswitcher.mo
+# nuitka-project: --include-data-files={MAIN_DIRECTORY}/locale/fr_FR/LC_MESSAGES/steamswitcher.mo=locale/fr_FR/LC_MESSAGES/steamswitcher.mo
+# nuitka-project: --windows-icon-from-ico=icon.ico
+
 import sys
 import os
 import shutil
@@ -5,8 +17,9 @@ import logging
 import argparse
 from modules.log import StreamToLogger
 
-VERSION = '3.1'
+VERSION = '3.1.1'
 
+is_nuitka = "__compiled__" in globals()
 logger = logging.getLogger()
 logger.addHandler(logging.NullHandler())
 parser = argparse.ArgumentParser()
@@ -22,7 +35,7 @@ args = parser.parse_args()
 
 log_format = logging.Formatter("{name} - [{levelname}] - {message}", style="{")
 
-if args.logfile or getattr(sys, 'frozen', False):
+if args.logfile or is_nuitka:
     handler = logging.FileHandler('log.txt', 'w', 'utf-8')
 else:
     handler = logging.StreamHandler()
@@ -35,7 +48,7 @@ logger.info(f'Launch arguments: {" ".join(sys.argv)}')
 
 if args.debug:
     BUNDLE = False
-elif getattr(sys, 'frozen', False):
+elif is_nuitka:
     BUNDLE = True
     if os.path.isdir('updater'):
         try:
@@ -47,7 +60,7 @@ elif getattr(sys, 'frozen', False):
             os.remove('update.zip')
         except OSError:
             pass
-    logger.info('Running on an executable')
+    logger.info('Running nuitka-compiled executable')
 else:
     BUNDLE = False
     logger.info('Running in a Python interpreter')
