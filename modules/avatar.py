@@ -48,7 +48,3 @@ def download_avatar(steamid_list):
             await asyncio.gather(*tasks)
 
     asyncio.run(main())
-
-
-if __name__ == "__main__":
-    download_avatar([76561198058911545])
