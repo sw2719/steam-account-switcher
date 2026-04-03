@@ -29,7 +29,6 @@ Keep in mind that I can't guarantee that your suggestions will be added 100%.
 
 # Requirements (for executable release)
 * Windows 8.1 or newer
-  - 64-bit is no longer required since version 2.7.
 * Steam installed correctly
 * Visual C++ Redistributable for Visual Studio 2015 or 2017
   - Chances are it's already installed, but if it isn't, you can download it below.
