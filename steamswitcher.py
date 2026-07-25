@@ -17,7 +17,7 @@ import logging
 import argparse
 from modules.log import StreamToLogger
 
-VERSION = '3.1.1'
+VERSION = '3.1.2'
 
 is_nuitka = "__compiled__" in globals()
 logger = logging.getLogger()
