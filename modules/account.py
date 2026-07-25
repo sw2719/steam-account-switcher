@@ -395,7 +395,7 @@ def check_autologin_availability(username):
 
     for user in loginusers_dict['users'].values():
         if user['AccountName'] == username:
-            return user['AllowAutoLogin'] == '1'
+            return user['AutoLogin'] == '1'
         else:
             continue
 
